@@ -6,18 +6,24 @@
 #define CXBASE_TEMPLATES_H
 
 #include <boost/polygon/polygon.hpp>
-#include "objects.h"
+#include <cxbase/objects.h>
 
 namespace cxbase {
-    class Template {
+    class CTemplate {
     public:
-        Template()=default;
+        CTemplate() = default;
 
-        CRect *add_rect(lay_type lay, purp_type purp, coord_type x0, coord_type y0, coord_type x1, coord_type y1);
+        CRect *add_rect(lay_type lay, purp_type purp, coord_type x0, coord_type y0, coord_type x1,
+                        coord_type y1);
+
+        CPin *add_pin(lay_type lay, purp_type purp, coord_type x0, coord_type y0, coord_type x1,
+                      coord_type y1, std::string net, std::string lbl);
+
+        friend std::ostream &operator<<(std::ostream &os, const CTemplate &obj);
 
     private:
-        std::vector<CRect> rect_list;
-        std::vector<CPin> pin_list;
+        std::list<CRect> rect_list;
+        std::list<CPin> pin_list;
     };
 }
 
