@@ -7,7 +7,7 @@
 
 #include <map>
 #include <string>
-#include "oaDesignDB.h"
+#include <oa/oaDesignDB.h>
 
 // techID = techOpenTechFile(lib_name "tech.oa" "r")
 // techGetPurposeNum(techID "pin")
@@ -15,7 +15,7 @@
 namespace cxbase {
     class LibDefObserver: public oa::oaObserver<oa::oaLibDefList> {
     public:
-        LibDefObserver(oa::oaUInt4 priority) :
+        explicit LibDefObserver(oa::oaUInt4 priority) :
                 oa::oaObserver<oa::oaLibDefList>(priority, true) {
         }
         ;
@@ -27,10 +27,9 @@ namespace cxbase {
     class OALibrary {
     public:
         OALibrary() :
-                is_open(false), dbu_per_uu(1000), lib_def_obs(1), lib_ptr(NULL), tech_ptr(NULL) {
+                is_open(false), dbu_per_uu(1000), lib_def_obs(1), lib_ptr(nullptr), tech_ptr(nullptr) {
         }
-        ~OALibrary() {
-        }
+        ~OALibrary() = default;
 
         void open_library(const std::string & lib_file, const std::string & library,
                           const std::string & lib_path, const std::string & tech_lib);

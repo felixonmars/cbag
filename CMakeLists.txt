@@ -18,17 +18,19 @@ set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE
 include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR})
 
 # setup link library path.  Must call before defining target.
-link_directories( $ENV{OA_LINK_DIR} )
+link_directories( $ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB
         src/templates.cpp
-        src/objects.cpp include/cxbase/database.h)
+        src/objects.cpp
+        )
 add_library(cxbase SHARED ${SRC_FILES_LIB})
 
 
 set(SRC_FILES_OA
-        src/templates.cpp
-        src/objects.cpp src/bagoa.cpp)
+        test/test_oa.cpp
+        src/bagoa.cpp
+        )
 add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
