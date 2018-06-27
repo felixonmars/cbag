@@ -37,7 +37,7 @@ int read_oa(int argc, char *argv[]) {
 
 
         oa::oaName tmp_name;
-        oa::oaVectorName tmp_vec_name;
+        oa::oaVectorBitName tmp_vec_name;
         oa::oaString tmp_str;
 
         // print bus terminals
@@ -46,13 +46,18 @@ int read_oa(int argc, char *argv[]) {
         while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
             bus_term_def_ptr->getName(ns_cdba, tmp_str);
             std::cout << "Bus Term: " << tmp_str << std::endl;
-            oa::oaIter<oa::oaBusTerm> bus_term_iter(bus_term_def_ptr->getBusTerms());
-            oa::oaBusTerm *bus_term_ptr;
+            oa::oaIter<oa::oaBusTermBit> bus_term_iter(bus_term_def_ptr->getBusTermBits());
+            oa::oaBusTermBit *bus_term_ptr;
+            bool print_type = false;            
             while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
+                if(!print_type) {
+                    std::cout << "type: " << bus_term_ptr->getTermType().getName() << std::endl;
+                    print_type = true;
+                }
                 bus_term_ptr->getName(tmp_vec_name);
                 tmp_vec_name.getBaseName(ns_cdba, tmp_str);
-                std::cout << "base = " << tmp_str << ", range = (" << tmp_vec_name.getStart() << ", "
-                          << tmp_vec_name.getStop() << ", " << tmp_vec_name.getStep() << ")" << std::endl;
+                std::cout << "base = " << tmp_str << ", idx = "
+                          << tmp_vec_name.getIndex() << std::endl;
 
             }
         }
@@ -63,7 +68,10 @@ int read_oa(int argc, char *argv[]) {
         while ((term_ptr = term_iter.getNext()) != nullptr) {
             term_ptr->getName(tmp_name);
             tmp_name.get(ns_cdba, tmp_str);
-            std::cout << "Term(" << tmp_str << ", " << ")" << std::endl;
+            if(tmp_str.index('<') == tmp_str.getLength()) {
+                std::cout << "Term(" << tmp_str << ", " << term_ptr->getTermType().getName() << ")" << std::endl;
+            }
+            
         }
 
         lib_ptr->close();
