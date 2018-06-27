@@ -2,7 +2,7 @@
 // Created by erichang on 6/10/18.
 //
 
-#include <cxbase/objects.h>
+#include <cxbase/layout/objects.h>
 
 namespace cxbase {
     std::ostream &operator<<(std::ostream &os, const CBox &obj) {

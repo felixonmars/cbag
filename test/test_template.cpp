@@ -2,7 +2,7 @@
 // Created by erichang on 6/10/18.
 //
 
-#include <cxbase/templates.h>
+#include <cxbase/layout/templates.h>
 
 
 int main() {

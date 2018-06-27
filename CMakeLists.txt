@@ -18,7 +18,7 @@ include_directories(include)
 
 set(SRC_FILES_LIB
         src/templates.cpp
-        src/objects.cpp)
+        src/objects.cpp include/cxbase/database.h)
 add_library(cxbase SHARED ${SRC_FILES_LIB})
 
 set(SRC_FILES_TEST

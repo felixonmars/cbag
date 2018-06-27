@@ -6,7 +6,7 @@
 #define CXBASE_TEMPLATES_H
 
 #include <boost/polygon/polygon.hpp>
-#include <cxbase/objects.h>
+#include <cxbase/layout/objects.h>
 
 namespace cxbase {
     class CTemplate {
