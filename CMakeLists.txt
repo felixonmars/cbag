@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.7)
 project(cxbase)
 
 # set CXX options
@@ -15,7 +15,8 @@ add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
 # setup include libraries
-include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR})
+# TODO: Why do I have to list Boost include here again?
+include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 
 # setup link library path.  Must call before defining target.
 link_directories( $ENV{OA_LINK_DIR})

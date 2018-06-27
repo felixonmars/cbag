@@ -1,3 +1,10 @@
+# General Files
 *~
 .idea
+
+# CMake related files
 cmake-build-debug
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
