@@ -48,17 +48,15 @@ int read_oa(int argc, char *argv[]) {
             std::cout << "Bus Term: " << tmp_str << std::endl;
             oa::oaIter<oa::oaBusTermBit> bus_term_iter(bus_term_def_ptr->getBusTermBits());
             oa::oaBusTermBit *bus_term_ptr;
-            bool print_type = false;            
+            bool print_type = false;
             while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
-                if(!print_type) {
+                if (!print_type) {
                     std::cout << "type: " << bus_term_ptr->getTermType().getName() << std::endl;
                     print_type = true;
                 }
                 bus_term_ptr->getName(tmp_vec_name);
                 tmp_vec_name.getBaseName(ns_cdba, tmp_str);
-                std::cout << "base = " << tmp_str << ", idx = "
-                          << tmp_vec_name.getIndex() << std::endl;
-
+                std::cout << "base = " << tmp_str << ", idx = " << tmp_vec_name.getIndex() << std::endl;
             }
         }
 
@@ -68,11 +66,47 @@ int read_oa(int argc, char *argv[]) {
         while ((term_ptr = term_iter.getNext()) != nullptr) {
             term_ptr->getName(tmp_name);
             tmp_name.get(ns_cdba, tmp_str);
-            if(tmp_str.index('<') == tmp_str.getLength()) {
+            if (tmp_str.index('<') == tmp_str.getLength()) {
                 std::cout << "Term(" << tmp_str << ", " << term_ptr->getTermType().getName() << ")" << std::endl;
             }
-            
         }
+
+        // print instances
+        oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
+        oa::oaInst *inst_ptr;
+        while ((inst_ptr = inst_iter.getNext()) != nullptr) {
+            oa::oaString lib_str, cell_str;
+            inst_ptr->getLibName(ns_cdba, lib_str);
+            inst_ptr->getCellName(ns_cdba, cell_str);
+            if (lib_str != "basic" || (cell_str != "ipin" && cell_str != "opin" && cell_str != "iopin")) {
+                inst_ptr->getName(ns_cdba, tmp_str);
+                std::cout << "Inst(" << tmp_str << ", " << lib_str << ", " << cell_str;
+                inst_ptr->getViewName(ns_cdba, tmp_str);
+                std::cout << ", " << tmp_str;
+                std::cout << ", " << inst_ptr->getNumBits();
+
+                oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
+                oa::oaProp *prop_ptr;
+                int prop_idx = 0;
+                while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+                    prop_ptr->getName(tmp_str);
+                    if (prop_idx == 0) {
+                        std::cout << ", {" << tmp_str;
+                    } else {
+                        std::cout << ", " << tmp_str;
+                    }
+                    prop_ptr->getValue(tmp_str);
+                    std::cout << "=" << tmp_str;
+
+                    prop_idx++;
+                }
+                if (prop_idx > 0) {
+                    std::cout << "}";
+                }
+                std::cout << ")" << std::endl;
+            }
+        }
+
 
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
