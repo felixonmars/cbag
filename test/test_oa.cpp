@@ -21,7 +21,7 @@ int read_oa(int argc, char *argv[]) {
         oa::oaLibDefList::openLibs(lib_def_path);
 
         // open library
-        oa::oaScalarName lib_name(ns, "AAAscratch");
+        oa::oaScalarName lib_name(ns, "AAAAAASCRATCH");
         oa::oaScalarName cell_name(ns, "inv");
         oa::oaScalarName view_name(ns, "schematic");
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name);
