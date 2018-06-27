@@ -9,12 +9,14 @@
 
 #include <oa/oaDesignDB.h>
 
-int read_oa(int argc, char * argv[]) {
+int read_oa(int argc, char *argv[]) {
     try {
 
-        oaDesignInit( oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         const oa::oaNativeNS ns;
+        const oa::oaCdbaNS ns_cdba;
+
         oa::oaString lib_def_path("cds.lib");
         oa::oaLibDefList::openLibs(lib_def_path);
 
@@ -22,50 +24,29 @@ int read_oa(int argc, char * argv[]) {
         oa::oaScalarName lib_name(ns, "AAAscratch");
         oa::oaScalarName cell_name(ns, "inv");
         oa::oaScalarName view_name(ns, "schematic");
-        oa::oaLib * lib_ptr = oa::oaLib::find(lib_name);
+        oa::oaLib *lib_ptr = oa::oaLib::find(lib_name);
         if (lib_ptr == nullptr) {
             throw std::invalid_argument("Cannot find library.");
         } else if (!lib_ptr->isValid()) {
             throw std::invalid_argument("Invalid library.");
         }
 
-        oa::oaDesign * dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
-                                                    oa::oaViewType::get(oa::oacSchematic), 'r');
+        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
+                                                   oa::oaViewType::get(oa::oacSchematic), 'r');
 
 
-        oa::oaBlock * blk_ptr = dsn_ptr->getTopBlock();
-        oa::oaSimpleName inst_name(ns, "X0");
+        oa::oaName tmp_name;
+        oa::oaString tmp_str;
 
-        oa::oaInst *inst_ptr = oa::oaInst::find(blk_ptr, inst_name);
-        oa::oaParamArray parr;
-
-        inst_ptr->getParams(parr);
-
-        unsigned int num = parr.getNumElements();
-
-        std::ofstream myfile("oa_mos_params.txt");
-
-        for (unsigned int x = 0; x < num; x++) {
-            oa::oaParam par = parr[x];
-            oa::oaParamType ptype = par.getType();
-            oa::oaString name_str;
-            oa::oaString temp_str;
-            par.getName(name_str);
-            switch(ptype) {
-                case oa::oacIntParamType :
-                    std::cout << name_str << ": " << ptype.getName() << ", " << par.getIntVal() << std::endl;
-                    break;
-                case oa::oacStringParamType :
-                    par.getStringVal(temp_str);
-                    std::cout << name_str << ": " << ptype.getName() << ", " << temp_str << std::endl;
-                    myfile << name_str << " " << temp_str << std::endl;
-                    break;
-                default :
-                    std::cout << name_str << ": " << ptype.getName() << std::endl;
-            }
+        // print terminals
+        oa::oaBlock *blk_ptr = dsn_ptr->getTopBlock();
+        oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterAll));
+        oa::oaTerm *term_ptr;
+        while ((term_ptr = term_iter.getNext()) != nullptr) {
+            term_ptr->getName(tmp_name);
+            tmp_name.get(ns_cdba, tmp_str);
+            std::cout << "Term name: " << tmp_str << std::endl;
         }
-
-        myfile.close();
 
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
@@ -82,10 +63,10 @@ int read_oa(int argc, char * argv[]) {
     return 0;
 }
 
-int write_oa(int argc, char * argv[]) {
+int write_oa(int argc, char *argv[]) {
     try {
 
-        oaDesignInit( oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         const oa::oaNativeNS ns;
         oa::oaString lib_def_path("cds.lib");
@@ -95,23 +76,23 @@ int write_oa(int argc, char * argv[]) {
         oa::oaScalarName lib_name(ns, "AAAscratch");
         oa::oaScalarName cell_name(ns, "oa_mos_write");
         oa::oaScalarName view_name(ns, "layout");
-        oa::oaLib * lib_ptr = oa::oaLib::find(lib_name);
+        oa::oaLib *lib_ptr = oa::oaLib::find(lib_name);
         if (lib_ptr == nullptr) {
             throw std::invalid_argument("Cannot find library.");
         } else if (!lib_ptr->isValid()) {
             throw std::invalid_argument("Invalid library.");
         }
 
-        oa::oaDesign * dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
-                                                    oa::oaViewType::get(oa::oacMaskLayout), 'w');
+        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
+                                                   oa::oaViewType::get(oa::oacMaskLayout), 'w');
 
 
-        oa::oaBlock * blk_ptr = oa::oaBlock::create(dsn_ptr);
+        oa::oaBlock *blk_ptr = oa::oaBlock::create(dsn_ptr);
 
         oa::oaScalarName mlib_name(ns, "tsmcN16");
         oa::oaScalarName mcell_name(ns, "nch_lvt_mac");
-        oa::oaDesign * master_ptr = oa::oaDesign::open(mlib_name, mcell_name, view_name,
-                                                       oa::oaViewType::get(oa::oacMaskLayout), 'r');
+        oa::oaDesign *master_ptr = oa::oaDesign::open(mlib_name, mcell_name, view_name,
+                                                      oa::oaViewType::get(oa::oacMaskLayout), 'r');
 
 
         oa::oaScalarName inst_name(ns, "X0");
@@ -120,7 +101,7 @@ int write_oa(int argc, char * argv[]) {
 
         std::ifstream myfile("oa_mos_params.txt");
         std::string line;
-        while( std::getline(myfile, line) ) {
+        while (std::getline(myfile, line)) {
             std::istringstream iss(line);
             std::string name;
             std::string value;
