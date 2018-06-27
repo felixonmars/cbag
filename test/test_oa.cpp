@@ -9,7 +9,7 @@
 
 #include <oa/oaDesignDB.h>
 
-int read_oa(int argc, char *argv[]) {
+int read_oa() {
     try {
 
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
@@ -83,26 +83,28 @@ int read_oa(int argc, char *argv[]) {
                 std::cout << "Inst(" << tmp_str << ", " << lib_str << ", " << cell_str;
                 inst_ptr->getViewName(ns_cdba, tmp_str);
                 std::cout << ", " << tmp_str;
-                std::cout << ", " << inst_ptr->getNumBits();
 
-                oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
-                oa::oaProp *prop_ptr;
-                int prop_idx = 0;
-                while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+                oa::oaTransform xform;
+                inst_ptr->getTransform(xform);
+                std::cout << ", (" << xform.xOffset() << ", " << xform.yOffset() << ")";
+                std::cout << ", " << xform.orient().getName();
+
+                if (inst_ptr->hasProp()) {
+                    oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
+                    oa::oaProp *prop_ptr = prop_iter.getNext();
                     prop_ptr->getName(tmp_str);
-                    if (prop_idx == 0) {
-                        std::cout << ", {" << tmp_str;
-                    } else {
-                        std::cout << ", " << tmp_str;
-                    }
+                    std::cout << ", {" << tmp_str << "=";
                     prop_ptr->getValue(tmp_str);
-                    std::cout << "=" << tmp_str;
-
-                    prop_idx++;
-                }
-                if (prop_idx > 0) {
+                    std::cout << tmp_str;
+                    while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+                        prop_ptr->getName(tmp_str);
+                        std::cout << ", " << tmp_str << "=";
+                        prop_ptr->getValue(tmp_str);
+                        std::cout << tmp_str;
+                    }
                     std::cout << "}";
                 }
+
                 std::cout << ")" << std::endl;
             }
         }
@@ -123,7 +125,7 @@ int read_oa(int argc, char *argv[]) {
     return 0;
 }
 
-int write_oa(int argc, char *argv[]) {
+int write_oa() {
     try {
 
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
@@ -196,6 +198,6 @@ int write_oa(int argc, char *argv[]) {
 
 
 int main(int argc, char *argv[]) {
-    return read_oa(argc, argv);
+    return read_oa();
     // return write_oa(argc, argv);
 }
