@@ -33,19 +33,37 @@ int read_oa(int argc, char *argv[]) {
 
         oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
                                                    oa::oaViewType::get(oa::oacSchematic), 'r');
+        oa::oaBlock *blk_ptr = dsn_ptr->getTopBlock();
 
 
         oa::oaName tmp_name;
+        oa::oaVectorName tmp_vec_name;
         oa::oaString tmp_str;
 
+        // print bus terminals
+        oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
+        oa::oaBusTermDef *bus_term_def_ptr;
+        while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
+            bus_term_def_ptr->getName(ns_cdba, tmp_str);
+            std::cout << "Bus Term: " << tmp_str << std::endl;
+            oa::oaIter<oa::oaBusTerm> bus_term_iter(bus_term_def_ptr->getBusTerms());
+            oa::oaBusTerm *bus_term_ptr;
+            while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
+                bus_term_ptr->getName(tmp_vec_name);
+                tmp_vec_name.getBaseName(ns_cdba, tmp_str);
+                std::cout << "base = " << tmp_str << ", range = (" << tmp_vec_name.getStart() << ", "
+                          << tmp_vec_name.getStop() << ", " << tmp_vec_name.getStep() << ")" << std::endl;
+
+            }
+        }
+
         // print terminals
-        oa::oaBlock *blk_ptr = dsn_ptr->getTopBlock();
-        oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterAll));
+        oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterSingleBit));
         oa::oaTerm *term_ptr;
         while ((term_ptr = term_iter.getNext()) != nullptr) {
             term_ptr->getName(tmp_name);
             tmp_name.get(ns_cdba, tmp_str);
-            std::cout << "Term name: " << tmp_str << std::endl;
+            std::cout << "Term(" << tmp_str << ", " << ")" << std::endl;
         }
 
         lib_ptr->close();
