@@ -14,15 +14,22 @@ find_package(Boost REQUIRED)
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
-include_directories(include)
+# setup include libraries
+include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR})
+
+# setup link library path.  Must call before defining target.
+link_directories( $ENV{OA_LINK_DIR} )
 
 set(SRC_FILES_LIB
         src/templates.cpp
         src/objects.cpp)
 add_library(cxbase SHARED ${SRC_FILES_LIB})
 
-set(SRC_FILES_TEST
-        test/test_template.cpp
-        )
-add_executable(test_template ${SRC_FILES_TEST})
-target_link_libraries(test_template cxbase)
+
+set(SRC_FILES_OA
+        src/templates.cpp
+        src/objects.cpp src/bagoa.cpp)
+add_executable(test_oa ${SRC_FILES_OA})
+
+# shared library dependencies
+target_link_libraries( test_oa oaCommon oaBase oaPlugIn oaDM oaTech oaDesign ${CMAKE_DL_LIBS} )
