@@ -10,9 +10,11 @@
 #include <oa/oaDesignDB.h>
 
 int read_oa() {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NotAssignable"
     try {
 
-        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber); // NOLINT
 
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;
@@ -56,7 +58,8 @@ int read_oa() {
                 }
                 bus_term_ptr->getName(tmp_vec_name);
                 tmp_vec_name.getBaseName(ns_cdba, tmp_str);
-                std::cout << "base = " << tmp_str << ", idx = " << tmp_vec_name.getIndex() << std::endl;
+                std::cout << "base = " << tmp_str << ", idx = " << tmp_vec_name.getIndex()
+                          << std::endl;
             }
         }
 
@@ -67,7 +70,8 @@ int read_oa() {
             term_ptr->getName(tmp_name);
             tmp_name.get(ns_cdba, tmp_str);
             if (tmp_str.index('<') == tmp_str.getLength()) {
-                std::cout << "Term(" << tmp_str << ", " << term_ptr->getTermType().getName() << ")" << std::endl;
+                std::cout << "Term(" << tmp_str << ", " << term_ptr->getTermType().getName() << ")"
+                          << std::endl;
             }
         }
 
@@ -78,7 +82,8 @@ int read_oa() {
             oa::oaString lib_str, cell_str;
             inst_ptr->getLibName(ns_cdba, lib_str);
             inst_ptr->getCellName(ns_cdba, cell_str);
-            if (lib_str != "basic" || (cell_str != "ipin" && cell_str != "opin" && cell_str != "iopin")) {
+            if (lib_str != "basic" ||
+                (cell_str != "ipin" && cell_str != "opin" && cell_str != "iopin")) {
                 inst_ptr->getName(ns_cdba, tmp_str);
                 std::cout << "Inst(" << tmp_str << ", " << lib_str << ", " << cell_str;
                 inst_ptr->getViewName(ns_cdba, tmp_str);
@@ -112,6 +117,7 @@ int read_oa() {
 
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
+#pragma clang diagnostic pop
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);
     } catch (oa::oaDMError &ex) {
@@ -124,11 +130,14 @@ int read_oa() {
 
     return 0;
 }
+#pragma clang diagnostic pop
 
 int write_oa() {
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NotAssignable"
     try {
 
-        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber); // NOLINT
 
         const oa::oaNativeNS ns;
         oa::oaString lib_def_path("cds.lib");
@@ -183,6 +192,7 @@ int write_oa() {
         dsn_ptr->close();
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
+#pragma clang diagnostic pop
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);
     } catch (oa::oaDMError &ex) {

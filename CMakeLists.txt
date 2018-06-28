@@ -3,7 +3,8 @@ project(cxbase)
 
 # set CXX options
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
+-Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
 
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
@@ -19,7 +20,7 @@ set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE
 include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 
 # setup link library path.  Must call before defining target.
-link_directories( $ENV{OA_LINK_DIR})
+link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB
         src/templates.cpp
@@ -35,4 +36,4 @@ set(SRC_FILES_OA
 add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
-target_link_libraries( test_oa oaCommon oaBase oaPlugIn oaDM oaTech oaDesign ${CMAKE_DL_LIBS} )
+target_link_libraries(test_oa oaCommon oaBase oaPlugIn oaDM oaTech oaDesign ${CMAKE_DL_LIBS})
