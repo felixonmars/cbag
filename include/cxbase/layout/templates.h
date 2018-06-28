@@ -5,7 +5,6 @@
 #ifndef CXBASE_LAYTOUT_TEMPLATES_H
 #define CXBASE_LAYTOUT_TEMPLATES_H
 
-#include <boost/polygon/polygon.hpp>
 #include <cxbase/layout/objects.h>
 
 namespace cxbase {
@@ -13,11 +12,11 @@ namespace cxbase {
     public:
         CTemplate() = default;
 
-        CRect *add_rect(lay_type lay, purp_type purp, coord_type x0, coord_type y0, coord_type x1,
-                        coord_type y1);
+        CRect *add_rect(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
+                        coord_t y1);
 
-        CPin *add_pin(lay_type lay, purp_type purp, coord_type x0, coord_type y0, coord_type x1,
-                      coord_type y1, std::string net, std::string lbl);
+        CPin *add_pin(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
+                      coord_t y1, std::string net, std::string lbl);
 
         friend std::ostream &operator<<(std::ostream &os, const CTemplate &obj);
 

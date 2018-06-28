@@ -1,9 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
-#include <exception>
-#include <stdexcept>
 #include <map>
 #include <vector>
 
@@ -120,7 +117,6 @@ int read_oa() {
                  << YAML::Value << inout_terms
                  << YAML::EndMap;
 
-        /*
         // print instances
         oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
         oa::oaInst *inst_ptr;
@@ -159,8 +155,6 @@ int read_oa() {
                 std::cout << ")" << std::endl;
             }
         }
-
-        */
 
         out_yaml << YAML::EndMap;
         std::cout << out_yaml.c_str() << std::endl;

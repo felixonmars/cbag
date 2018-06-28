@@ -9,10 +9,11 @@
 #include <tuple>
 #include <vector>
 
-#include <yaml-cpp/yaml.h>
+#include <cxbase/common.h>
 
 namespace cxbase {
 
+    // Range data structure to represent bus terminal indices
     struct Range {
         Range() = default;
 
@@ -32,12 +33,18 @@ namespace cxbase {
         std::vector<Range> range_list;
     };
 
-    YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v) {
-        out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
-        return out;
+    struct CSchInstance {
+        CSchInstance() = default;
+
+        std::string inst_name, lib_name, cell_name, view_name;
+        Transform xform;
+    };
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v) {
+        return out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
     }
 
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v) {
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v) {
         out << YAML::BeginMap
             << YAML::Key << "name"
             << YAML::Value << v.name
@@ -52,6 +59,5 @@ namespace cxbase {
     }
 
 }
-
 
 #endif //CXBASE_OBJECTS_H
