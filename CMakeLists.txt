@@ -23,26 +23,27 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIR}
+        ${YAML_CPP_INCLUDE_DIR}
         )
 
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB
-        src/templates.cpp
-        src/objects.cpp
-        )
+        src/layout/templates.cpp
+        src/layout/objects.cpp
+        src/schematic/objects.cpp)
 add_library(cxbase SHARED ${SRC_FILES_LIB})
 
 
 set(SRC_FILES_OA
         test/test_oa.cpp
-        src/bagoa.cpp
         )
 add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
 target_link_libraries(test_oa
+        cxbase
         yaml-cpp
         oaCommon
         oaBase

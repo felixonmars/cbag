@@ -10,12 +10,9 @@
 #include <yaml-cpp/yaml.h>
 #include <oa/oaDesignDB.h>
 
+#include <cxbase/schematic/objects.h>
 
 int read_oa() {
-    YAML::Node node = YAML::Load("[1, 2, 3]");
-    if (node.IsSequence()) {
-        std::cout << "YAML works!" << std::endl;
-    }
     try {
 
 #pragma clang diagnostic push
@@ -49,39 +46,81 @@ int read_oa() {
         oa::oaVectorBitName tmp_vec_name;
         oa::oaString tmp_str;
 
-        // print bus terminals
+        YAML::Emitter out_yaml;
+        out_yaml << YAML::BeginMap;
+
+
+        // get all terminals
+        std::vector<cxbase::CSchTerm> in_terms, out_terms, inout_terms;
+        // get bus terminals
         oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
         oa::oaBusTermDef *bus_term_def_ptr;
+        std::vector<cxbase::CSchTerm> *term_list_ptr = nullptr;
         while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
             bus_term_def_ptr->getName(ns_cdba, tmp_str);
-            std::cout << "Bus Term: " << tmp_str << std::endl;
+            std::string pin_name(tmp_str);
+
             oa::oaIter<oa::oaBusTermBit> bus_term_iter(bus_term_def_ptr->getBusTermBits());
             oa::oaBusTermBit *bus_term_ptr;
-            bool print_type = false;
+            std::vector<uint32_t> idx_list;
             while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
-                if (!print_type) {
-                    std::cout << "type: " << bus_term_ptr->getTermType().getName() << std::endl;
-                    print_type = true;
+                if (term_list_ptr == nullptr) {
+                    switch (bus_term_ptr->getTermType()) {
+                        case oa::oacInputTermType:
+                            term_list_ptr = &in_terms;
+                            break;
+                        case oa::oacOutputTermType:
+                            term_list_ptr = &out_terms;
+                            break;
+                        default:
+                            term_list_ptr = &inout_terms;
+                            break;
+                    }
                 }
-                bus_term_ptr->getName(tmp_vec_name);
-                tmp_vec_name.getBaseName(ns_cdba, tmp_str);
-                std::cout << "base = " << tmp_str << ", idx = " << tmp_vec_name.getIndex()
-                          << std::endl;
+                idx_list.push_back(tmp_vec_name.getIndex());
+            }
+            if (term_list_ptr != nullptr) {
+                cxbase::CSchTerm tmp_sch_term(pin_name, idx_list);
+                term_list_ptr->push_back(tmp_sch_term);
             }
         }
 
-        // print terminals
+        // get scalar terminals
         oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterSingleBit));
         oa::oaTerm *term_ptr;
         while ((term_ptr = term_iter.getNext()) != nullptr) {
             term_ptr->getName(tmp_name);
             tmp_name.get(ns_cdba, tmp_str);
             if (tmp_str.index('<') == tmp_str.getLength()) {
-                std::cout << "Term(" << tmp_str << ", " << term_ptr->getTermType().getName() << ")"
-                          << std::endl;
+                std::string pin_name(tmp_str);
+                switch (term_ptr->getTermType()) {
+                    case oa::oacInputTermType:
+                        term_list_ptr = &in_terms;
+                        break;
+                    case oa::oacOutputTermType:
+                        term_list_ptr = &out_terms;
+                        break;
+                    default:
+                        term_list_ptr = &inout_terms;
+                        break;
+                }
+                term_list_ptr->emplace_back(pin_name);
             }
         }
 
+        // write to YAML
+        out_yaml << YAML::Key << "pins"
+                 << YAML::Value
+                 << YAML::BeginMap
+                 << YAML::Key << "inputs"
+                 << YAML::Value << in_terms
+                 << YAML::Key << "outputs"
+                 << YAML::Value << out_terms
+                 << YAML::Key << "inouts"
+                 << YAML::Value << inout_terms
+                 << YAML::EndMap;
+
+        /*
         // print instances
         oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
         oa::oaInst *inst_ptr;
@@ -121,10 +160,13 @@ int read_oa() {
             }
         }
 
+        */
+
+        out_yaml << YAML::EndMap;
+        std::cout << out_yaml.c_str() << std::endl;
 
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
-#pragma clang diagnostic pop
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);
     } catch (oa::oaDMError &ex) {
@@ -138,6 +180,7 @@ int read_oa() {
     return 0;
 }
 
+/*
 int write_oa() {
     try {
 
@@ -211,7 +254,7 @@ int write_oa() {
 
     return 0;
 }
-
+*/
 
 int main(int argc, char *argv[]) {
     return read_oa();

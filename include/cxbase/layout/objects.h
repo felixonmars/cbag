@@ -2,8 +2,8 @@
 // Created by Eric Chang on 6/8/18.
 //
 
-#ifndef CXBASE_DATATYPES_H
-#define CXBASE_DATATYPES_H
+#ifndef CXBASE_LAYOUT_OBJECTS_H
+#define CXBASE_LAYOUT_OBJECTS_H
 
 #include <boost/polygon/polygon.hpp>
 

@@ -2,8 +2,8 @@
 // Created by Eric Chang on 6/9/18.
 //
 
-#ifndef CXBASE_TEMPLATES_H
-#define CXBASE_TEMPLATES_H
+#ifndef CXBASE_LAYTOUT_TEMPLATES_H
+#define CXBASE_LAYTOUT_TEMPLATES_H
 
 #include <boost/polygon/polygon.hpp>
 #include <cxbase/layout/objects.h>
