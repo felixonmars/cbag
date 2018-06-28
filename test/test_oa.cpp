@@ -7,14 +7,21 @@
 #include <map>
 #include <vector>
 
+#include <yaml-cpp/yaml.h>
 #include <oa/oaDesignDB.h>
 
+
 int read_oa() {
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "NotAssignable"
+    YAML::Node node = YAML::Load("[1, 2, 3]");
+    if (node.IsSequence()) {
+        std::cout << "YAML works!" << std::endl;
+    }
     try {
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NotAssignable"
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber); // NOLINT
+#pragma clang diagnostic pop
 
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;
@@ -130,14 +137,14 @@ int read_oa() {
 
     return 0;
 }
-#pragma clang diagnostic pop
 
 int write_oa() {
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "NotAssignable"
     try {
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NotAssignable"
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber); // NOLINT
+#pragma clang diagnostic pop
 
         const oa::oaNativeNS ns;
         oa::oaString lib_def_path("cds.lib");
@@ -192,7 +199,6 @@ int write_oa() {
         dsn_ptr->close();
         lib_ptr->close();
     } catch (oa::oaCompatibilityError &ex) {
-#pragma clang diagnostic pop
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);
     } catch (oa::oaDMError &ex) {

@@ -15,9 +15,15 @@ find_package(Boost REQUIRED)
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
+# Include yaml-cpp as an imported target
+find_package(yaml-cpp REQUIRED)
+
 # setup include libraries
 # TODO: Why do I have to list Boost include here again?
-include_directories(${CMAKE_SOURCE_DIR}/include $ENV{OA_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/include
+        $ENV{OA_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIR}
+        )
 
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
@@ -36,4 +42,13 @@ set(SRC_FILES_OA
 add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
-target_link_libraries(test_oa oaCommon oaBase oaPlugIn oaDM oaTech oaDesign ${CMAKE_DL_LIBS})
+target_link_libraries(test_oa
+        yaml-cpp
+        oaCommon
+        oaBase
+        oaPlugIn
+        oaDM
+        oaTech
+        oaDesign
+        ${CMAKE_DL_LIBS}
+        )
