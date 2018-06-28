@@ -2,10 +2,10 @@
 // Created by erichang on 6/27/18.
 //
 
-#include <cxbase/schematic/objects.h>
+#include <cbag/schematic/objects.h>
 
 
-namespace cxbase {
+namespace cbag {
 
     CSchTerm::CSchTerm(std::string name, const std::vector<uint32_t> &idx_list) :
             name(std::move(name)), range_list() {
@@ -43,8 +43,8 @@ namespace cxbase {
 namespace YAML {
     // YAML encode/decode routine for Range
     template<>
-    struct convert<cxbase::Range> {
-        static Node encode(const cxbase::Range &rhs) {
+    struct convert<cbag::Range> {
+        static Node encode(const cbag::Range &rhs) {
             Node node;
             node.push_back(rhs.start);
             node.push_back(rhs.stop);
@@ -52,7 +52,7 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node &node, cxbase::Range &rhs) {
+        static bool decode(const Node &node, cbag::Range &rhs) {
             if (!node.IsSequence() || node.size() != 3) {
                 return false;
             }
@@ -66,10 +66,10 @@ namespace YAML {
 
     // YAML encode/decode routine for CSchTerm
     template<>
-    struct convert<cxbase::CSchTerm> {
-        static Node encode(const cxbase::CSchTerm &rhs) {
+    struct convert<cbag::CSchTerm> {
+        static Node encode(const cbag::CSchTerm &rhs) {
             Node node, range_list_node;
-            for (cxbase::Range item : rhs.range_list) {
+            for (cbag::Range item : rhs.range_list) {
                 range_list_node.push_back(item);
             }
             node.push_back(rhs.name);
@@ -77,13 +77,13 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node &node, cxbase::CSchTerm &rhs) {
+        static bool decode(const Node &node, cbag::CSchTerm &rhs) {
             if (!node.IsSequence() || node.size() != 2) {
                 return false;
             }
 
             for (YAML::const_iterator iter = node[1].begin(); iter != node[1].end(); ++iter) {
-                rhs.range_list.push_back(iter->as<cxbase::Range>());
+                rhs.range_list.push_back(iter->as<cbag::Range>());
             }
             return true;
         }

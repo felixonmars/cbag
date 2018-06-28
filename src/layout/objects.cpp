@@ -2,9 +2,9 @@
 // Created by erichang on 6/10/18.
 //
 
-#include <cxbase/layout/objects.h>
+#include <cbag/layout/objects.h>
 
-namespace cxbase {
+namespace cbag {
     std::ostream &operator<<(std::ostream &os, const CBox &obj) {
         os << "CBox(" << obj.xl << ", " << obj.yl << ", " << obj.xh << ", " << obj.yh << ")";
         return os;

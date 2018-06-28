@@ -2,8 +2,8 @@
 // Created by erichang on 6/26/18.
 //
 
-#ifndef CXBASE_BAGOA_H
-#define CXBASE_BAGOA_H
+#ifndef CBAG_BAGOA_H
+#define CBAG_BAGOA_H
 
 #include <map>
 #include <string>
@@ -13,7 +13,7 @@
 // techID = techOpenTechFile(lib_name "tech.oa" "r")
 // techGetPurposeNum(techID "pin")
 
-namespace cxbase {
+namespace cbag {
     class LibDefObserver: public oa::oaObserver<oa::oaLibDefList> {
     public:
         explicit LibDefObserver(oa::oaUInt4 priority) :
@@ -49,4 +49,4 @@ namespace cxbase {
 }
 
 
-#endif //CXBASE_BAGOA_H
+#endif //CBAG_BAGOA_H

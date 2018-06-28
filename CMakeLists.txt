@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(cxbase)
+project(cbag)
 
 # set CXX options
 set(CMAKE_CXX_STANDARD 11)
@@ -33,10 +33,10 @@ set(SRC_FILES_LIB
         src/layout/templates.cpp
         src/layout/objects.cpp
         src/schematic/objects.cpp)
-add_library(cxbase SHARED ${SRC_FILES_LIB})
+add_library(cbag SHARED ${SRC_FILES_LIB})
 
 # shared library dependencies
-target_link_libraries(cxbase
+target_link_libraries(cbag
         yaml-cpp
         )
 
@@ -47,7 +47,7 @@ add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
 target_link_libraries(test_oa
-        cxbase
+        cbag
         oaCommon
         oaBase
         oaPlugIn

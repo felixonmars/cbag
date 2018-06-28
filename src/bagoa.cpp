@@ -1,6 +1,6 @@
-#include <cxbase/bagoa.h>
+#include <cbag/bagoa.h>
 
-namespace cxbase {
+namespace cbag {
 
     // OA namespace object
     const oa::oaNativeNS ns;

@@ -3,8 +3,8 @@
 //
 
 
-#ifndef CXBASE_COMMON_H
-#define CXBASE_COMMON_H
+#ifndef CBAG_COMMON_H
+#define CBAG_COMMON_H
 
 #include <cstdint>
 
@@ -34,7 +34,7 @@
         }                                                                     \
     }
 
-namespace cxbase {
+namespace cbag {
     typedef int32_t coord_t;
     typedef int32_t lay_t;
     typedef int32_t purp_t;
@@ -56,4 +56,4 @@ namespace cxbase {
     }
 }
 
-#endif //CXBASE_COMMON_H
+#endif //CBAG_COMMON_H

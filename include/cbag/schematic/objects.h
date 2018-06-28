@@ -2,16 +2,16 @@
 // Created by erichang on 6/27/18.
 //
 
-#ifndef CXBASE_SCHEMATIC_OBJECTS_H
-#define CXBASE_SCHEMATIC_OBJECTS_H
+#ifndef CBAG_SCHEMATIC_OBJECTS_H
+#define CBAG_SCHEMATIC_OBJECTS_H
 
 #include <string>
 #include <tuple>
 #include <vector>
 
-#include <cxbase/common.h>
+#include <cbag/common.h>
 
-namespace cxbase {
+namespace cbag {
 
     // Range data structure to represent bus terminal indices
     struct Range {
@@ -60,4 +60,4 @@ namespace cxbase {
 
 }
 
-#endif //CXBASE_OBJECTS_H
+#endif //CBAG_SCHEMATIC_OBJECTS_H

@@ -7,7 +7,7 @@
 #include <yaml-cpp/yaml.h>
 #include <oa/oaDesignDB.h>
 
-#include <cxbase/schematic/objects.h>
+#include <cbag/schematic/objects.h>
 
 
 std::string get_type(oa::oaProp *prop_ptr) {
@@ -64,11 +64,11 @@ int read_oa() {
 
 
         // get all terminals
-        std::vector<cxbase::CSchTerm> in_terms, out_terms, inout_terms;
+        std::vector<cbag::CSchTerm> in_terms, out_terms, inout_terms;
         // get bus terminals
         oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
         oa::oaBusTermDef *bus_term_def_ptr;
-        std::vector<cxbase::CSchTerm> *term_list_ptr = nullptr;
+        std::vector<cbag::CSchTerm> *term_list_ptr = nullptr;
         while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
             bus_term_def_ptr->getName(ns_cdba, tmp_str);
             std::string pin_name(tmp_str);

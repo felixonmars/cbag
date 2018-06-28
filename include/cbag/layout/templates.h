@@ -2,12 +2,12 @@
 // Created by Eric Chang on 6/9/18.
 //
 
-#ifndef CXBASE_LAYTOUT_TEMPLATES_H
-#define CXBASE_LAYTOUT_TEMPLATES_H
+#ifndef CBAG_LAYTOUT_TEMPLATES_H
+#define CBAG_LAYTOUT_TEMPLATES_H
 
-#include <cxbase/layout/objects.h>
+#include <cbag/layout/objects.h>
 
-namespace cxbase {
+namespace cbag {
     class CTemplate {
     public:
         CTemplate() = default;
@@ -27,4 +27,4 @@ namespace cxbase {
 }
 
 
-#endif //CXBASE_TEMPLATES_H
+#endif //CBAG_LAYTOUT_TEMPLATES_H

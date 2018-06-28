@@ -2,14 +2,14 @@
 // Created by Eric Chang on 6/8/18.
 //
 
-#ifndef CXBASE_LAYOUT_OBJECTS_H
-#define CXBASE_LAYOUT_OBJECTS_H
+#ifndef CBAG_LAYOUT_OBJECTS_H
+#define CBAG_LAYOUT_OBJECTS_H
 
 #include <boost/polygon/polygon.hpp>
 
-#include <cxbase/common.h>
+#include <cbag/common.h>
 
-namespace cxbase {
+namespace cbag {
 
     class CBox {
     public:
@@ -46,4 +46,4 @@ namespace cxbase {
     };
 }
 
-#endif //CXBASE_DATATYPES_H
+#endif //CBAG_LAYOUT_OBJECTS_H
