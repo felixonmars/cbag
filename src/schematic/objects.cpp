@@ -13,14 +13,14 @@ namespace cxbase {
         auto riter = idx_list.rbegin();
         auto last = idx_list.rend();
         if (riter != last) {
-            uint32_t start = *(riter++);
-            uint32_t prev = start;
+            int32_t start = *(riter++);
+            int32_t prev = start;
             int32_t step = 0;
             while (riter != last) {
-                uint32_t stop = *(riter++);
+                int32_t stop = *(riter++);
                 if (step == 0) {
-                    step = (int32_t) (stop - prev);
-                } else if (step != (int32_t) (stop - prev)) {
+                    step = stop - prev;
+                } else if (step != stop - prev) {
                     // step size changed
                     range_list.emplace_back(start, prev + step, step);
                     start = stop;

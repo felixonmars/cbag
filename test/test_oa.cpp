@@ -77,11 +77,11 @@ int read_oa() {
                             break;
                     }
                 }
+                bus_term_ptr->getName(tmp_vec_name);
                 idx_list.push_back(tmp_vec_name.getIndex());
             }
             if (term_list_ptr != nullptr) {
-                cxbase::CSchTerm tmp_sch_term(pin_name, idx_list);
-                term_list_ptr->push_back(tmp_sch_term);
+                term_list_ptr->emplace_back(pin_name, idx_list);
             }
         }
 

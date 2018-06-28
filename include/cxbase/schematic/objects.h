@@ -16,10 +16,9 @@ namespace cxbase {
     struct Range {
         Range() = default;
 
-        Range(uint32_t start, uint32_t stop, int32_t step) : start(start), stop(stop), step(step) {}
+        Range(int32_t start, int32_t stop, int32_t step) : start(start), stop(stop), step(step) {}
 
-        uint32_t start, stop;
-        int32_t step;
+        int32_t start, stop, step;
     };
 
     struct CSchTerm {
@@ -34,7 +33,7 @@ namespace cxbase {
     };
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v) {
-        out << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
+        out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
         return out;
     }
 
@@ -43,7 +42,7 @@ namespace cxbase {
             << YAML::Key << "name"
             << YAML::Value << v.name
             << YAML::Key << "ranges"
-            << YAML::Value << YAML::BeginSeq;
+            << YAML::Value << YAML::Flow << YAML::BeginSeq;
 
         for (Range item : v.range_list) {
             out << item;
