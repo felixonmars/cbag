@@ -9,6 +9,22 @@
 
 #include <cxbase/schematic/objects.h>
 
+
+std::string get_type(oa::oaProp *prop_ptr) {
+    switch (prop_ptr->getType()) {
+        case oa::oacStringPropType :
+            return "str";
+        case oa::oacIntPropType :
+            return "int";
+        case oa::oacDoublePropType :
+            return "dbl";
+        case oa::oacFloatPropType :
+            return "flt";
+        default :
+            throw std::invalid_argument("Unsupport OA property type.  See developer.");
+    }
+}
+
 int read_oa() {
     try {
 
@@ -140,12 +156,12 @@ int read_oa() {
                     oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
                     oa::oaProp *prop_ptr = prop_iter.getNext();
                     prop_ptr->getName(tmp_str);
-                    std::cout << ", {" << tmp_str << "=";
+                    std::cout << ", {" << tmp_str << "(" << get_type(prop_ptr) << ")=";
                     prop_ptr->getValue(tmp_str);
                     std::cout << tmp_str;
                     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
                         prop_ptr->getName(tmp_str);
-                        std::cout << ", " << tmp_str << "=";
+                        std::cout << ", " << tmp_str << "(" << get_type(prop_ptr) << ")=";
                         prop_ptr->getValue(tmp_str);
                         std::cout << tmp_str;
                     }
