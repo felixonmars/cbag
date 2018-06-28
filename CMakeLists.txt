@@ -35,6 +35,10 @@ set(SRC_FILES_LIB
         src/schematic/objects.cpp)
 add_library(cxbase SHARED ${SRC_FILES_LIB})
 
+# shared library dependencies
+target_link_libraries(cxbase
+        yaml-cpp
+        )
 
 set(SRC_FILES_OA
         test/test_oa.cpp
@@ -44,7 +48,6 @@ add_executable(test_oa ${SRC_FILES_OA})
 # shared library dependencies
 target_link_libraries(test_oa
         cxbase
-        yaml-cpp
         oaCommon
         oaBase
         oaPlugIn
