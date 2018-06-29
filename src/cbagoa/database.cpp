@@ -1,10 +1,9 @@
-#include <cbag/bagoa.h>
+#include <cbagoa/database.h>
 
-namespace cbag {
+namespace cbagoa {
 
-    // OA namespace object
-    const oa::oaNativeNS ns;
-    const oa::oaCdbaNS ns_cdba;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
 
     oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                                  oa::oaLibDefListWarningTypeEnum type) {
@@ -12,10 +11,16 @@ namespace cbag {
         throw std::runtime_error("OA Error: " + msg_std);
     }
 
-    void OALibrary::open_library(const std::string &lib_file, const std::string &library,
-                                 const std::string &lib_path, const std::string &tech_lib) {
+#pragma clang diagnostic pop
+
+    void Library::open_lib(const std::string &lib_file, const std::string &library,
+                           const std::string &lib_path, const std::string &tech_lib) {
         try {
-            oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "NotAssignable"
+            oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, // NOLINT
+                         oacDataModelRevNumber); // NOLINT
+#pragma clang diagnostic pop
 
             // open library definition
             oa::oaString lib_def_file(lib_file.c_str());
@@ -31,7 +36,7 @@ namespace cbag {
                 lib_ptr = oa::oaLib::create(lib_name, oa_lib_path);
                 oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
-                // I cannot get open access to modify the library file, so
+                // NOTE: I cannot get open access to modify the library file, so
                 // we just do it by hand.
                 std::ofstream outfile;
                 outfile.open(lib_file, std::ios_base::app);
@@ -67,10 +72,18 @@ namespace cbag {
         } catch (oa::oaError &ex) {
             std::string msg_std(ex.getMsg());
             throw std::runtime_error("OA Error: " + msg_std);
+        } catch (oa::oaDesignError &ex) {
+            std::string msg_std(ex.getMsg());
+            throw std::runtime_error("OA Design Error: " + msg_std);
         }
     }
 
-    void OALibrary::close() {
+    oa::oaBlock *Library::parse_sch(const std::string &cell_name,
+                                    const std::string &view_name = "schematic") {
+
+    }
+
+    void Library::close() {
         if (is_open) {
             tech_ptr->close();
             lib_ptr->close();

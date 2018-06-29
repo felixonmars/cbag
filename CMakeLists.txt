@@ -30,9 +30,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB
-        src/layout/templates.cpp
-        src/layout/objects.cpp
-        src/schematic/objects.cpp)
+        src/cbag/layout/templates.cpp
+        src/cbag/layout/objects.cpp
+        src/cbag/schematic/objects.cpp)
 add_library(cbag SHARED ${SRC_FILES_LIB})
 
 # shared library dependencies
