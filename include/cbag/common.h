@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include <boost/preprocessor.hpp>
+#include <boost/variant.hpp>
 #include <yaml-cpp/yaml.h>
 
 // Macro that allows easy conversion between enum and strings
@@ -49,6 +50,10 @@ namespace cbag {
         coord_t x, y;
         Orientation orient;
     };
+
+    // parameter data structure
+    typedef boost::variant<int32_t, double, std::string> value_t;
+    typedef std::map<std::string, value_t> ParamMap;
 
     inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
         return out << YAML::Flow
