@@ -7,7 +7,7 @@
 
 #include <string>
 #include <tuple>
-#include <vector>
+#include <utility> #include <vector>
 
 #include <cbag/common.h>
 
@@ -27,36 +27,41 @@ namespace cbag {
 
         explicit CSchTerm(std::string name) : name(std::move(name)), range_list() {}
 
-        CSchTerm(std::string name, const std::vector<uint32_t> &idx_list);
+        CSchTerm(std::string name, const std::list<uint32_t> &idx_list);
 
         std::string name;
-        std::vector<Range> range_list;
+        std::list<Range> range_list;
     };
 
     struct CSchInstance {
         CSchInstance() = default;
 
+        CSchInstance(std::string name, std::string lib, std::string cell, std::string view,
+                     Transform xform) : inst_name(std::move(name)), lib_name(std::move(lib)),
+                                        cell_name(std::move(cell)), view_name(std::move(view)),
+                                        xform(xform) {}
+
         std::string inst_name, lib_name, cell_name, view_name;
         Transform xform;
+        ParamMap params;
+        std::map<std::string, std::string> term_map;
     };
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v) {
-        return out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
-    }
+    struct CSchMaster {
+        CSchMaster() = default;
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v) {
-        out << YAML::BeginMap
-            << YAML::Key << "name"
-            << YAML::Value << v.name
-            << YAML::Key << "ranges"
-            << YAML::Value << YAML::Flow << YAML::BeginSeq;
+        std::list<CSchTerm> in_terms, out_terms, io_terms;
+        std::list<CSchInstance> inst_list;
+    };
 
-        for (Range item : v.range_list) {
-            out << item;
-        }
-        out << YAML::EndSeq << YAML::EndMap;
-        return out;
-    }
+    // YAML stream out functions
+    YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v);
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v);
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v);
 
 }
 

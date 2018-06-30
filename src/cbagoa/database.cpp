@@ -1,9 +1,10 @@
 #include <cbagoa/database.h>
+#include <iostream>
 
 namespace cbagoa {
 
     cbag::Orientation convert_orient(const oa::oaOrient &orient) {
-        switch(orient) {
+        switch (orient) {
             case oa::oacR0:
                 return cbag::Orientation::R0;
             case oa::oacR90:
@@ -102,8 +103,8 @@ namespace cbagoa {
         }
     }
 
-    cbag::CSchInstance Library::parse_sch(const std::string &cell_name,
-                                          const std::string &view_name = "schematic") {
+    cbag::CSchMaster Library::parse_sch(const std::string &cell_name,
+                                        const std::string &view_name = "schematic") {
         // get OA Block pointer
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
@@ -126,37 +127,40 @@ namespace cbagoa {
 
         }
 
+        cbag::CSchMaster ans;
         // place holder classes
         oa::oaString tmp_str;
 
-        // get all terminals
-        std::vector<cbag::CSchTerm> in_terms, out_terms, inout_terms;
         // get bus terminals
         oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
         oa::oaBusTermDef *bus_term_def_ptr;
-        std::vector<cbag::CSchTerm> *term_list_ptr = &in_terms;
+        std::list<cbag::CSchTerm> *term_list_ptr = nullptr;
         while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
             bus_term_def_ptr->getName(ns_cdba, tmp_str);
             std::string pin_name(tmp_str);
 
             oa::oaIter<oa::oaBusTermBit> bus_term_iter(bus_term_def_ptr->getBusTermBits());
             oa::oaBusTermBit *bus_term_ptr;
-            std::vector<uint32_t> idx_list;
+            std::list<uint32_t> idx_list;
+            term_list_ptr = nullptr;
             while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
-                switch (bus_term_ptr->getTermType()) {
-                    case oa::oacInputTermType:
-                        term_list_ptr = &in_terms;
-                        break;
-                    case oa::oacOutputTermType:
-                        term_list_ptr = &out_terms;
-                        break;
-                    default:
-                        term_list_ptr = &inout_terms;
-                        break;
+                if (term_list_ptr == nullptr) {
+                    switch (bus_term_ptr->getTermType()) {
+                        case oa::oacInputTermType:
+                            term_list_ptr = &ans.in_terms;
+                            break;
+                        case oa::oacOutputTermType:
+                            term_list_ptr = &ans.out_terms;
+                            break;
+                        default:
+                            term_list_ptr = &ans.io_terms;
+                    }
                 }
                 idx_list.push_back(bus_term_ptr->getBitIndex());
             }
-            term_list_ptr->emplace_back(pin_name, idx_list);
+            if (term_list_ptr != nullptr) {
+                term_list_ptr->emplace_back(pin_name, idx_list);
+            }
         }
         // get scalar terminals
         oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterSingleBit));
@@ -167,16 +171,14 @@ namespace cbagoa {
                 std::string pin_name(tmp_str);
                 switch (term_ptr->getTermType()) {
                     case oa::oacInputTermType:
-                        term_list_ptr = &in_terms;
+                        ans.in_terms.emplace_back(pin_name);
                         break;
                     case oa::oacOutputTermType:
-                        term_list_ptr = &out_terms;
+                        ans.out_terms.emplace_back(pin_name);
                         break;
                     default:
-                        term_list_ptr = &inout_terms;
-                        break;
+                        ans.io_terms.emplace_back(pin_name);
                 }
-                term_list_ptr->emplace_back(pin_name);
             }
         }
 
@@ -206,25 +208,25 @@ namespace cbagoa {
                 cbag::Transform inst_xform(xform.xOffset(), xform.yOffset(),
                                            convert_orient(xform.orient()));
 
+                // create schematic instance
+                ans.inst_list.emplace_back(inst_name, inst_lib, inst_cell, inst_view, inst_xform);
+                cbag::CSchInstance *sch_inst_ptr = &ans.inst_list.back();
+
+                // get parameters
                 if (inst_ptr->hasProp()) {
                     oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
-                    oa::oaProp *prop_ptr = prop_iter.getNext();
-                    prop_ptr->getName(tmp_str);
-                    std::cout << ", {" << tmp_str << "(" << get_type(prop_ptr) << ")=";
-                    prop_ptr->getValue(tmp_str);
-                    std::cout << tmp_str;
+                    oa::oaProp *prop_ptr;
                     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                        prop_ptr->getName(tmp_str);
-                        std::cout << ", " << tmp_str << "(" << get_type(prop_ptr) << ")=";
-                        prop_ptr->getValue(tmp_str);
-                        std::cout << tmp_str;
+                        add_param(sch_inst_ptr->params, prop_ptr);
                     }
-                    std::cout << "}";
                 }
 
-                std::cout << ")" << std::endl;
+                // get connections
+
             }
         }
+
+        return ans;
     }
 
     void Library::close() {
@@ -235,6 +237,40 @@ namespace cbagoa {
             is_open = false;
         }
 
+    }
+
+    void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr) {
+        // get parameter name
+        oa::oaString tmp_str;
+        prop_ptr->getName(tmp_str);
+        std::string key(tmp_str);
+
+        // get parameter value
+        // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
+        // use NOLINT to suppress IDE warnings
+        oa::oaType ptype = prop_ptr->getType();
+        switch (ptype) {
+            case oa::oacStringPropType :
+                prop_ptr->getValue(tmp_str);
+                std::string vals(tmp_str);
+                params.emplace(key, vals);
+                break;
+            case oa::oacIntPropType :
+                params.emplace(key, static_cast<oa::oaIntProp *>(prop_ptr)->getValue()); // NOLINT
+                break;
+            case oa::oacDoublePropType :
+                params.emplace(key,
+                               static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
+                break;
+            case oa::oacFloatPropType :
+                double vald = static_cast<oa::oaFloatProp *>(prop_ptr)->getValue(); // NOLINT
+                params.emplace(key, vald);
+                break;
+            default :
+                std::ostringstream stream;
+                stream << "Unsupport OA property type: " << ptype.getName() << ".  See developer.";
+                throw std::invalid_argument(stream.str());
+        }
     }
 
 }

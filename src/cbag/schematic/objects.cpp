@@ -7,7 +7,7 @@
 
 namespace cbag {
 
-    CSchTerm::CSchTerm(std::string name, const std::vector<uint32_t> &idx_list) :
+    CSchTerm::CSchTerm(std::string name, const std::list<uint32_t> &idx_list) :
             name(std::move(name)), range_list() {
         // assume idx_list sorted in increasing order.  Will generate range list in decreasing order
         auto riter = idx_list.rbegin();
@@ -36,6 +36,34 @@ namespace cbag {
                 range_list.emplace_back(start, prev + step, step);
             }
         }
+    }
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v) {
+        return out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step << YAML::EndSeq;
+    }
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v) {
+        out << YAML::BeginMap
+            << YAML::Key << "name"
+            << YAML::Value << v.name
+            << YAML::Key << "ranges"
+            << YAML::Value << YAML::Flow << YAML::BeginSeq;
+
+        for (Range item : v.range_list) {
+            out << item;
+        }
+        out << YAML::EndSeq << YAML::EndMap;
+        return out;
+    }
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v) {
+        // TODO: Supply actual implementation
+        return out;
+    }
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v) {
+        // TODO: Supply actual implementation
+        return out;
     }
 }
 

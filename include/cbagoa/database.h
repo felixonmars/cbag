@@ -38,8 +38,8 @@ namespace cbagoa {
         void open_lib(const std::string &lib_file, const std::string &library,
                       const std::string &lib_path, const std::string &tech_lib);
 
-        cbag::CSchInstance parse_sch(const std::string &cell_name,
-                                     const std::string &view_name = "schematic");
+        cbag::CSchMaster parse_sch(const std::string &cell_name,
+                                   const std::string &view_name = "schematic");
 
         void close();
 
@@ -56,6 +56,8 @@ namespace cbagoa {
         std::string lib_name;
         oa::oaScalarName lib_name_oa;
     };
+
+    void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr);
 
 }
 
