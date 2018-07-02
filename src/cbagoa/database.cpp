@@ -37,6 +37,10 @@ namespace cbagoa {
 
 #pragma clang diagnostic pop
 
+    Library::~Library() {
+        close();
+    }
+
     void Library::open_lib(const std::string &lib_file, const std::string &library,
                            const std::string &lib_path, const std::string &tech_lib) {
         try {
@@ -226,6 +230,7 @@ namespace cbagoa {
             }
         }
 
+        dsn_ptr->close();
         return ans;
     }
 

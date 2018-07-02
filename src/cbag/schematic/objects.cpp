@@ -57,13 +57,45 @@ namespace cbag {
     }
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v) {
-        // TODO: Supply actual implementation
+        // record basic info
+        out << YAML::BeginMap
+            << YAML::Key << "inst_name"
+            << YAML::Value << v.inst_name
+            << YAML::Key << "lib_name"
+            << YAML::Value << v.lib_name
+            << YAML::Key << "cell_name"
+            << YAML::Value << v.cell_name
+            << YAML::Key << "view_name"
+            << YAML::Value << v.view_name
+            << YAML::Key << "xform"
+            << YAML::Value << v.xform;
+
+        // record parameters
+        out << YAML::Key << "params"
+            << YAML::Value << YAML::BeginMap;
+        for (const auto &element : v.params) {
+            out << YAML::Key << element.first << YAML::Value << element.second;
+        }
+        out << YAML::EndMap;
+
+        // record terminals
+
+        // wrap up and return
+        out << YAML::EndMap;
         return out;
     }
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v) {
-        // TODO: Supply actual implementation
-        return out;
+        return out << YAML::BeginMap
+                   << YAML::Key << "inputs"
+                   << YAML::Value << YAML::BeginSeq << v.in_terms << YAML::EndSeq
+                   << YAML::Key << "outputs"
+                   << YAML::Value << YAML::BeginSeq << v.out_terms << YAML::EndSeq
+                   << YAML::Key << "inouts"
+                   << YAML::Value << YAML::BeginSeq << v.io_terms << YAML::EndSeq
+                   << YAML::Key << "instances"
+                   << YAML::Value << YAML::BeginSeq << v.inst_list << YAML::EndSeq
+                   << YAML::EndMap;
     }
 }
 

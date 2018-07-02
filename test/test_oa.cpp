@@ -7,7 +7,7 @@
 #include <yaml-cpp/yaml.h>
 #include <oa/oaDesignDB.h>
 
-#include <cbag/schematic/objects.h>
+#include <cbagoa/database.h>
 
 
 std::string get_type(oa::oaProp *prop_ptr) {
@@ -28,154 +28,25 @@ std::string get_type(oa::oaProp *prop_ptr) {
 int read_oa() {
     try {
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "NotAssignable"
-        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber); // NOLINT
-#pragma clang diagnostic pop
+        std::string lib_file("cds.lib");
+        std::string library("AAAAAASCRATCH");
+        std::string lib_path(".");
+        std::string tech_lib("tsmcN16");
+        std::string cell_name("inv");
+        std::string view_name("schematic");
 
-        const oa::oaNativeNS ns;
-        const oa::oaCdbaNS ns_cdba;
+        cbagoa::Library lib;
 
-        oa::oaString lib_def_path("cds.lib");
-        oa::oaLibDefList::openLibs(lib_def_path);
+        lib.open_lib(lib_file, library, lib_path, tech_lib);
 
-        // open library
-        oa::oaScalarName lib_name(ns, "AAAAAASCRATCH");
-        oa::oaScalarName cell_name(ns, "inv");
-        oa::oaScalarName view_name(ns, "schematic");
-        oa::oaLib *lib_ptr = oa::oaLib::find(lib_name);
-        if (lib_ptr == nullptr) {
-            throw std::invalid_argument("Cannot find library.");
-        } else if (!lib_ptr->isValid()) {
-            throw std::invalid_argument("Invalid library.");
-        }
-
-        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name, cell_name, view_name,
-                                                   oa::oaViewType::get(oa::oacSchematic), 'r');
-        oa::oaBlock *blk_ptr = dsn_ptr->getTopBlock();
-
-
-        oa::oaName tmp_name;
-        oa::oaVectorBitName tmp_vec_name;
-        oa::oaString tmp_str;
+        cbag::CSchMaster sch_master = lib.parse_sch(cell_name, view_name);
 
         YAML::Emitter out_yaml;
-        out_yaml << YAML::BeginMap;
+        out_yaml << sch_master;
 
-
-        // get all terminals
-        std::vector<cbag::CSchTerm> in_terms, out_terms, inout_terms;
-        // get bus terminals
-        oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
-        oa::oaBusTermDef *bus_term_def_ptr;
-        std::vector<cbag::CSchTerm> *term_list_ptr = nullptr;
-        while ((bus_term_def_ptr = bus_term_def_iter.getNext()) != nullptr) {
-            bus_term_def_ptr->getName(ns_cdba, tmp_str);
-            std::string pin_name(tmp_str);
-
-            oa::oaIter<oa::oaBusTermBit> bus_term_iter(bus_term_def_ptr->getBusTermBits());
-            oa::oaBusTermBit *bus_term_ptr;
-            std::vector<uint32_t> idx_list;
-            while ((bus_term_ptr = bus_term_iter.getNext()) != nullptr) {
-                if (term_list_ptr == nullptr) {
-                    switch (bus_term_ptr->getTermType()) {
-                        case oa::oacInputTermType:
-                            term_list_ptr = &in_terms;
-                            break;
-                        case oa::oacOutputTermType:
-                            term_list_ptr = &out_terms;
-                            break;
-                        default:
-                            term_list_ptr = &inout_terms;
-                            break;
-                    }
-                }
-                bus_term_ptr->getName(tmp_vec_name);
-                idx_list.push_back(tmp_vec_name.getIndex());
-            }
-            if (term_list_ptr != nullptr) {
-                term_list_ptr->emplace_back(pin_name, idx_list);
-            }
-        }
-
-        // get scalar terminals
-        oa::oaIter<oa::oaTerm> term_iter(blk_ptr->getTerms(oacTermIterSingleBit));
-        oa::oaTerm *term_ptr;
-        while ((term_ptr = term_iter.getNext()) != nullptr) {
-            term_ptr->getName(tmp_name);
-            tmp_name.get(ns_cdba, tmp_str);
-            if (tmp_str.index('<') == tmp_str.getLength()) {
-                std::string pin_name(tmp_str);
-                switch (term_ptr->getTermType()) {
-                    case oa::oacInputTermType:
-                        term_list_ptr = &in_terms;
-                        break;
-                    case oa::oacOutputTermType:
-                        term_list_ptr = &out_terms;
-                        break;
-                    default:
-                        term_list_ptr = &inout_terms;
-                        break;
-                }
-                term_list_ptr->emplace_back(pin_name);
-            }
-        }
-
-        // write to YAML
-        out_yaml << YAML::Key << "pins"
-                 << YAML::Value
-                 << YAML::BeginMap
-                 << YAML::Key << "inputs"
-                 << YAML::Value << in_terms
-                 << YAML::Key << "outputs"
-                 << YAML::Value << out_terms
-                 << YAML::Key << "inouts"
-                 << YAML::Value << inout_terms
-                 << YAML::EndMap;
-
-        // print instances
-        oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
-        oa::oaInst *inst_ptr;
-        while ((inst_ptr = inst_iter.getNext()) != nullptr) {
-            oa::oaString lib_str, cell_str;
-            inst_ptr->getLibName(ns_cdba, lib_str);
-            inst_ptr->getCellName(ns_cdba, cell_str);
-            if (lib_str != "basic" ||
-                (cell_str != "ipin" && cell_str != "opin" && cell_str != "iopin")) {
-                inst_ptr->getName(ns_cdba, tmp_str);
-                std::cout << "Inst(" << tmp_str << ", " << lib_str << ", " << cell_str;
-                inst_ptr->getViewName(ns_cdba, tmp_str);
-                std::cout << ", " << tmp_str;
-
-                oa::oaTransform xform;
-                inst_ptr->getTransform(xform);
-                std::cout << ", (" << xform.xOffset() << ", " << xform.yOffset() << ")";
-                std::cout << ", " << xform.orient().getName();
-
-                if (inst_ptr->hasProp()) {
-                    oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
-                    oa::oaProp *prop_ptr = prop_iter.getNext();
-                    prop_ptr->getName(tmp_str);
-                    std::cout << ", {" << tmp_str << "(" << get_type(prop_ptr) << ")=";
-                    prop_ptr->getValue(tmp_str);
-                    std::cout << tmp_str;
-                    while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                        prop_ptr->getName(tmp_str);
-                        std::cout << ", " << tmp_str << "(" << get_type(prop_ptr) << ")=";
-                        prop_ptr->getValue(tmp_str);
-                        std::cout << tmp_str;
-                    }
-                    std::cout << "}";
-                }
-
-                std::cout << ")" << std::endl;
-            }
-        }
-
-        out_yaml << YAML::EndMap;
         std::cout << out_yaml.c_str() << std::endl;
 
-        lib_ptr->close();
+        lib.close();
     } catch (oa::oaCompatibilityError &ex) {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);

@@ -33,7 +33,7 @@ namespace cbagoa {
                 tech_ptr(nullptr) {
         }
 
-        ~Library() = default;
+        ~Library();
 
         void open_lib(const std::string &lib_file, const std::string &library,
                       const std::string &lib_path, const std::string &tech_lib);

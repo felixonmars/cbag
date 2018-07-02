@@ -57,7 +57,34 @@ namespace cbag {
 
     inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
         return out << YAML::Flow
-                   << YAML::BeginSeq << v.x << v.y  << enumToStr(v.orient) << YAML::EndSeq;
+                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v) {
+
+        struct OutVisitor : public boost::static_visitor<> {
+
+            OutVisitor(YAML::Emitter *out_ptr) : out_ptr(out_ptr) {}
+
+            void operator()(const int32_t &i) const {
+                (*out_ptr) << i;
+            }
+
+            void operator()(const double &d) const {
+                (*out_ptr) << d;
+            }
+
+            void operator()(const std::string &s) const {
+                (*out_ptr) << s;
+            }
+
+            YAML::Emitter *out_ptr;
+
+        };
+
+        OutVisitor visitor(&out);
+        boost::apply_visitor(visitor, v);
+        return out;
     }
 }
 
