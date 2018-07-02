@@ -64,7 +64,7 @@ namespace cbag {
 
         struct OutVisitor : public boost::static_visitor<> {
 
-            OutVisitor(YAML::Emitter *out_ptr) : out_ptr(out_ptr) {}
+            explicit OutVisitor(YAML::Emitter *out_ptr) : out_ptr(out_ptr) {}
 
             void operator()(const int32_t &i) const {
                 (*out_ptr) << i;
@@ -75,7 +75,7 @@ namespace cbag {
             }
 
             void operator()(const std::string &s) const {
-                (*out_ptr) << s;
+                (*out_ptr) << YAML::DoubleQuoted << s;
             }
 
             YAML::Emitter *out_ptr;

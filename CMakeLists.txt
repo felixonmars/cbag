@@ -29,15 +29,25 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
-set(SRC_FILES_LIB
+set(SRC_FILES_LIB_CBAG
         src/cbag/layout/templates.cpp
         src/cbag/layout/objects.cpp
         src/cbag/schematic/objects.cpp)
-add_library(cbag SHARED ${SRC_FILES_LIB})
+add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
 target_link_libraries(cbag
         yaml-cpp
+        )
+
+set(SRC_FILES_LIB_CBAGOA
+        src/cbagoa/database.cpp
+        )
+add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
+
+# shared library dependencies
+target_link_libraries(cbagoa
+        cbag
         )
 
 set(SRC_FILES_OA
@@ -47,7 +57,7 @@ add_executable(test_oa ${SRC_FILES_OA})
 
 # shared library dependencies
 target_link_libraries(test_oa
-        cbag
+        cbagoa
         oaCommon
         oaBase
         oaPlugIn

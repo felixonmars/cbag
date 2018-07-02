@@ -10,21 +10,6 @@
 #include <cbagoa/database.h>
 
 
-std::string get_type(oa::oaProp *prop_ptr) {
-    switch (prop_ptr->getType()) {
-        case oa::oacStringPropType :
-            return "str";
-        case oa::oacIntPropType :
-            return "int";
-        case oa::oacDoublePropType :
-            return "dbl";
-        case oa::oacFloatPropType :
-            return "flt";
-        default :
-            throw std::invalid_argument("Unsupport OA property type.  See developer.");
-    }
-}
-
 int read_oa() {
     try {
 

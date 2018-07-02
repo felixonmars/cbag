@@ -108,7 +108,7 @@ namespace cbagoa {
     }
 
     cbag::CSchMaster Library::parse_sch(const std::string &cell_name,
-                                        const std::string &view_name = "schematic") {
+                                        const std::string &view_name) {
         // get OA Block pointer
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
@@ -255,26 +255,31 @@ namespace cbagoa {
         // use NOLINT to suppress IDE warnings
         oa::oaType ptype = prop_ptr->getType();
         switch (ptype) {
-            case oa::oacStringPropType :
+            case oa::oacStringPropType : {
                 prop_ptr->getValue(tmp_str);
                 std::string vals(tmp_str);
                 params.emplace(key, vals);
                 break;
-            case oa::oacIntPropType :
+            }
+            case oa::oacIntPropType : {
                 params.emplace(key, static_cast<oa::oaIntProp *>(prop_ptr)->getValue()); // NOLINT
                 break;
-            case oa::oacDoublePropType :
+            }
+            case oa::oacDoublePropType : {
                 params.emplace(key,
                                static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
                 break;
-            case oa::oacFloatPropType :
+            }
+            case oa::oacFloatPropType : {
                 double vald = static_cast<oa::oaFloatProp *>(prop_ptr)->getValue(); // NOLINT
                 params.emplace(key, vald);
                 break;
-            default :
+            }
+            default : {
                 std::ostringstream stream;
                 stream << "Unsupport OA property type: " << ptype.getName() << ".  See developer.";
                 throw std::invalid_argument(stream.str());
+            }
         }
     }
 
