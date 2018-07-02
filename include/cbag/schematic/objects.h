@@ -7,7 +7,7 @@
 
 #include <string>
 #include <tuple>
-#include <utility> #include <vector>
+#include <utility>
 
 #include <cbag/common.h>
 
