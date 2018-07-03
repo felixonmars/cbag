@@ -8,13 +8,13 @@
 #include <string>
 
 namespace cbag {
-class CMasterDB {
- public:
-  CMasterDB(std::string lib_name, std::string prefix, std::string suffix);
+    class CMasterDB {
+    public:
+        CMasterDB(std::string lib_name, std::string prefix, std::string suffix);
 
- private:
-  std::string lib_name, prefix, suffix;
-};
+    private:
+        std::string lib_name, prefix, suffix;
+    };
 }
 
 #endif //CBAG_DATABASE_H

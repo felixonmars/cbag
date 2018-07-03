@@ -13,83 +13,99 @@
 
 namespace cbag {
 
-// Range data structure to represent bus terminal indices
-struct Range {
-  Range() : start(0), stop(0), step(-1) {}
+    /**
+    Data structure to represent vector indices.
 
-  Range(int32_t start, int32_t stop, int32_t step) : start(start), stop(stop), step(step) {}
+    The step size of a range can be either positive or negative, but must not be 0.
+    If start == stop, this range is considered empty.
+    */
+    struct Range {
+        /**
+        Creates an empty Range.
+        */
+        Range()
+                : start(0), stop(0), step(-1) {}
 
-  inline bool is_empty() { return stop == start; }
+        Range(int32_t start, int32_t stop, int32_t step)
+                : start(start), stop(stop), step(step) {}
 
-  inline uint32_t size() { return static_cast<uint32_t>((stop - start) / step); }
+        /**
+        Returns true if this range contains no index.
 
-  int32_t start, stop, step;
-};
+        @returns true if this range contains no index.
+        */
+        inline bool is_empty() { return stop == start; }
+
+        /**
+        Returns number of elements in this Range.
+
+        @returns number of elements in this Range.
+        */
+        inline uint32_t size() { return static_cast<uint32_t>((stop - start) / step); }
+
+        int32_t start, stop, step;
+    };
 
 // A schematic terminal unit; a group of terminals with the same base name.
 // This can either be a scalar terminal, like "foo", or a bus terminal,
 // like "bar<2:0>" or "baz<0>".
-struct CSchTermUnit {
-  CSchTermUnit() = default;
+    struct CSchTermUnit {
+        CSchTermUnit() = default;
 
-  explicit CSchTerm(std::string
-  name) :
-  name (std::move(name)), range_list() {}
+        CSchTermUnit(std::string name, Range range)
+                : name(std::move(name)), range(range) {}
 
-  CSchTerm(std::string
-  name,
-  const std::list<uint32_t> &idx_list
-  );
+        std::string name;
+        Range range;
+    };
 
-  std::string name;
-  Range range;
-};
+    struct CSchTerm {
+        CSchTerm() = default;
 
-struct CSchTerm {
-  CSchTerm() = default;
+        explicit CSchTerm(std::string name)
+                : name(std::move(name)), range_list() {}
 
-  explicit CSchTerm(std::string name) : name(std::move(name)), range_list() {}
+        CSchTerm(std::string name, const std::list<uint32_t> &idx_list);
 
-  CSchTerm(std::string name, const std::list<uint32_t> &idx_list);
+        std::string name;
+        std::list<Range> range_list;
+    };
 
-  std::string name;
-  std::list<Range> range_list;
-};
+    struct CSchInstance {
+        CSchInstance() = default;
 
-struct CSchInstance {
-  CSchInstance() = default;
+        CSchInstance(std::string name, std::string lib, std::string cell, std::string view,
+                     Transform xform, Range r)
+                : inst_name(std::move(name)),
+                  lib_name(std::move(lib)),
+                  cell_name(std::move(cell)),
+                  view_name(std::move(view)),
+                  xform(xform), inst_range(r) {}
 
-  CSchInstance(std::string name, std::string lib, std::string cell, std::string view,
-               Transform xform, Range r) : inst_name(std::move(name)),
-                                           lib_name(std::move(lib)),
-                                           cell_name(std::move(cell)),
-                                           view_name(std::move(view)),
-                                           xform(xform), inst_range(r) {}
+        inline uint32_t size() { return (inst_range.is_empty()) ? 1 : inst_range.size(); }
 
-  inline uint32_t size() { return (inst_range.is_empty()) ? 1 : inst_range.size(); }
+        std::string inst_name, lib_name, cell_name, view_name;
+        Range inst_range;
+        Transform xform;
+        ParamMap params;
+        std::map<std::string, std::vector<std::string>> term_map;
+    };
 
-  std::string inst_name, lib_name, cell_name, view_name;
-  Range inst_range;
-  Transform xform;
-  ParamMap params;
-  std::map<std::string, std::vector<std::string>> term_map;
-};
+    struct CSchMaster {
+        CSchMaster() = default;
 
-struct CSchMaster {
-  CSchMaster() = default;
-
-  std::list<CSchTerm> in_terms, out_terms, io_terms;
-  std::list<CSchInstance> inst_list;
-};
+        std::list<CSchTerm> in_terms, out_terms, io_terms;
+        std::list<CSchInstance> inst_list;
+    };
 
 // YAML stream out functions
-YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v);
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v);
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
 
-YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v);
 
 }
 
