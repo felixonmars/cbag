@@ -13,37 +13,54 @@
 
 namespace cbag {
 
+    /** An instance in a schematic.
+     */
     struct CSchInstance {
+        /** Create an empty instance.
+         */
         CSchInstance() = default;
 
-        CSchInstance(std::string name, std::string lib, std::string cell, std::string view,
-                     Transform xform, Range r)
-                : inst_name(std::move(name)),
-                  lib_name(std::move(lib)),
-                  cell_name(std::move(cell)),
-                  view_name(std::move(view)),
-                  xform(xform), inst_range(r) {}
+        /** Create an instance with empty parameter and terminal mappings.
+         *
+         * @param name name of the instance.
+         * @param lib the library name.
+         * @param cell the cell name.
+         * @param view the view name.
+         * @param xform the instance location.
+         */
+        CSchInstance(NameUnit name, std::string lib, std::string cell, std::string view, Transform xform)
+                : inst_name(std::move(name)), lib_name(std::move(lib)),
+                  cell_name(std::move(cell)), view_name(std::move(view)),
+                  xform(xform) {}
 
-        inline uint32_t size() { return (inst_range.is_empty()) ? 1 : inst_range.size(); }
+        /** Returns true if this instance is a vector instance.
+         *
+         *  @returns true if this instance is a vector instance.
+         */
+        inline bool is_vector() { return inst_name.is_vector(); }
 
-        std::string inst_name, lib_name, cell_name, view_name;
-        Range inst_range;
+        /** Returns the number of instances this schematic instance represents.
+         *
+         *  @returns number of instances in this schematic instance.
+         */
+        inline uint32_t size() { return (inst_name.size()); }
+
+        std::string lib_name, cell_name, view_name;
+        NameUnit inst_name;
         Transform xform;
         ParamMap params;
-        std::map<std::string, std::vector<std::string>> term_map;
+        std::list<Name> in_terms, out_terms, io_terms;
+        std::map<NameUnit, NameUnit> term_map;
     };
 
     struct CSchMaster {
         CSchMaster() = default;
 
-        std::list<CSchTerm> in_terms, out_terms, io_terms;
+        std::list<Name> in_terms, out_terms, io_terms;
         std::list<CSchInstance> inst_list;
     };
 
-// YAML stream out functions
-    YAML::Emitter &operator<<(YAML::Emitter &out, const Range &v);
-
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchTerm &v);
+    // YAML stream out functions.
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
 

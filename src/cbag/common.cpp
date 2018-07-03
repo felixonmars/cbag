@@ -86,7 +86,53 @@ namespace cbag {
         int32_t n = (r_stop - r_start + r_step) / r_step;
 
         // return answer
-        return Range(r_start, r_start + n * r_step, r_step);
+        return {r_start, r_start + n * r_step, r_step};
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
+        return out << YAML::Flow
+                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameUnit &v) {
+        return out << YAML::Flow
+                   << YAML::BeginSeq << v.name << v.range.start << v.range.stop << v.range.step << YAML::EndSeq;
+    }
+
+    YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v) {
+        out << YAML::BeginSeq;
+        for (auto name : v.unit_list) {
+            out << name;
+        }
+        return out << YAML::EndSeq;
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v) {
+
+        struct OutVisitor : public boost::static_visitor<> {
+
+            explicit OutVisitor(YAML::Emitter *out_ptr)
+                    : out_ptr(out_ptr) {}
+
+            void operator()(const int32_t &i) const {
+                (*out_ptr) << i;
+            }
+
+            void operator()(const double &d) const {
+                (*out_ptr) << d;
+            }
+
+            void operator()(const std::string &s) const {
+                (*out_ptr) << YAML::DoubleQuoted << s;
+            }
+
+            YAML::Emitter *out_ptr;
+
+        };
+
+        OutVisitor visitor(&out);
+        boost::apply_visitor(visitor, v);
+        return out;
     }
 
 }

@@ -204,43 +204,20 @@ namespace cbag {
         char delim, vec_start, vec_stop, vec_delim;
     };
 
-
-    // parameter data structure
+    // parameter data structure.
     typedef boost::variant<int32_t, double, std::string> value_t;
+    // parameter dictionary.
     typedef std::map<std::string, value_t> ParamMap;
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
-        return out << YAML::Flow
-                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
-    }
+    // YAML stream out functions.
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v) {
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v);
 
-        struct OutVisitor : public boost::static_visitor<> {
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameUnit &v);
 
-            explicit OutVisitor(YAML::Emitter *out_ptr)
-                    : out_ptr(out_ptr) {}
+    YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v);
 
-            void operator()(const int32_t &i) const {
-                (*out_ptr) << i;
-            }
-
-            void operator()(const double &d) const {
-                (*out_ptr) << d;
-            }
-
-            void operator()(const std::string &s) const {
-                (*out_ptr) << YAML::DoubleQuoted << s;
-            }
-
-            YAML::Emitter *out_ptr;
-
-        };
-
-        OutVisitor visitor(&out);
-        boost::apply_visitor(visitor, v);
-        return out;
-    }
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v);
 }
 
 #endif //CBAG_COMMON_H
