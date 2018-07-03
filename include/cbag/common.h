@@ -122,9 +122,9 @@ namespace cbag {
          */
         inline uint32_t size() { return (empty()) ? 0 : ((range.empty()) ? 1 : range.size()); }
 
-        inline bool operator==(const NameUnit &other) const;
+        bool operator==(const NameUnit &other) const;
 
-        inline bool operator<(const NameUnit &other) const;
+        bool operator<(const NameUnit &other) const;
 
         std::string name;
         Range range;
@@ -137,7 +137,11 @@ namespace cbag {
     struct Name {
         /** Creates an empty name.
          */
-        Name() = default;
+        Name() : unit_list(0) {}
+
+        /** Creates an empty name with vector preallocation.
+         */
+        explicit Name(unsigned long n) : unit_list(n) {}
 
         /** Returns true if this name is empty.
          *
@@ -159,7 +163,7 @@ namespace cbag {
 
         bool operator<(const Name &other) const;
 
-        std::list<NameUnit> unit_list;
+        std::vector<NameUnit> unit_list;
     };
 
     /** A class that encodes/decodes Name objects to/from strings.
@@ -218,15 +222,50 @@ namespace cbag {
     // parameter dictionary.
     typedef std::map<std::string, value_t> ParamMap;
 
+    // Visitor structor for outputing boost variant to YAML
+    struct VarYAMLVisitor : public boost::static_visitor<> {
+
+        explicit VarYAMLVisitor(YAML::Emitter *out_ptr)
+                : out_ptr(out_ptr) {}
+
+        void operator()(const int32_t &i) const {
+            (*out_ptr) << i;
+        }
+
+        void operator()(const double &d) const {
+            (*out_ptr) << d;
+        }
+
+        void operator()(const std::string &s) const {
+            (*out_ptr) << YAML::DoubleQuoted << s;
+        }
+
+        YAML::Emitter *out_ptr;
+
+    };
+
     // YAML stream out functions.
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v);
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
+        return out << YAML::Flow
+                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
+    }
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameUnit &v);
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameUnit &v) {
+        return out << YAML::Flow
+                   << YAML::BeginSeq << v.name << v.range.start << v.range.stop << v.range.step << YAML::EndSeq;
+    }
 
-    YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v);
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v) {
+        return out << v.unit_list;
+    }
 
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v);
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v) {
+
+        VarYAMLVisitor visitor(&out);
+        boost::apply_visitor(visitor, v);
+        return out;
+    }
 }
 
 #endif //CBAG_COMMON_H

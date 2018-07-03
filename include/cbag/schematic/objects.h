@@ -50,9 +50,9 @@ namespace cbag {
         NameUnit inst_name;
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        ParamMap params;
         std::vector<Name> in_pins, out_pins, io_pins;
         std::map<NameUnit, NameUnit> connections;
+        ParamMap params;
     };
 
     /** A schematic master, in other words, a schematic cellview.
@@ -60,7 +60,8 @@ namespace cbag {
      *  Note that the terminal lists and instance list are all sorted in ascending order.
      */
     struct CSchMaster {
-        CSchMaster() = default;
+        CSchMaster(unsigned long num_in, unsigned long num_out, unsigned long num_io, unsigned long num_inst)
+                : in_pins(num_in), out_pins(num_out), io_pins(num_io), inst_list(num_inst) {}
 
         std::vector<Name> in_pins, out_pins, io_pins;
         std::list<CSchInstance> inst_list;

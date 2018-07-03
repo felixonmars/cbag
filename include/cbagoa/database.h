@@ -30,8 +30,8 @@ namespace cbagoa {
     public:
         Library()
                 :
-                is_open(false), dbu_per_uu(1000), lib_def_obs(1), lib_ptr(nullptr),
-                tech_ptr(nullptr) {}
+                formatter(cbag::NameFormatter(',', '<', '>', ':')), is_open(false), dbu_per_uu(1000),
+                lib_def_obs(1), lib_ptr(nullptr), tech_ptr(nullptr) {}
 
         ~Library();
 
@@ -43,9 +43,14 @@ namespace cbagoa {
 
         void close();
 
+    private:
+
+        cbag::Name make_name(oa::oaTerm *term_ptr);
+
         // OA namespace objects
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;
+        cbag::NameFormatter formatter;
 
         bool is_open;
         oa::oaUInt4 dbu_per_uu;
