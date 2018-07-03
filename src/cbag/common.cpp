@@ -2,9 +2,52 @@
 // Created by erichang on 7/3/18.
 //
 
+#include <boost/functional/hash.hpp>
+
 #include <cbag/common.h>
 
 namespace cbag {
+
+    inline bool Range::operator==(const Range &other) const {
+        return (start == other.start && stop == other.stop && step == other.step);
+    }
+
+    inline bool Range::operator<(const Range &other) const {
+        return (step < other.step ||
+                (step == other.step &&
+                 (start < other.start ||
+                  (start == other.start && stop < other.stop))));
+    }
+
+    inline bool NameUnit::operator==(const NameUnit &other) const {
+        return (name == other.name && range == other.range);
+    }
+
+    inline bool NameUnit::operator<(const NameUnit &other) const {
+        return (name < other.name || (name == other.name && range < other.range));
+    }
+
+    bool Name::operator<(const Name &other) const {
+        unsigned long this_size = unit_list.size();
+        unsigned long that_size = other.unit_list.size();
+        if (this_size < that_size) {
+            return true;
+        } else if (this_size == that_size) {
+            auto it1 = unit_list.begin();
+            auto it2 = other.unit_list.begin();
+            for (; it1 != unit_list.end(); ++it1, ++it2) {
+                if (*it1 < *it2) {
+                    return true;
+                } else if (*it2 < *it1) {
+                    return false;
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
+    }
+
     Name NameFormatter::get_name(const std::string &name_str) {
         Name ans;
 
@@ -101,7 +144,7 @@ namespace cbag {
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v) {
         out << YAML::BeginSeq;
-        for (auto name : v.unit_list) {
+        for (const auto name : v.unit_list) {
             out << name;
         }
         return out << YAML::EndSeq;
@@ -134,5 +177,24 @@ namespace cbag {
         boost::apply_visitor(visitor, v);
         return out;
     }
+
+}
+
+namespace std {
+
+    // define hash function for NameUnit
+    template<>
+    struct hash<cbag::NameUnit> {
+        size_t operator()(const cbag::NameUnit &v) const {
+
+            size_t seed = 0;
+            boost::hash_combine(seed, v.name);
+            boost::hash_combine(seed, v.range.start);
+            boost::hash_combine(seed, v.range.stop);
+            boost::hash_combine(seed, v.range.step);
+
+            return seed;
+        }
+    };
 
 }

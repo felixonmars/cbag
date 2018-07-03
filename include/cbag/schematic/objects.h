@@ -45,14 +45,20 @@ namespace cbag {
          */
         inline uint32_t size() { return (inst_name.size()); }
 
+        inline bool operator<(const CSchInstance &other) const { return inst_name < other.inst_name; }
+
         std::string lib_name, cell_name, view_name;
         NameUnit inst_name;
         Transform xform;
         ParamMap params;
-        std::list<Name> in_terms, out_terms, io_terms;
+        std::list<Name> terms;
         std::map<NameUnit, NameUnit> term_map;
     };
 
+    /** A schematic master, in other words, a schematic cellview.
+     *
+     *  Note that the terminal lists and instance list are all sorted in ascending order.
+     */
     struct CSchMaster {
         CSchMaster() = default;
 

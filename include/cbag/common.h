@@ -88,6 +88,10 @@ namespace cbag {
          */
         inline uint32_t size() { return static_cast<uint32_t>((stop - start) / step); }
 
+        inline bool operator==(const Range &other) const;
+
+        inline bool operator<(const Range &other) const;
+
         int32_t start, stop, step;
     };
 
@@ -117,6 +121,10 @@ namespace cbag {
          *  @returns number of objects represented by this name unit.
          */
         inline uint32_t size() { return (empty()) ? 0 : ((range.empty()) ? 1 : range.size()); }
+
+        inline bool operator==(const NameUnit &other) const;
+
+        inline bool operator<(const NameUnit &other) const;
 
         std::string name;
         Range range;
@@ -149,6 +157,7 @@ namespace cbag {
          */
         inline uint32_t size() { return static_cast<uint32_t>(unit_list.size()); }
 
+        bool operator<(const Name &other) const;
 
         std::list<NameUnit> unit_list;
     };
