@@ -8,23 +8,22 @@
 #include <cbag/layout/objects.h>
 
 namespace cbag {
-    class CTemplate {
-    public:
-        CTemplate() = default;
+class CTemplate {
+ public:
+  CTemplate() = default;
 
-        CRect *add_rect(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
-                        coord_t y1);
+  CRect *add_rect(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
+                  coord_t y1);
 
-        CPin *add_pin(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
-                      coord_t y1, std::string net, std::string lbl);
+  CPin *add_pin(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,
+                coord_t y1, std::string net, std::string lbl);
 
-        friend std::ostream &operator<<(std::ostream &os, const CTemplate &obj);
+  friend std::ostream &operator<<(std::ostream &os, const CTemplate &obj);
 
-    private:
-        std::list<CRect> rect_list;
-        std::list<CPin> pin_list;
-    };
+ private:
+  std::list<CRect> rect_list;
+  std::list<CPin> pin_list;
+};
 }
-
 
 #endif //CBAG_LAYTOUT_TEMPLATES_H
