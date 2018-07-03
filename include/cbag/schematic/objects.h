@@ -13,64 +13,6 @@
 
 namespace cbag {
 
-    /**
-    Data structure to represent vector indices.
-
-    The step size of a range can be either positive or negative, but must not be 0.
-    If start == stop, this range is considered empty.
-    */
-    struct Range {
-        /**
-        Creates an empty Range.
-        */
-        Range()
-                : start(0), stop(0), step(-1) {}
-
-        Range(int32_t start, int32_t stop, int32_t step)
-                : start(start), stop(stop), step(step) {}
-
-        /**
-        Returns true if this range contains no index.
-
-        @returns true if this range contains no index.
-        */
-        inline bool is_empty() { return stop == start; }
-
-        /**
-        Returns number of elements in this Range.
-
-        @returns number of elements in this Range.
-        */
-        inline uint32_t size() { return static_cast<uint32_t>((stop - start) / step); }
-
-        int32_t start, stop, step;
-    };
-
-// A schematic terminal unit; a group of terminals with the same base name.
-// This can either be a scalar terminal, like "foo", or a bus terminal,
-// like "bar<2:0>" or "baz<0>".
-    struct CSchTermUnit {
-        CSchTermUnit() = default;
-
-        CSchTermUnit(std::string name, Range range)
-                : name(std::move(name)), range(range) {}
-
-        std::string name;
-        Range range;
-    };
-
-    struct CSchTerm {
-        CSchTerm() = default;
-
-        explicit CSchTerm(std::string name)
-                : name(std::move(name)), range_list() {}
-
-        CSchTerm(std::string name, const std::list<uint32_t> &idx_list);
-
-        std::string name;
-        std::list<Range> range_list;
-    };
-
     struct CSchInstance {
         CSchInstance() = default;
 

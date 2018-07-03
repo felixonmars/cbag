@@ -32,7 +32,7 @@ link_directories($ENV{OA_LINK_DIR})
 set(SRC_FILES_LIB_CBAG
         src/cbag/layout/templates.cpp
         src/cbag/layout/objects.cpp
-        src/cbag/schematic/objects.cpp)
+        src/cbag/schematic/objects.cpp src/cbag/common.cpp)
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
