@@ -171,6 +171,7 @@ namespace cbagoa {
         oa::oaTerm *term_ptr;
         while ((term_ptr = term_iter.getNext()) != nullptr) {
             term_ptr->getName(ns_cdba, tmp_str);
+            // avoid single-bit bus terminals, i.e. bus with single index
             if (tmp_str.index('<') == tmp_str.getLength()) {
                 std::string pin_name(tmp_str);
                 switch (term_ptr->getTermType()) {
@@ -199,6 +200,19 @@ namespace cbagoa {
                 // get names
                 std::string inst_lib(inst_lib_oa);
                 std::string inst_cell(inst_cell_oa);
+                cbag::Range inst_range;
+                oa::oaType inst_type = inst_ptr->getType();
+                if (inst_type == oa::oacVectorInstType) {
+                    auto vinst_ptr = static_cast<oa::oaVectorInst *>(inst_ptr); // NOLINT
+                    int32_t start = vinst_ptr->getStart();
+                    int32_t stop = vinst_ptr->getStop();
+                    int32_t step = (stop > start) ? 1 : -1;
+                    inst_range = cbag::Range(start, stop, step);
+                } else if (inst_type == oa::oacVectorInstBitType) {
+                    auto vinst_ptr = static_cast<oa::oaVectorInstBit *>(inst_ptr); // NOLINT
+                    int32_t start = vinst_ptr->getBitIndex();
+                    inst_range = cbag::Range(start, start - 1, -1);
+                }
 
                 inst_ptr->getViewName(ns_cdba, tmp_str);
                 std::string inst_view(tmp_str);
@@ -213,7 +227,8 @@ namespace cbagoa {
                                            convert_orient(xform.orient()));
 
                 // create schematic instance
-                ans.inst_list.emplace_back(inst_name, inst_lib, inst_cell, inst_view, inst_xform);
+                ans.inst_list.emplace_back(inst_name, inst_lib, inst_cell, inst_view,
+                                           inst_xform, inst_range);
                 cbag::CSchInstance *sch_inst_ptr = &ans.inst_list.back();
 
                 // get parameters
@@ -225,7 +240,22 @@ namespace cbagoa {
                     }
                 }
 
-                // get connections
+                // get instance terminal connections
+                oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
+                oa::oaInstTerm *iterm_ptr;
+                std::cout << "Instance: " << inst_name << std::endl;
+                std::cout << "  InstType: " << inst_ptr->getType().getName() << std::endl;
+                while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
+                    iterm_ptr->getTermName(ns_cdba, tmp_str);
+                    std::cout << "  Terminal: " << tmp_str << std::endl;
+                    std::cout << "    numBits: " << iterm_ptr->getNumBits() << std::endl;
+                    std::cout << "    isBound: " << iterm_ptr->isBound() << std::endl;
+                    std::cout << "    isImplicit: " << iterm_ptr->isImplicit() << std::endl;
+                    std::cout << "    usesTermPosition: " << iterm_ptr->usesTermPosition() << std::endl;
+                    iterm_ptr->getNet()->getName(ns_cdba, tmp_str);
+                    std::cout << "    Net: " << tmp_str << std::endl;
+                }
+
 
             }
         }
