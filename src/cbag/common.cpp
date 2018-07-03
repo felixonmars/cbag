@@ -144,7 +144,7 @@ namespace cbag {
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const Name &v) {
         out << YAML::BeginSeq;
-        for (const auto name : v.unit_list) {
+        for (const auto &name : v.unit_list) {
             out << name;
         }
         return out << YAML::EndSeq;

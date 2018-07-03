@@ -47,12 +47,12 @@ namespace cbag {
 
         inline bool operator<(const CSchInstance &other) const { return inst_name < other.inst_name; }
 
-        std::string lib_name, cell_name, view_name;
         NameUnit inst_name;
+        std::string lib_name, cell_name, view_name;
         Transform xform;
         ParamMap params;
-        std::list<Name> terms;
-        std::map<NameUnit, NameUnit> term_map;
+        std::vector<Name> in_pins, out_pins, io_pins;
+        std::map<NameUnit, NameUnit> connections;
     };
 
     /** A schematic master, in other words, a schematic cellview.
@@ -62,7 +62,7 @@ namespace cbag {
     struct CSchMaster {
         CSchMaster() = default;
 
-        std::list<Name> in_terms, out_terms, io_terms;
+        std::vector<Name> in_pins, out_pins, io_pins;
         std::list<CSchInstance> inst_list;
     };
 

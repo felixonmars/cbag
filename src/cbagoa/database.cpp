@@ -135,7 +135,7 @@ namespace cbagoa {
         // place holder classes
         oa::oaString tmp_str;
 
-        // get bus terminals
+        // get terminals
         oa::oaIter<oa::oaBusTermDef> bus_term_def_iter(blk_ptr->getBusTermDefs());
         oa::oaBusTermDef *bus_term_def_ptr;
         std::list<cbag::CSchTerm> *term_list_ptr = nullptr;
