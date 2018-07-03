@@ -241,12 +241,16 @@ namespace cbagoa {
                 }
 
                 // get instance terminal connections
+                uint32_t inst_size = sch_inst_ptr->size();
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
-                std::cout << "Instance: " << inst_name << std::endl;
-                std::cout << "  InstType: " << inst_ptr->getType().getName() << std::endl;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
                     iterm_ptr->getTermName(ns_cdba, tmp_str);
+                    auto iter_flag_pair = sch_inst_ptr->term_map.emplace(tmp_str, inst_size);
+                    auto pair_iter = iter_flag_pair.first;
+
+
+
                     std::cout << "  Terminal: " << tmp_str << std::endl;
                     std::cout << "    numBits: " << iterm_ptr->getNumBits() << std::endl;
                     std::cout << "    isBound: " << iterm_ptr->isBound() << std::endl;
