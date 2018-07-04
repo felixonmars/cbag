@@ -28,7 +28,7 @@ int read_oa() {
         YAML::Emitter out_yaml;
         out_yaml << sch_master;
 
-        // std::cout << out_yaml.c_str() << std::endl;
+        std::cout << out_yaml.c_str() << std::endl;
 
         lib.close();
     } catch (oa::oaCompatibilityError &ex) {

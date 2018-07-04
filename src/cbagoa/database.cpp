@@ -158,7 +158,7 @@ namespace cbagoa {
         oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
         oa::oaInst *inst_ptr;
         while ((inst_ptr = inst_iter.getNext()) != nullptr) {
-            oa::oaString inst_lib_oa, inst_cell_oa;
+            oa::oaString inst_lib_oa, inst_cell_oa, inst_name_oa;
             inst_ptr->getLibName(ns_cdba, inst_lib_oa);
             inst_ptr->getCellName(ns_cdba, inst_cell_oa);
             // NOTE: exclude pin instances
@@ -169,39 +169,58 @@ namespace cbagoa {
                 inst_ptr->getViewName(ns_cdba, inst_view_oa);
 
                 // get instance name
-                inst_ptr->getName(ns_cdba, tmp_str);
+                inst_ptr->getName(ns_cdba, inst_name_oa);
 
                 // get transform
                 oa::oaTransform xform;
                 inst_ptr->getTransform(xform);
 
                 // create schematic instance
-                ans.inst_list.emplace_back(formatter.get_name_unit(std::string(tmp_str)), std::string(inst_lib_oa),
+                ans.inst_list.emplace_back(formatter.get_name_unit(std::string(inst_name_oa)), std::string(inst_lib_oa),
                                            std::string(inst_cell_oa), std::string(inst_view_oa),
                                            cbag::Transform(xform.xOffset(), xform.yOffset(),
                                                            convert_orient(xform.orient())));
+                // get instance pointer
+                cbag::CSchInstance *sinst_ptr = &ans.inst_list.back();
 
                 // get parameters
                 if (inst_ptr->hasProp()) {
                     oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
                     oa::oaProp *prop_ptr;
                     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                        add_param(ans.inst_list.back().params, prop_ptr);
+                        add_param(sinst_ptr->params, prop_ptr);
                     }
                 }
 
                 // get instance terminal connections
-                uint32_t inst_size = ans.inst_list.back().size();
+                uint32_t inst_size = sinst_ptr->size();
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
                     iterm_ptr->getTermName(ns_cdba, tmp_str);
+                    oa::oaTerm *term_ptr = iterm_ptr->getTerm();
+                    cbag::Name *term_name_ptr;
+                    switch (term_ptr->getTermType()) {
+                        case oa::oacInputTermType :
+                            sinst_ptr->in_pins.push_back(make_name(term_ptr));
+                            term_name_ptr = &sinst_ptr->in_pins.back();
+                            break;
+                        case oa::oacOutputTermType :
+                            sinst_ptr->out_pins.push_back(make_name(term_ptr));
+                            term_name_ptr = &sinst_ptr->out_pins.back();
+                            break;
+                        case oa::oacInputOutputTermType :
+                            sinst_ptr->io_pins.push_back(make_name(term_ptr));
+                            term_name_ptr = &sinst_ptr->io_pins.back();
+                            break;
+                        default:
+                            errstream << "Instance " << inst_name_oa << " pin " << tmp_str
+                                      << " has invalid terminal type: " << term_ptr->getTermType().getName();
+                            throw std::invalid_argument(errstream.str());
+                    }
 
                     std::cout << "  Terminal: " << tmp_str << std::endl;
                     std::cout << "    numBits: " << iterm_ptr->getNumBits() << std::endl;
-                    std::cout << "    isBound: " << iterm_ptr->isBound() << std::endl;
-                    std::cout << "    isImplicit: " << iterm_ptr->isImplicit() << std::endl;
-                    std::cout << "    usesTermPosition: " << iterm_ptr->usesTermPosition() << std::endl;
                     iterm_ptr->getNet()->getName(ns_cdba, tmp_str);
                     std::cout << "    Net: " << tmp_str << std::endl;
                 }
@@ -213,6 +232,13 @@ namespace cbagoa {
         std::sort(ans.out_pins.begin(), ans.out_pins.end());
         std::sort(ans.io_pins.begin(), ans.io_pins.end());
         std::sort(ans.inst_list.begin(), ans.inst_list.end());
+
+        // test range
+        cbag::Range test(10, 0, 2);
+
+        for (const auto ele : test) {
+            std::cout << "Range index: " << ele << std::endl;
+        }
 
         // close design and return master
         dsn_ptr->close();

@@ -62,7 +62,7 @@ namespace cbag {
         std::string lib_name, cell_name, view_name;
         Transform xform;
         std::vector<Name> in_pins, out_pins, io_pins;
-        std::map<NameUnit, NameUnit> connections;
+        std::map<NameBit, NameUnit> connections;
         ParamMap params;
     };
 

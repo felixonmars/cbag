@@ -6,7 +6,7 @@
 #ifndef CBAG_COMMON_H
 #define CBAG_COMMON_H
 
-#include <cstdint>
+#include <utility>
 
 #include <boost/preprocessor.hpp>
 #include <boost/variant.hpp>
@@ -67,10 +67,43 @@ namespace cbag {
      * If start == stop, this Range is considered empty.
      */
     struct Range {
+
+        class ConstRangeIterator {
+        public:
+
+            ConstRangeIterator(uint32_t val, int32_t step) : val(val), step(step) {}
+
+            ConstRangeIterator(const ConstRangeIterator &) = default;
+
+            ConstRangeIterator &operator=(const ConstRangeIterator &) = default;
+
+            inline bool operator==(const ConstRangeIterator &other) const { return val == other.val; }
+
+            inline bool operator!=(const ConstRangeIterator &other) const { return val != other.val; }
+
+            inline ConstRangeIterator &operator++() {
+                val += step;
+                return *this;
+            };
+
+            inline ConstRangeIterator &operator--() {
+                val -= step;
+                return *this;
+            };
+
+            inline uint32_t operator*() const { return val; };
+
+            inline const uint32_t *operator->() const { return &val; };
+
+        private:
+            uint32_t val;
+            int32_t step;
+        };
+
         /** Creates an empty Range.
          */
         Range()
-                : start(0), stop(0), step(-1) {}
+                : start(0), stop(0), step(1) {}
 
         /** Create a new vector range.
          *
@@ -78,7 +111,7 @@ namespace cbag {
          * @param stop  the stopping index (exclusive).
          * @param step  the step size.  Should never be 0, and sign should be consistent with start/stop.
          */
-        Range(int32_t start, int32_t stop, int32_t step)
+        Range(uint32_t start, uint32_t stop, uint32_t step)
                 : start(start), stop(stop), step(step) {}
 
         /** Returns true if this range contains no index.
@@ -91,14 +124,85 @@ namespace cbag {
          *
          *  @returns number of elements in this Range.
          */
-        inline uint32_t size() { return static_cast<uint32_t>((stop - start) / step); }
+        inline uint32_t size() { return (stop >= start) ? (stop - start) / step : (start - stop) / step; }
 
-        inline bool operator==(const Range &other) const;
+        inline ConstRangeIterator begin() const {
+            return cbegin();
+        }
 
-        inline bool operator<(const Range &other) const;
+        inline ConstRangeIterator cbegin() const {
+            int32_t iter_step = (stop >= start) ? step : -step;
+            return ConstRangeIterator(start, iter_step);
+        }
 
-        int32_t start, stop, step;
+        inline ConstRangeIterator end() const {
+            return cend();
+        }
+
+        inline ConstRangeIterator cend() const {
+            int32_t iter_step = (stop >= start) ? step : -step;
+            return ConstRangeIterator(stop, iter_step);
+        }
+
+        inline bool operator==(const Range &other) const {
+            return (start == other.start && stop == other.stop && step == other.step);
+        }
+
+        inline bool operator<(const Range &other) const {
+            return (step < other.step ||
+                    (step == other.step &&
+                     (start < other.start ||
+                      (start == other.start && stop < other.stop))));
+        }
+
+        uint32_t start, stop, step;
     };
+
+    /** Name of a single net, a single terminal (i.e. pin), or a single instance.
+     *
+     *  This class implements scalar name (like "foo") or vector bit name (like "bar<0>") in OpenAccess.
+     */
+    struct NameBit {
+        /** Creates an new name bit.
+         */
+        explicit NameBit(std::string name = "", int index = -1) : name(std::move(name)), index(index) {};
+
+        // This class is movable, but not copyable.
+        // This ensures good performance when placed in STL containers.
+
+        NameBit(const NameBit &) = delete;
+
+        NameBit &operator=(const NameBit &) = delete;
+
+        NameBit(NameBit &&) noexcept;
+
+        NameBit &operator=(NameBit &&) noexcept;
+
+        /** Returns true if this name bit has no base name.
+         *
+         *  @returns true if this name bit has no base name.
+         */
+        inline bool empty() { return name.empty(); }
+
+        /** Returns true if this name bit is a bit in a vector.
+         *
+         *  @returns true if this name bit is a bit in a vector.
+         */
+        inline bool is_vector() { return index >= 0; }
+
+        inline bool operator==(const NameBit &other) { return name == other.name && index == other.index; }
+
+        inline bool operator<(const NameBit &other) const {
+            return name < other.name || (name == other.name && index < other.index);
+        }
+
+        std::string name;
+        int32_t index = -1;
+    };
+
+    inline NameBit::NameBit(NameBit &&) noexcept = default;
+
+    inline NameBit &NameBit::operator=(NameBit &&) noexcept = default;
 
     /** A name unit object representing either a net, a terminal (i.e. pin), or an instance.
      *
@@ -108,6 +212,10 @@ namespace cbag {
         /** Creates an empty name unit.
          */
         NameUnit() = default;
+
+        explicit NameUnit(std::string name) : name(std::move(name)) {}
+
+        NameUnit(std::string name, Range r) : name(std::move(name)), range(r) {}
 
         // This class is movable, but not copyable.
         // This ensures good performance when placed in STL containers.
@@ -138,9 +246,13 @@ namespace cbag {
          */
         inline uint32_t size() { return (empty()) ? 0 : ((range.empty()) ? 1 : range.size()); }
 
-        bool operator==(const NameUnit &other) const;
+        inline bool operator==(const NameUnit &other) const {
+            return (name == other.name && range == other.range);
+        }
 
-        bool operator<(const NameUnit &other) const;
+        inline bool operator<(const NameUnit &other) const {
+            return (name < other.name || (name == other.name && range < other.range));
+        }
 
         std::string name;
         Range range;
@@ -292,6 +404,10 @@ namespace cbag {
     inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
         return out << YAML::Flow
                    << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameBit &v) {
+        return out << YAML::Flow << YAML::BeginSeq << v.name << v.index << YAML::EndSeq;
     }
 
     inline YAML::Emitter &operator<<(YAML::Emitter &out, const NameUnit &v) {
