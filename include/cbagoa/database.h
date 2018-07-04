@@ -29,11 +29,20 @@ namespace cbagoa {
     class Library {
     public:
         Library()
-                :
-                formatter(cbag::NameFormatter(',', '<', '>', ':')), is_open(false), dbu_per_uu(1000),
-                lib_def_obs(1), lib_ptr(nullptr), tech_ptr(nullptr) {}
+                : is_open(false), dbu_per_uu(1000), lib_def_obs(1),
+                  lib_ptr(nullptr), tech_ptr(nullptr) {}
 
         ~Library();
+
+        // This class is neither copyable nor movable
+
+        Library(const Library &) = delete;
+
+        Library &operator=(const Library &) = delete;
+
+        Library(Library &&) = delete;
+
+        Library &operator=(Library &&) = delete;
 
         void open_lib(const std::string &lib_file, const std::string &library,
                       const std::string &lib_path, const std::string &tech_lib);

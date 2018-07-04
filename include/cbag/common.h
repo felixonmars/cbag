@@ -48,9 +48,14 @@ namespace cbag {
     /** Location and Orientation of an instance.
      */
     struct Transform {
-        explicit Transform(coord_t x = 0, coord_t y = 0, Orientation orient = R0)
-                :
-                x(x), y(y), orient(orient) {}
+        Transform()
+                : x(0), y(0), orient(R0) {}
+
+        Transform(coord_t x, coord_t y)
+                : x(x), y(y), orient(R0) {}
+
+        Transform(coord_t x, coord_t y, Orientation orient)
+                : x(x), y(y), orient(orient) {}
 
         coord_t x, y;
         Orientation orient;
@@ -104,6 +109,17 @@ namespace cbag {
          */
         NameUnit() = default;
 
+        // This class is both copyable and movable,
+        // so you can just put it in STL containers.
+
+        NameUnit(const NameUnit &) = default;
+
+        NameUnit &operator=(const NameUnit &) = default;
+
+        NameUnit(NameUnit &&) noexcept;
+
+        NameUnit &operator=(NameUnit &&) noexcept;
+
         /** Returns true if this name unit has no base name.
          *
          *  @returns true if this name unit has no base name.
@@ -130,6 +146,11 @@ namespace cbag {
         Range range;
     };
 
+    inline NameUnit::NameUnit(NameUnit &&) noexcept = default;
+
+    inline NameUnit &NameUnit::operator=(NameUnit &&) noexcept = default;
+
+
     /** A name object.
      *
      *  This class implements bundle name in OpenAccess.
@@ -142,6 +163,17 @@ namespace cbag {
         /** Creates an empty name with vector preallocation.
          */
         explicit Name(unsigned long n) : unit_list(n) {}
+
+        // This class is both copyable and movable,
+        // so you can just put it in STL containers.
+
+        Name(const Name &) = default;
+
+        Name &operator=(const Name &) = default;
+
+        Name(Name &&) noexcept;
+
+        Name &operator=(Name &&) noexcept;
 
         /** Returns true if this name is empty.
          *
@@ -166,6 +198,11 @@ namespace cbag {
         std::vector<NameUnit> unit_list;
     };
 
+    inline Name::Name(Name &&) noexcept = default;
+
+    inline Name &Name::operator=(Name &&) noexcept = default;
+
+
     /** A class that encodes/decodes Name objects to/from strings.
      *
      *  This class is mainly used to handle different vector or delimiters for different kinds of netlists.
@@ -177,6 +214,16 @@ namespace cbag {
          */
         NameFormatter()
                 : delim(','), vec_start('<'), vec_stop('>'), vec_delim(':') {}
+
+        // This class is copyable, but not movable.
+
+        NameFormatter(const NameFormatter &) = default;
+
+        NameFormatter &operator=(const NameFormatter &) = default;
+
+        NameFormatter(NameFormatter &&) = delete;
+
+        NameFormatter &operator=(NameFormatter &&) = delete;
 
         /** Create a new NameFormatter.
          *

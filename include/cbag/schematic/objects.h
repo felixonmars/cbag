@@ -33,6 +33,17 @@ namespace cbag {
                   cell_name(std::move(cell)), view_name(std::move(view)),
                   xform(xform) {}
 
+        // This class is both copyable and movable,
+        // so you can just put it in STL containers.
+
+        CSchInstance(const CSchInstance &) = default;
+
+        CSchInstance &operator=(const CSchInstance &) = default;
+
+        CSchInstance(CSchInstance &&) noexcept;
+
+        CSchInstance &operator=(CSchInstance &&) noexcept;
+
         /** Returns true if this instance is a vector instance.
          *
          *  @returns true if this instance is a vector instance.
@@ -55,6 +66,11 @@ namespace cbag {
         ParamMap params;
     };
 
+    inline CSchInstance::CSchInstance(CSchInstance &&) noexcept = default;
+
+    inline CSchInstance &CSchInstance::operator=(CSchInstance &&) noexcept = default;
+
+
     /** A schematic master, in other words, a schematic cellview.
      *
      *  Note that the terminal lists and instance list are all sorted in ascending order.
@@ -63,9 +79,25 @@ namespace cbag {
         CSchMaster(unsigned long num_in, unsigned long num_out, unsigned long num_io, unsigned long num_inst)
                 : in_pins(num_in), out_pins(num_out), io_pins(num_io), inst_list(num_inst) {}
 
+        // This class is both copyable and movable,
+        // so you can just put it in STL containers.
+
+        CSchMaster(const CSchMaster &) = default;
+
+        CSchMaster &operator=(const CSchMaster &) = default;
+
+        CSchMaster(CSchMaster &&) noexcept;
+
+        CSchMaster &operator=(CSchMaster &&) noexcept;
+
         std::vector<Name> in_pins, out_pins, io_pins;
         std::list<CSchInstance> inst_list;
     };
+
+    inline CSchMaster::CSchMaster(CSchMaster &&) noexcept = default;
+
+    inline CSchMaster &CSchMaster::operator=(CSchMaster &&) noexcept = default;
+
 
     // YAML stream out functions.
 
