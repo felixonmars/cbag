@@ -33,12 +33,12 @@ namespace cbag {
                   cell_name(std::move(cell)), view_name(std::move(view)),
                   xform(xform) {}
 
-        // This class is both copyable and movable,
-        // so you can just put it in STL containers.
+        // This class is movable, but not copyable.
+        // This ensures good performance when placed in STL containers.
 
-        CSchInstance(const CSchInstance &) = default;
+        CSchInstance(const CSchInstance &) = delete;
 
-        CSchInstance &operator=(const CSchInstance &) = default;
+        CSchInstance &operator=(const CSchInstance &) = delete;
 
         CSchInstance(CSchInstance &&) noexcept;
 
@@ -76,15 +76,14 @@ namespace cbag {
      *  Note that the terminal lists and instance list are all sorted in ascending order.
      */
     struct CSchMaster {
-        CSchMaster(unsigned long num_in, unsigned long num_out, unsigned long num_io, unsigned long num_inst)
-                : in_pins(num_in), out_pins(num_out), io_pins(num_io), inst_list(num_inst) {}
+        CSchMaster() = default;
 
-        // This class is both copyable and movable,
-        // so you can just put it in STL containers.
+        // This class is movable, but not copyable.
+        // This ensures good performance when placed in STL containers.
 
-        CSchMaster(const CSchMaster &) = default;
+        CSchMaster(const CSchMaster &) = delete;
 
-        CSchMaster &operator=(const CSchMaster &) = default;
+        CSchMaster &operator=(const CSchMaster &) = delete;
 
         CSchMaster(CSchMaster &&) noexcept;
 

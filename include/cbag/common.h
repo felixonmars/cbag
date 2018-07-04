@@ -109,12 +109,12 @@ namespace cbag {
          */
         NameUnit() = default;
 
-        // This class is both copyable and movable,
-        // so you can just put it in STL containers.
+        // This class is movable, but not copyable.
+        // This ensures good performance when placed in STL containers.
 
-        NameUnit(const NameUnit &) = default;
+        NameUnit(const NameUnit &) = delete;
 
-        NameUnit &operator=(const NameUnit &) = default;
+        NameUnit &operator=(const NameUnit &) = delete;
 
         NameUnit(NameUnit &&) noexcept;
 
@@ -158,18 +158,14 @@ namespace cbag {
     struct Name {
         /** Creates an empty name.
          */
-        Name() : unit_list(0) {}
+        Name() = default;
 
-        /** Creates an empty name with vector preallocation.
-         */
-        explicit Name(unsigned long n) : unit_list(n) {}
+        // This class is movable, but not copyable.
+        // This ensures good performance when placed in STL containers.
 
-        // This class is both copyable and movable,
-        // so you can just put it in STL containers.
+        Name(const Name &) = delete;
 
-        Name(const Name &) = default;
-
-        Name &operator=(const Name &) = default;
+        Name &operator=(const Name &) = delete;
 
         Name(Name &&) noexcept;
 

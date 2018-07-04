@@ -33,12 +33,10 @@ namespace cbag {
         if (this_size < that_size) {
             return true;
         } else if (this_size == that_size) {
-            auto it1 = unit_list.begin();
-            auto it2 = other.unit_list.begin();
-            for (; it1 != unit_list.end(); ++it1, ++it2) {
-                if (*it1 < *it2) {
+            for (unsigned long idx = 0; idx < this_size; idx++) {
+                if (unit_list[idx] < other.unit_list[idx]) {
                     return true;
-                } else if (*it2 < *it1) {
+                } else if (other.unit_list[idx] < unit_list[idx]) {
                     return false;
                 }
             }
@@ -54,13 +52,10 @@ namespace cbag {
         typedef boost::tokenizer<boost::char_separator<char> > Tok;
         Tok tok(name_str, sep);
 
-        // get size first so we can pre-allocate vector
-        Name ans(static_cast<unsigned long>(std::distance(tok.begin(), tok.end())));
-
         // fill in names
-        uint32_t i = 0;
-        for (Tok::iterator beg = tok.begin(); beg != tok.end(); ++beg, ++i) {
-            ans.unit_list[i] = get_name_unit(*beg);
+        Name ans;
+        for (Tok::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+            ans.unit_list.push_back(get_name_unit(*beg));
         }
         return ans;
     }

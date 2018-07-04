@@ -31,8 +31,7 @@ namespace cbagoa {
 
     oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                                  oa::oaLibDefListWarningTypeEnum type) {
-        std::string msg_std(msg);
-        throw std::runtime_error("OA Error: " + msg_std);
+        throw std::runtime_error("OA Error: " + std::string(msg));
     }
 
 #pragma clang diagnostic pop
@@ -94,16 +93,13 @@ namespace cbagoa {
             is_open = true;
         } catch (oa::oaCompatibilityError &ex) {
             std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA Compatibility Error: " + msg_std);
+            throw std::runtime_error("OA Compatibility Error: " + std::string(ex.getMsg()));
         } catch (oa::oaDMError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA DM Error: " + msg_std);
+            throw std::runtime_error("OA DM Error: " + std::string(ex.getMsg()));
         } catch (oa::oaError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA Error: " + msg_std);
+            throw std::runtime_error("OA Error: " + std::string(ex.getMsg()));
         } catch (oa::oaDesignError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA Design Error: " + msg_std);
+            throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
         }
     }
 
@@ -132,133 +128,74 @@ namespace cbagoa {
 
         // place holder classes
         oa::oaString tmp_str;
+        // create schematic master
+        cbag::CSchMaster ans;
 
         // get pins
-        oa::oaCollection<oa::oaPin, oa::oaBlock> pin_list = blk_ptr->getPins();
-        // count number of pins for each type
-        unsigned long num_in = 0;
-        unsigned long num_out = 0;
-        unsigned long num_io = 0;
-        oa::oaIter<oa::oaPin> pin_iter(pin_list);
+        oa::oaIter<oa::oaPin> pin_iter(blk_ptr->getPins());
         oa::oaPin *pin_ptr;
-        while ((pin_ptr = pin_iter.getNext()) != nullptr) {
-            switch (pin_ptr->getTerm()->getTermType()) {
-                case oa::oacInputTermType :
-                    num_in++;
-                    break;
-                case oa::oacOutputTermType :
-                    num_out++;
-                    break;
-                case oa::oacInputOutputTermType :
-                    num_io++;
-                    break;
-                default:
-                    pin_ptr->getName(tmp_str);
-                    errstream << "Pin " << tmp_str
-                              << " has invalid terminal type: " << pin_ptr->getTerm()->getTermType().getName();
-                    throw std::invalid_argument(errstream.str());
-            }
-        }
-
-        // get number of instances.  Excluding pin instances
-        oa::oaCollection<oa::oaInst, oa::oaBlock> inst_list = blk_ptr->getInsts();
-        oa::oaIter<oa::oaInst> inst_iter(inst_list);
-        oa::oaInst *inst_ptr;
-        unsigned long num_inst = 0;
-        while ((inst_ptr = inst_iter.getNext()) != nullptr) {
-            oa::oaString inst_lib_oa, inst_cell_oa;
-            inst_ptr->getLibName(ns_cdba, inst_lib_oa);
-            inst_ptr->getCellName(ns_cdba, inst_cell_oa);
-            if (inst_lib_oa != "basic" ||
-                (inst_cell_oa != "ipin" && inst_cell_oa != "opin" && inst_cell_oa != "iopin")) {
-                num_inst++;
-            }
-        }
-
-        // create schematic master
-        cbag::CSchMaster ans(num_in, num_out, num_io, num_inst);
-
-        // populate pins
-        unsigned long idx_in = 0;
-        unsigned long idx_out = 0;
-        unsigned long idx_io = 0;
-        pin_iter = oa::oaIter<oa::oaPin>(pin_list);
         while ((pin_ptr = pin_iter.getNext()) != nullptr) {
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    ans.in_pins[idx_in++] = make_name(term_ptr);
+                    ans.in_pins.push_back(make_name(term_ptr));
                     break;
                 case oa::oacOutputTermType :
-                    ans.out_pins[idx_out++] = make_name(term_ptr);
+                    ans.out_pins.push_back(make_name(term_ptr));
                     break;
+                case oa::oacInputOutputTermType :
+                    ans.io_pins.push_back(make_name(term_ptr));
                 default:
-                    ans.io_pins[idx_io++] = make_name(term_ptr);
+                    term_ptr->getName(ns_cdba, tmp_str);
+                    errstream << "Pin " << tmp_str
+                              << " has invalid terminal type: " << term_ptr->getTermType().getName();
+                    throw std::invalid_argument(errstream.str());
             }
         }
 
-        /*
         // get instances
-        inst_iter = oa::oaIter<oa::oaInst>(inst_list);
-        unsigned long idx_inst = 0;
-        while((inst_ptr = inst_iter.getNext()) != nullptr) {
+        oa::oaIter<oa::oaInst> inst_iter(blk_ptr->getInsts());
+        oa::oaInst *inst_ptr;
+        while ((inst_ptr = inst_iter.getNext()) != nullptr) {
             oa::oaString inst_lib_oa, inst_cell_oa;
             inst_ptr->getLibName(ns_cdba, inst_lib_oa);
             inst_ptr->getCellName(ns_cdba, inst_cell_oa);
             // NOTE: exclude pin instances
             if (inst_lib_oa != "basic" ||
                 (inst_cell_oa != "ipin" && inst_cell_oa != "opin" && inst_cell_oa != "iopin")) {
-                // get names
-                std::string inst_lib(inst_lib_oa);
-                std::string inst_cell(inst_cell_oa);
-                cbag::Range inst_range;
-                oa::oaType inst_type = inst_ptr->getType();
-                if (inst_type == oa::oacVectorInstType) {
-                    auto vinst_ptr = static_cast<oa::oaVectorInst *>(inst_ptr); // NOLINT
-                    int32_t start = vinst_ptr->getStart();
-                    int32_t stop = vinst_ptr->getStop();
-                    int32_t step = (stop > start) ? 1 : -1;
-                    inst_range = cbag::Range(start, stop, step);
-                } else if (inst_type == oa::oacVectorInstBitType) {
-                    auto vinst_ptr = static_cast<oa::oaVectorInstBit *>(inst_ptr); // NOLINT
-                    int32_t start = vinst_ptr->getBitIndex();
-                    inst_range = cbag::Range(start, start - 1, -1);
-                }
+                // get view
+                oa::oaString inst_view_oa;
+                inst_ptr->getViewName(ns_cdba, inst_view_oa);
 
-                inst_ptr->getViewName(ns_cdba, tmp_str);
-                std::string inst_view(tmp_str);
-
+                // get instance name
                 inst_ptr->getName(ns_cdba, tmp_str);
-                std::string inst_name(tmp_str);
 
                 // get transform
                 oa::oaTransform xform;
                 inst_ptr->getTransform(xform);
-                cbag::Transform inst_xform(xform.xOffset(), xform.yOffset(),
-                                           convert_orient(xform.orient()));
+                cbag::Transform inst_xform(xform.xOffset(), xform.yOffset(), convert_orient(xform.orient()));
 
                 // create schematic instance
-                ans.inst_list.emplace_back(inst_name, inst_lib, inst_cell, inst_view,
-                                           inst_xform, inst_range);
-                cbag::CSchInstance *sch_inst_ptr = &ans.inst_list.back();
+                ans.inst_list.emplace_back(formatter.get_name_unit(std::string(tmp_str)), std::string(inst_lib_oa),
+                                           std::string(inst_cell_oa), std::string(inst_view_oa),
+                                           cbag::Transform(xform.xOffset(), xform.yOffset(),
+                                                           convert_orient(xform.orient())));
 
                 // get parameters
                 if (inst_ptr->hasProp()) {
                     oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
                     oa::oaProp *prop_ptr;
                     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                        add_param(sch_inst_ptr->params, prop_ptr);
+                        add_param(ans.inst_list.back().params, prop_ptr);
                     }
                 }
 
                 // get instance terminal connections
-                uint32_t inst_size = sch_inst_ptr->size();
+                uint32_t inst_size = ans.inst_list.back().size();
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
                     iterm_ptr->getTermName(ns_cdba, tmp_str);
-                    auto iter_flag_pair = sch_inst_ptr->term_map.emplace(tmp_str, inst_size);
-                    auto pair_iter = iter_flag_pair.first;
 
                     std::cout << "  Terminal: " << tmp_str << std::endl;
                     std::cout << "    numBits: " << iterm_ptr->getNumBits() << std::endl;
@@ -268,12 +205,9 @@ namespace cbagoa {
                     iterm_ptr->getNet()->getName(ns_cdba, tmp_str);
                     std::cout << "    Net: " << tmp_str << std::endl;
                 }
-
-                // increment instance index
-                idx_inst++;
             }
         }
-        */
+
         dsn_ptr->close();
         return ans;
     }
