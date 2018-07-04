@@ -90,7 +90,7 @@ namespace cbag {
         CSchMaster &operator=(CSchMaster &&) noexcept;
 
         std::vector<Name> in_pins, out_pins, io_pins;
-        std::list<CSchInstance> inst_list;
+        std::vector<CSchInstance> inst_list;
     };
 
     inline CSchMaster::CSchMaster(CSchMaster &&) noexcept = default;

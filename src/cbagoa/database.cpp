@@ -145,6 +145,7 @@ namespace cbagoa {
                     break;
                 case oa::oacInputOutputTermType :
                     ans.io_pins.push_back(make_name(term_ptr));
+                    break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
                     errstream << "Pin " << tmp_str
@@ -173,7 +174,6 @@ namespace cbagoa {
                 // get transform
                 oa::oaTransform xform;
                 inst_ptr->getTransform(xform);
-                cbag::Transform inst_xform(xform.xOffset(), xform.yOffset(), convert_orient(xform.orient()));
 
                 // create schematic instance
                 ans.inst_list.emplace_back(formatter.get_name_unit(std::string(tmp_str)), std::string(inst_lib_oa),
@@ -208,6 +208,13 @@ namespace cbagoa {
             }
         }
 
+        // sort pins and instances so we have consistent order
+        std::sort(ans.in_pins.begin(), ans.in_pins.end());
+        std::sort(ans.out_pins.begin(), ans.out_pins.end());
+        std::sort(ans.io_pins.begin(), ans.io_pins.end());
+        std::sort(ans.inst_list.begin(), ans.inst_list.end());
+
+        // close design and return master
         dsn_ptr->close();
         return ans;
     }
