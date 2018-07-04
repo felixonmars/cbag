@@ -48,13 +48,13 @@ namespace cbag {
 
     Name NameFormatter::get_name(const std::string &name_str) {
 
-        boost::char_separator<char> sep(&delim);
+        boost::char_separator<char> sep(std::string(1, delim).c_str());
         typedef boost::tokenizer<boost::char_separator<char> > Tok;
         Tok tok(name_str, sep);
 
         // fill in names
         Name ans;
-        for (Tok::iterator beg = tok.begin(); beg != tok.end(); ++beg) {
+        for (Tok::iterator beg = tok.begin(); beg != tok.end(); beg++) {
             ans.unit_list.push_back(get_name_unit(*beg));
         }
         return ans;
