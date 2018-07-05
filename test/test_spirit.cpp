@@ -7,7 +7,7 @@
 #include <cbag/spirit/config.h>
 
 
-auto parse = [](std::string const &source) -> std::string {
+std::string parse(std::string const &source) {
     std::stringstream out;
 
     using cbag::spirit::parser::iterator_type;
@@ -22,19 +22,18 @@ auto parse = [](std::string const &source) -> std::string {
     using cbag::spirit::parser::error_handler_type;
     using cbag::spirit::parser::error_handler_tag;
     error_handler_type error_handler(iter, end, out); // Our error handler
-
+    const std::reference_wrapper<error_handler_type> err_ref = std::ref(error_handler);
     // Our parser
     auto const parser =
             // we pass our error handler to the parser so we can access
             // it later on in our on_error and on_sucess handlers
-            with<error_handler_tag>(std::ref(error_handler))
+            with<error_handler_tag>(err_ref)
             [
                     cbag::spirit::range()
             ];
 
     // Go forth and parse!
-    using boost::spirit::x3::ascii::space;
-    bool success = phrase_parse(iter, end, parser, space, ast);
+    bool success = parse(iter, end, parser, ast);
 
     if (success) {
         if (iter != end) {
@@ -45,8 +44,8 @@ auto parse = [](std::string const &source) -> std::string {
         } else {
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
-            std::cout << "got: " << ast << std::endl;
-            std::cout << "\n-------------------------\n";
+            std::cout << "got: " << ast.start << ", " << ast.stop << ", " << ast.step << std::endl;
+            std::cout << "-------------------------\n";
         }
     } else {
         std::cout << "-------------------------\n";

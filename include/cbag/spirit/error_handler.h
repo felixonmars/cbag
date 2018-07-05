@@ -37,9 +37,7 @@ namespace cbag {
             inline x3::error_handler_result
             error_handler_base::on_error(
                     Iterator &first, Iterator const &last, Exception const &x, Context const &context) {
-                std::string which = x.which();
-
-                std::string message = "Error! Expecting: " + which + " here:";
+                std::string message = "Error while parsing index: " + std::to_string(x.where() - first);
                 auto &error_handler = x3::get<error_handler_tag>(context).get();
                 error_handler(x.where(), message);
                 return x3::error_handler_result::fail;
