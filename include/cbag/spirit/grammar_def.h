@@ -23,7 +23,7 @@ namespace cbag {
 
             name_unit_type const name_unit = "name_unit";
 
-            auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:*"));
+            auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:* "));
 
             auto const range_def = '<' > x3::uint_ >> -(':' > x3::uint_ >> -(':' > x3::uint_)) > '>';
 
