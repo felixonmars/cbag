@@ -42,12 +42,14 @@ include_directories(${CMAKE_SOURCE_DIR}/include
         ${Boost_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIR}
         )
-link_libraries( yaml-cpp )
+link_libraries(yaml-cpp)
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/layout/templates.cpp
         src/cbag/layout/objects.cpp
-        src/cbag/schematic/objects.cpp src/cbag/common.cpp)
+        src/cbag/schematic/objects.cpp
+        src/cbag/common.cpp
+        )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # setup link library path.  Must call before defining target.
@@ -85,4 +87,4 @@ target_link_libraries(test_oa
 set_target_properties(test_oa PROPERTIES
         INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(test_spirit test/test_spirit.cpp)
+add_executable(test_spirit test/test_spirit.cpp src/cbag/parser/range.cpp)
