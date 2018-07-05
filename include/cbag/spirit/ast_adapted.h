@@ -21,4 +21,8 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
                           mult, base, index
 )
 
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name,
+                          unit_list
+)
+
 #endif //CBAG_SPIRIT_AST_ADAPTED_H

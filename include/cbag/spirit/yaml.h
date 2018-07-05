@@ -22,6 +22,10 @@ namespace cbag {
                 return out << YAML::Flow << YAML::BeginSeq << v.base << v.index << v.mult
                            << YAML::EndSeq;
             }
+
+            inline YAML::Emitter &operator<<(YAML::Emitter &out, const name &v) {
+                return out << v.unit_list;
+            }
         }
     }
 }

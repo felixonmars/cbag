@@ -4,7 +4,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/spirit/ast.h>
-#include <cbag/spirit/name_unit.h>
+#include <cbag/spirit/name.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/config.h>
 #include <cbag/spirit/yaml.h>
@@ -21,7 +21,7 @@ std::string parse(std::string const &source) {
     bsp::parser::iterator_type const end(source.end());
 
     // Our AST
-    bsp::ast::name_unit ast;
+    bsp::ast::name ast;
 
     // Our error handler
     bsp::parser::error_handler_type error_handler(iter, end, out); // Our error handler
@@ -32,7 +32,7 @@ std::string parse(std::string const &source) {
             // it later on in our on_error and on_sucess handlers
             x3::with<bsp::parser::error_handler_tag>(err_ref)
             [
-                    bsp::name_unit()
+                    bsp::name()
             ];
 
     // Go forth and parse!
@@ -67,7 +67,7 @@ std::string parse(std::string const &source) {
 //  Main program
 ///////////////////////////////////////////////////////////////////////////////
 int main() {
-    std::cout << "Give me a name_unit." << std::endl;
+    std::cout << "Give me a name." << std::endl;
     std::cout << "Type [q or Q] to quit" << std::endl << std::endl;
 
     std::string str;

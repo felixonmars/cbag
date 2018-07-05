@@ -45,9 +45,7 @@ namespace cbag {
 
             struct range_class : x3::annotate_on_success, error_handler_base {
             };
-
         }
-
     }
 }
 #endif //CBAG_SPIRIT_RANGE_DEF_H

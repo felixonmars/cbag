@@ -5,6 +5,8 @@
 #ifndef CBAG_SPIRIT_AST_H
 #define CBAG_SPIRIT_AST_H
 
+#include <vector>
+
 #include <boost/optional/optional.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
@@ -43,6 +45,11 @@ namespace cbag {
                 uint32_t mult;
                 std::string base;
                 range index;
+            };
+
+            struct name : x3::position_tagged {
+
+                std::vector<name_unit> unit_list;
             };
         }
     }

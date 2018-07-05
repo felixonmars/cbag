@@ -22,7 +22,6 @@ namespace cbag {
         }
 
         parser::range_type const &range();
-
     }
 }
 

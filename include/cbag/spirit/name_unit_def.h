@@ -21,17 +21,23 @@ namespace cbag {
 
             name_unit_type const name_unit = "name_unit";
 
-            auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:* "));
+            /** A string with no spaces, '<', '>', ':', ',', or '*'.
+             */
+            auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:*, "));
 
+            /** Grammar for name_unit
+             *
+             *  name_unit has the form of <*N>base<a:b:c>.  The multiplier and index range are optional.
+             *  the multiplier cannot be 0.
+             */
             auto const name_unit_def = name_unit_type{}
-                = -('<' > x3::uint32[check_zero] > "*>") > name_string >> -(range);
+                = -("<*" > (x3::uint32[check_zero]) > ">") > name_string >> -(range);
 
             BOOST_SPIRIT_DEFINE(name_unit);
 
             struct name_unit_class : x3::annotate_on_success, error_handler_base {
             };
         }
-
     }
 }
 #endif //CBAG_SPIRIT_NAME_UNIT_DEF_H
