@@ -20,12 +20,10 @@ namespace cbag {
 
                 uint32_t size() const;
 
-                uint32_t get_stop() const;
-
                 uint32_t get_stop_exclude() const;
 
                 uint32_t start = 0;
-                boost::optional<uint32_t> stop;
+                uint32_t stop = 0;
                 uint32_t step = 1;
             };
 
@@ -37,12 +35,7 @@ namespace cbag {
             YAML::Emitter &operator<<(YAML::Emitter &out, const range &v);
 
             inline std::ostream &operator<<(std::ostream &os, range const &p) {
-                os << '<' << p.start;
-                if (p.stop)
-                    os << ':' << *p.stop << ':';
-                else
-                    os << ":-:";
-                return os << p.step << '>';
+                return os << '<' << p.start << ':' << p.stop << ':' << p.step << '>';
             }
 
             inline std::ostream &operator<<(std::ostream &os, name_unit const &p) {

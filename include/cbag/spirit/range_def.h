@@ -18,9 +18,26 @@ namespace cbag {
         namespace parser {
             namespace x3 = boost::spirit::x3;
 
+            auto set_stop = [](auto &ctx) {
+                x3::_val(ctx).stop = x3::_attr(ctx);
+            };
+
+            auto check_zero = [](auto &ctx) {
+                x3::_pass(ctx) = (x3::_attr(ctx) != 0);
+            };
+
             range_type const range = "range";
 
-            auto const range_def = '<' > x3::uint_ >> -(':' > x3::uint_ >> -(':' > x3::uint_)) > '>';
+            /** Grammer for range
+             *
+             *  range is of the form <a:b:c>, b and c are optional.
+             *  if b is missing, then b = a by default.  If c is missing, then c = 1 (initialized by struct).
+             *  c cannot be 0.
+             */
+            auto const range_def =
+                    x3::rule<range_class, ast::range, true>{}
+                            = '<' > (x3::uint32[set_stop])
+                            >> -(':' > x3::uint32 >> -(':' > (x3::uint32[check_zero]))) > '>';
 
             BOOST_SPIRIT_DEFINE(range);
 

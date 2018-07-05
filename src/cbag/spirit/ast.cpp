@@ -8,37 +8,24 @@ namespace cbag {
     namespace spirit {
         namespace ast {
             inline uint32_t range::size() const {
-                if (stop) {
-                    uint32_t stop_val = *stop;
-                    if (stop_val >= start) {
-                        return (stop_val - start + step) / step;
-                    } else {
-                        return (start - stop_val + step) / step;
-                    }
+                if (stop >= start) {
+                    return (stop - start + step) / step;
                 } else {
-                    return 1;
+                    return (start - stop + step) / step;
                 }
-            }
 
-            inline uint32_t range::get_stop() const {
-                return (stop) ? *stop : start;
             }
 
             inline uint32_t range::get_stop_exclude() const {
-                if (stop) {
-                    uint32_t stop_val = *stop;
-                    if (stop_val >= start) {
-                        return start + size() * step;
-                    } else {
-                        return start - size() * step;
-                    }
+                if (stop >= start) {
+                    return start + size() * step;
                 } else {
-                    return start - step;
+                    return start - size() * step;
                 }
             }
 
             inline YAML::Emitter &operator<<(YAML::Emitter &out, const range &v) {
-                return out << YAML::Flow << YAML::BeginSeq << v.start << v.get_stop() << v.step
+                return out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step
                            << YAML::EndSeq;
             }
 
