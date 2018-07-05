@@ -89,7 +89,8 @@ set_target_properties(test_oa PROPERTIES
 
 add_executable(test_spirit
         test/test_spirit.cpp
-        src/cbag/parser/grammar.cpp
+        src/cbag/parser/range.cpp
+        src/cbag/parser/name_unit.cpp
         )
 
 target_link_libraries(test_spirit

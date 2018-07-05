@@ -2,7 +2,7 @@
 #include <boost/fusion/include/io.hpp>
 
 #include <cbag/spirit/ast.h>
-#include <cbag/spirit/grammar.h>
+#include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/config.h>
 

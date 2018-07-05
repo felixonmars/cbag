@@ -3,14 +3,16 @@
 //
 
 #include <cbag/spirit/config.h>
-#include <cbag/spirit/grammar_def.h>
+#include <cbag/spirit/name_unit_def.h>
 
 namespace cbag {
     namespace spirit {
         namespace parser {
-            BOOST_SPIRIT_INSTANTIATE(range_type, iterator_type, context_type);
-
             BOOST_SPIRIT_INSTANTIATE(name_unit_type, iterator_type, context_type);
+        }
+
+        parser::name_unit_type const &name_unit() {
+            return parser::name_unit;
         }
     }
 }
