@@ -11,7 +11,6 @@
 #include <cbag/spirit/ast.h>
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/error_handler.h>
-#include <cbag/spirit/range.h>
 #include <cbag/spirit/grammar.h>
 
 namespace cbag {
