@@ -23,7 +23,8 @@ namespace cbag {
 
             auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:* "));
 
-            auto const name_unit_def = name_string >> -(range);
+            auto const name_unit_def = name_unit_type{}
+                = -('<' > x3::uint32[check_zero] > "*>") > name_string >> -(range);
 
             BOOST_SPIRIT_DEFINE(name_unit);
 

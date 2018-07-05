@@ -16,7 +16,7 @@ namespace cbag {
 
             struct name_unit_class;
 
-            using name_unit_type = x3::rule<name_unit_class, ast::name_unit>;
+            using name_unit_type = x3::rule<name_unit_class, ast::name_unit, true>;
 
             BOOST_SPIRIT_DECLARE(name_unit_type);
         }

@@ -18,10 +18,13 @@ namespace cbag {
         namespace parser {
             namespace x3 = boost::spirit::x3;
 
-            auto set_stop = [](auto &ctx) {
+            // after parsing start, set default values of stop and step
+            auto init_range = [](auto &ctx) {
                 x3::_val(ctx).stop = x3::_attr(ctx);
+                x3::_val(ctx).step = 1;
             };
 
+            // make sure value is not 0
             auto check_zero = [](auto &ctx) {
                 x3::_pass(ctx) = (x3::_attr(ctx) != 0);
             };
@@ -31,12 +34,11 @@ namespace cbag {
             /** Grammer for range
              *
              *  range is of the form <a:b:c>, b and c are optional.
-             *  if b is missing, then b = a by default.  If c is missing, then c = 1 (initialized by struct).
+             *  if b is missing, then b = a by default.  If c is missing, then c = 1.
              *  c cannot be 0.
              */
-            auto const range_def =
-                    x3::rule<range_class, ast::range, true>{}
-                            = '<' > (x3::uint32[set_stop])
+            auto const range_def = range_type {}
+                            = '<' > (x3::uint32[init_range])
                             >> -(':' > x3::uint32 >> -(':' > (x3::uint32[check_zero]))) > '>';
 
             BOOST_SPIRIT_DEFINE(range);

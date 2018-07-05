@@ -91,7 +91,9 @@ add_executable(test_spirit
         test/test_spirit.cpp
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
-        src/cbag/spirit/ast.cpp)
+        src/cbag/spirit/ast.cpp
+        src/cbag/spirit/yaml.cpp
+        )
 
 target_link_libraries(test_spirit
         boost_system

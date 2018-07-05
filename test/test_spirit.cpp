@@ -1,10 +1,13 @@
 #include <iostream>
 #include <boost/fusion/include/io.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 #include <cbag/spirit/ast.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/config.h>
+#include <cbag/spirit/yaml.h>
 
 
 namespace x3 = boost::spirit::x3;
@@ -42,9 +45,13 @@ std::string parse(std::string const &source) {
             std::cout << "-------------------------\n";
             error_handler(iter, "Error! Expecting end of input here: ");
         } else {
+            YAML::Emitter yout;
+
+            yout << ast;
+
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
-            std::cout << "got: " << ast << std::endl;
+            std::cout << "got: " << yout.c_str() << std::endl;
             std::cout << "-------------------------\n";
         }
     } else {

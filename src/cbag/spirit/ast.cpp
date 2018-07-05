@@ -8,6 +8,8 @@ namespace cbag {
     namespace spirit {
         namespace ast {
             inline uint32_t range::size() const {
+                if (step == 0)
+                    return 0;
                 if (stop >= start) {
                     return (stop - start + step) / step;
                 } else {
@@ -23,12 +25,6 @@ namespace cbag {
                     return start - size() * step;
                 }
             }
-
-            inline YAML::Emitter &operator<<(YAML::Emitter &out, const range &v) {
-                return out << YAML::Flow << YAML::BeginSeq << v.start << v.stop << v.step
-                           << YAML::EndSeq;
-            }
-
 
         }
     }

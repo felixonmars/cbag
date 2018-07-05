@@ -16,7 +16,7 @@ namespace cbag {
 
             struct range_class;
 
-            using range_type = x3::rule<range_class, ast::range>;
+            using range_type = x3::rule<range_class, ast::range, true>;
 
             BOOST_SPIRIT_DECLARE(range_type);
         }
