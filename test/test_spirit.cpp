@@ -23,9 +23,9 @@ std::string parse(std::string const &source) {
     // Our error handler
     bsp::parser::error_handler_type error_handler(iter, end, out); // Our error handler
     const std::reference_wrapper<bsp::parser::error_handler_type> err_ref = std::ref(error_handler);
-    // Our parser
+    // Our spirit
     auto const parser =
-            // we pass our error handler to the parser so we can access
+            // we pass our error handler to the spirit so we can access
             // it later on in our on_error and on_sucess handlers
             x3::with<bsp::parser::error_handler_tag>(err_ref)
             [

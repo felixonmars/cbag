@@ -89,9 +89,9 @@ set_target_properties(test_oa PROPERTIES
 
 add_executable(test_spirit
         test/test_spirit.cpp
-        src/cbag/parser/range.cpp
-        src/cbag/parser/name_unit.cpp
-        )
+        src/cbag/spirit/range.cpp
+        src/cbag/spirit/name_unit.cpp
+        src/cbag/spirit/ast.cpp)
 
 target_link_libraries(test_spirit
         boost_system
