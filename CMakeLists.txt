@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.7)
 project(cbag)
 
-# build with C++11
-set(CMAKE_CXX_STANDARD 11)
+# build with C++14, required by Boost Spirit X3
+set(CMAKE_CXX_STANDARD 14)
 # control compiler warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
@@ -84,3 +84,5 @@ target_link_libraries(test_oa
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_oa PROPERTIES
         INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}")
+
+add_executable(test_spirit test/test_spirit.cpp)

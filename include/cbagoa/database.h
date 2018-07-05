@@ -54,7 +54,7 @@ namespace cbagoa {
 
     private:
 
-        cbag::Name make_name(oa::oaTerm *term_ptr);
+        cbag::Name make_name(std::string &&std_str);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

@@ -136,15 +136,17 @@ namespace cbagoa {
         oa::oaPin *pin_ptr;
         while ((pin_ptr = pin_iter.getNext()) != nullptr) {
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
+            oa::oaString tmp_;
+            term_ptr->getName(ns_cdba, tmp_str);
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    ans.in_pins.push_back(make_name(term_ptr));
+                    ans.in_pins.push_back(make_name(std::string(tmp_str)));
                     break;
                 case oa::oacOutputTermType :
-                    ans.out_pins.push_back(make_name(term_ptr));
+                    ans.out_pins.push_back(make_name(std::string(tmp_str)));
                     break;
                 case oa::oacInputOutputTermType :
-                    ans.io_pins.push_back(make_name(term_ptr));
+                    ans.io_pins.push_back(make_name(std::string(tmp_str)));
                     break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
@@ -197,20 +199,20 @@ namespace cbagoa {
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
-                    iterm_ptr->getTermName(ns_cdba, tmp_str);
                     oa::oaTerm *term_ptr = iterm_ptr->getTerm();
                     cbag::Name *term_name_ptr;
+                    term_ptr->getName(ns_cdba, tmp_str);
                     switch (term_ptr->getTermType()) {
                         case oa::oacInputTermType :
-                            sinst_ptr->in_pins.push_back(make_name(term_ptr));
+                            sinst_ptr->in_pins.push_back(make_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->in_pins.back();
                             break;
                         case oa::oacOutputTermType :
-                            sinst_ptr->out_pins.push_back(make_name(term_ptr));
+                            sinst_ptr->out_pins.push_back(make_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->out_pins.back();
                             break;
                         case oa::oacInputOutputTermType :
-                            sinst_ptr->io_pins.push_back(make_name(term_ptr));
+                            sinst_ptr->io_pins.push_back(make_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->io_pins.back();
                             break;
                         default:
@@ -255,11 +257,8 @@ namespace cbagoa {
 
     }
 
-    cbag::Name Library::make_name(oa::oaTerm *term_ptr) {
-        oa::oaString tmp_str;
-        term_ptr->getName(ns_cdba, tmp_str);
-        std::string term_str(tmp_str);
-        return formatter.get_name(term_str);
+    cbag::Name Library::make_name(std::string && std_str) {
+        return formatter.get_name(std_str);
     }
 
     void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr) {
