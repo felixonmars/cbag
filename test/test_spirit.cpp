@@ -2,38 +2,38 @@
 #include <boost/fusion/include/io.hpp>
 
 #include <cbag/spirit/ast.h>
-#include <cbag/spirit/range.h>
+#include <cbag/spirit/grammar.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/config.h>
+
+
+namespace x3 = boost::spirit::x3;
+namespace bsp = cbag::spirit;
 
 
 std::string parse(std::string const &source) {
     std::stringstream out;
 
-    using cbag::spirit::parser::iterator_type;
-    iterator_type iter(source.begin());
-    iterator_type const end(source.end());
+    bsp::parser::iterator_type iter(source.begin());
+    bsp::parser::iterator_type const end(source.end());
 
     // Our AST
-    cbag::spirit::ast::range ast;
+    bsp::ast::name_unit ast;
 
     // Our error handler
-    using boost::spirit::x3::with;
-    using cbag::spirit::parser::error_handler_type;
-    using cbag::spirit::parser::error_handler_tag;
-    error_handler_type error_handler(iter, end, out); // Our error handler
-    const std::reference_wrapper<error_handler_type> err_ref = std::ref(error_handler);
+    bsp::parser::error_handler_type error_handler(iter, end, out); // Our error handler
+    const std::reference_wrapper<bsp::parser::error_handler_type> err_ref = std::ref(error_handler);
     // Our parser
     auto const parser =
             // we pass our error handler to the parser so we can access
             // it later on in our on_error and on_sucess handlers
-            with<error_handler_tag>(err_ref)
+            x3::with<bsp::parser::error_handler_tag>(err_ref)
             [
-                    cbag::spirit::range()
+                    bsp::name_unit()
             ];
 
     // Go forth and parse!
-    bool success = parse(iter, end, parser, ast);
+    bool success = x3::parse(iter, end, parser, ast);
 
     if (success) {
         if (iter != end) {
@@ -44,7 +44,7 @@ std::string parse(std::string const &source) {
         } else {
             std::cout << "-------------------------\n";
             std::cout << "Parsing succeeded\n";
-            std::cout << "got: " << ast.start << ", " << ast.stop << ", " << ast.step << std::endl;
+            std::cout << "got: " << ast << std::endl;
             std::cout << "-------------------------\n";
         }
     } else {
@@ -60,11 +60,7 @@ std::string parse(std::string const &source) {
 //  Main program
 ///////////////////////////////////////////////////////////////////////////////
 int main() {
-    std::cout << "/////////////////////////////////////////////////////////\n\n";
-    std::cout << "\t\tAn range spirit for Spirit...\n\n";
-    std::cout << "/////////////////////////////////////////////////////////\n\n";
-
-    std::cout << "Give me an range." << std::endl;
+    std::cout << "Give me a name_unit." << std::endl;
     std::cout << "Type [q or Q] to quit" << std::endl << std::endl;
 
     std::string str;

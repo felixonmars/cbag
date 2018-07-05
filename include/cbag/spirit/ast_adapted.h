@@ -17,4 +17,8 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range,
                           start, stop, step
 )
 
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
+                          base, index
+)
+
 #endif //CBAG_SPIRIT_AST_ADAPTED_H

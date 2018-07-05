@@ -16,8 +16,9 @@ namespace cbag {
 
             using iterator_type = std::string::const_iterator;
             using error_handler_type = error_handler<iterator_type>;
-            typedef x3::context<error_handler_tag, std::reference_wrapper<error_handler_type> const,
-                    x3::unused_type> context_type;
+            using context_type = x3::context<error_handler_tag,
+                    std::reference_wrapper<error_handler_type> const,
+                    x3::unused_type>;
         }
     }
 }

@@ -87,7 +87,10 @@ target_link_libraries(test_oa
 set_target_properties(test_oa PROPERTIES
         INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(test_spirit test/test_spirit.cpp src/cbag/parser/range.cpp)
+add_executable(test_spirit
+        test/test_spirit.cpp
+        src/cbag/parser/grammar.cpp
+        )
 
 target_link_libraries(test_spirit
         boost_system
