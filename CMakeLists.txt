@@ -93,7 +93,6 @@ add_executable(test_spirit
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
         src/cbag/spirit/name.cpp
-        src/cbag/spirit/parsers.cpp
         )
 
 target_link_libraries(test_spirit

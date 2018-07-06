@@ -3,8 +3,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/spirit/parsers.h>
-#include <cbag/spirit/name.h>
 #include <cbag/spirit/yaml.h>
+
+namespace bsp = cbag::spirit;
 
 int main() {
     std::cout << "Give me a name." << std::endl;
@@ -18,7 +19,7 @@ int main() {
 
         try {
             YAML::Emitter yout;
-            yout << cbag::parse(str);
+            yout << cbag::parse<bsp::ast::name, bsp::parser::name_type>(str, bsp::name());
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";
             std::cout << yout.c_str() << std::endl;
