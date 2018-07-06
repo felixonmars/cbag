@@ -5,16 +5,14 @@
 #ifndef CBAG_SPIRIT_ERROR_HANDLER_H
 #define CBAG_SPIRIT_ERROR_HANDLER_H
 
-#include <map>
-
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 #include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
+namespace x3 = boost::spirit::x3;
 
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             // X3 Error Handler Utility
             template<typename Iterator>
