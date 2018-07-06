@@ -5,7 +5,6 @@
 #ifndef CBAG_SPIRIT_ERROR_HANDLER_H
 #define CBAG_SPIRIT_ERROR_HANDLER_H
 
-#include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 #include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 
 namespace x3 = boost::spirit::x3;
@@ -13,6 +12,9 @@ namespace x3 = boost::spirit::x3;
 namespace cbag {
     namespace spirit {
         namespace parser {
+
+            // X3 Error result enum
+            using err_res = x3::error_handler_result;
 
             // X3 Error Handler Utility
             template<typename Iterator>
@@ -25,13 +27,12 @@ namespace cbag {
                 error_handler_base() = default;
 
                 template<typename Iterator, typename Exception, typename Context>
-                x3::error_handler_result on_error(
+                err_res on_error(
                         Iterator &first, Iterator const &last, Exception const &x, Context const &context);
             };
 
             template<typename Iterator, typename Exception, typename Context>
-            inline x3::error_handler_result
-            error_handler_base::on_error(
+            inline err_res error_handler_base::on_error(
                     Iterator &first, Iterator const &last, Exception const &x, Context const &context) {
                 std::string message = "Error while parsing index: " + std::to_string(x.where() - first);
                 auto &error_handler = x3::get<error_handler_tag>(context).get();

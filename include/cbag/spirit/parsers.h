@@ -5,8 +5,6 @@
 #ifndef CBAG_SPIRIT_PARSERS_H
 #define CBAG_SPIRIT_PARSERS_H
 
-#include <cbag/spirit/name.h>
-#include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/config.h>
 
 namespace x3 = boost::spirit::x3;

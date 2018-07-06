@@ -14,10 +14,11 @@
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit_def.h>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             name_type const name = "name";
 

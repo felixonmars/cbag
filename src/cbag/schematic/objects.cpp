@@ -2,9 +2,19 @@
 // Created by erichang on 6/27/18.
 //
 
+#include <cbag/spirit/yaml.h>
 #include <cbag/schematic/objects.h>
 
 namespace cbag {
+
+    CSchInstance::CSchInstance(bsa::name_unit name, std::string lib, std::string cell,
+                               std::string view, Transform xform)
+            : inst_name(std::move(name)), lib_name(std::move(lib)), cell_name(std::move(cell)),
+              view_name(std::move(view)), xform(xform) {
+        if (inst_name.mult != 1) {
+            throw std::invalid_argument("Invalid instance name.");
+        }
+    }
 
     YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v) {
         out << YAML::BeginMap

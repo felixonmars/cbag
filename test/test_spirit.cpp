@@ -3,6 +3,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/spirit/parsers.h>
+#include <cbag/spirit/name.h>
 #include <cbag/spirit/yaml.h>
 
 namespace bsp = cbag::spirit;

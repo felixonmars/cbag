@@ -31,10 +31,7 @@ namespace cbag {
          * @param view the view name.
          * @param xform the instance location.
          */
-        CSchInstance(bsa::name_unit name, std::string lib, std::string cell, std::string view, Transform xform)
-                : inst_name(std::move(name)), lib_name(std::move(lib)),
-                  cell_name(std::move(cell)), view_name(std::move(view)),
-                  xform(xform) {}
+        CSchInstance(bsa::name_unit name, std::string lib, std::string cell, std::string view, Transform xform);
 
         // This class is movable, but not copyable.
         // This ensures good performance when placed in STL containers.
@@ -46,6 +43,8 @@ namespace cbag {
         CSchInstance(CSchInstance &&) noexcept;
 
         CSchInstance &operator=(CSchInstance &&) noexcept;
+
+        inline uint32_t size() { return inst_name.size(); }
 
         inline bool operator<(const CSchInstance &other) const { return inst_name < other.inst_name; }
 

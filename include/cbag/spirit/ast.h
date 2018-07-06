@@ -5,16 +5,17 @@
 #ifndef CBAG_SPIRIT_AST_H
 #define CBAG_SPIRIT_AST_H
 
+#include <algorithm>
 #include <vector>
 
 #include <boost/optional/optional.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace ast {
-
-            namespace x3 = boost::spirit::x3;
 
             /** Represents a range of indices at regular interval.
              *
@@ -31,6 +32,8 @@ namespace cbag {
                 uint32_t size() const;
 
                 uint32_t get_stop_exclude() const;
+
+                std::string to_string() const;
 
                 bool operator==(const range &other) const;
 
@@ -66,6 +69,10 @@ namespace cbag {
 
                 name_unit()
                         : mult(1), base(""), index({0, 0, 0}) {}
+
+                inline uint32_t size() { return mult * std::max(index.size(), 1u); }
+
+                std::string to_string() const;
 
                 bool operator==(const name_unit &other) const;
 

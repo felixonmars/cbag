@@ -13,10 +13,11 @@
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/range.h>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             // after parsing start, set default values of stop and step
             auto init_range = [](auto &ctx) {

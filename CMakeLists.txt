@@ -48,7 +48,10 @@ set(SRC_FILES_LIB_CBAG
         src/cbag/layout/templates.cpp
         src/cbag/layout/objects.cpp
         src/cbag/schematic/objects.cpp
-        src/cbag/common.cpp
+        src/cbag/spirit/ast.cpp
+        src/cbag/spirit/range.cpp
+        src/cbag/spirit/name_unit.cpp
+        src/cbag/spirit/name.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
@@ -73,6 +76,7 @@ add_executable(test_oa ${SRC_FILES_OA})
 # shared library dependencies
 target_link_libraries(test_oa
         cbagoa
+        boost_system
         oaCommon
         oaBase
         oaPlugIn
@@ -89,12 +93,9 @@ set_target_properties(test_oa PROPERTIES
 
 add_executable(test_spirit
         test/test_spirit.cpp
-        src/cbag/spirit/ast.cpp
-        src/cbag/spirit/range.cpp
-        src/cbag/spirit/name_unit.cpp
-        src/cbag/spirit/name.cpp
         )
 
 target_link_libraries(test_spirit
+        cbag
         boost_system
         )

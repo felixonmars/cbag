@@ -9,10 +9,11 @@
 
 #include <cbag/spirit/ast.h>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             struct name_unit_class;
 

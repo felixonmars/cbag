@@ -14,10 +14,11 @@
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/range_def.h>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             name_unit_type const name_unit = "name_unit";
 

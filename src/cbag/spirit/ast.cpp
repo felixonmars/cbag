@@ -2,12 +2,14 @@
 // Created by erichang on 7/5/18.
 //
 
+#include <sstream>
+
 #include <cbag/spirit/ast.h>
 
 namespace cbag {
     namespace spirit {
         namespace ast {
-            inline uint32_t range::size() const {
+            uint32_t range::size() const {
                 if (step == 0)
                     return 0;
                 if (stop >= start) {
@@ -17,12 +19,32 @@ namespace cbag {
                 }
             }
 
-            inline uint32_t range::get_stop_exclude() const {
+            uint32_t range::get_stop_exclude() const {
                 if (stop >= start) {
                     return start + size() * step;
                 } else {
                     return start - size() * step;
                 }
+            }
+
+            std::string range::to_string() const {
+                if (step == 0) {
+                    return "";
+                }
+                std::ostringstream out;
+
+                out << "<" << start;
+                if (start == stop) {
+                    out << ">";
+                } else {
+                    out << ':' << stop;
+                    if (step == 1) {
+                        out << '>';
+                    } else {
+                        out << ':' << step << '>';
+                    }
+                }
+                return out.str();
             }
 
             bool range::operator==(const range &other) const {
@@ -51,6 +73,17 @@ namespace cbag {
                 } else {
                     return false;
                 }
+            }
+
+            std::string name_unit::to_string() const {
+                std::ostringstream out;
+                if (mult > 1) {
+                    out << "<*" << mult << '>';
+                }
+                out << base;
+                out << index.to_string();
+
+                return out.str();
             }
 
             bool name_unit::operator==(const name_unit &other) const {

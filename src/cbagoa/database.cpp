@@ -1,7 +1,23 @@
-#include <cbagoa/database.h>
 #include <iostream>
 
+#include <cbag/spirit/parsers.h>
+#include <cbag/spirit/name.h>
+#include <cbag/spirit/name_unit.h>
+
+#include <cbagoa/database.h>
+
+
 namespace cbagoa {
+
+    namespace bsp = cbag::spirit;
+
+    bsp::ast::name parse_name(const std::string &source) {
+        return cbag::parse<bsp::ast::name, bsp::parser::name_type>(source, bsp::name());
+    }
+
+    bsp::ast::name_unit parse_name_unit(const std::string &source) {
+        return cbag::parse<bsp::ast::name_unit, bsp::parser::name_unit_type>(source, bsp::name_unit());
+    }
 
     cbag::Orientation convert_orient(const oa::oaOrient &orient) {
         switch (orient) {
@@ -140,13 +156,13 @@ namespace cbagoa {
             term_ptr->getName(ns_cdba, tmp_str);
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    ans.in_pins.push_back(make_name(std::string(tmp_str)));
+                    ans.in_pins.push_back(parse_name(std::string(tmp_str)));
                     break;
                 case oa::oacOutputTermType :
-                    ans.out_pins.push_back(make_name(std::string(tmp_str)));
+                    ans.out_pins.push_back(parse_name(std::string(tmp_str)));
                     break;
                 case oa::oacInputOutputTermType :
-                    ans.io_pins.push_back(make_name(std::string(tmp_str)));
+                    ans.io_pins.push_back(parse_name(std::string(tmp_str)));
                     break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
@@ -178,7 +194,7 @@ namespace cbagoa {
                 inst_ptr->getTransform(xform);
 
                 // create schematic instance
-                ans.inst_list.emplace_back(formatter.get_name_unit(std::string(inst_name_oa)), std::string(inst_lib_oa),
+                ans.inst_list.emplace_back(parse_name_unit(std::string(inst_name_oa)), std::string(inst_lib_oa),
                                            std::string(inst_cell_oa), std::string(inst_view_oa),
                                            cbag::Transform(xform.xOffset(), xform.yOffset(),
                                                            convert_orient(xform.orient())));
@@ -200,19 +216,19 @@ namespace cbagoa {
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
                     oa::oaTerm *term_ptr = iterm_ptr->getTerm();
-                    cbag::Name *term_name_ptr;
+                    bsp::ast::name *term_name_ptr;
                     term_ptr->getName(ns_cdba, tmp_str);
                     switch (term_ptr->getTermType()) {
                         case oa::oacInputTermType :
-                            sinst_ptr->in_pins.push_back(make_name(std::string(tmp_str)));
+                            sinst_ptr->in_pins.push_back(parse_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->in_pins.back();
                             break;
                         case oa::oacOutputTermType :
-                            sinst_ptr->out_pins.push_back(make_name(std::string(tmp_str)));
+                            sinst_ptr->out_pins.push_back(parse_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->out_pins.back();
                             break;
                         case oa::oacInputOutputTermType :
-                            sinst_ptr->io_pins.push_back(make_name(std::string(tmp_str)));
+                            sinst_ptr->io_pins.push_back(parse_name(std::string(tmp_str)));
                             term_name_ptr = &sinst_ptr->io_pins.back();
                             break;
                         default:
@@ -235,13 +251,6 @@ namespace cbagoa {
         std::sort(ans.io_pins.begin(), ans.io_pins.end());
         std::sort(ans.inst_list.begin(), ans.inst_list.end());
 
-        // test range
-        cbag::Range test(10, 0, 2);
-
-        for (const auto ele : test) {
-            std::cout << "Range index: " << ele << std::endl;
-        }
-
         // close design and return master
         dsn_ptr->close();
         return ans;
@@ -255,10 +264,6 @@ namespace cbagoa {
             is_open = false;
         }
 
-    }
-
-    cbag::Name Library::make_name(std::string && std_str) {
-        return formatter.get_name(std_str);
     }
 
     void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr) {

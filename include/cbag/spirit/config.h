@@ -9,10 +9,11 @@
 
 #include <cbag/spirit/error_handler.h>
 
+namespace x3 = boost::spirit::x3;
+
 namespace cbag {
     namespace spirit {
         namespace parser {
-            namespace x3 = boost::spirit::x3;
 
             using iterator_type = std::string::const_iterator;
             using error_handler_type = error_handler<iterator_type>;
