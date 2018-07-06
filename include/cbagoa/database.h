@@ -11,9 +11,6 @@
 #include <oa/oaDesignDB.h>
 #include <cbag/schematic/objects.h>
 
-// techID = techOpenTechFile(lib_name "tech.oa" "r")
-// techGetPurposeNum(techID "pin")
-
 namespace cbagoa {
 
     class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
@@ -54,12 +51,9 @@ namespace cbagoa {
 
     private:
 
-        cbag::Name make_name(std::string &&std_str);
-
         // OA namespace objects
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;
-        cbag::NameFormatter formatter;
 
         bool is_open;
         oa::oaUInt4 dbu_per_uu;

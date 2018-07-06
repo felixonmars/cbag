@@ -10,8 +10,11 @@
 #include <utility>
 
 #include <cbag/common.h>
+#include <cbag/spirit/ast.h>
 
 namespace cbag {
+
+    namespace bsa = spirit::ast;
 
     /** An instance in a schematic.
      */
@@ -28,7 +31,7 @@ namespace cbag {
          * @param view the view name.
          * @param xform the instance location.
          */
-        CSchInstance(NameUnit name, std::string lib, std::string cell, std::string view, Transform xform)
+        CSchInstance(bsa::name_unit name, std::string lib, std::string cell, std::string view, Transform xform)
                 : inst_name(std::move(name)), lib_name(std::move(lib)),
                   cell_name(std::move(cell)), view_name(std::move(view)),
                   xform(xform) {}
@@ -44,25 +47,13 @@ namespace cbag {
 
         CSchInstance &operator=(CSchInstance &&) noexcept;
 
-        /** Returns true if this instance is a vector instance.
-         *
-         *  @returns true if this instance is a vector instance.
-         */
-        inline bool is_vector() { return inst_name.is_vector(); }
-
-        /** Returns the number of instances this schematic instance represents.
-         *
-         *  @returns number of instances in this schematic instance.
-         */
-        inline uint32_t size() { return (inst_name.size()); }
-
         inline bool operator<(const CSchInstance &other) const { return inst_name < other.inst_name; }
 
-        NameUnit inst_name;
+        bsa::name_unit inst_name;
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        std::vector<Name> in_pins, out_pins, io_pins;
-        std::map<NameBit, NameUnit> connections;
+        std::vector<bsa::name> in_pins, out_pins, io_pins;
+        std::map<bsa::name_bit, std::vector<bsa::name_bit>> connections;
         ParamMap params;
     };
 
@@ -89,7 +80,7 @@ namespace cbag {
 
         CSchMaster &operator=(CSchMaster &&) noexcept;
 
-        std::vector<Name> in_pins, out_pins, io_pins;
+        std::vector<bsa::name> in_pins, out_pins, io_pins;
         std::vector<CSchInstance> inst_list;
     };
 

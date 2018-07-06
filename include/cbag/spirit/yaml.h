@@ -18,6 +18,16 @@ namespace cbag {
                            << YAML::EndSeq;
             }
 
+            inline YAML::Emitter &operator<<(YAML::Emitter &out, const name_bit &v) {
+                out << YAML::Flow << YAML::BeginSeq << v.base;
+                if (v.index) {
+                    out << *v.index;
+                } else {
+                    out << YAML::Null;
+                }
+                return out << YAML::EndSeq;
+            }
+
             inline YAML::Emitter &operator<<(YAML::Emitter &out, const name_unit &v) {
                 return out << YAML::Flow << YAML::BeginSeq << v.base << v.index << v.mult
                            << YAML::EndSeq;
