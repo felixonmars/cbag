@@ -3,6 +3,7 @@
 //
 
 #include <sstream>
+#include <limits>
 
 #include <boost/functional/hash.hpp>
 
@@ -99,6 +100,22 @@ namespace cbag {
                                                   || (index == other.index && mult < other.mult)));
             }
 
+            bool name::operator==(const name &other) const {
+                unsigned long size1 = unit_list.size();
+                unsigned long size2 = other.unit_list.size();
+
+                if (size1 == size2) {
+                    for (unsigned long idx = 0; idx < size1; idx++) {
+                        if (unit_list[idx] != other.unit_list[idx]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
             bool name::operator<(const name &other) const {
                 unsigned long size1 = unit_list.size();
                 unsigned long size2 = other.unit_list.size();
@@ -123,7 +140,6 @@ namespace cbag {
 
 
 namespace std {
-
     // define hash function for NameUnit
     template<>
     struct hash<cbag::spirit::ast::name_bit> {
@@ -131,7 +147,8 @@ namespace std {
 
             size_t seed = 0;
             boost::hash_combine(seed, v.base);
-            boost::hash_combine(seed, v.index);
+            boost::hash_combine(seed, (v.index) ? *(v.index) :
+                                      std::numeric_limits<std::size_t>::max());
 
             return seed;
         }

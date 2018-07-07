@@ -73,6 +73,12 @@ set(SRC_FILES_OA
         )
 add_executable(test_oa ${SRC_FILES_OA})
 
+# append yaml-cpp library directory and build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(test_oa PROPERTIES
+        INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}"
+        )
+
 # shared library dependencies
 target_link_libraries(test_oa
         cbagoa
@@ -85,11 +91,6 @@ target_link_libraries(test_oa
         oaDesign
         ${CMAKE_DL_LIBS}
         )
-
-# append yaml-cpp library directory and build directory to RPATH
-# we do it this way now because we're running directly from the build directory.
-set_target_properties(test_oa PROPERTIES
-        INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(test_spirit
         test/test_spirit.cpp

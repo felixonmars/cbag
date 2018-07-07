@@ -5,10 +5,6 @@
 #ifndef CBAG_SCHEMATIC_OBJECTS_H
 #define CBAG_SCHEMATIC_OBJECTS_H
 
-#include <string>
-#include <tuple>
-#include <utility>
-
 #include <cbag/common.h>
 #include <cbag/spirit/ast.h>
 
@@ -52,7 +48,7 @@ namespace cbag {
         bsa::name_unit inst_name;
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        std::vector<bsa::name> in_pins, out_pins, io_pins;
+        std::set<bsa::name> in_pins, out_pins, io_pins;
         std::map<bsa::name_bit, std::vector<bsa::name_bit>> connections;
         ParamMap params;
     };
@@ -80,8 +76,9 @@ namespace cbag {
 
         CSchMaster &operator=(CSchMaster &&) noexcept;
 
-        std::vector<bsa::name> in_pins, out_pins, io_pins;
-        std::vector<CSchInstance> inst_list;
+        std::set<bsa::name> in_pins, out_pins, io_pins;
+        std::map<bsa::name_unit, CSchInstRef> inst_refs;
+        std::map<bsa::name_bit, CSchInstInfo> inst_map;
     };
 
     inline CSchMaster::CSchMaster(CSchMaster &&) noexcept = default;

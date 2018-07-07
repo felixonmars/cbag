@@ -16,7 +16,8 @@ namespace cbagoa {
     }
 
     bsp::ast::name_unit parse_name_unit(const std::string &source) {
-        return cbag::parse<bsp::ast::name_unit, bsp::parser::name_unit_type>(source, bsp::name_unit());
+        return cbag::parse<bsp::ast::name_unit,
+                bsp::parser::name_unit_type>(source, bsp::name_unit());
     }
 
     cbag::Orientation convert_orient(const oa::oaOrient &orient) {
@@ -154,21 +155,26 @@ namespace cbagoa {
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
             oa::oaString tmp_;
             term_ptr->getName(ns_cdba, tmp_str);
+            bool success = false;
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    ans.in_pins.push_back(parse_name(std::string(tmp_str)));
+                    success = ans.in_pins.insert(parse_name(std::string(tmp_str))).second;
                     break;
                 case oa::oacOutputTermType :
-                    ans.out_pins.push_back(parse_name(std::string(tmp_str)));
+                    success = ans.out_pins.insert(parse_name(std::string(tmp_str))).second;
                     break;
                 case oa::oacInputOutputTermType :
-                    ans.io_pins.push_back(parse_name(std::string(tmp_str)));
+                    success = ans.io_pins.insert(parse_name(std::string(tmp_str))).second;
                     break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
-                    errstream << "Pin " << tmp_str
-                              << " has invalid terminal type: " << term_ptr->getTermType().getName();
+                    errstream << "Pin " << tmp_str << " has invalid terminal type: "
+                              << term_ptr->getTermType().getName();
                     throw std::invalid_argument(errstream.str());
+            }
+            if (!success) {
+                errstream << "Cannot add pin " << tmp_str << "; it already exists.";
+                throw std::invalid_argument(errstream.str());
             }
         }
 
@@ -194,8 +200,9 @@ namespace cbagoa {
                 inst_ptr->getTransform(xform);
 
                 // create schematic instance
-                ans.inst_list.emplace_back(parse_name_unit(std::string(inst_name_oa)), std::string(inst_lib_oa),
-                                           std::string(inst_cell_oa), std::string(inst_view_oa),
+                ans.inst_list.emplace_back(parse_name_unit(std::string(inst_name_oa)),
+                                           std::string(inst_lib_oa), std::string(inst_cell_oa),
+                                           std::string(inst_view_oa),
                                            cbag::Transform(xform.xOffset(), xform.yOffset(),
                                                            convert_orient(xform.orient())));
                 // get instance pointer
@@ -210,31 +217,34 @@ namespace cbagoa {
                     }
                 }
 
-                // get instance terminal connections
+                // get instance terminals and connections
                 uint32_t inst_size = sinst_ptr->size();
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
                     oa::oaTerm *term_ptr = iterm_ptr->getTerm();
-                    bsp::ast::name *term_name_ptr;
+                    std::pair<std::set<bsp::ast::name>::iterator, bool> rpair;
                     term_ptr->getName(ns_cdba, tmp_str);
                     switch (term_ptr->getTermType()) {
                         case oa::oacInputTermType :
-                            sinst_ptr->in_pins.push_back(parse_name(std::string(tmp_str)));
-                            term_name_ptr = &sinst_ptr->in_pins.back();
+                            rpair = sinst_ptr->in_pins.insert(parse_name(std::string(tmp_str)));
                             break;
                         case oa::oacOutputTermType :
-                            sinst_ptr->out_pins.push_back(parse_name(std::string(tmp_str)));
-                            term_name_ptr = &sinst_ptr->out_pins.back();
+                            rpair = sinst_ptr->out_pins.insert(parse_name(std::string(tmp_str)));
                             break;
                         case oa::oacInputOutputTermType :
-                            sinst_ptr->io_pins.push_back(parse_name(std::string(tmp_str)));
-                            term_name_ptr = &sinst_ptr->io_pins.back();
+                            rpair = sinst_ptr->io_pins.insert(parse_name(std::string(tmp_str)));
                             break;
                         default:
                             errstream << "Instance " << inst_name_oa << " pin " << tmp_str
-                                      << " has invalid terminal type: " << term_ptr->getTermType().getName();
+                                      << " has invalid terminal type: "
+                                      << term_ptr->getTermType().getName();
                             throw std::invalid_argument(errstream.str());
+                    }
+                    if (!rpair.second) {
+                        errstream << "Instance " << inst_name_oa << " has duplicate pin "
+                                  << tmp_str;
+                        throw std::invalid_argument(errstream.str());
                     }
 
                     std::cout << "  Terminal: " << tmp_str << std::endl;
@@ -244,12 +254,6 @@ namespace cbagoa {
                 }
             }
         }
-
-        // sort pins and instances so we have consistent order
-        std::sort(ans.in_pins.begin(), ans.in_pins.end());
-        std::sort(ans.out_pins.begin(), ans.out_pins.end());
-        std::sort(ans.io_pins.begin(), ans.io_pins.end());
-        std::sort(ans.inst_list.begin(), ans.inst_list.end());
 
         // close design and return master
         dsn_ptr->close();

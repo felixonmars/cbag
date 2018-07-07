@@ -38,6 +38,8 @@ namespace cbag {
 
                 bool operator==(const range &other) const;
 
+                inline bool operator!=(const range &other) const { return !(*this == other); }
+
                 bool operator<(const range &other) const;
 
                 uint32_t start;
@@ -55,6 +57,8 @@ namespace cbag {
                         : base("") {}
 
                 bool operator==(const name_bit &other) const;
+
+                inline bool operator!=(const name_bit &other) const { return !(*this == other); }
 
                 bool operator<(const name_bit &other) const;
 
@@ -77,6 +81,8 @@ namespace cbag {
 
                 bool operator==(const name_unit &other) const;
 
+                inline bool operator!=(const name_unit &other) const { return !(*this == other); }
+
                 bool operator<(const name_unit &other) const;
 
                 uint32_t mult;
@@ -87,6 +93,11 @@ namespace cbag {
             /** Represents a list of name units.
              */
             struct name : x3::position_tagged {
+
+                bool operator==(const name &other) const;
+
+                inline bool operator!=(const name &other) const { return !(*this == other); }
+
                 bool operator<(const name &other) const;
 
                 std::vector<name_unit> unit_list;
