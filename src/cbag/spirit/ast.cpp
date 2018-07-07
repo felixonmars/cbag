@@ -4,7 +4,10 @@
 
 #include <sstream>
 
+#include <boost/functional/hash.hpp>
+
 #include <cbag/spirit/ast.h>
+
 
 namespace cbag {
     namespace spirit {
@@ -116,4 +119,22 @@ namespace cbag {
 
         }
     }
+}
+
+
+namespace std {
+
+    // define hash function for NameUnit
+    template<>
+    struct hash<cbag::spirit::ast::name_bit> {
+        size_t operator()(const cbag::spirit::ast::name_bit &v) const {
+
+            size_t seed = 0;
+            boost::hash_combine(seed, v.base);
+            boost::hash_combine(seed, v.index);
+
+            return seed;
+        }
+    };
+
 }

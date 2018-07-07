@@ -13,6 +13,7 @@
 #include <boost/tokenizer.hpp>
 #include <yaml-cpp/yaml.h>
 
+
 // Macro that allows easy conversion between enum and strings
 // https://stackoverflow.com/questions/5093460/how-to-convert-an-enum-type-variable-to-a-string
 #define X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE(r, data, elem)    \

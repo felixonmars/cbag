@@ -5,7 +5,9 @@
 #ifndef CBAG_SPIRIT_ERROR_HANDLER_H
 #define CBAG_SPIRIT_ERROR_HANDLER_H
 
+#include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
+
 
 namespace x3 = boost::spirit::x3;
 

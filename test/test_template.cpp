@@ -4,6 +4,7 @@
 
 #include <cbag/layout/templates.h>
 
+
 int main() {
     cbag::CTemplate temp;
     temp.add_rect(1, 0, 0, 0, 20, 10);

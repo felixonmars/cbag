@@ -4,6 +4,7 @@
 
 #include <cbag/layout/templates.h>
 
+
 namespace cbag {
 
     CRect *CTemplate::add_rect(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1,

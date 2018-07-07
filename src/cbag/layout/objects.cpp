@@ -4,6 +4,7 @@
 
 #include <cbag/layout/objects.h>
 
+
 namespace cbag {
     std::ostream &operator<<(std::ostream &os, const CBox &obj) {
         os << "CBox(" << obj.xl << ", " << obj.yl << ", " << obj.xh << ", " << obj.yh << ")";

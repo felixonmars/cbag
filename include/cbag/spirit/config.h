@@ -5,9 +5,8 @@
 #ifndef CBAG_SPIRIT_CONFIG_H
 #define CBAG_SPIRIT_CONFIG_H
 
-#include <boost/spirit/home/x3.hpp>
-
 #include <cbag/spirit/error_handler.h>
+
 
 namespace x3 = boost::spirit::x3;
 

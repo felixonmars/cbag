@@ -5,9 +5,10 @@
 #ifndef CBAG_SPIRIT_AST_ADAPTED_H
 #define CBAG_SPIRIT_AST_ADAPTED_H
 
-
 #include <boost/fusion/include/adapt_struct.hpp>
+
 #include <cbag/spirit/ast.h>
+
 
 // We need to tell fusion about our structs
 // to make it a first-class fusion citizen. This has to

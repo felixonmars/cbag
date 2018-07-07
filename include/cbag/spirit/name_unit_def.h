@@ -5,7 +5,6 @@
 #ifndef CBAG_SPIRIT_NAME_UNIT_DEF_H
 #define CBAG_SPIRIT_NAME_UNIT_DEF_H
 
-#include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 
 #include <cbag/spirit/ast.h>
@@ -13,6 +12,7 @@
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/range_def.h>
+
 
 namespace x3 = boost::spirit::x3;
 

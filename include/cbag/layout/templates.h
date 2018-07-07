@@ -7,6 +7,7 @@
 
 #include <cbag/layout/objects.h>
 
+
 namespace cbag {
     class CTemplate {
     public:
