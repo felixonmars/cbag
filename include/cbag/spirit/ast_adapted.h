@@ -19,7 +19,7 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range,
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
-                          mult, base, index
+                          mult, base, idx_range
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name,

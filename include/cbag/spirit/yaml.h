@@ -30,7 +30,7 @@ namespace cbag {
             }
 
             inline YAML::Emitter &operator<<(YAML::Emitter &out, const name_unit &v) {
-                return out << YAML::Flow << YAML::BeginSeq << v.base << v.index << v.mult
+                return out << YAML::Flow << YAML::BeginSeq << v.base << v.idx_range << v.mult
                            << YAML::EndSeq;
             }
 

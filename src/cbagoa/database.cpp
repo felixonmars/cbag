@@ -244,6 +244,10 @@ namespace cbagoa {
                     bsp::ast::name net_name = parse_name(std::string(tmp_str));
 
                     // populate connect map keys
+                    std::cout << "Net name: " << tmp_str << std::endl;
+                    for (auto net_bit : net_name) {
+                        std::cout << "Net bit: " << net_bit.to_string() << std::endl;
+                    }
 
                     // populate connection maps
                     if (inst_size == 1) {

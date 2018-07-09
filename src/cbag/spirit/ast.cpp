@@ -51,6 +51,15 @@ namespace cbag {
                 return out.str();
             }
 
+            std::string name_bit::to_string() const {
+                std::ostringstream out;
+                out << base;
+                if (index) {
+                    out << '<' << (*index) << '>';
+                }
+                return out.str();
+            }
+
             bool range::operator==(const range &other) const {
                 return start == other.start && stop == other.stop && step == other.step;
             }
@@ -85,19 +94,35 @@ namespace cbag {
                     out << "<*" << mult << '>';
                 }
                 out << base;
-                out << index.to_string();
+                out << idx_range.to_string();
 
                 return out.str();
             }
 
+            name_bit name_unit::operator[](uint32_t index) const {
+                uint32_t range_size = idx_range.size();
+                return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index % range_size]);
+            }
+
             bool name_unit::operator==(const name_unit &other) const {
-                return base == other.base && index == other.index && mult == other.mult;
+                return base == other.base && idx_range == other.idx_range && mult == other.mult;
             }
 
             bool name_unit::operator<(const name_unit &other) const {
                 return base < other.base
-                       || (base == other.base && (index < other.index
-                                                  || (index == other.index && mult < other.mult)));
+                       || (base == other.base && (idx_range < other.idx_range
+                                                  || (idx_range == other.idx_range && mult < other.mult)));
+            }
+
+            name::const_iterator &name::const_iterator::operator++() {
+                if (bit_index < (ptr->unit_list[unit_index]).size() - 1) {
+                    ++bit_index;
+                } else {
+                    ++unit_index;
+                    bit_index = 0;
+                }
+
+                return *this;
             }
 
             bool name::operator==(const name &other) const {

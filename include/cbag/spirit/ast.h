@@ -23,7 +23,6 @@ namespace cbag {
              *  step size of 0 means that this range is empty; it doesn't contain any item.
              */
             struct range : x3::position_tagged {
-
                 range()
                         : start(0), stop(0), step(0) {}
 
@@ -35,6 +34,10 @@ namespace cbag {
                 uint32_t get_stop_exclude() const;
 
                 std::string to_string() const;
+
+                inline uint32_t operator[](uint32_t index) const {
+                    return (stop >= start) ? start + step * index : start - step * index;
+                }
 
                 bool operator==(const range &other) const;
 
@@ -56,6 +59,12 @@ namespace cbag {
                 name_bit()
                         : base("") {}
 
+                explicit name_bit(std::string base) : base(std::move(base)) {}
+
+                name_bit(std::string base, uint32_t index) : base(std::move(base)), index(index) {}
+
+                std::string to_string() const;
+
                 bool operator==(const name_bit &other) const;
 
                 inline bool operator!=(const name_bit &other) const { return !(*this == other); }
@@ -73,11 +82,15 @@ namespace cbag {
             struct name_unit : x3::position_tagged {
 
                 name_unit()
-                        : mult(1), base(""), index({0, 0, 0}) {}
+                        : mult(1), base(""), idx_range({0, 0, 0}) {}
 
-                inline uint32_t size() { return mult * std::max(index.size(), 1u); }
+                inline uint32_t size() const { return mult * std::max(idx_range.size(), 1u); }
+
+                inline bool is_vector() { return idx_range.size() > 0; }
 
                 std::string to_string() const;
+
+                name_bit operator[](uint32_t index) const;
 
                 bool operator==(const name_unit &other) const;
 
@@ -87,12 +100,34 @@ namespace cbag {
 
                 uint32_t mult;
                 std::string base;
-                range index;
+                range idx_range;
             };
 
             /** Represents a list of name units.
              */
             struct name : x3::position_tagged {
+                class const_iterator {
+                public:
+                    const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index)
+                            : ptr(ptr), unit_index(unit_index), bit_index(bit_index) {}
+
+                    const_iterator &operator++();
+
+                    inline bool operator!=(const const_iterator &other) {
+                        return ptr != other.ptr || unit_index != other.unit_index || bit_index != other.bit_index;
+                    }
+
+                    inline name_bit operator*() const { return ptr->unit_list[unit_index][bit_index]; }
+
+                private:
+                    const name *ptr;
+                    unsigned long unit_index;
+                    uint32_t bit_index;
+                };
+
+                inline const_iterator begin() const { return {this, 0, 0}; }
+
+                inline const_iterator end() const { return {this, unit_list.size(), 0}; }
 
                 bool operator==(const name &other) const;
 
