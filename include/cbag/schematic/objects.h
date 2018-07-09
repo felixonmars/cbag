@@ -22,41 +22,19 @@ namespace cbag {
 
         /** Create an instance with empty parameter and terminal mappings.
          *
-         * @param name name of the instance.
          * @param lib the library name.
          * @param cell the cell name.
          * @param view the view name.
          * @param xform the instance location.
          */
-        CSchInstance(bsa::name_unit name, std::string lib, std::string cell, std::string view, Transform xform);
+        CSchInstance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
+                : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}), params({}) {}
 
-        // This class is movable, but not copyable.
-        // This ensures good performance when placed in STL containers.
-
-        CSchInstance(const CSchInstance &) = delete;
-
-        CSchInstance &operator=(const CSchInstance &) = delete;
-
-        CSchInstance(CSchInstance &&) noexcept;
-
-        CSchInstance &operator=(CSchInstance &&) noexcept;
-
-        inline uint32_t size() { return inst_name.size(); }
-
-        inline bool operator<(const CSchInstance &other) const { return inst_name < other.inst_name; }
-
-        bsa::name_unit inst_name;
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        std::set<bsa::name> in_pins, out_pins, io_pins;
         std::map<bsa::name_bit, std::vector<bsa::name_bit>> connections;
         ParamMap params;
     };
-
-    inline CSchInstance::CSchInstance(CSchInstance &&) noexcept = default;
-
-    inline CSchInstance &CSchInstance::operator=(CSchInstance &&) noexcept = default;
-
 
     /** A schematic master, in other words, a schematic cellview.
      *
@@ -65,26 +43,11 @@ namespace cbag {
     struct CSchMaster {
         CSchMaster() = default;
 
-        // This class is movable, but not copyable.
-        // This ensures good performance when placed in STL containers.
-
-        CSchMaster(const CSchMaster &) = delete;
-
-        CSchMaster &operator=(const CSchMaster &) = delete;
-
-        CSchMaster(CSchMaster &&) noexcept;
-
-        CSchMaster &operator=(CSchMaster &&) noexcept;
-
+        std::set<std::string> symbols;
+        std::string lib_name, cell_name, view_name;
         std::set<bsa::name> in_pins, out_pins, io_pins;
-        std::map<bsa::name_unit, CSchInstRef> inst_refs;
-        std::map<bsa::name_bit, CSchInstInfo> inst_map;
+        std::map<bsa::name_unit, CSchInstance> inst_map;
     };
-
-    inline CSchMaster::CSchMaster(CSchMaster &&) noexcept = default;
-
-    inline CSchMaster &CSchMaster::operator=(CSchMaster &&) noexcept = default;
-
 
     // YAML stream out functions.
 

@@ -155,7 +155,7 @@ namespace cbagoa {
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
             oa::oaString tmp_;
             term_ptr->getName(ns_cdba, tmp_str);
-            bool success = false;
+            bool success;
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
                     success = ans.in_pins.insert(parse_name(std::string(tmp_str))).second;
@@ -200,13 +200,28 @@ namespace cbagoa {
                 inst_ptr->getTransform(xform);
 
                 // create schematic instance
-                ans.inst_list.emplace_back(parse_name_unit(std::string(inst_name_oa)),
-                                           std::string(inst_lib_oa), std::string(inst_cell_oa),
-                                           std::string(inst_view_oa),
-                                           cbag::Transform(xform.xOffset(), xform.yOffset(),
-                                                           convert_orient(xform.orient())));
+                bsp::ast::name_unit inst_name = parse_name_unit(std::string(inst_name_oa));
+                if (inst_name.mult > 1) {
+                    errstream << "Invalid instance name: " << inst_name_oa;
+                    throw std::invalid_argument(errstream.str());
+                }
+                uint32_t inst_size = inst_name.size();
+
+                auto inst_ret_val = ans.inst_map.emplace(std::move(inst_name),
+                                                         cbag::CSchInstance(std::string(inst_lib_oa),
+                                                                            std::string(inst_cell_oa),
+                                                                            std::string(inst_view_oa),
+                                                                            cbag::Transform(xform.xOffset(),
+                                                                                            xform.yOffset(),
+                                                                                            convert_orient(
+                                                                                                    xform.orient()))));
+                if (!inst_ret_val.second) {
+                    errstream << "Instance " << inst_name_oa << " already exists.";
+                    throw std::invalid_argument(errstream.str());
+                }
+
                 // get instance pointer
-                cbag::CSchInstance *sinst_ptr = &ans.inst_list.back();
+                cbag::CSchInstance *sinst_ptr = &inst_ret_val.first->second;
 
                 // get parameters
                 if (inst_ptr->hasProp()) {
@@ -217,40 +232,23 @@ namespace cbagoa {
                     }
                 }
 
-                // get instance terminals and connections
-                uint32_t inst_size = sinst_ptr->size();
+                // get instance connections
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
-                    oa::oaTerm *term_ptr = iterm_ptr->getTerm();
-                    std::pair<std::set<bsp::ast::name>::iterator, bool> rpair;
-                    term_ptr->getName(ns_cdba, tmp_str);
-                    switch (term_ptr->getTermType()) {
-                        case oa::oacInputTermType :
-                            rpair = sinst_ptr->in_pins.insert(parse_name(std::string(tmp_str)));
-                            break;
-                        case oa::oacOutputTermType :
-                            rpair = sinst_ptr->out_pins.insert(parse_name(std::string(tmp_str)));
-                            break;
-                        case oa::oacInputOutputTermType :
-                            rpair = sinst_ptr->io_pins.insert(parse_name(std::string(tmp_str)));
-                            break;
-                        default:
-                            errstream << "Instance " << inst_name_oa << " pin " << tmp_str
-                                      << " has invalid terminal type: "
-                                      << term_ptr->getTermType().getName();
-                            throw std::invalid_argument(errstream.str());
-                    }
-                    if (!rpair.second) {
-                        errstream << "Instance " << inst_name_oa << " has duplicate pin "
-                                  << tmp_str;
-                        throw std::invalid_argument(errstream.str());
-                    }
+                    // register instance terminals in connection map
+                    iterm_ptr->getTerm()->getName(ns_cdba, tmp_str);
+                    bsp::ast::name term_name = parse_name(std::string(tmp_str));
 
-                    std::cout << "  Terminal: " << tmp_str << std::endl;
-                    std::cout << "    numBits: " << iterm_ptr->getNumBits() << std::endl;
                     iterm_ptr->getNet()->getName(ns_cdba, tmp_str);
-                    std::cout << "    Net: " << tmp_str << std::endl;
+                    bsp::ast::name net_name = parse_name(std::string(tmp_str));
+
+                    // populate connect map keys
+
+                    // populate connection maps
+                    if (inst_size == 1) {
+
+                    }
                 }
             }
         }
