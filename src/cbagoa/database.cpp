@@ -11,16 +11,16 @@
 #include <cbagoa/database.h>
 
 
+namespace bsp = cbag::spirit;
+namespace bsa = bsp::ast;
+
 namespace cbagoa {
-
-    namespace bsp = cbag::spirit;
-
-    bsp::ast::name parse_name(const std::string &source) {
-        return cbag::parse<bsp::ast::name, bsp::parser::name_type>(source, bsp::name());
+    bsa::name parse_name(const std::string &source) {
+        return cbag::parse<bsa::name, bsp::parser::name_type>(source, bsp::name());
     }
 
-    bsp::ast::name_unit parse_name_unit(const std::string &source) {
-        return cbag::parse<bsp::ast::name_unit,
+    bsa::name_unit parse_name_unit(const std::string &source) {
+        return cbag::parse<bsa::name_unit,
                 bsp::parser::name_unit_type>(source, bsp::name_unit());
     }
 
@@ -198,7 +198,7 @@ namespace cbagoa {
                 inst_ptr->getTransform(xform);
 
                 // create schematic instance
-                bsp::ast::name_unit inst_name = parse_name_unit(std::string(inst_name_oa));
+                bsa::name_unit inst_name = parse_name_unit(std::string(inst_name_oa));
                 if (inst_name.mult > 1) {
                     throw std::invalid_argument(fmt::format("Invalid instance name: {}", inst_name_oa));
                 }
@@ -231,23 +231,73 @@ namespace cbagoa {
                 // get instance connections
                 oa::oaIter<oa::oaInstTerm> iterm_iter(inst_ptr->getInstTerms(oacInstTermIterAll));
                 oa::oaInstTerm *iterm_ptr;
+                oa::oaString term_name_oa, net_name_oa;
                 while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
-                    // register instance terminals in connection map
-                    iterm_ptr->getTerm()->getName(ns_cdba, tmp_str);
-                    bsp::ast::name term_name = parse_name(std::string(tmp_str));
+                    // get terminal and net names
+                    iterm_ptr->getTerm()->getName(ns_cdba, term_name_oa);
+                    iterm_ptr->getNet()->getName(ns_cdba, net_name_oa);
+                    bsa::name term_name = parse_name(std::string(term_name_oa));
+                    bsa::name net_name = parse_name(std::string(net_name_oa));
 
-                    iterm_ptr->getNet()->getName(ns_cdba, tmp_str);
-                    bsp::ast::name net_name = parse_name(std::string(tmp_str));
-
-                    // populate connect map keys
-                    std::cout << "Net name: " << tmp_str << std::endl;
-                    for (auto net_bit : net_name) {
-                        std::cout << "Net bit: " << net_bit.to_string() << std::endl;
-                    }
-
-                    // populate connection maps
+                    // populate connection map
+                    auto tname_iter = term_name.begin();
+                    auto tname_end = term_name.end();
+                    auto nname_iter = net_name.begin();
+                    auto nname_end = net_name.end();
                     if (inst_size == 1) {
+                        // handle case where we have a scalar instance
+                        for (; tname_iter != tname_end; ++tname_iter, ++nname_iter) {
+                            if (nname_iter == nname_end) {
+                                throw std::invalid_argument(
+                                        fmt::format("Instance {} terminal {} net {} length mismatch.",
+                                                    inst_name_oa, term_name_oa, net_name_oa));
+                            }
+                            bsa::name_bit term_name_bit = *tname_iter;
 
+                            auto conn_ret = sinst_ptr->connections.emplace(*tname_iter, inst_size);
+                            if (conn_ret.second) {
+                                (conn_ret.first->second)[0] = *nname_iter;
+                            } else {
+                                throw std::invalid_argument(fmt::format("Instance {} has duplicate pin {}",
+                                                                        inst_name_oa, term_name_bit.to_string()));
+                            }
+                        }
+                        if (nname_iter != nname_end) {
+                            throw std::invalid_argument(
+                                    fmt::format("Instance {} terminal {} net {} length mismatch.",
+                                                inst_name_oa, term_name_oa, net_name_oa));
+                        }
+                    } else {
+                        // handle case where we have a vector instance
+                        std::vector<std::map<bsa::name_bit, std::vector<bsa::name_bit> >::iterator> ptr_list;
+                        for (; tname_iter != tname_end; ++tname_iter, ++nname_iter) {
+                            if (nname_iter == nname_end) {
+                                throw std::invalid_argument(
+                                        fmt::format("Instance {} terminal {} net {} length mismatch.",
+                                                    inst_name_oa, term_name_oa, net_name_oa));
+                            }
+                            bsa::name_bit term_name_bit = *tname_iter;
+
+                            auto conn_ret = sinst_ptr->connections.emplace(*tname_iter, inst_size);
+                            if (conn_ret.second) {
+                                (conn_ret.first->second)[0] = *nname_iter;
+                                ptr_list.push_back(conn_ret.first);
+                            } else {
+                                throw std::invalid_argument(fmt::format("Instance {} has duplicate pin {}",
+                                                                        inst_name_oa, term_name_bit.to_string()));
+                            }
+                        }
+                        for (uint32_t idx = 1; idx < inst_size; ++idx) {
+                            for (auto ptr : ptr_list) {
+                                if (nname_iter == nname_end) {
+                                    throw std::invalid_argument(
+                                            fmt::format("Instance {} terminal {} net {} length mismatch.",
+                                                        inst_name_oa, term_name_oa, net_name_oa));
+                                }
+                                (ptr->second)[idx] = *nname_iter;
+                                ++nname_iter;
+                            }
+                        }
                     }
                 }
             }

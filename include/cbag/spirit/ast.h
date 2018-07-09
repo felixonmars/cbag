@@ -117,6 +117,10 @@ namespace cbag {
                         return ptr != other.ptr || unit_index != other.unit_index || bit_index != other.bit_index;
                     }
 
+                    inline bool operator==(const const_iterator &other) {
+                        return ptr == other.ptr && unit_index == other.unit_index && bit_index == other.bit_index;
+                    }
+
                     inline name_bit operator*() const { return ptr->unit_list[unit_index][bit_index]; }
 
                 private:
