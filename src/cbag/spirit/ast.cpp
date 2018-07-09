@@ -88,7 +88,7 @@ namespace cbag {
                 if (mult > 1) {
                     return fmt::format("<*{}>{}{}", mult, base, idx_range.to_string());
                 } else {
-                    return fmt::format("{}{}", base, idx_range.to_string());
+                    return base + idx_range.to_string();
                 }
             }
 

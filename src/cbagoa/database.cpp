@@ -1,5 +1,9 @@
 #include <iostream>
 
+#include <fmt/format.h>
+// include fmt/ostream.h to support formatting oaStrings, which defines operator <<
+#include <fmt/ostream.h>
+
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
@@ -128,19 +132,15 @@ namespace cbagoa {
 
         oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name_oa, cell_oa, view_oa,
                                                    oa::oaViewType::get(oa::oacSchematic), 'r');
-        std::ostringstream errstream;
         if (dsn_ptr == nullptr) {
-            errstream << "Cannot open cell: " << lib_name << "__" << cell_name
-                      << "(" << view_name << ").";
-            throw std::invalid_argument(errstream.str());
+            throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
+                                                    lib_name, cell_name, view_name));
         }
 
         oa::oaBlock *blk_ptr = dsn_ptr->getTopBlock();
         if (blk_ptr == nullptr) {
-            errstream << "Cannot open top block for cell: " << lib_name << "__" << cell_name
-                      << "(" << view_name << ").";
-            throw std::invalid_argument(errstream.str());
-
+            throw std::invalid_argument(fmt::format("Cannot open top block for cell: {}__{}({})",
+                                                    lib_name, cell_name, view_name));
         }
 
         // place holder classes
@@ -168,13 +168,11 @@ namespace cbagoa {
                     break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
-                    errstream << "Pin " << tmp_str << " has invalid terminal type: "
-                              << term_ptr->getTermType().getName();
-                    throw std::invalid_argument(errstream.str());
+                    throw std::invalid_argument(fmt::format("Pin {} has invalid terminal type: {}",
+                                                            tmp_str, term_ptr->getTermType().getName()));
             }
             if (!success) {
-                errstream << "Cannot add pin " << tmp_str << "; it already exists.";
-                throw std::invalid_argument(errstream.str());
+                throw std::invalid_argument(fmt::format("Cannot add pin {}; it already exists.", tmp_str));
             }
         }
 
@@ -202,8 +200,7 @@ namespace cbagoa {
                 // create schematic instance
                 bsp::ast::name_unit inst_name = parse_name_unit(std::string(inst_name_oa));
                 if (inst_name.mult > 1) {
-                    errstream << "Invalid instance name: " << inst_name_oa;
-                    throw std::invalid_argument(errstream.str());
+                    throw std::invalid_argument(fmt::format("Invalid instance name: {}", inst_name_oa));
                 }
                 uint32_t inst_size = inst_name.size();
 
@@ -216,8 +213,7 @@ namespace cbagoa {
                                                                                             convert_orient(
                                                                                                     xform.orient()))));
                 if (!inst_ret_val.second) {
-                    errstream << "Instance " << inst_name_oa << " already exists.";
-                    throw std::invalid_argument(errstream.str());
+                    throw std::invalid_argument(fmt::format("Instance {} already exists.", inst_name_oa));
                 }
 
                 // get instance pointer
@@ -303,11 +299,9 @@ namespace cbagoa {
                 params.emplace(key, vald);
                 break;
             }
-            default : {
-                std::ostringstream stream;
-                stream << "Unsupport OA property type: " << ptype.getName() << ".  See developer.";
-                throw std::invalid_argument(stream.str());
-            }
+            default :
+                throw std::invalid_argument(fmt::format("Unsupported OA property type: {}, see developer.",
+                                                        ptype.getName()));
         }
     }
 
