@@ -2,10 +2,11 @@
 // Created by erichang on 7/5/18.
 //
 
-#include <sstream>
 #include <limits>
 
 #include <boost/functional/hash.hpp>
+
+#include <fmt/format.h>
 
 #include <cbag/spirit/ast.h>
 
@@ -35,29 +36,24 @@ namespace cbag {
                 if (step == 0) {
                     return "";
                 }
-                std::ostringstream out;
 
-                out << "<" << start;
                 if (start == stop) {
-                    out << ">";
+                    return fmt::format("<{}>", start);
                 } else {
-                    out << ':' << stop;
                     if (step == 1) {
-                        out << '>';
+                        return fmt::format("<{}:{}>", start, stop);
                     } else {
-                        out << ':' << step << '>';
+                        return fmt::format("<{}:{}:{}>", start, stop, step);
                     }
                 }
-                return out.str();
             }
 
             std::string name_bit::to_string() const {
-                std::ostringstream out;
-                out << base;
                 if (index) {
-                    out << '<' << (*index) << '>';
+                    return fmt::format("{}<{}>", base, *index);
+                } else {
+                    return base;
                 }
-                return out.str();
             }
 
             bool range::operator==(const range &other) const {
@@ -89,14 +85,11 @@ namespace cbag {
             }
 
             std::string name_unit::to_string() const {
-                std::ostringstream out;
                 if (mult > 1) {
-                    out << "<*" << mult << '>';
+                    return fmt::format("<*{}>{}{}", mult, base, idx_range.to_string());
+                } else {
+                    return fmt::format("{}{}", base, idx_range.to_string());
                 }
-                out << base;
-                out << idx_range.to_string();
-
-                return out.str();
             }
 
             name_bit name_unit::operator[](uint32_t index) const {

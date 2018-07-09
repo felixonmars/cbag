@@ -36,13 +36,16 @@ message("yaml-cpp library file: " ${YAML_LIB_PATH})
 message("yaml-cpp library directory: " ${YAML_LIB_DIR})
 message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
 
+# add fmt library
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
+
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIR}
         )
-link_libraries(yaml-cpp)
+link_libraries(yaml-cpp fmt-header-only)
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/layout/templates.cpp
