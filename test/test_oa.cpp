@@ -20,17 +20,23 @@ int read_oa() {
         std::string tech_lib("tsmcN16");
         std::string cell_name("inv");
         std::string view_name("schematic");
+        std::string sym_view_name("symbol");
 
         cbagoa::Library lib;
 
         lib.open_lib(lib_file, library, lib_path, tech_lib);
 
-        cbag::CSchMaster sch_master = lib.parse_sch(cell_name, view_name);
+        cbag::CSchMaster sch_master = lib.parse_schematic(cell_name, view_name);
+
+        lib.parse_symbol(cell_name, sym_view_name);
 
         YAML::Emitter out_yaml;
         out_yaml << sch_master;
 
-        std::cout << out_yaml.c_str() << std::endl;
+        std::ofstream outfile;
+        outfile.open("inv_test.yaml", std::ios_base::out);
+        outfile << out_yaml.c_str() << std::endl;
+        outfile.close();
 
         lib.close();
     } catch (oa::oaCompatibilityError &ex) {

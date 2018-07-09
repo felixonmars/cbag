@@ -46,12 +46,19 @@ namespace cbagoa {
         void open_lib(const std::string &lib_file, const std::string &library,
                       const std::string &lib_path, const std::string &tech_lib);
 
-        cbag::CSchMaster parse_sch(const std::string &cell_name,
-                                   const std::string &view_name = "schematic");
+        cbag::CSchMaster parse_schematic(const std::string &cell_name,
+                                         const std::string &view_name = "schematic");
+
+        void parse_symbol(const std::string &cell_name,
+                          const std::string &view_name = "symbol");
 
         void close();
 
     private:
+
+        std::pair<oa::oaDesign *, oa::oaBlock *>
+        open_design(const std::string &cell_name, const std::string &view_name,
+                    oa::oaReservedViewTypeEnum view_type);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

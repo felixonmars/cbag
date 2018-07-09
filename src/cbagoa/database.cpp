@@ -90,6 +90,7 @@ namespace cbagoa {
                 std::ofstream outfile;
                 outfile.open(lib_file, std::ios_base::app);
                 outfile << "DEFINE " << library << " " << lib_path << std::endl;
+                outfile.close();
             } else if (!lib_ptr->isValid()) {
                 throw std::invalid_argument("Invalid library: " + library);
             }
@@ -124,14 +125,14 @@ namespace cbagoa {
         }
     }
 
-    cbag::CSchMaster Library::parse_sch(const std::string &cell_name,
-                                        const std::string &view_name) {
-        // get OA Block pointer
+    std::pair<oa::oaDesign *, oa::oaBlock *>
+    Library::open_design(const std::string &cell_name, const std::string &view_name,
+                         oa::oaReservedViewTypeEnum view_type) {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
         oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name_oa, cell_oa, view_oa,
-                                                   oa::oaViewType::get(oa::oacSchematic), 'r');
+                                                   oa::oaViewType::get(view_type), 'r');
         if (dsn_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
                                                     lib_name, cell_name, view_name));
@@ -142,6 +143,15 @@ namespace cbagoa {
             throw std::invalid_argument(fmt::format("Cannot open top block for cell: {}__{}({})",
                                                     lib_name, cell_name, view_name));
         }
+        return {dsn_ptr, blk_ptr};
+    }
+
+    cbag::CSchMaster Library::parse_schematic(const std::string &cell_name,
+                                              const std::string &view_name) {
+        // get OA design and block pointers
+        auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematic);
+        oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
+        oa::oaBlock *blk_ptr = dsn_ptr_pair.second;
 
         // place holder classes
         oa::oaString tmp_str;
@@ -306,6 +316,57 @@ namespace cbagoa {
         // close design and return master
         dsn_ptr->close();
         return ans;
+    }
+
+    void Library::parse_symbol(const std::string &cell_name, const std::string &view_name) {
+        // get OA design and block pointers
+        auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematicSymbol);
+        oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
+        oa::oaBlock *blk_ptr = dsn_ptr_pair.second;
+
+        // place holder classes
+        oa::oaString tmp_str;
+
+        // get pins
+        oa::oaIter<oa::oaPin> pin_iter(blk_ptr->getPins());
+        oa::oaPin *pin_ptr;
+        while ((pin_ptr = pin_iter.getNext()) != nullptr) {
+            oa::oaTerm *term_ptr = pin_ptr->getTerm();
+            oa::oaString tmp_;
+            term_ptr->getName(ns_cdba, tmp_str);
+
+            std::cout << "Pin " << tmp_str << ':' << std::endl;
+
+            switch (term_ptr->getTermType()) {
+                case oa::oacInputTermType :
+                    std::cout << "  type: input" << std::endl;
+                    break;
+                case oa::oacOutputTermType :
+                    std::cout << "  type: output" << std::endl;
+                    break;
+                case oa::oacInputOutputTermType :
+                    std::cout << "  type: inout" << std::endl;
+                    break;
+                default:
+                    term_ptr->getName(ns_cdba, tmp_str);
+                    throw std::invalid_argument(fmt::format("Pin {} has invalid terminal type: {}",
+                                                            tmp_str, term_ptr->getTermType().getName()));
+            }
+
+            std::cout << "  figures:" << std::endl;
+            oa::oaIter<oa::oaPinFig> fig_iter(pin_ptr->getFigs());
+            oa::oaPinFig *fig_ptr;
+            while ((fig_ptr = fig_iter.getNext()) != nullptr) {
+                oa::oaBox bbox;
+                fig_ptr->getBBox(bbox);
+                std::cout << "    type: " << fig_ptr->getType().getName() << std::endl;
+                std::cout << fmt::format("    bbox: ({}, {}, {}, {})", bbox.left(),
+                                         bbox.bottom(), bbox.right(), bbox.top()) << std::endl;
+            }
+        }
+
+        // close design and return master
+        dsn_ptr->close();
     }
 
     void Library::close() {
