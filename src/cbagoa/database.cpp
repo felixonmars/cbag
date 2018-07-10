@@ -324,28 +324,36 @@ namespace cbagoa {
         oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
         oa::oaBlock *blk_ptr = dsn_ptr_pair.second;
 
+        YAML::Emitter emitter;
+        emitter << YAML::BeginMap;
+
         // place holder classes
         oa::oaString tmp_str;
 
         // get pins
         oa::oaIter<oa::oaPin> pin_iter(blk_ptr->getPins());
         oa::oaPin *pin_ptr;
+        emitter << YAML::Key << "Pins" << YAML::Value;
+
+        emitter << YAML::BeginMap;
         while ((pin_ptr = pin_iter.getNext()) != nullptr) {
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
             oa::oaString tmp_;
             term_ptr->getName(ns_cdba, tmp_str);
+            emitter << YAML::Key << tmp_str << YAML::Value;
 
-            std::cout << "Pin " << tmp_str << ':' << std::endl;
+            emitter << YAML::BeginMap;
+            emitter << YAML::Key << "type" << YAML::Value;
 
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    std::cout << "  type: input" << std::endl;
+                    emitter << "input";
                     break;
                 case oa::oacOutputTermType :
-                    std::cout << "  type: output" << std::endl;
+                    emitter << "output";
                     break;
                 case oa::oacInputOutputTermType :
-                    std::cout << "  type: inout" << std::endl;
+                    emitter << "inout";
                     break;
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
@@ -353,17 +361,57 @@ namespace cbagoa {
                                                             tmp_str, term_ptr->getTermType().getName()));
             }
 
-            std::cout << "  figures:" << std::endl;
+            emitter << YAML::Key << "figures" << YAML::Value;
+
+            emitter << YAML::BeginSeq;
             oa::oaIter<oa::oaPinFig> fig_iter(pin_ptr->getFigs());
             oa::oaPinFig *fig_ptr;
             while ((fig_ptr = fig_iter.getNext()) != nullptr) {
+                emitter << YAML::BeginMap;
+
+                emitter << YAML::Key << "type" << YAML::Value << fig_ptr->getType().getName();
                 oa::oaBox bbox;
                 fig_ptr->getBBox(bbox);
-                std::cout << "    type: " << fig_ptr->getType().getName() << std::endl;
-                std::cout << fmt::format("    bbox: ({}, {}, {}, {})", bbox.left(),
-                                         bbox.bottom(), bbox.right(), bbox.top()) << std::endl;
+                emitter << YAML::Key << "bbox" << YAML::Value << YAML::Flow << YAML::BeginSeq;
+                emitter << bbox.left() << bbox.bottom() << bbox.right() << bbox.top() << YAML::EndSeq;
+
+                emitter << YAML::EndMap;
+            }
+            emitter << YAML::EndSeq;
+
+            emitter << YAML::EndMap;
+        }
+        emitter << YAML::EndMap;
+
+        // get all figures
+        emitter << YAML::Key << "Shapes" << YAML::Value;
+
+        emitter << YAML::BeginSeq;
+        oa::oaIter<oa::oaShape> shape_iter(blk_ptr->getShapes());
+        oa::oaShape *shape_ptr;
+        while ((shape_ptr = shape_iter.getNext()) != nullptr) {
+            emitter << YAML::BeginMap;
+            emitter << YAML::Key << "type" << YAML::Value << shape_ptr->getType().getName();
+            emitter << YAML::EndMap;
+        }
+        emitter << YAML::EndSeq;
+
+        // get Properties
+        emitter << YAML::Key << "Properties" << YAML::Value;
+        cbag::ParamMap params;
+
+        if (dsn_ptr->hasProp()) {
+            oa::oaIter<oa::oaProp> prop_iter(dsn_ptr->getProps());
+            oa::oaProp *prop_ptr;
+            while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+                add_param(params, prop_ptr);
             }
         }
+        emitter << params;
+
+
+        emitter << YAML::EndMap;
+        std::cout << emitter.c_str() << std::endl;
 
         // close design and return master
         dsn_ptr->close();
@@ -392,8 +440,7 @@ namespace cbagoa {
         switch (ptype) {
             case oa::oacStringPropType : {
                 prop_ptr->getValue(tmp_str);
-                std::string vals(tmp_str);
-                params.emplace(key, vals);
+                params.emplace(key, std::string(tmp_str));
                 break;
             }
             case oa::oacIntPropType : {
@@ -401,18 +448,29 @@ namespace cbagoa {
                 break;
             }
             case oa::oacDoublePropType : {
-                params.emplace(key,
-                               static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
+                params.emplace(key, static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
                 break;
             }
             case oa::oacFloatPropType : {
-                double vald = static_cast<oa::oaFloatProp *>(prop_ptr)->getValue(); // NOLINT
-                params.emplace(key, vald);
+                params.emplace(key,
+                               static_cast<double>(static_cast<oa::oaFloatProp *>(prop_ptr)->getValue())); // NOLINT
                 break;
             }
-            default :
-                throw std::invalid_argument(fmt::format("Unsupported OA property type: {}, see developer.",
-                                                        ptype.getName()));
+            case oa::oacTimePropType : {
+                params.emplace(key, cbag::Time(static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())); // NOLINT
+                break;
+            }
+            case oa::oacAppPropType : {
+                oa::oaByteArray data;
+                static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
+                const unsigned char *data_ptr = data.getElements();
+                params.emplace(key, std::vector<unsigned char>(data_ptr, data_ptr + data.getNumElements()));
+                break;
+            }
+            default : {
+                throw std::invalid_argument(fmt::format("Unsupported OA property {} with type: {}, see developer.",
+                                                        key, ptype.getName()));
+            }
         }
     }
 

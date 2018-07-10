@@ -62,13 +62,39 @@ namespace cbag {
         Orientation orient;
     };
 
+    // A custom struct representing time.
+    // This struct is used so that boost variant will not confuse time with int or double.
+    struct Time {
+
+        Time() = default;
+
+        explicit Time(time_t time_val) : time_val(time_val) {}
+
+        time_t time_val;
+    };
     // parameter data structure.
-    typedef boost::variant<int32_t, double, std::string> value_t;
+    typedef boost::variant<int32_t, double, std::string, Time, std::vector<unsigned char> > value_t;
     // parameter dictionary.
     typedef std::map<std::string, value_t> ParamMap;
 
+    // YAML stream out functions.
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
+        return out << YAML::Flow
+                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
+    }
+
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Time &v) {
+        return out << YAML::Flow << YAML::BeginSeq << "time" << v.time_val << YAML::EndSeq;
+    }
+
+}
+
+// define YAML overload for cbag::value_t in boost namespace, because cbag::value_t is a typedef of a boost
+// data structure.
+namespace boost {
     // Visitor structor for outputing boost variant to YAML
-    struct VarYAMLVisitor : public boost::static_visitor<> {
+    struct VarYAMLVisitor : public static_visitor<> {
 
         explicit VarYAMLVisitor(YAML::Emitter *out_ptr)
                 : out_ptr(out_ptr) {}
@@ -85,18 +111,19 @@ namespace cbag {
             (*out_ptr) << YAML::DoubleQuoted << s;
         }
 
+        void operator()(const cbag::Time &t) const {
+            (*out_ptr) << t;
+        }
+
+        void operator()(const std::vector<unsigned char> &v) const {
+            (*out_ptr) << YAML::Binary(v.data(), v.size());
+        }
+
         YAML::Emitter *out_ptr;
 
     };
 
-    // YAML stream out functions.
-
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const Transform &v) {
-        return out << YAML::Flow
-                   << YAML::BeginSeq << v.x << v.y << enumToStr(v.orient) << YAML::EndSeq;
-    }
-
-    inline YAML::Emitter &operator<<(YAML::Emitter &out, const value_t &v) {
+    inline YAML::Emitter &operator<<(YAML::Emitter &out, const cbag::value_t &v) {
 
         VarYAMLVisitor visitor(&out);
         boost::apply_visitor(visitor, v);

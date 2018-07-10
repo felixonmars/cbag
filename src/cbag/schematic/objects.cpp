@@ -15,12 +15,7 @@ namespace cbag {
             << YAML::Key << "view_name" << YAML::Value << v.view_name
             << YAML::Key << "xform" << YAML::Value << v.xform
             << YAML::Key << "connections" << YAML::Value << v.connections
-            << YAML::Key << "params" << YAML::Value << YAML::BeginMap;
-
-        for (const auto &element : v.params) {
-            out << YAML::Key << element.first << YAML::Value << element.second;
-        }
-        out << YAML::EndMap;
+            << YAML::Key << "params" << YAML::Value << v.params;
 
         out << YAML::EndMap;
         return out;
