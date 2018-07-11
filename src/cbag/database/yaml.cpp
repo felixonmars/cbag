@@ -1,9 +1,13 @@
-//
-// Created by erichang on 6/27/18.
-//
+/** \file yaml.cpp
+ *  \brief This file implements functions to write various database objects to YAML file.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
+
 
 #include <cbag/spirit/yaml.h>
-#include <cbag/schematic/objects.h>
+#include <cbag/database/yaml.h>
 
 
 namespace cbag {

@@ -8,6 +8,7 @@
 
 #include <oa/oaDesignDB.h>
 
+#include <cbag/database/yaml.h>
 #include <cbagoa/database.h>
 
 
@@ -22,7 +23,7 @@ int read_oa() {
         std::string view_name("schematic");
         std::string sym_view_name("symbol");
 
-        cbagoa::Library lib;
+        cbagoa::OALibrary lib;
 
         lib.open_lib(lib_file, library, lib_path, tech_lib);
 

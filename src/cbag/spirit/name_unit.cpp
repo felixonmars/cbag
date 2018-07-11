@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file name_unit.cpp
+ *  \brief This file instantiates the parsing rule for name_unit.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #include <cbag/spirit/config.h>
 #include <cbag/spirit/name_unit_def.h>

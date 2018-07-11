@@ -1,7 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
-
+/** \file range.cpp
+ *  \brief This file instantiates the parsing rule for range.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 #include <cbag/spirit/config.h>
 #include <cbag/spirit/range_def.h>
 

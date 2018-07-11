@@ -1,10 +1,14 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file range_def.h
+ *  \brief This file defines the parsing rule for range.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_RANGE_DEF_H
 #define CBAG_SPIRIT_RANGE_DEF_H
 
+#include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 
 #include <cbag/spirit/ast.h>

@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/4/18.
-//
+/** \file ast.h
+ *  \brief This file defines various abstract syntax tree (AST) structures parsed by Spirit X3.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_AST_H
 #define CBAG_SPIRIT_AST_H

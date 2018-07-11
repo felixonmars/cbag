@@ -1,6 +1,10 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file name_unit.h
+ *  \brief This file declares the parsing rule for name_unit.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
+
 
 #ifndef CBAG_SPIRIT_NAME_UNIT_H
 #define CBAG_SPIRIT_NAME_UNIT_H

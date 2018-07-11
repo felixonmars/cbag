@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file ast_adapted.h
+ *  \brief This file adapts the AST structs as boost fusion tuples
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_AST_ADAPTED_H
 #define CBAG_SPIRIT_AST_ADAPTED_H

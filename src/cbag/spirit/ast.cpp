@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file ast.cpp
+ *  \brief This file implements various abstract syntax tree (AST) structures parsed by Spirit X3.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #include <limits>
 

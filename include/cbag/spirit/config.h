@@ -1,10 +1,14 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file config.h
+ *  \brief This file defines the error handle, iterator, and context type for Spirit X3.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_CONFIG_H
 #define CBAG_SPIRIT_CONFIG_H
 
+#include <boost/spirit/home/x3.hpp>
 #include <cbag/spirit/error_handler.h>
 
 

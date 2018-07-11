@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file yaml.h
+ *  \brief This file defines functions to write various struct objects to YAML file.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_YAML_H
 #define CBAG_SPIRIT_YAML_H

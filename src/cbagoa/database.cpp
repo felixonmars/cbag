@@ -1,3 +1,10 @@
+/** \file database.cpp
+ *  \brief This file implements classes and functions to read/write an OpenAccess database.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
+
 #include <iostream>
 
 #include <fmt/format.h>
@@ -7,6 +14,9 @@
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
+
+// TODO: Temporary for debugging only.  Remove later
+#include <cbag/database/yaml.h>
 
 #include <cbagoa/database.h>
 
@@ -57,11 +67,11 @@ namespace cbagoa {
 
 #pragma clang diagnostic pop
 
-    Library::~Library() {
+    OALibrary::~OALibrary() {
         close();
     }
 
-    void Library::open_lib(const std::string &lib_file, const std::string &library,
+    void OALibrary::open_lib(const std::string &lib_file, const std::string &library,
                            const std::string &lib_path, const std::string &tech_lib) {
         try {
 #pragma clang diagnostic push
@@ -126,7 +136,7 @@ namespace cbagoa {
     }
 
     std::pair<oa::oaDesign *, oa::oaBlock *>
-    Library::open_design(const std::string &cell_name, const std::string &view_name,
+    OALibrary::open_design(const std::string &cell_name, const std::string &view_name,
                          oa::oaReservedViewTypeEnum view_type) {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
@@ -146,7 +156,7 @@ namespace cbagoa {
         return {dsn_ptr, blk_ptr};
     }
 
-    cbag::CSchMaster Library::parse_schematic(const std::string &cell_name,
+    cbag::CSchMaster OALibrary::parse_schematic(const std::string &cell_name,
                                               const std::string &view_name) {
         // get OA design and block pointers
         auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematic);
@@ -318,7 +328,7 @@ namespace cbagoa {
         return ans;
     }
 
-    void Library::parse_symbol(const std::string &cell_name, const std::string &view_name) {
+    void OALibrary::parse_symbol(const std::string &cell_name, const std::string &view_name) {
         // get OA design and block pointers
         auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematicSymbol);
         oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
@@ -417,7 +427,7 @@ namespace cbagoa {
         dsn_ptr->close();
     }
 
-    void Library::close() {
+    void OALibrary::close() {
         if (is_open) {
             tech_ptr->close();
             lib_ptr->close();

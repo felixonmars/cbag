@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file error_handler.h
+ *  \brief This file defines the error handler for Spirit X3.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_ERROR_HANDLER_H
 #define CBAG_SPIRIT_ERROR_HANDLER_H

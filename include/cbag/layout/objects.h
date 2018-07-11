@@ -7,7 +7,7 @@
 
 #include <boost/polygon/polygon.hpp>
 
-#include <cbag/common.h>
+#include <cbag/database/datatypes.h>
 
 
 namespace cbag {

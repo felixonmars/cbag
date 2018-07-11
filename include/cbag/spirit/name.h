@@ -1,6 +1,9 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file name.h
+ *  \brief This file declares the parsing rule for name.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_NAME_H
 #define CBAG_SPIRIT_NAME_H

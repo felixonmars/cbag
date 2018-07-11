@@ -48,9 +48,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 link_libraries(yaml-cpp fmt-header-only)
 
 set(SRC_FILES_LIB_CBAG
-        src/cbag/layout/templates.cpp
-        src/cbag/layout/objects.cpp
-        src/cbag/schematic/objects.cpp
+        src/cbag/database/yaml.cpp
         src/cbag/spirit/ast.cpp
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp

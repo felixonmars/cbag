@@ -1,9 +1,14 @@
-//
-// Created by erichang on 7/5/18.
-//
+/** \file parsers.h
+ *  \brief This file defines the parsing method.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
 #ifndef CBAG_SPIRIT_PARSERS_H
 #define CBAG_SPIRIT_PARSERS_H
+
+#include <boost/spirit/home/x3.hpp>
 
 #include <cbag/spirit/config.h>
 

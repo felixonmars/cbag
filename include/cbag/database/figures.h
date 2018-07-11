@@ -1,17 +1,20 @@
-//
-// Created by erichang on 6/27/18.
-//
+/** \file figures.h
+ *  \brief This file defines various figure classes used by the database.
+ *
+ *  \author Eric Chang
+ *  \date   2018/07/10
+ */
 
-#ifndef CBAG_SCHEMATIC_OBJECTS_H
-#define CBAG_SCHEMATIC_OBJECTS_H
+#ifndef CBAG_DATABASE_FIGURES_H
+#define CBAG_DATABASE_FIGURES_H
 
-#include <cbag/common.h>
+#include <cbag/database/datatypes.h>
 #include <cbag/spirit/ast.h>
 
 
-namespace cbag {
+namespace bsa = cbag::spirit::ast;
 
-    namespace bsa = spirit::ast;
+namespace cbag {
 
     /** An instance in a schematic.
      */
@@ -49,12 +52,6 @@ namespace cbag {
         std::map<bsa::name_unit, CSchInstance> inst_map;
     };
 
-    // YAML stream out functions.
-
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
-
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v);
-
 }
 
-#endif //CBAG_SCHEMATIC_OBJECTS_H
+#endif //CBAG_DATABASE_FIGURES_H
