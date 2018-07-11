@@ -1,10 +1,10 @@
 #include <iostream>
+#include <fstream>
 
-#include <nlohmann/json.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/json.h>
 
 
 namespace bsp = cbag::spirit;
@@ -20,12 +20,15 @@ int main() {
 
 
         try {
+            std::ostringstream ofs;
+            boost::archive::xml_oarchive xml_out(ofs);
+
             bsp::ast::name name_obj = cbag::parse<bsp::ast::name, bsp::parser::name_type>(str, bsp::name());
-            nlohmann::json obj = name_obj;
+            xml_out << BOOST_SERIALIZATION_NVP(name_obj);
 
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";
-            std::cout << obj.dump(2) << std::endl;
+            std::cout << ofs.str() << std::endl;
             std::cout << "-------------------------\n";
         } catch (std::invalid_argument &ex) {
             std::cout << "-------------------------\n";

@@ -30,15 +30,17 @@ include_directories(${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/better-enums
         ${CMAKE_SOURCE_DIR}/json/single_include
         )
-link_libraries(fmt-header-only)
+# fmt-header-only: for fmt: the string formatting library
+# boost_system: for Spirit X3 error handling
+# boost_serialization: for serialization
+link_libraries(fmt-header-only boost_system boost_serialization)
 
 set(SRC_FILES_LIB_CBAG
-        src/cbag/database/json.cpp
         src/cbag/spirit/ast.cpp
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
         src/cbag/spirit/name.cpp
-        src/cbag/spirit/json.cpp)
+        )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # setup link library path.  Must call before defining target.
@@ -68,7 +70,6 @@ set_target_properties(test_oa PROPERTIES
 # shared library dependencies
 target_link_libraries(test_oa
         cbagoa
-        boost_system
         oaCommon
         oaBase
         oaPlugIn
@@ -90,5 +91,4 @@ set_target_properties(test_spirit PROPERTIES
 
 target_link_libraries(test_spirit
         cbag
-        boost_system
         )

@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include <boost/variant.hpp>
+#include <boost/serialization/nvp.hpp>
 
 #include <enum.h>
 
@@ -25,11 +26,6 @@ namespace cbag {
      */
     BETTER_ENUM(Orientation, uint32_t, R0, R90, R180, R270, MY, MYR90, MX, MXR90)
 
-    /** Define the parameter type enum.
-     */
-    BETTER_ENUM(ParamType, uint32_t, integer, dbl, str, time, bin)
-
-
     /** Location and Orientation of an instance.
      */
     struct Transform {
@@ -41,6 +37,15 @@ namespace cbag {
 
         Transform(coord_t x, coord_t y, Orientation orient)
                 : x(x), y(y), orient(orient) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(x);
+            ar & BOOST_SERIALIZATION_NVP(y);
+            ar & BOOST_SERIALIZATION_NVP(orient);
+        }
 
         coord_t x, y;
         Orientation orient;
@@ -56,6 +61,13 @@ namespace cbag {
 
         explicit Time(time_t time_val) : time_val(time_val) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(time_val);
+        }
+
         time_t time_val;
     };
 
@@ -68,6 +80,13 @@ namespace cbag {
         Binary() = default;
 
         explicit Binary(std::string bin_val) : bin_val(std::move(bin_val)) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(bin_val);
+        }
 
         std::string bin_val;
     };

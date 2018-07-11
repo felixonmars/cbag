@@ -16,7 +16,7 @@
 #include <cbag/spirit/name_unit.h>
 
 // TODO: Temporary for debugging only.  Remove later
-#include <cbag/database/json.h>
+#include <cbag/database/serialize.h>
 
 #include <cbagoa/database.h>
 

@@ -8,7 +8,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/json.h>
+#include <cbag/database/serialize.h>
 #include <cbagoa/database.h>
 
 

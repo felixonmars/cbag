@@ -12,6 +12,11 @@
 #include <vector>
 
 #include <boost/optional/optional.hpp>
+#include <boost/serialization/nvp.hpp>
+// for string serialization support
+#include <boost/serialization/string.hpp>
+// for vector serialization support
+#include <boost/serialization/vector.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
 
@@ -48,6 +53,15 @@ namespace cbag {
 
                 bool operator<(const range &other) const;
 
+                // boost serialization
+                template<class Archive>
+                void serialize(Archive &ar, const unsigned int version)
+                {
+                    ar & BOOST_SERIALIZATION_NVP(start);
+                    ar & BOOST_SERIALIZATION_NVP(stop);
+                    ar & BOOST_SERIALIZATION_NVP(step);
+                }
+
                 uint32_t start;
                 uint32_t stop;
                 uint32_t step;
@@ -73,6 +87,14 @@ namespace cbag {
                 inline bool operator!=(const name_bit &other) const { return !(*this == other); }
 
                 bool operator<(const name_bit &other) const;
+
+                // boost serialization
+                template<class Archive>
+                void serialize(Archive &ar, const unsigned int version)
+                {
+                    ar & BOOST_SERIALIZATION_NVP(base);
+                    ar & BOOST_SERIALIZATION_NVP(index);
+                }
 
                 std::string base;
                 boost::optional<uint32_t> index;
@@ -100,6 +122,15 @@ namespace cbag {
                 inline bool operator!=(const name_unit &other) const { return !(*this == other); }
 
                 bool operator<(const name_unit &other) const;
+
+                // boost serialization
+                template<class Archive>
+                void serialize(Archive &ar, const unsigned int version)
+                {
+                    ar & BOOST_SERIALIZATION_NVP(base);
+                    ar & BOOST_SERIALIZATION_NVP(idx_range);
+                    ar & BOOST_SERIALIZATION_NVP(mult);
+                }
 
                 uint32_t mult;
                 std::string base;
@@ -141,6 +172,13 @@ namespace cbag {
                 inline bool operator!=(const name &other) const { return !(*this == other); }
 
                 bool operator<(const name &other) const;
+
+                // boost serialization
+                template<class Archive>
+                void serialize(Archive &ar, const unsigned int version)
+                {
+                    ar & BOOST_SERIALIZATION_NVP(unit_list);
+                }
 
                 std::vector<name_unit> unit_list;
             };
