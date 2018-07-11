@@ -4,11 +4,10 @@
 #include <map>
 #include <vector>
 
-#include <yaml-cpp/yaml.h>
+#include <boost/archive/xml_oarchive.hpp>
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/serialize.h>
 #include <cbagoa/database.h>
 
 
@@ -16,9 +15,9 @@ int read_oa() {
     try {
 
         std::string lib_file("cds.lib");
-        std::string library("AAAAAASCRATCH");
+        std::string library("schtest");
         std::string lib_path(".");
-        std::string tech_lib("tsmcN16");
+        std::string tech_lib("cds_ff_mpt");
         std::string cell_name("inv");
         std::string view_name("schematic");
         std::string sym_view_name("symbol");
@@ -31,12 +30,10 @@ int read_oa() {
 
         lib.parse_symbol(cell_name, sym_view_name);
 
-        YAML::Emitter out_yaml;
-        out_yaml << sch_master;
-
         std::ofstream outfile;
         outfile.open("inv_test.yaml", std::ios_base::out);
-        outfile << out_yaml.c_str() << std::endl;
+        boost::archive::xml_oarchive xml_out(outfile);
+        xml_out << BOOST_SERIALIZATION_NVP(sch_master);
         outfile.close();
 
         lib.close();

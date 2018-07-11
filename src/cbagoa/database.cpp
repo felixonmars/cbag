@@ -5,6 +5,7 @@
  *  \date   2018/07/10
  */
 
+// TODO: Debug only, remve later
 #include <iostream>
 
 #include <fmt/format.h>
@@ -14,9 +15,6 @@
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
-
-// TODO: Temporary for debugging only.  Remove later
-#include <cbag/database/serialize.h>
 
 #include <cbagoa/database.h>
 
@@ -72,7 +70,7 @@ namespace cbagoa {
     }
 
     void OALibrary::open_lib(const std::string &lib_file, const std::string &library,
-                           const std::string &lib_path, const std::string &tech_lib) {
+                             const std::string &lib_path, const std::string &tech_lib) {
         try {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "NotAssignable"
@@ -137,7 +135,7 @@ namespace cbagoa {
 
     std::pair<oa::oaDesign *, oa::oaBlock *>
     OALibrary::open_design(const std::string &cell_name, const std::string &view_name,
-                         oa::oaReservedViewTypeEnum view_type) {
+                           oa::oaReservedViewTypeEnum view_type) {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
@@ -157,7 +155,7 @@ namespace cbagoa {
     }
 
     cbag::SchMaster OALibrary::parse_schematic(const std::string &cell_name,
-                                              const std::string &view_name) {
+                                               const std::string &view_name) {
         // get OA design and block pointers
         auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematic);
         oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
@@ -189,10 +187,12 @@ namespace cbagoa {
                 default:
                     term_ptr->getName(ns_cdba, tmp_str);
                     throw std::invalid_argument(fmt::format("Pin {} has invalid terminal type: {}",
-                                                            tmp_str, term_ptr->getTermType().getName()));
+                                                            tmp_str,
+                                                            term_ptr->getTermType().getName()));
             }
             if (!success) {
-                throw std::invalid_argument(fmt::format("Cannot add pin {}; it already exists.", tmp_str));
+                throw std::invalid_argument(
+                        fmt::format("Cannot add pin {}; it already exists.", tmp_str));
             }
         }
 
@@ -220,20 +220,25 @@ namespace cbagoa {
                 // create schematic instance
                 bsa::name_unit inst_name = parse_name_unit(std::string(inst_name_oa));
                 if (inst_name.mult > 1) {
-                    throw std::invalid_argument(fmt::format("Invalid instance name: {}", inst_name_oa));
+                    throw std::invalid_argument(
+                            fmt::format("Invalid instance name: {}", inst_name_oa));
                 }
                 uint32_t inst_size = inst_name.size();
 
                 auto inst_ret_val = ans.inst_map.emplace(std::move(inst_name),
                                                          cbag::SchInstance(std::string(inst_lib_oa),
-                                                                            std::string(inst_cell_oa),
-                                                                            std::string(inst_view_oa),
-                                                                            cbag::Transform(xform.xOffset(),
-                                                                                            xform.yOffset(),
-                                                                                            convert_orient(
-                                                                                                    xform.orient()))));
+                                                                           std::string(
+                                                                                   inst_cell_oa),
+                                                                           std::string(
+                                                                                   inst_view_oa),
+                                                                           cbag::Transform(
+                                                                                   xform.xOffset(),
+                                                                                   xform.yOffset(),
+                                                                                   convert_orient(
+                                                                                           xform.orient()))));
                 if (!inst_ret_val.second) {
-                    throw std::invalid_argument(fmt::format("Instance {} already exists.", inst_name_oa));
+                    throw std::invalid_argument(
+                            fmt::format("Instance {} already exists.", inst_name_oa));
                 }
 
                 // get instance pointer
@@ -269,8 +274,9 @@ namespace cbagoa {
                         for (; tname_iter != tname_end; ++tname_iter, ++nname_iter) {
                             if (nname_iter == nname_end) {
                                 throw std::invalid_argument(
-                                        fmt::format("Instance {} terminal {} net {} length mismatch.",
-                                                    inst_name_oa, term_name_oa, net_name_oa));
+                                        fmt::format(
+                                                "Instance {} terminal {} net {} length mismatch.",
+                                                inst_name_oa, term_name_oa, net_name_oa));
                             }
                             bsa::name_bit term_name_bit = *tname_iter;
 
@@ -278,8 +284,9 @@ namespace cbagoa {
                             if (conn_ret.second) {
                                 (conn_ret.first->second)[0] = *nname_iter;
                             } else {
-                                throw std::invalid_argument(fmt::format("Instance {} has duplicate pin {}",
-                                                                        inst_name_oa, term_name_bit.to_string()));
+                                throw std::invalid_argument(
+                                        fmt::format("Instance {} has duplicate pin {}",
+                                                    inst_name_oa, term_name_bit.to_string()));
                             }
                         }
                         if (nname_iter != nname_end) {
@@ -293,8 +300,9 @@ namespace cbagoa {
                         for (; tname_iter != tname_end; ++tname_iter, ++nname_iter) {
                             if (nname_iter == nname_end) {
                                 throw std::invalid_argument(
-                                        fmt::format("Instance {} terminal {} net {} length mismatch.",
-                                                    inst_name_oa, term_name_oa, net_name_oa));
+                                        fmt::format(
+                                                "Instance {} terminal {} net {} length mismatch.",
+                                                inst_name_oa, term_name_oa, net_name_oa));
                             }
                             bsa::name_bit term_name_bit = *tname_iter;
 
@@ -303,16 +311,18 @@ namespace cbagoa {
                                 (conn_ret.first->second)[0] = *nname_iter;
                                 ptr_list.push_back(conn_ret.first);
                             } else {
-                                throw std::invalid_argument(fmt::format("Instance {} has duplicate pin {}",
-                                                                        inst_name_oa, term_name_bit.to_string()));
+                                throw std::invalid_argument(
+                                        fmt::format("Instance {} has duplicate pin {}",
+                                                    inst_name_oa, term_name_bit.to_string()));
                             }
                         }
                         for (uint32_t idx = 1; idx < inst_size; ++idx) {
                             for (auto ptr : ptr_list) {
                                 if (nname_iter == nname_end) {
                                     throw std::invalid_argument(
-                                            fmt::format("Instance {} terminal {} net {} length mismatch.",
-                                                        inst_name_oa, term_name_oa, net_name_oa));
+                                            fmt::format(
+                                                    "Instance {} terminal {} net {} length mismatch.",
+                                                    inst_name_oa, term_name_oa, net_name_oa));
                                 }
                                 (ptr->second)[idx] = *nname_iter;
                                 ++nname_iter;
@@ -334,74 +344,53 @@ namespace cbagoa {
         oa::oaDesign *dsn_ptr = dsn_ptr_pair.first;
         oa::oaBlock *blk_ptr = dsn_ptr_pair.second;
 
-        YAML::Emitter emitter;
-        emitter << YAML::BeginMap;
-
         // place holder classes
         oa::oaString tmp_str;
 
         // get pins
         oa::oaIter<oa::oaPin> pin_iter(blk_ptr->getPins());
         oa::oaPin *pin_ptr;
-        emitter << YAML::Key << "Pins" << YAML::Value;
+        std::cout << "Pins: " << std::endl;
 
-        emitter << YAML::BeginMap;
         while ((pin_ptr = pin_iter.getNext()) != nullptr) {
             pin_ptr->getName(tmp_str);
-            emitter << YAML::Key << tmp_str << YAML::Value;
+            std::cout << tmp_str << " : " << std::endl;
+            std::cout << "terminal: " << std::endl;
 
-            emitter << YAML::BeginMap;
-            emitter << YAML::Key << "terminal" << YAML::Value;
-
-            emitter << YAML::BeginMap;
             oa::oaTerm *term_ptr = pin_ptr->getTerm();
             term_ptr->getName(ns_cdba, tmp_str);
-            emitter << YAML::Key << "name" << YAML::Value << tmp_str;
-            emitter << YAML::Key << "type" << YAML::Value << term_ptr->getTermType().getName();
+            std::cout << "name: " << tmp_str << std::endl;
+            std::cout << "type: " << term_ptr->getTermType().getName() << std::endl;
+
             term_ptr->getNet()->getName(ns_cdba, tmp_str);
-            emitter << YAML::Key << "net" << YAML:: Value << tmp_str;
-            emitter << YAML::EndMap;
+            std::cout << "net: " << tmp_str << std::endl;
 
-            emitter << YAML::Key << "figures" << YAML::Value;
+            std::cout << "figures: " << std::endl;
 
-            emitter << YAML::BeginSeq;
+
             oa::oaIter<oa::oaPinFig> fig_iter(pin_ptr->getFigs());
             oa::oaPinFig *fig_ptr;
             while ((fig_ptr = fig_iter.getNext()) != nullptr) {
-                emitter << YAML::BeginMap;
 
-                emitter << YAML::Key << "type" << YAML::Value << fig_ptr->getType().getName();
+                std::cout << "type: " << fig_ptr->getType().getName() << std::endl;
                 oa::oaBox bbox;
                 fig_ptr->getBBox(bbox);
-                emitter << YAML::Key << "bbox" << YAML::Value << YAML::Flow << YAML::BeginSeq;
-                emitter << bbox.left() << bbox.bottom() << bbox.right() << bbox.top() << YAML::EndSeq;
-
-                emitter << YAML::EndMap;
+                std::cout << "bbox: " << bbox.left() << " " << bbox.bottom() << " "
+                          << bbox.right() << " " << bbox.top() << std::endl;
             }
-            emitter << YAML::EndSeq;
-
-            oa::oaCollection<oa::oaRoute, oa::oaPin> col = pin_ptr->getConnRoutes();
-            emitter << YAML::Key << "conn_route_size" << YAML::Value << col.getCount();
-
-            emitter << YAML::EndMap;
         }
-        emitter << YAML::EndMap;
 
         // get all figures
-        emitter << YAML::Key << "Shapes" << YAML::Value;
+        std::cout << "Shapes: " << std::endl;
 
-        emitter << YAML::BeginSeq;
         oa::oaIter<oa::oaShape> shape_iter(blk_ptr->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
-            emitter << YAML::BeginMap;
-            emitter << YAML::Key << "type" << YAML::Value << shape_ptr->getType().getName();
-            emitter << YAML::EndMap;
+            std::cout << "type: " << shape_ptr->getType().getName() << std::endl;
         }
-        emitter << YAML::EndSeq;
 
         // get Properties
-        emitter << YAML::Key << "Properties" << YAML::Value;
+        std::cout << "Properties: " << std::endl;
         cbag::ParamMap params;
 
         if (dsn_ptr->hasProp()) {
@@ -411,11 +400,11 @@ namespace cbagoa {
                 add_param(params, prop_ptr);
             }
         }
-        emitter << params;
 
-
-        emitter << YAML::EndMap;
-        std::cout << emitter.c_str() << std::endl;
+        for(auto item : params) {
+            std::cout << "key: " << item.first << std::endl;
+            std::cout << "val: " << item.second << std::endl;
+        }
 
         // close design and return master
         dsn_ptr->close();
@@ -452,7 +441,8 @@ namespace cbagoa {
                 break;
             }
             case oa::oacDoublePropType : {
-                params.emplace(key, static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
+                params.emplace(key,
+                               static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
                 break;
             }
             case oa::oacFloatPropType : {
@@ -461,19 +451,20 @@ namespace cbagoa {
                 break;
             }
             case oa::oacTimePropType : {
-                params.emplace(key, cbag::Time(static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())); // NOLINT
+                params.emplace(key, cbag::Time(
+                        static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())); // NOLINT
                 break;
             }
             case oa::oacAppPropType : {
                 oa::oaByteArray data;
                 static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
-                const unsigned char *data_ptr = data.getElements();
-                params.emplace(key, std::string(data_ptr, data_ptr + data.getNumElements()));
+                params.emplace(key, cbag::Binary(data.getElements(), data.getNumElements()));
                 break;
             }
             default : {
-                throw std::invalid_argument(fmt::format("Unsupported OA property {} with type: {}, see developer.",
-                                                        key, ptype.getName()));
+                throw std::invalid_argument(
+                        fmt::format("Unsupported OA property {} with type: {}, see developer.",
+                                    key, ptype.getName()));
             }
         }
     }

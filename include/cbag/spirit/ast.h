@@ -17,6 +17,8 @@
 #include <boost/serialization/string.hpp>
 // for vector serialization support
 #include <boost/serialization/vector.hpp>
+// for optional serialization support
+#include <boost/serialization/optional.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
 

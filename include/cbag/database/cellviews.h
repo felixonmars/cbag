@@ -8,6 +8,11 @@
 #ifndef CBAG_DATABASE_CELLVIEWS_H
 #define CBAG_DATABASE_CELLVIEWS_H
 
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
+
+
 #include <cbag/spirit/ast.h>
 #include <cbag/database/datatypes.h>
 #include <cbag/database/shapes.h>
@@ -34,6 +39,18 @@ namespace cbag {
         SchInstance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
                 : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}), params({}) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(lib_name);
+            ar & BOOST_SERIALIZATION_NVP(cell_name);
+            ar & BOOST_SERIALIZATION_NVP(view_name);
+            ar & BOOST_SERIALIZATION_NVP(xform);
+            ar & BOOST_SERIALIZATION_NVP(connections);
+            ar & BOOST_SERIALIZATION_NVP(params);
+        }
+
         std::string lib_name, cell_name, view_name;
         Transform xform;
         std::map<bsa::name_bit, std::vector<bsa::name_bit>> connections;
@@ -47,6 +64,17 @@ namespace cbag {
     struct SchMaster {
         SchMaster() = default;
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(symbols);
+            ar & BOOST_SERIALIZATION_NVP(in_pins);
+            ar & BOOST_SERIALIZATION_NVP(out_pins);
+            ar & BOOST_SERIALIZATION_NVP(io_pins);
+            ar & BOOST_SERIALIZATION_NVP(inst_map);
+        }
+
         std::set<std::string> symbols;
         std::set<bsa::name> in_pins, out_pins, io_pins;
         std::map<bsa::name_unit, SchInstance> inst_map;
@@ -57,6 +85,15 @@ namespace cbag {
      */
     struct SchSymbol {
         SchSymbol() = default;
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version)
+        {
+            ar & BOOST_SERIALIZATION_NVP(in_pins);
+            ar & BOOST_SERIALIZATION_NVP(out_pins);
+            ar & BOOST_SERIALIZATION_NVP(io_pins);
+        }
 
         std::map<bsa::name, RectShape> in_pins, out_pins, io_pins;
 

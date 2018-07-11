@@ -9,10 +9,12 @@
 #ifndef CBAG_DATABASE_COMMON_H
 #define CBAG_DATABASE_COMMON_H
 
+#include <iostream>
 #include <cstdint>
 
 #include <boost/variant.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <boost/serialization/variant.hpp>
 
 #include <enum.h>
 
@@ -30,25 +32,24 @@ namespace cbag {
      */
     struct Transform {
         Transform()
-                : x(0), y(0), orient(Orientation::R0) {}
+                : x(0), y(0), orient("R0") {}
 
         Transform(coord_t x, coord_t y)
-                : x(x), y(y), orient(Orientation::R0) {}
+                : x(x), y(y), orient("R0") {}
 
         Transform(coord_t x, coord_t y, Orientation orient)
-                : x(x), y(y), orient(orient) {}
+                : x(x), y(y), orient(orient._to_string()) {}
 
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(x);
             ar & BOOST_SERIALIZATION_NVP(y);
             ar & BOOST_SERIALIZATION_NVP(orient);
         }
 
         coord_t x, y;
-        Orientation orient;
+        std::string orient;
     };
 
     /** A custom struct representing time data.
@@ -61,10 +62,14 @@ namespace cbag {
 
         explicit Time(time_t time_val) : time_val(time_val) {}
 
+        // standard out printing
+        friend std::ostream &operator<<(std::ostream &os, const Time &t) {
+            return os << "[time, " << t.time_val << "]";
+        }
+
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(time_val);
         }
 
@@ -79,12 +84,16 @@ namespace cbag {
     struct Binary {
         Binary() = default;
 
-        explicit Binary(std::string bin_val) : bin_val(std::move(bin_val)) {}
+        Binary(const unsigned char *data, unsigned int size) : bin_val(data, data + size) {}
+
+        // standard out printing
+        friend std::ostream &operator<<(std::ostream &os, const Binary &s) {
+            return os << "[bin, " << s.bin_val << "]";
+        }
 
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(bin_val);
         }
 
@@ -93,12 +102,32 @@ namespace cbag {
 
     /** Type definition for a parameter value type.
      */
-    typedef boost::variant<int32_t, double, std::string, Time, Binary > value_t;
+    typedef boost::variant<int32_t, double, std::string, Time, Binary> value_t;
 
     /** Type definition for a parameter dictonary.
      */
     typedef std::map<std::string, value_t> ParamMap;
 
 }
+/*
+BOOST_SERIALIZATION_SPLIT_FREE(cbag::Orientation)
+
+namespace boost {
+    namespace serialization {
+
+        template<class Archive>
+        void save(Archive &ar, const cbag::Orientation &orient, const unsigned int version) {
+            ar << orient._to_string();
+        }
+
+        template<class Archive>
+        void load(Archive &ar, cbag::Orientation &orient, const unsigned int version) {
+            std::string tmp;
+            ar >> tmp;
+            orient = cbag::Orientation::_from_string((tmp.c_str()));
+        }
+    }
+}
+*/
 
 #endif //CBAG_DATABASE_COMMON_H
