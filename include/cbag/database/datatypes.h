@@ -11,33 +11,9 @@
 
 #include <cstdint>
 
-#include <boost/preprocessor.hpp>
 #include <boost/variant.hpp>
-#include <boost/tokenizer.hpp>
 
-// Macro that allows easy conversion between enum and strings
-// https://stackoverflow.com/questions/5093460/how-to-convert-an-enum-type-variable-to-a-string
-#define X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE(r, data, elem)    \
-    case elem : return BOOST_PP_STRINGIZE(elem);
-
-#define DEFINE_ENUM_WITH_STRING_CONVERSIONS(name, enumerators)                \
-    enum name {                                                               \
-        BOOST_PP_SEQ_ENUM(enumerators)                                        \
-    };                                                                        \
-                                                                              \
-    inline const char* enumToStr(name v)                                      \
-    {                                                                         \
-        switch (v)                                                            \
-        {                                                                     \
-            BOOST_PP_SEQ_FOR_EACH(                                            \
-                X_DEFINE_ENUM_WITH_STRING_CONVERSIONS_TOSTRING_CASE,          \
-                name,                                                         \
-                enumerators                                                   \
-            )                                                                 \
-            default: return "[Unknown " BOOST_PP_STRINGIZE(name) "]";         \
-        }                                                                     \
-    }
-
+#include <enum.h>
 
 namespace cbag {
     typedef int32_t coord_t;
@@ -47,16 +23,16 @@ namespace cbag {
 
     /** Define the orientation enum.
      */
-    DEFINE_ENUM_WITH_STRING_CONVERSIONS(Orientation, (R0)(R90)(R180)(R270)(MY)(MYR90)(MX)(MXR90))
+    BETTER_ENUM(Orientation, uint32_t, R0, R90, R180, R270, MY, MYR90, MX, MXR90)
 
     /** Location and Orientation of an instance.
      */
     struct Transform {
         Transform()
-                : x(0), y(0), orient(R0) {}
+                : x(0), y(0), orient(Orientation::R0) {}
 
         Transform(coord_t x, coord_t y)
-                : x(x), y(y), orient(R0) {}
+                : x(x), y(y), orient(Orientation::R0) {}
 
         Transform(coord_t x, coord_t y, Orientation orient)
                 : x(x), y(y), orient(orient) {}

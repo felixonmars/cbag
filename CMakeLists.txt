@@ -44,6 +44,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIR}
         ${YAML_CPP_INCLUDE_DIR}
+        ${CMAKE_SOURCE_DIR}/better-enums
         )
 link_libraries(yaml-cpp fmt-header-only)
 

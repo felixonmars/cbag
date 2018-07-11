@@ -15,17 +15,16 @@ namespace cbag {
 
     /** Define the alignment enum
      */
-    DEFINE_ENUM_WITH_STRING_CONVERSIONS(Alignment, (upperLeft)(centerLeft)(lowerLeft)(upperCenter)
-            (centerCenter)(lowerCenter)(upperRight)(centerRight)(lowerRight))
+    BETTER_ENUM(Alignment, uint32_t, upperLeft, centerLeft, lowerLeft, upperCenter, centerCenter, lowerCenter,
+                upperRight, centerRight, lowerRight)
 
     /** Define the font enum
      */
-    DEFINE_ENUM_WITH_STRING_CONVERSIONS(Font, (euroStyle)(gothic)(math)(roman)(script)(stick)(fixed)
-            (swedish)(milSpec))
+    BETTER_ENUM(Font, uint32_t, euroStyle, gothic, math, roman, script, stick, fixed, swedish, milSpec)
 
     /** Define the path style enum
      */
-    DEFINE_ENUM_WITH_STRING_CONVERSIONS(PathStyle, (truncate)(extend)(round)(variable)(chamfer)(custom))
+    BETTER_ENUM(PathStyle, uint32_t, truncate, extend, round, variable, chamfer, custom)
 
     /** A rectangular shape
      */
@@ -102,7 +101,7 @@ namespace cbag {
     };
 
     struct Path {
-        Path() : layer(0), purpose(0), width(0), point_list(), style(truncate), begin_ext(0), end_ext(0) {}
+        Path() : layer(0), purpose(0), width(0), point_list(), style(PathStyle::truncate), begin_ext(0), end_ext(0) {}
 
         Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point>::size_type num_pts, PathStyle style,
              dist_t begin_ext, dist_t end_ext)
@@ -120,7 +119,7 @@ namespace cbag {
 
     struct PathSeg {
         PathSeg() : layer(0), purpose(0), start(0, 0), stop(0, 0), width(0),
-                    begin_style(truncate), end_style(truncate), begin_ext(0), end_ext(0) {}
+                    begin_style(PathStyle::truncate), end_style(PathStyle::truncate), begin_ext(0), end_ext(0) {}
 
         PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1, dist_t width,
                 PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
@@ -136,12 +135,13 @@ namespace cbag {
     };
 
     struct Text {
-        Text() : layer(0), purpose(0), text(), origin(0, 0), alignment(centerCenter), orient(R0),
-                 font(roman), height(0), overbar(false), visible(true), drafting(true) {}
+        Text() : layer(0), purpose(0), text(), origin(0, 0), alignment(Alignment::centerCenter),
+                 orient(Orientation::R0), font(Font::roman), height(0), overbar(false),
+                 visible(true), drafting(true) {}
 
         Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Orientation orient, dist_t height)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(centerCenter),
-                  orient(orient), font(roman), height(height), overbar(false), visible(true), drafting(true) {}
+                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(Alignment::centerCenter),
+                  orient(orient), font(Font::roman), height(height), overbar(false), visible(true), drafting(true) {}
 
         Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align, Orientation orient,
              Font font, dist_t height, bool overbar, bool visible, bool drafting)
