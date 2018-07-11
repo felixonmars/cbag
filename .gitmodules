@@ -1,3 +1,6 @@
 [submodule "fmt"]
 	path = fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "better-enums"]
+	path = better-enums
+	url = https://github.com/aantron/better-enums
