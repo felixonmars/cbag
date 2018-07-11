@@ -4,6 +4,3 @@
 [submodule "better-enums"]
 	path = better-enums
 	url = https://github.com/aantron/better-enums
-[submodule "json"]
-	path = json
-	url = https://github.com/nlohmann/json.git
