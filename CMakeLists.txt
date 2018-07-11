@@ -20,22 +20,6 @@ find_package(Boost REQUIRED)
 add_library(boost INTERFACE IMPORTED)
 set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
 
-# NOTE: apparently, there's no good way in cmake now to automatically add RPATH of
-# imported libraries to executable.  Since yaml-cpp is an imported library, we
-# just get the library file location and add to RPATH ourselves.
-
-# Find yaml-cpp package
-find_package(yaml-cpp REQUIRED)
-# Find yaml-cpp .so file location, extract directory, then add to RPATH
-get_target_property(YAML_LIB_PATH yaml-cpp LOCATION)
-get_filename_component(YAML_LIB_DIR ${YAML_LIB_PATH} DIRECTORY)
-
-set(CMAKE_INSTALL_RPATH ${YAML_LIB_DIR})
-
-message("yaml-cpp library file: " ${YAML_LIB_PATH})
-message("yaml-cpp library directory: " ${YAML_LIB_DIR})
-message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
-
 # add fmt library
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
@@ -43,18 +27,18 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIR}
-        ${YAML_CPP_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/better-enums
+        ${CMAKE_SOURCE_DIR}/json/single_include
         )
-link_libraries(yaml-cpp fmt-header-only)
+link_libraries(fmt-header-only)
 
 set(SRC_FILES_LIB_CBAG
-        src/cbag/database/yaml.cpp
+        src/cbag/database/json.cpp
         src/cbag/spirit/ast.cpp
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
         src/cbag/spirit/name.cpp
-        )
+        src/cbag/spirit/json.cpp)
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # setup link library path.  Must call before defining target.
@@ -75,10 +59,10 @@ set(SRC_FILES_OA
         )
 add_executable(test_oa ${SRC_FILES_OA})
 
-# append yaml-cpp library directory and build directory to RPATH
+# append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_oa PROPERTIES
-        INSTALL_RPATH "${YAML_LIB_DIR}:${CMAKE_CURRENT_BINARY_DIR}"
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}"
         )
 
 # shared library dependencies
@@ -96,6 +80,12 @@ target_link_libraries(test_oa
 
 add_executable(test_spirit
         test/test_spirit.cpp
+        )
+
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(test_spirit PROPERTIES
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}"
         )
 
 target_link_libraries(test_spirit

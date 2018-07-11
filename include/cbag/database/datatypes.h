@@ -25,6 +25,11 @@ namespace cbag {
      */
     BETTER_ENUM(Orientation, uint32_t, R0, R90, R180, R270, MY, MYR90, MX, MXR90)
 
+    /** Define the parameter type enum.
+     */
+    BETTER_ENUM(ParamType, uint32_t, integer, dbl, str, time, bin)
+
+
     /** Location and Orientation of an instance.
      */
     struct Transform {
@@ -54,9 +59,22 @@ namespace cbag {
         time_t time_val;
     };
 
+    /** A custom struct representing binary data.
+     *
+     *  This struct is used to distinguish binary from string, so that boost::variant
+     *  will not be confused.
+     */
+    struct Binary {
+        Binary() = default;
+
+        explicit Binary(std::string bin_val) : bin_val(std::move(bin_val)) {}
+
+        std::string bin_val;
+    };
+
     /** Type definition for a parameter value type.
      */
-    typedef boost::variant<int32_t, double, std::string, Time, std::vector<unsigned char> > value_t;
+    typedef boost::variant<int32_t, double, std::string, Time, Binary > value_t;
 
     /** Type definition for a parameter dictonary.
      */

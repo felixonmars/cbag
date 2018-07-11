@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include <yaml-cpp/yaml.h>
+#include <nlohmann/json.hpp>
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/yaml.h>
+#include <cbag/spirit/json.h>
 
 
 namespace bsp = cbag::spirit;
@@ -20,11 +20,12 @@ int main() {
 
 
         try {
-            YAML::Emitter yout;
-            yout << cbag::parse<bsp::ast::name, bsp::parser::name_type>(str, bsp::name());
+            bsp::ast::name name_obj = cbag::parse<bsp::ast::name, bsp::parser::name_type>(str, bsp::name());
+            nlohmann::json obj = name_obj;
+
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";
-            std::cout << yout.c_str() << std::endl;
+            std::cout << obj.dump(2) << std::endl;
             std::cout << "-------------------------\n";
         } catch (std::invalid_argument &ex) {
             std::cout << "-------------------------\n";
