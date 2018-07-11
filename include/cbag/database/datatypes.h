@@ -32,13 +32,13 @@ namespace cbag {
      */
     struct Transform {
         Transform()
-                : x(0), y(0), orient("R0") {}
+                : x(0), y(0), orient(Orientation::R0) {}
 
         Transform(coord_t x, coord_t y)
-                : x(x), y(y), orient("R0") {}
+                : x(x), y(y), orient(Orientation::R0) {}
 
         Transform(coord_t x, coord_t y, Orientation orient)
-                : x(x), y(y), orient(orient._to_string()) {}
+                : x(x), y(y), orient(orient) {}
 
         // boost serialization
         template<class Archive>
@@ -49,7 +49,7 @@ namespace cbag {
         }
 
         coord_t x, y;
-        std::string orient;
+        Orientation orient;
     };
 
     /** A custom struct representing time data.
@@ -109,7 +109,7 @@ namespace cbag {
     typedef std::map<std::string, value_t> ParamMap;
 
 }
-/*
+
 BOOST_SERIALIZATION_SPLIT_FREE(cbag::Orientation)
 
 namespace boost {
@@ -117,7 +117,8 @@ namespace boost {
 
         template<class Archive>
         void save(Archive &ar, const cbag::Orientation &orient, const unsigned int version) {
-            ar << orient._to_string();
+            std::string tmp(orient._to_string());
+            ar & make_nvp("value", tmp);
         }
 
         template<class Archive>
@@ -128,6 +129,6 @@ namespace boost {
         }
     }
 }
-*/
+
 
 #endif //CBAG_DATABASE_COMMON_H
