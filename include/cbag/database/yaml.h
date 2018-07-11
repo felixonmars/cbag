@@ -12,7 +12,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/database/datatypes.h>
-#include <cbag/database/figures.h>
+#include <cbag/database/cellviews.h>
 
 
 namespace cbag {
@@ -26,9 +26,9 @@ namespace cbag {
         return out << YAML::Flow << YAML::BeginSeq << "time" << v.time_val << YAML::EndSeq;
     }
 
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchInstance &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const SchInstance &v);
 
-    YAML::Emitter &operator<<(YAML::Emitter &out, const CSchMaster &v);
+    YAML::Emitter &operator<<(YAML::Emitter &out, const SchMaster &v);
 
 }
 

@@ -13,7 +13,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/figures.h>
+#include <cbag/database/cellviews.h>
 
 
 namespace cbagoa {
@@ -49,7 +49,7 @@ namespace cbagoa {
         void open_lib(const std::string &lib_file, const std::string &library,
                       const std::string &lib_path, const std::string &tech_lib);
 
-        cbag::CSchMaster parse_schematic(const std::string &cell_name,
+        cbag::SchMaster parse_schematic(const std::string &cell_name,
                                          const std::string &view_name = "schematic");
 
         void parse_symbol(const std::string &cell_name,

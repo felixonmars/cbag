@@ -27,6 +27,31 @@ namespace cbag {
      */
     DEFINE_ENUM_WITH_STRING_CONVERSIONS(PathStyle, (truncate)(extend)(round)(variable)(chamfer)(custom))
 
+    /** A rectangular shape
+     */
+    struct RectShape {
+        RectShape() : layer(0), purpose(0), bbox(0, 0, 0, 0) {}
+
+        RectShape(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
+                : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
+
+        lay_t layer;
+        purp_t purpose;
+        Rect bbox;
+    };
+
+    /** A polygon shape.
+     */
+    struct PolyShape {
+        PolyShape() : layer(0), purpose(0), poly() {}
+
+        PolyShape(lay_t lay, purp_t purp) : layer(lay), purpose(purp), poly() {}
+
+        lay_t layer;
+        purp_t purpose;
+        Poly poly;
+    };
+
     struct Arc {
         Arc() : layer(0), purpose(0), ang_start(0), ang_stop(0), bbox(0, 0, 0, 0) {}
 
@@ -98,7 +123,7 @@ namespace cbag {
                     begin_style(truncate), end_style(truncate), begin_ext(0), end_ext(0) {}
 
         PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1, dist_t width,
-                PathStyle s0, PathStyle s1,  dist_t begin_ext, dist_t end_ext)
+                PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
                 : layer(lay), purpose(purp), start(x0, y0), stop(x0, y0), width(width),
                   begin_style(s0), end_style(s1), begin_ext(begin_ext), end_ext(end_ext) {}
 

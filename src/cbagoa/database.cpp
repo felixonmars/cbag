@@ -156,7 +156,7 @@ namespace cbagoa {
         return {dsn_ptr, blk_ptr};
     }
 
-    cbag::CSchMaster OALibrary::parse_schematic(const std::string &cell_name,
+    cbag::SchMaster OALibrary::parse_schematic(const std::string &cell_name,
                                               const std::string &view_name) {
         // get OA design and block pointers
         auto dsn_ptr_pair = open_design(cell_name, view_name, oa::oacSchematic);
@@ -166,7 +166,7 @@ namespace cbagoa {
         // place holder classes
         oa::oaString tmp_str;
         // create schematic master
-        cbag::CSchMaster ans;
+        cbag::SchMaster ans;
 
         // get pins
         oa::oaIter<oa::oaPin> pin_iter(blk_ptr->getPins());
@@ -225,7 +225,7 @@ namespace cbagoa {
                 uint32_t inst_size = inst_name.size();
 
                 auto inst_ret_val = ans.inst_map.emplace(std::move(inst_name),
-                                                         cbag::CSchInstance(std::string(inst_lib_oa),
+                                                         cbag::SchInstance(std::string(inst_lib_oa),
                                                                             std::string(inst_cell_oa),
                                                                             std::string(inst_view_oa),
                                                                             cbag::Transform(xform.xOffset(),
@@ -237,7 +237,7 @@ namespace cbagoa {
                 }
 
                 // get instance pointer
-                cbag::CSchInstance *sinst_ptr = &inst_ret_val.first->second;
+                cbag::SchInstance *sinst_ptr = &inst_ret_val.first->second;
 
                 // get parameters
                 if (inst_ptr->hasProp()) {
@@ -347,29 +347,20 @@ namespace cbagoa {
 
         emitter << YAML::BeginMap;
         while ((pin_ptr = pin_iter.getNext()) != nullptr) {
-            oa::oaTerm *term_ptr = pin_ptr->getTerm();
-            oa::oaString tmp_;
-            term_ptr->getName(ns_cdba, tmp_str);
+            pin_ptr->getName(tmp_str);
             emitter << YAML::Key << tmp_str << YAML::Value;
 
             emitter << YAML::BeginMap;
-            emitter << YAML::Key << "type" << YAML::Value;
+            emitter << YAML::Key << "terminal" << YAML::Value;
 
-            switch (term_ptr->getTermType()) {
-                case oa::oacInputTermType :
-                    emitter << "input";
-                    break;
-                case oa::oacOutputTermType :
-                    emitter << "output";
-                    break;
-                case oa::oacInputOutputTermType :
-                    emitter << "inout";
-                    break;
-                default:
-                    term_ptr->getName(ns_cdba, tmp_str);
-                    throw std::invalid_argument(fmt::format("Pin {} has invalid terminal type: {}",
-                                                            tmp_str, term_ptr->getTermType().getName()));
-            }
+            emitter << YAML::BeginMap;
+            oa::oaTerm *term_ptr = pin_ptr->getTerm();
+            term_ptr->getName(ns_cdba, tmp_str);
+            emitter << YAML::Key << "name" << YAML::Value << tmp_str;
+            emitter << YAML::Key << "type" << YAML::Value << term_ptr->getTermType().getName();
+            term_ptr->getNet()->getName(ns_cdba, tmp_str);
+            emitter << YAML::Key << "net" << YAML:: Value << tmp_str;
+            emitter << YAML::EndMap;
 
             emitter << YAML::Key << "figures" << YAML::Value;
 
@@ -388,6 +379,9 @@ namespace cbagoa {
                 emitter << YAML::EndMap;
             }
             emitter << YAML::EndSeq;
+
+            oa::oaCollection<oa::oaRoute, oa::oaPin> col = pin_ptr->getConnRoutes();
+            emitter << YAML::Key << "conn_route_size" << YAML::Value << col.getCount();
 
             emitter << YAML::EndMap;
         }
@@ -474,7 +468,7 @@ namespace cbagoa {
                 oa::oaByteArray data;
                 static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
                 const unsigned char *data_ptr = data.getElements();
-                params.emplace(key, std::vector<unsigned char>(data_ptr, data_ptr + data.getNumElements()));
+                params.emplace(key, std::string(data_ptr, data_ptr + data.getNumElements()));
                 break;
             }
             default : {

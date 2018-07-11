@@ -27,7 +27,7 @@ int read_oa() {
 
         lib.open_lib(lib_file, library, lib_path, tech_lib);
 
-        cbag::CSchMaster sch_master = lib.parse_schematic(cell_name, view_name);
+        cbag::SchMaster sch_master = lib.parse_schematic(cell_name, view_name);
 
         lib.parse_symbol(cell_name, sym_view_name);
 

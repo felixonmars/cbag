@@ -1,15 +1,16 @@
-/** \file figures.h
- *  \brief This file defines various figure classes used by the database.
+/** \file cellviews.h
+ *  \brief This file defines classes representing various cell views.
  *
  *  \author Eric Chang
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_DATABASE_FIGURES_H
-#define CBAG_DATABASE_FIGURES_H
+#ifndef CBAG_DATABASE_CELLVIEWS_H
+#define CBAG_DATABASE_CELLVIEWS_H
 
-#include <cbag/database/datatypes.h>
 #include <cbag/spirit/ast.h>
+#include <cbag/database/datatypes.h>
+#include <cbag/database/shapes.h>
 
 
 namespace bsa = cbag::spirit::ast;
@@ -18,10 +19,10 @@ namespace cbag {
 
     /** An instance in a schematic.
      */
-    struct CSchInstance {
+    struct SchInstance {
         /** Create an empty instance.
          */
-        CSchInstance() = default;
+        SchInstance() = default;
 
         /** Create an instance with empty parameter and terminal mappings.
          *
@@ -30,7 +31,7 @@ namespace cbag {
          * @param view the view name.
          * @param xform the instance location.
          */
-        CSchInstance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
+        SchInstance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
                 : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}), params({}) {}
 
         std::string lib_name, cell_name, view_name;
@@ -43,15 +44,24 @@ namespace cbag {
      *
      *  Note that the terminal lists and instance list are all sorted in ascending order.
      */
-    struct CSchMaster {
-        CSchMaster() = default;
+    struct SchMaster {
+        SchMaster() = default;
 
         std::set<std::string> symbols;
-        std::string lib_name, cell_name, view_name;
         std::set<bsa::name> in_pins, out_pins, io_pins;
-        std::map<bsa::name_unit, CSchInstance> inst_map;
+        std::map<bsa::name_unit, SchInstance> inst_map;
+    };
+
+    /** A schematic symbol, in other words, a symbol cellview.
+     *
+     */
+    struct SchSymbol {
+        SchSymbol() = default;
+
+        std::map<bsa::name, RectShape> in_pins, out_pins, io_pins;
+
     };
 
 }
 
-#endif //CBAG_DATABASE_FIGURES_H
+#endif //CBAG_DATABASE_CELLVIEWS_H
