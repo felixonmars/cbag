@@ -46,6 +46,8 @@ int read_oa() {
     } catch (oa::oaError &ex) {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Error: " + msg_std);
+    } catch (oa::oaDesignError &ex) {
+        throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
     }
 
     return 0;

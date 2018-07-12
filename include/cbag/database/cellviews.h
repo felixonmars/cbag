@@ -37,12 +37,12 @@ namespace cbag {
          * @param xform the instance location.
          */
         SchInstance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
-                : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}), params({}) {}
+                : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}),
+                  params({}) {}
 
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(lib_name);
             ar & BOOST_SERIALIZATION_NVP(cell_name);
             ar & BOOST_SERIALIZATION_NVP(view_name);
@@ -66,8 +66,7 @@ namespace cbag {
 
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(symbols);
             ar & BOOST_SERIALIZATION_NVP(in_pins);
             ar & BOOST_SERIALIZATION_NVP(out_pins);
@@ -88,15 +87,13 @@ namespace cbag {
 
         // boost serialization
         template<class Archive>
-        void serialize(Archive &ar, const unsigned int version)
-        {
+        void serialize(Archive &ar, const unsigned int version) {
             ar & BOOST_SERIALIZATION_NVP(in_pins);
             ar & BOOST_SERIALIZATION_NVP(out_pins);
             ar & BOOST_SERIALIZATION_NVP(io_pins);
         }
 
         std::map<bsa::name, RectShape> in_pins, out_pins, io_pins;
-
     };
 
 }

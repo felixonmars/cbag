@@ -22,7 +22,8 @@ int main() {
         try {
             std::ostringstream ofs;
             boost::archive::xml_oarchive xml_out(ofs);
-            bsp::ast::name name_obj = cbag::parse<bsp::ast::name, bsp::parser::name_type>(str, bsp::name());
+            bsp::ast::name name_obj = cbag::parse<bsp::ast::name,
+                    bsp::parser::name_type>(str.c_str(), str.size(), bsp::name());
             xml_out << BOOST_SERIALIZATION_NVP(name_obj);
 
             std::cout << "-------------------------\n";

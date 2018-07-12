@@ -74,6 +74,7 @@ target_link_libraries(test_oa
         oaBase
         oaPlugIn
         oaDM
+        oaDMFileSysBase
         oaTech
         oaDesign
         ${CMAKE_DL_LIBS}
