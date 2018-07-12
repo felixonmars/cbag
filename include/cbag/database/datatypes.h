@@ -20,8 +20,8 @@
 
 namespace cbag {
     typedef int32_t coord_t;
-    typedef int32_t lay_t;
-    typedef int32_t purp_t;
+    typedef uint32_t lay_t;
+    typedef uint32_t purp_t;
     typedef uint32_t dist_t;
 
     /** Define the orientation enum.

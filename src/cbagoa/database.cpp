@@ -579,9 +579,13 @@ namespace cbagoa {
         oa::oaPoint p0, p1;
         p->getStyle(style);
         p->getPoints(p0, p1);
+        oa::oaDist e0, e1, ld0, ld1, rd0, rd1, rh0, rh1;
+        style.getBeginExt(e0, ld0, rd0, rh0);
+        style.getEndExt(e1, ld1, rd1, rh1);
+        cbag::SegEndStyle s0(convert_end_style(style.getBeginStyle()), e0, ld0, rd0, rh0);
+        cbag::SegEndStyle s1(convert_end_style(style.getEndStyle()), e1, ld1, rd1, rh1);
         return {p->getLayerNum(), p->getPurposeNum(), p0.x(), p0.y(), p1.x(), p1.y(),
-                style.getWidth(), convert_end_style(style.getBeginStyle()),
-                convert_end_style(style.getEndStyle()), style.getBeginExt(), style.getEndExt()};
+                style.getWidth(), s0, s1};
     }
 
     cbag::Text make_text(oa::oaText *p) {
@@ -650,6 +654,11 @@ namespace cbagoa {
             case oa::oacPathType : {
                 symbol.shapes.emplace_back(
                         make_path(static_cast<oa::oaPath *>(shape_ptr)));  // NOLINT
+                break;
+            }
+            case oa::oacPathSegType : {
+                symbol.shapes.emplace_back(
+                        make_path_seg(static_cast<oa::oaPathSeg *>(shape_ptr)));  // NOLINT
                 break;
             }
             case oa::oacTextType : {

@@ -73,6 +73,32 @@ namespace cbag {
         coord_t xl, yl, xh, yh;
     };
 
+    /** A class representing the end style of a path segment.
+     */
+    struct SegEndStyle {
+        SegEndStyle() : style(PathStyle::truncate), ext(0), left_diag(0),
+                        right_diag(0), right_half(0) {}
+
+        SegEndStyle(PathStyle style, dist_t e, dist_t ld, dist_t rd, dist_t rh)
+                : style(style), ext(e), left_diag(ld), right_diag(rd), right_half(rh) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(style);
+            ar & BOOST_SERIALIZATION_NVP(ext);
+            ar & BOOST_SERIALIZATION_NVP(left_diag);
+            ar & BOOST_SERIALIZATION_NVP(right_diag);
+            ar & BOOST_SERIALIZATION_NVP(right_half);
+#pragma clang diagnostic pop
+        }
+
+        PathStyle style;
+        dist_t ext, left_diag, right_diag, right_half;
+    };
+
     /** A rectangular shape
      */
     struct Rect {
@@ -252,13 +278,12 @@ namespace cbag {
 
     struct PathSeg {
         PathSeg() : layer(0), purpose(0), start(0, 0), stop(0, 0), width(0),
-                    begin_style(PathStyle::truncate), end_style(PathStyle::truncate),
-                    begin_ext(0), end_ext(0) {}
+                    begin_style(), end_style() {}
 
         PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                dist_t width, PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
+                dist_t width, SegEndStyle s0, SegEndStyle s1)
                 : layer(lay), purpose(purp), start(x0, y0), stop(x0, y0), width(width),
-                  begin_style(s0), end_style(s1), begin_ext(begin_ext), end_ext(end_ext) {}
+                  begin_style(s0), end_style(s1) {}
 
         // boost serialization
         template<class Archive>
@@ -271,8 +296,6 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(stop);
             ar & BOOST_SERIALIZATION_NVP(begin_style);
             ar & BOOST_SERIALIZATION_NVP(end_style);
-            ar & BOOST_SERIALIZATION_NVP(begin_ext);
-            ar & BOOST_SERIALIZATION_NVP(end_ext);
 #pragma clang diagnostic pop
         }
 
@@ -280,8 +303,7 @@ namespace cbag {
         purp_t purpose;
         Point start, stop;
         dist_t width;
-        PathStyle begin_style, end_style;
-        dist_t begin_ext, end_ext;
+        SegEndStyle begin_style, end_style;
     };
 
     struct Text {
