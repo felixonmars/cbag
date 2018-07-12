@@ -119,25 +119,27 @@ namespace cbag {
 
 }
 
+// Serialization routines for enums
+
 BOOST_SERIALIZATION_SPLIT_FREE(cbag::Orientation)
 
 namespace boost {
     namespace serialization {
 
-        template<class Archive>
-        void save(Archive &ar, const cbag::Orientation &orient, const unsigned int version) {
-            std::string tmp(orient._to_string());
+        template<class Archive, class E>
+        void save(Archive &ar, const E &e, const unsigned int version) {
+            std::string tmp(e._to_string());
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
             ar & make_nvp("value", tmp);
 #pragma clang diagnostic pop
         }
 
-        template<class Archive>
-        void load(Archive &ar, cbag::Orientation &orient, const unsigned int version) {
+        template<class Archive, class E>
+        void load(Archive &ar, E &e, const unsigned int version) {
             std::string tmp;
             ar >> tmp;
-            orient = cbag::Orientation::_from_string((tmp.c_str()));
+            e = E::_from_string((tmp.c_str()));
         }
     }
 }

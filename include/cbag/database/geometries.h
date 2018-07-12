@@ -17,11 +17,11 @@ namespace bpo = boost::polygon;
 
 namespace cbag {
 
-    using Point = bpo::point_data<coord_t>;
-    using Rect = bpo::rectangle_data<coord_t>;
-    using Poly90 = bpo::polygon_90_data<coord_t>;
-    using Poly45 = bpo::polygon_45_data<coord_t>;
-    using Poly = bpo::polygon_data<coord_t>;
+    using GPoint = bpo::point_data<coord_t>;
+    using GRect = bpo::rectangle_data<coord_t>;
+    using GPoly90 = bpo::polygon_90_data<coord_t>;
+    using GPoly45 = bpo::polygon_45_data<coord_t>;
+    using GPoly = bpo::polygon_data<coord_t>;
 }
 
 #endif //CBAG_DATABASE_GEOMETRIES_H

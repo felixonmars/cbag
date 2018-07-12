@@ -7,8 +7,10 @@
 #ifndef CBAG_DATABASE_SHAPES_H
 #define CBAG_DATABASE_SHAPES_H
 
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/vector.hpp>
+
 #include <cbag/database/datatypes.h>
-#include <cbag/database/geometries.h>
 
 
 namespace cbag {
@@ -27,6 +29,49 @@ namespace cbag {
      */
     BETTER_ENUM(PathStyle, uint32_t, truncate, extend, round, variable, chamfer, custom)
 
+    /** A point
+     */
+    struct Point {
+        Point() : x(0), y(0) {}
+
+        Point(coord_t x, coord_t y) : x(x), y(y) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(x);
+            ar & BOOST_SERIALIZATION_NVP(y);
+#pragma clang diagnostic pop
+        }
+
+        coord_t x, y;
+    };
+
+    /** A bounding box
+     */
+    struct BBox {
+        BBox() : xl(0), yl(0), xh(0), yh(0) {}
+
+        BBox(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
+                : xl(xl), yl(yl), xh(xh), yh(yh) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(xl);
+            ar & BOOST_SERIALIZATION_NVP(yl);
+            ar & BOOST_SERIALIZATION_NVP(xh);
+            ar & BOOST_SERIALIZATION_NVP(xh);
+#pragma clang diagnostic pop
+        }
+
+        coord_t xl, yl, xh, yh;
+    };
+
     /** A rectangular shape
      */
     struct RectShape {
@@ -35,21 +80,44 @@ namespace cbag {
         RectShape(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
                 : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(bbox);
+#pragma clang diagnostic pop
+        }
+
         lay_t layer;
         purp_t purpose;
-        Rect bbox;
+        BBox bbox;
     };
 
     /** A polygon shape.
      */
     struct PolyShape {
-        PolyShape() : layer(0), purpose(0), poly() {}
+        PolyShape() : layer(0), purpose(0), points() {}
 
-        PolyShape(lay_t lay, purp_t purp) : layer(lay), purpose(purp), poly() {}
+        PolyShape(lay_t lay, purp_t purp, std::vector<Point> &&points)
+                : layer(lay), purpose(purp), points(points) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(points);
+#pragma clang diagnostic pop
+        }
 
         lay_t layer;
         purp_t purpose;
-        Poly poly;
+        std::vector<Point> points;
     };
 
     struct Arc {
@@ -60,10 +128,23 @@ namespace cbag {
                 : layer(lay), purpose(purp), ang_start(start), ang_stop(stop),
                   bbox(xl, yl, xh, yh) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(ang_start);
+            ar & BOOST_SERIALIZATION_NVP(ang_stop);
+            ar & BOOST_SERIALIZATION_NVP(bbox);
+#pragma clang diagnostic pop
+        }
+
         lay_t layer;
         purp_t purpose;
         double ang_start, ang_stop;
-        Rect bbox;
+        BBox bbox;
     };
 
     struct Donut {
@@ -71,6 +152,19 @@ namespace cbag {
 
         Donut(lay_t lay, purp_t purp, coord_t x, coord_t y, dist_t r, dist_t hole_r)
                 : layer(lay), purpose(purp), center(x, y), radius(r), hole_radius(hole_r) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(center);
+            ar & BOOST_SERIALIZATION_NVP(radius);
+            ar & BOOST_SERIALIZATION_NVP(hole_radius);
+#pragma clang diagnostic pop
+        }
 
         lay_t layer;
         purp_t purpose;
@@ -84,38 +178,72 @@ namespace cbag {
         Ellipse(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
                 : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(bbox);
+#pragma clang diagnostic pop
+        }
+
         lay_t layer;
         purp_t purpose;
-        Rect bbox;
+        BBox bbox;
     };
 
     struct Line {
-        Line() : layer(0), purpose(0), point_list() {}
+        Line() : layer(0), purpose(0), points() {}
 
-        Line(lay_t lay, purp_t purp, std::vector<Point>::size_type num_pts)
-                : layer(lay), purpose(purp), point_list(num_pts) {}
+        Line(lay_t lay, purp_t purp, std::vector<Point> &&points)
+                : layer(lay), purpose(purp), points(points) {}
 
-        Line(lay_t lay, purp_t purp, std::vector<Point> &&point_list)
-                : layer(lay), purpose(purp), point_list(point_list) {}
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(points);
+#pragma clang diagnostic pop
+        }
 
         lay_t layer;
         purp_t purpose;
-        std::vector<Point> point_list;
+        std::vector<Point> points;
     };
 
     struct Path {
-        Path() : layer(0), purpose(0), width(0), point_list(), style(PathStyle::truncate),
+        Path() : layer(0), purpose(0), width(0), points(), style(PathStyle::truncate),
                  begin_ext(0), end_ext(0) {}
 
-        Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point>::size_type num_pts,
+        Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point> &&points,
              PathStyle style, dist_t begin_ext, dist_t end_ext)
-                : layer(lay), purpose(purp), width(width), point_list(num_pts), style(style),
+                : layer(lay), purpose(purp), width(width), points(points), style(style),
                   begin_ext(begin_ext), end_ext(end_ext) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(width);
+            ar & BOOST_SERIALIZATION_NVP(points);
+            ar & BOOST_SERIALIZATION_NVP(style);
+            ar & BOOST_SERIALIZATION_NVP(begin_ext);
+            ar & BOOST_SERIALIZATION_NVP(end_ext);
+#pragma clang diagnostic pop
+        }
 
         lay_t layer;
         purp_t purpose;
         dist_t width;
-        std::vector<Point> point_list;
+        std::vector<Point> points;
         PathStyle style;
         dist_t begin_ext, end_ext;
     };
@@ -130,6 +258,22 @@ namespace cbag {
                 dist_t width, PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
                 : layer(lay), purpose(purp), start(x0, y0), stop(x0, y0), width(width),
                   begin_style(s0), end_style(s1), begin_ext(begin_ext), end_ext(end_ext) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(start);
+            ar & BOOST_SERIALIZATION_NVP(stop);
+            ar & BOOST_SERIALIZATION_NVP(begin_style);
+            ar & BOOST_SERIALIZATION_NVP(end_style);
+            ar & BOOST_SERIALIZATION_NVP(begin_ext);
+            ar & BOOST_SERIALIZATION_NVP(end_ext);
+#pragma clang diagnostic pop
+        }
 
         lay_t layer;
         purp_t purpose;
@@ -157,6 +301,26 @@ namespace cbag {
                   orient(orient), font(font), height(height), overbar(overbar), visible(visible),
                   drafting(drafting) {}
 
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(layer);
+            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_NVP(text);
+            ar & BOOST_SERIALIZATION_NVP(origin);
+            ar & BOOST_SERIALIZATION_NVP(alignment);
+            ar & BOOST_SERIALIZATION_NVP(orient);
+            ar & BOOST_SERIALIZATION_NVP(font);
+            ar & BOOST_SERIALIZATION_NVP(height);
+            ar & BOOST_SERIALIZATION_NVP(overbar);
+            ar & BOOST_SERIALIZATION_NVP(visible);
+            ar & BOOST_SERIALIZATION_NVP(drafting);
+#pragma clang diagnostic pop
+        }
+
+
         lay_t layer;
         purp_t purpose;
         std::string text;
@@ -168,6 +332,14 @@ namespace cbag {
         bool overbar, visible, drafting;
     };
 }
+
+// Declare split serialization routines for enums
+
+BOOST_SERIALIZATION_SPLIT_FREE(cbag::Alignment)
+BOOST_SERIALIZATION_SPLIT_FREE(cbag::Font)
+BOOST_SERIALIZATION_SPLIT_FREE(cbag::PathStyle)
+
+
 
 
 #endif //CBAG_DATABASE_SHAPES_H
