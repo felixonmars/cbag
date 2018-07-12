@@ -331,6 +331,33 @@ namespace cbag {
         dist_t height;
         bool overbar, visible, drafting;
     };
+
+    struct EvalText : Text {
+        EvalText() : Text(), evaluator() {}
+
+        EvalText(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y,
+                 Orientation orient, dist_t height, std::string eval)
+                : Text(lay, purp, std::move(text), x, y, orient, height),
+                  evaluator(std::move(eval)) {}
+
+        EvalText(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align,
+                 Orientation orient, Font font, dist_t height, bool overbar,
+                 bool visible, bool drafting, std::string eval)
+                : Text(lay, purp, std::move(text), x, y, align, orient, font, height, overbar,
+                       visible, drafting), evaluator(std::move(eval)) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & boost::serialization::base_object<Text>(*this);
+            ar & BOOST_SERIALIZATION_NVP(evaluator);
+#pragma clang diagnostic pop
+        }
+
+        std::string evaluator;
+    };
 }
 
 // Declare split serialization routines for enums
@@ -338,8 +365,6 @@ namespace cbag {
 BOOST_SERIALIZATION_SPLIT_FREE(cbag::Alignment)
 BOOST_SERIALIZATION_SPLIT_FREE(cbag::Font)
 BOOST_SERIALIZATION_SPLIT_FREE(cbag::PathStyle)
-
-
 
 
 #endif //CBAG_DATABASE_SHAPES_H
