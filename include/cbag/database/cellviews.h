@@ -11,6 +11,7 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
+#include <boost/serialization/vector.hpp>
 
 
 #include <cbag/spirit/ast.h>
@@ -99,10 +100,12 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(in_pins);
             ar & BOOST_SERIALIZATION_NVP(out_pins);
             ar & BOOST_SERIALIZATION_NVP(io_pins);
+            ar & BOOST_SERIALIZATION_NVP(shapes);
 #pragma clang diagnostic pop
         }
 
-        std::map<bsa::name, RectShape> in_pins, out_pins, io_pins;
+        std::map<bsa::name, Rect> in_pins, out_pins, io_pins;
+        std::vector<Shape> shapes;
     };
 
 }

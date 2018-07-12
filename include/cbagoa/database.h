@@ -80,6 +80,8 @@ namespace cbagoa {
 
     void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr);
 
+    void add_shape(cbag::SchSymbol &symbol, oa::oaShape *shape_ptr);
+
 }
 
 #endif //CBAGOA_DATABASE_H

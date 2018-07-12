@@ -7,6 +7,7 @@
 #ifndef CBAG_DATABASE_SHAPES_H
 #define CBAG_DATABASE_SHAPES_H
 
+#include <boost/variant.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/vector.hpp>
 
@@ -14,6 +15,10 @@
 
 
 namespace cbag {
+
+    /** Define the path style enum
+     */
+    BETTER_ENUM(PathStyle, uint32_t, truncate, extend, round, variable, chamfer, custom)
 
     /** Define the alignment enum
      */
@@ -24,10 +29,6 @@ namespace cbag {
      */
     BETTER_ENUM(Font, uint32_t, euroStyle, gothic, math, roman, script, stick, fixed,
                 swedish, milSpec)
-
-    /** Define the path style enum
-     */
-    BETTER_ENUM(PathStyle, uint32_t, truncate, extend, round, variable, chamfer, custom)
 
     /** A point
      */
@@ -74,10 +75,10 @@ namespace cbag {
 
     /** A rectangular shape
      */
-    struct RectShape {
-        RectShape() : layer(0), purpose(0), bbox(0, 0, 0, 0) {}
+    struct Rect {
+        Rect() : layer(0), purpose(0), bbox(0, 0, 0, 0) {}
 
-        RectShape(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
+        Rect(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
                 : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
 
         // boost serialization
@@ -98,11 +99,11 @@ namespace cbag {
 
     /** A polygon shape.
      */
-    struct PolyShape {
-        PolyShape() : layer(0), purpose(0), points() {}
+    struct Poly {
+        Poly() : layer(0), purpose(0), points() {}
 
-        PolyShape(lay_t lay, purp_t purp, std::vector<Point> &&points)
-                : layer(lay), purpose(purp), points(points) {}
+        Poly(lay_t lay, purp_t purp, size_t n)
+                : layer(lay), purpose(purp), points(n) {}
 
         // boost serialization
         template<class Archive>
@@ -197,8 +198,8 @@ namespace cbag {
     struct Line {
         Line() : layer(0), purpose(0), points() {}
 
-        Line(lay_t lay, purp_t purp, std::vector<Point> &&points)
-                : layer(lay), purpose(purp), points(points) {}
+        Line(lay_t lay, purp_t purp, size_t n)
+                : layer(lay), purpose(purp), points(n) {}
 
         // boost serialization
         template<class Archive>
@@ -220,9 +221,9 @@ namespace cbag {
         Path() : layer(0), purpose(0), width(0), points(), style(PathStyle::truncate),
                  begin_ext(0), end_ext(0) {}
 
-        Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point> &&points,
+        Path(lay_t lay, purp_t purp, dist_t width, size_t n,
              PathStyle style, dist_t begin_ext, dist_t end_ext)
-                : layer(lay), purpose(purp), width(width), points(points), style(style),
+                : layer(lay), purpose(purp), width(width), points(n), style(style),
                   begin_ext(begin_ext), end_ext(end_ext) {}
 
         // boost serialization
@@ -346,6 +347,8 @@ namespace cbag {
                 : Text(lay, purp, std::move(text), x, y, align, orient, font, height, overbar,
                        visible, drafting), evaluator(std::move(eval)) {}
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
@@ -355,9 +358,13 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(evaluator);
 #pragma clang diagnostic pop
         }
+#pragma clang diagnostic pop
 
         std::string evaluator;
     };
+
+    using Shape = boost::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, PathSeg,
+            Text, EvalText>;
 }
 
 // Declare split serialization routines for enums
