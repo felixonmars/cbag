@@ -126,8 +126,14 @@ BOOST_SERIALIZATION_SPLIT_FREE(cbag::Orientation)
 namespace boost {
     namespace serialization {
 
+        // SFINAE trick to make sure this template function only applies if object of class E
+        // has _to_string() method.  the auto keyword delay return type declaration to decltype(),
+        // decltype() checks if e._to_string() compiles, and if so, this function returns void.
+        // if e._to_string() does not compile, this template function is discarded.
+
         template<class Archive, class E>
-        void save(Archive &ar, const E &e, const unsigned int version) {
+        auto save(Archive &ar, const E &e, const unsigned int version)
+        -> decltype(e._to_string(), void()) {
             std::string tmp(e._to_string());
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
@@ -135,8 +141,12 @@ namespace boost {
 #pragma clang diagnostic pop
         }
 
+        // same SFINAE trick to make sure this function only applies to E if
+        // E::_from_string() compiles.
+
         template<class Archive, class E>
-        void load(Archive &ar, E &e, const unsigned int version) {
+        auto load(Archive &ar, E &e, const unsigned int version)
+        -> decltype(E::_from_string(), void()) {
             std::string tmp;
             ar >> tmp;
             e = E::_from_string((tmp.c_str()));
