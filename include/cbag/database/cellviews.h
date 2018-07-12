@@ -43,12 +43,15 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(lib_name);
             ar & BOOST_SERIALIZATION_NVP(cell_name);
             ar & BOOST_SERIALIZATION_NVP(view_name);
             ar & BOOST_SERIALIZATION_NVP(xform);
             ar & BOOST_SERIALIZATION_NVP(connections);
             ar & BOOST_SERIALIZATION_NVP(params);
+#pragma clang diagnostic pop
         }
 
         std::string lib_name, cell_name, view_name;
@@ -67,11 +70,14 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(symbols);
             ar & BOOST_SERIALIZATION_NVP(in_pins);
             ar & BOOST_SERIALIZATION_NVP(out_pins);
             ar & BOOST_SERIALIZATION_NVP(io_pins);
             ar & BOOST_SERIALIZATION_NVP(inst_map);
+#pragma clang diagnostic pop
         }
 
         std::set<std::string> symbols;
@@ -88,9 +94,12 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(in_pins);
             ar & BOOST_SERIALIZATION_NVP(out_pins);
             ar & BOOST_SERIALIZATION_NVP(io_pins);
+#pragma clang diagnostic pop
         }
 
         std::map<bsa::name, RectShape> in_pins, out_pins, io_pins;

@@ -43,9 +43,12 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(x);
             ar & BOOST_SERIALIZATION_NVP(y);
             ar & BOOST_SERIALIZATION_NVP(orient);
+#pragma clang diagnostic pop
         }
 
         coord_t x, y;
@@ -70,7 +73,10 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(time_val);
+#pragma clang diagnostic pop
         }
 
         time_t time_val;
@@ -94,7 +100,10 @@ namespace cbag {
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(bin_val);
+#pragma clang diagnostic pop
         }
 
         std::string bin_val;
@@ -118,7 +127,10 @@ namespace boost {
         template<class Archive>
         void save(Archive &ar, const cbag::Orientation &orient, const unsigned int version) {
             std::string tmp(orient._to_string());
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
             ar & make_nvp("value", tmp);
+#pragma clang diagnostic pop
         }
 
         template<class Archive>

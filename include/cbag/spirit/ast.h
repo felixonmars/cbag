@@ -57,11 +57,13 @@ namespace cbag {
 
                 // boost serialization
                 template<class Archive>
-                void serialize(Archive &ar, const unsigned int version)
-                {
+                void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
                     ar & BOOST_SERIALIZATION_NVP(start);
                     ar & BOOST_SERIALIZATION_NVP(stop);
                     ar & BOOST_SERIALIZATION_NVP(step);
+#pragma clang diagnostic pop
                 }
 
                 uint32_t start;
@@ -92,10 +94,12 @@ namespace cbag {
 
                 // boost serialization
                 template<class Archive>
-                void serialize(Archive &ar, const unsigned int version)
-                {
+                void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
                     ar & BOOST_SERIALIZATION_NVP(base);
                     ar & BOOST_SERIALIZATION_NVP(index);
+#pragma clang diagnostic pop
                 }
 
                 std::string base;
@@ -127,11 +131,13 @@ namespace cbag {
 
                 // boost serialization
                 template<class Archive>
-                void serialize(Archive &ar, const unsigned int version)
-                {
+                void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
                     ar & BOOST_SERIALIZATION_NVP(base);
                     ar & BOOST_SERIALIZATION_NVP(idx_range);
                     ar & BOOST_SERIALIZATION_NVP(mult);
+#pragma clang diagnostic pop
                 }
 
                 uint32_t mult;
@@ -150,14 +156,17 @@ namespace cbag {
                     const_iterator &operator++();
 
                     inline bool operator!=(const const_iterator &other) {
-                        return ptr != other.ptr || unit_index != other.unit_index || bit_index != other.bit_index;
+                        return ptr != other.ptr || unit_index != other.unit_index ||
+                               bit_index != other.bit_index;
                     }
 
                     inline bool operator==(const const_iterator &other) {
-                        return ptr == other.ptr && unit_index == other.unit_index && bit_index == other.bit_index;
+                        return ptr == other.ptr && unit_index == other.unit_index &&
+                               bit_index == other.bit_index;
                     }
 
-                    inline name_bit operator*() const { return ptr->unit_list[unit_index][bit_index]; }
+                    inline name_bit
+                    operator*() const { return ptr->unit_list[unit_index][bit_index]; }
 
                 private:
                     const name *ptr;
@@ -177,9 +186,11 @@ namespace cbag {
 
                 // boost serialization
                 template<class Archive>
-                void serialize(Archive &ar, const unsigned int version)
-                {
+                void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
                     ar & BOOST_SERIALIZATION_NVP(unit_list);
+#pragma clang diagnostic pop
                 }
 
                 std::vector<name_unit> unit_list;
