@@ -15,12 +15,13 @@ namespace cbag {
 
     /** Define the alignment enum
      */
-    BETTER_ENUM(Alignment, uint32_t, upperLeft, centerLeft, lowerLeft, upperCenter, centerCenter, lowerCenter,
-                upperRight, centerRight, lowerRight)
+    BETTER_ENUM(Alignment, uint32_t, upperLeft, centerLeft, lowerLeft, upperCenter, centerCenter,
+                lowerCenter, upperRight, centerRight, lowerRight)
 
     /** Define the font enum
      */
-    BETTER_ENUM(Font, uint32_t, euroStyle, gothic, math, roman, script, stick, fixed, swedish, milSpec)
+    BETTER_ENUM(Font, uint32_t, euroStyle, gothic, math, roman, script, stick, fixed,
+                swedish, milSpec)
 
     /** Define the path style enum
      */
@@ -54,8 +55,10 @@ namespace cbag {
     struct Arc {
         Arc() : layer(0), purpose(0), ang_start(0), ang_stop(0), bbox(0, 0, 0, 0) {}
 
-        Arc(lay_t lay, purp_t purp, double start, double stop, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-                : layer(lay), purpose(purp), ang_start(start), ang_stop(stop), bbox(xl, yl, xh, yh) {}
+        Arc(lay_t lay, purp_t purp, double start, double stop, coord_t xl, coord_t yl,
+            coord_t xh, coord_t yh)
+                : layer(lay), purpose(purp), ang_start(start), ang_stop(stop),
+                  bbox(xl, yl, xh, yh) {}
 
         lay_t layer;
         purp_t purpose;
@@ -101,10 +104,11 @@ namespace cbag {
     };
 
     struct Path {
-        Path() : layer(0), purpose(0), width(0), point_list(), style(PathStyle::truncate), begin_ext(0), end_ext(0) {}
+        Path() : layer(0), purpose(0), width(0), point_list(), style(PathStyle::truncate),
+                 begin_ext(0), end_ext(0) {}
 
-        Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point>::size_type num_pts, PathStyle style,
-             dist_t begin_ext, dist_t end_ext)
+        Path(lay_t lay, purp_t purp, dist_t width, std::vector<Point>::size_type num_pts,
+             PathStyle style, dist_t begin_ext, dist_t end_ext)
                 : layer(lay), purpose(purp), width(width), point_list(num_pts), style(style),
                   begin_ext(begin_ext), end_ext(end_ext) {}
 
@@ -119,10 +123,11 @@ namespace cbag {
 
     struct PathSeg {
         PathSeg() : layer(0), purpose(0), start(0, 0), stop(0, 0), width(0),
-                    begin_style(PathStyle::truncate), end_style(PathStyle::truncate), begin_ext(0), end_ext(0) {}
+                    begin_style(PathStyle::truncate), end_style(PathStyle::truncate),
+                    begin_ext(0), end_ext(0) {}
 
-        PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1, dist_t width,
-                PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
+        PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+                dist_t width, PathStyle s0, PathStyle s1, dist_t begin_ext, dist_t end_ext)
                 : layer(lay), purpose(purp), start(x0, y0), stop(x0, y0), width(width),
                   begin_style(s0), end_style(s1), begin_ext(begin_ext), end_ext(end_ext) {}
 
@@ -139,14 +144,18 @@ namespace cbag {
                  orient(Orientation::R0), font(Font::roman), height(0), overbar(false),
                  visible(true), drafting(true) {}
 
-        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Orientation orient, dist_t height)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(Alignment::centerCenter),
-                  orient(orient), font(Font::roman), height(height), overbar(false), visible(true), drafting(true) {}
+        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y,
+             Orientation orient, dist_t height)
+                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y),
+                  alignment(Alignment::centerCenter), orient(orient), font(Font::roman),
+                  height(height), overbar(false), visible(true), drafting(true) {}
 
-        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align, Orientation orient,
-             Font font, dist_t height, bool overbar, bool visible, bool drafting)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(align), orient(orient),
-                  font(font), height(height), overbar(overbar), visible(visible), drafting(drafting) {}
+        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align,
+             Orientation orient, Font font, dist_t height, bool overbar,
+             bool visible, bool drafting)
+                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(align),
+                  orient(orient), font(font), height(height), overbar(overbar), visible(visible),
+                  drafting(drafting) {}
 
         lay_t layer;
         purp_t purpose;
