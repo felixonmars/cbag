@@ -28,13 +28,18 @@ int read_oa() {
 
         cbag::SchMaster sch_master = lib.parse_schematic(cell_name, view_name);
 
-        lib.parse_symbol(cell_name, sym_view_name);
+        cbag::SchSymbol sym_master = lib.parse_symbol(cell_name, sym_view_name);
 
         std::ofstream outfile;
-        outfile.open("inv_test.yaml", std::ios_base::out);
+        outfile.open("inv_sch.xml", std::ios_base::out);
         boost::archive::xml_oarchive xml_out(outfile);
         xml_out << BOOST_SERIALIZATION_NVP(sch_master);
         outfile.close();
+
+        std::ofstream symfile("inv_sym.xml", std::ios_base::out);
+        boost::archive::xml_oarchive xml_out2(symfile);
+        xml_out2 << BOOST_SERIALIZATION_NVP(sym_master);
+        symfile.close();
 
         lib.close();
     } catch (oa::oaCompatibilityError &ex) {

@@ -376,7 +376,7 @@ namespace cbag {
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & boost::serialization::base_object<Text>(*this);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(Text);
             ar & BOOST_SERIALIZATION_NVP(evaluator);
 #pragma clang diagnostic pop
         }

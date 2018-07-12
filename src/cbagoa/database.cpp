@@ -476,7 +476,10 @@ namespace cbagoa {
         oa::oaIter<oa::oaShape> shape_iter(blk_ptr->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
-            add_shape(ans, shape_ptr);
+            // skip shapes associated with pins.  We make those separately.
+            if (!shape_ptr->hasPin()) {
+                add_shape(ans, shape_ptr);
+            }
         }
 
         // get Properties

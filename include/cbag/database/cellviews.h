@@ -12,7 +12,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/vector.hpp>
-
+#include <boost/serialization/variant.hpp>
 
 #include <cbag/spirit/ast.h>
 #include <cbag/database/datatypes.h>
