@@ -62,7 +62,7 @@ namespace cbagoa {
         std::pair<oa::oaDesign *, oa::oaBlock *>
         open_design(const std::string &cell_name, const std::string &view_name);
 
-        void parse_sch_inst(cbag::SchInstance &inst, oa::oaInst *inst_ptr, uint32_t inst_size);
+        void parse_sch_inst(cbag::Instance &inst, oa::oaInst *inst_ptr, uint32_t inst_size);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

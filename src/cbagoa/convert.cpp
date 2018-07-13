@@ -14,6 +14,8 @@
 #include <cbagoa/convert.h>
 
 
+namespace bsa = cbag::spirit::ast;
+
 namespace cbagoa {
 
     // Read methods for shapes
@@ -160,6 +162,12 @@ namespace cbagoa {
                                       v.visible, v.drafting);
     }
 
+    // Read method for terminals
+
+    std::pair<bsa::name, std::vector<cbag::PinFigure>> read_terminals(oa::oaBlock *block) {
+        return {};
+    };
+
     // Read method for properties
 
     std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr) {
@@ -171,29 +179,25 @@ namespace cbagoa {
         switch (prop_ptr->getType()) {
             case oa::oacStringPropType : {
                 prop_ptr->getValue(tmp_str);
-                return {key, cbag::value_t(std::string(tmp_str))};
+                return {key, std::string(tmp_str)};
             }
             case oa::oacIntPropType : {
-                return {key, cbag::value_t(
-                        static_cast<oa::oaIntProp *>(prop_ptr)->getValue())}; // NOLINT
+                return {key, static_cast<oa::oaIntProp *>(prop_ptr)->getValue()}; // NOLINT
             }
             case oa::oacDoublePropType : {
-                return {key, cbag::value_t(
-                        static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue())}; // NOLINT
+                return {key, static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()}; // NOLINT
             }
             case oa::oacFloatPropType : {
-                return {key, cbag::value_t(
-                        static_cast<oa::oaFloatProp *>(prop_ptr)->getValue())}; // NOLINT
+                return {key, static_cast<oa::oaFloatProp *>(prop_ptr)->getValue()}; // NOLINT
             }
             case oa::oacTimePropType : {
-                return {key, cbag::value_t(cbag::Time(
-                        static_cast<oa::oaTimeProp *>(prop_ptr)->getValue()))}; // NOLINT
+                return {key,
+                        cbag::Time(static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())}; // NOLINT
             }
             case oa::oacAppPropType : {
                 oa::oaByteArray data;
                 static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
-                return {key, cbag::value_t(cbag::Binary(data.getElements(),
-                                                        data.getNumElements()))};
+                return {key, cbag::Binary(data.getElements(), data.getNumElements())};
             }
             default : {
                 throw std::invalid_argument(

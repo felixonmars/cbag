@@ -10,8 +10,11 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/shapes.h>
+#include <cbag/spirit/ast.h>
+#include <cbag/database/figures.h>
 
+
+namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
 
@@ -56,6 +59,10 @@ namespace cbagoa {
     oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v);
 
     oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
+
+    // Read method for terminals
+
+    std::pair<bsa::name, std::vector<cbag::PinFigure>> read_terminals(oa::oaBlock *block);
 
     // Read method for properties
 

@@ -191,8 +191,8 @@ namespace cbagoa {
                 }
                 uint32_t inst_size = inst_name.size();
 
-                cbag::SchInstance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                                       std::string(inst_view_oa), xform);
+                cbag::Instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
+                                    std::string(inst_view_oa), xform);
                 auto inst_ret_val = ans.inst_map.emplace(std::move(inst_name), std::move(inst));
                 if (!inst_ret_val.second) {
                     throw std::invalid_argument(
@@ -210,7 +210,7 @@ namespace cbagoa {
         return ans;
     }
 
-    void OALibrary::parse_sch_inst(cbag::SchInstance &inst, oa::oaInst *inst_ptr,
+    void OALibrary::parse_sch_inst(cbag::Instance &inst, oa::oaInst *inst_ptr,
                                    uint32_t inst_size) {
         // get parameters
         if (inst_ptr->hasProp()) {
