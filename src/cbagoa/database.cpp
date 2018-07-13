@@ -17,6 +17,7 @@
 #include <cbag/spirit/name_unit.h>
 
 #include <cbagoa/database.h>
+#include <cbagoa/convert.h>
 
 
 namespace bsp = cbag::spirit;
@@ -199,7 +200,7 @@ namespace cbagoa {
                 }
 
                 // parse schematic instance attributes
-                parse_sch_inst(&inst_ret_val.first->second, inst_ptr, inst_size);
+                parse_sch_inst(inst_ret_val.first->second, inst_ptr, inst_size);
             }
         }
 
@@ -209,14 +210,14 @@ namespace cbagoa {
         return ans;
     }
 
-    void OALibrary::parse_sch_inst(cbag::SchInstance *sinst_ptr, oa::oaInst *inst_ptr,
+    void OALibrary::parse_sch_inst(cbag::SchInstance &inst, oa::oaInst *inst_ptr,
                                    uint32_t inst_size) {
         // get parameters
         if (inst_ptr->hasProp()) {
             oa::oaIter<oa::oaProp> prop_iter(inst_ptr->getProps());
             oa::oaProp *prop_ptr;
             while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                add_param(sinst_ptr->params, prop_ptr);
+                inst.params.insert(read_prop(prop_ptr));
             }
         }
 
@@ -246,7 +247,7 @@ namespace cbagoa {
                     }
                     bsa::name_bit term_name_bit = *tname_iter;
 
-                    auto conn_ret = sinst_ptr->connections.emplace(*tname_iter, inst_size);
+                    auto conn_ret = inst.connections.emplace(*tname_iter, inst_size);
                     if (conn_ret.second) {
                         (conn_ret.first->second)[0] = *nname_iter;
                     } else {
@@ -271,7 +272,7 @@ namespace cbagoa {
                     }
                     bsa::name_bit term_name_bit = *tname_iter;
 
-                    auto conn_ret = sinst_ptr->connections.emplace(*tname_iter, inst_size);
+                    auto conn_ret = inst.connections.emplace(*tname_iter, inst_size);
                     if (conn_ret.second) {
                         (conn_ret.first->second)[0] = *nname_iter;
                         ptr_list.push_back(conn_ret.first);
@@ -371,7 +372,7 @@ namespace cbagoa {
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
             // skip shapes associated with pins.  We make those separately.
             if (!shape_ptr->hasPin()) {
-                add_shape(ans, shape_ptr);
+                ans.shapes.push_back(read_shape(shape_ptr));
             }
         }
 
@@ -380,7 +381,7 @@ namespace cbagoa {
             oa::oaIter<oa::oaProp> prop_iter(dsn_ptr->getProps());
             oa::oaProp *prop_ptr;
             while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                add_param(ans.params, prop_ptr);
+                ans.params.insert(read_prop(prop_ptr));
             }
         }
 
@@ -399,180 +400,4 @@ namespace cbagoa {
         }
 
     }
-
-    cbag::Rect make_rect(oa::oaRect *p) {
-        cbag::Rect ans(p->getLayerNum(), p->getPurposeNum());
-        p->getBBox(ans.bbox);
-        return ans;
-    }
-
-    cbag::Poly make_poly(oa::oaPolygon *p) {
-        cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
-        p->getPoints(ans.points);
-        return ans;
-    }
-
-    cbag::Arc make_arc(oa::oaArc *p) {
-        cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), p->getStartAngle(), p->getStopAngle());
-        p->getEllipseBBox(ans.bbox);
-        return ans;
-    }
-
-    cbag::Donut make_donut(oa::oaDonut *p) {
-        cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), p->getRadius(), p->getHoleRadius());
-        p->getCenter(ans.center);
-        return ans;
-    }
-
-    cbag::Ellipse make_ellipse(oa::oaEllipse *p) {
-        cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum());
-        p->getBBox(ans.bbox);
-        return ans;
-    }
-
-    cbag::Line make_line(oa::oaLine *p) {
-        cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
-        p->getPoints(ans.points);
-        return ans;
-    }
-
-    cbag::Path make_path(oa::oaPath *p) {
-        cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), p->getWidth(), p->getNumPoints(),
-                       p->getStyle(), p->getBeginExt(), p->getEndExt());
-        p->getPoints(ans.points);
-        return ans;
-    }
-
-    cbag::Text make_text(oa::oaText *p) {
-        oa::oaString text;
-        p->getText(text);
-        bool overbar = (p->hasOverbar() != 0);
-        bool visible = (p->isVisible() != 0);
-        bool drafting = (p->isDrafting() != 0);
-        cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), std::string(text), p->getAlignment(),
-                       p->getOrient(), p->getFont(), p->getHeight(), overbar, visible, drafting);
-        p->getOrigin(ans.origin);
-        return ans;
-    }
-
-    cbag::EvalText make_eval_text(oa::oaEvalText *p) {
-        oa::oaString text, eval;
-        p->getText(text);
-        p->getEvaluatorName(eval);
-        bool overbar = (p->hasOverbar() != 0);
-        bool visible = (p->isVisible() != 0);
-        bool drafting = (p->isDrafting() != 0);
-        cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), std::string(text),
-                           p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(),
-                           overbar, visible, drafting, std::string(eval));
-        p->getOrigin(ans.origin);
-        return ans;
-    }
-
-    void add_shape(cbag::SchSymbol &symbol, oa::oaShape *shape_ptr) {
-        // get parameter value
-        // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
-        // use NOLINT to suppress IDE warnings
-        switch (shape_ptr->getType()) {
-            case oa::oacRectType : {
-                symbol.shapes.emplace_back(
-                        make_rect(static_cast<oa::oaRect *>(shape_ptr))); // NOLINT
-                break;
-            }
-            case oa::oacPolygonType : {
-                symbol.shapes.emplace_back(
-                        make_poly(static_cast<oa::oaPolygon *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacArcType : {
-                symbol.shapes.emplace_back(
-                        make_arc(static_cast<oa::oaArc *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacDonutType : {
-                symbol.shapes.emplace_back(
-                        make_donut(static_cast<oa::oaDonut *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacEllipseType : {
-                symbol.shapes.emplace_back(
-                        make_ellipse(static_cast<oa::oaEllipse *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacLineType : {
-                symbol.shapes.emplace_back(
-                        make_line(static_cast<oa::oaLine *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacPathType : {
-                symbol.shapes.emplace_back(
-                        make_path(static_cast<oa::oaPath *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacTextType : {
-                symbol.shapes.emplace_back(
-                        make_text(static_cast<oa::oaText *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacEvalTextType : {
-                symbol.shapes.emplace_back(
-                        make_eval_text(static_cast<oa::oaEvalText *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            default : {
-                throw std::invalid_argument(
-                        fmt::format("Unsupported OA shape type: {}, see developer.",
-                                    shape_ptr->getType().getName()));
-            }
-        }
-    }
-
-    void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr) {
-        // get parameter name
-        oa::oaString tmp_str;
-        prop_ptr->getName(tmp_str);
-        std::string key(tmp_str);
-
-        // get parameter value
-        // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
-        // use NOLINT to suppress IDE warnings
-        switch (prop_ptr->getType()) {
-            case oa::oacStringPropType : {
-                prop_ptr->getValue(tmp_str);
-                params.emplace(key, std::string(tmp_str));
-                break;
-            }
-            case oa::oacIntPropType : {
-                params.emplace(key, static_cast<oa::oaIntProp *>(prop_ptr)->getValue()); // NOLINT
-                break;
-            }
-            case oa::oacDoublePropType : {
-                params.emplace(key,
-                               static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()); // NOLINT
-                break;
-            }
-            case oa::oacFloatPropType : {
-                params.emplace(key, static_cast<double>(
-                        static_cast<oa::oaFloatProp *>(prop_ptr)->getValue())); // NOLINT
-                break;
-            }
-            case oa::oacTimePropType : {
-                params.emplace(key, cbag::Time(
-                        static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())); // NOLINT
-                break;
-            }
-            case oa::oacAppPropType : {
-                oa::oaByteArray data;
-                static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
-                params.emplace(key, cbag::Binary(data.getElements(), data.getNumElements()));
-                break;
-            }
-            default : {
-                throw std::invalid_argument(
-                        fmt::format("Unsupported OA property {} with type: {}, see developer.",
-                                    key, prop_ptr->getType().getName()));
-            }
-        }
-    }
-
 }

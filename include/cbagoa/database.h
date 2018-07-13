@@ -62,7 +62,7 @@ namespace cbagoa {
         std::pair<oa::oaDesign *, oa::oaBlock *>
         open_design(const std::string &cell_name, const std::string &view_name);
 
-        void parse_sch_inst(cbag::SchInstance *sinst_ptr, oa::oaInst *inst_ptr, uint32_t inst_size);
+        void parse_sch_inst(cbag::SchInstance &inst, oa::oaInst *inst_ptr, uint32_t inst_size);
 
         // OA namespace objects
         const oa::oaNativeNS ns;
@@ -77,11 +77,6 @@ namespace cbagoa {
         std::string lib_name;
         oa::oaScalarName lib_name_oa;
     };
-
-    void add_param(cbag::ParamMap &params, oa::oaProp *prop_ptr);
-
-    void add_shape(cbag::SchSymbol &symbol, oa::oaShape *shape_ptr);
-
 }
 
 #endif //CBAGOA_DATABASE_H
