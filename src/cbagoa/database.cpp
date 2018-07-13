@@ -483,20 +483,12 @@ namespace cbagoa {
         }
 
         // get Properties
-        std::cout << "Properties: " << std::endl;
-        cbag::ParamMap params;
-
         if (dsn_ptr->hasProp()) {
             oa::oaIter<oa::oaProp> prop_iter(dsn_ptr->getProps());
             oa::oaProp *prop_ptr;
             while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-                add_param(params, prop_ptr);
+                add_param(ans.params, prop_ptr);
             }
-        }
-
-        for (auto item : params) {
-            std::cout << "key: " << item.first << std::endl;
-            std::cout << "val: " << item.second << std::endl;
         }
 
         // close design and return master

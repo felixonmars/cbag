@@ -8,6 +8,8 @@
 #ifndef CBAG_DATABASE_CELLVIEWS_H
 #define CBAG_DATABASE_CELLVIEWS_H
 
+#include <map>
+
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
@@ -101,11 +103,13 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(out_pins);
             ar & BOOST_SERIALIZATION_NVP(io_pins);
             ar & BOOST_SERIALIZATION_NVP(shapes);
+            ar & BOOST_SERIALIZATION_NVP(params);
 #pragma clang diagnostic pop
         }
 
         std::map<bsa::name, Rect> in_pins, out_pins, io_pins;
         std::vector<Shape> shapes;
+        ParamMap params;
     };
 
 }
