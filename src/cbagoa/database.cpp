@@ -33,111 +33,6 @@ namespace cbagoa {
                 bsp::parser::name_unit_type>(source, source.getLength(), bsp::name_unit());
     }
 
-    cbag::Orientation convert_orient(const oa::oaOrient &orient) {
-        switch (orient) {
-            case oa::oacR0:
-                return cbag::Orientation::R0;
-            case oa::oacR90:
-                return cbag::Orientation::R90;
-            case oa::oacR180:
-                return cbag::Orientation::R180;
-            case oa::oacR270:
-                return cbag::Orientation::R270;
-            case oa::oacMY:
-                return cbag::Orientation::MY;
-            case oa::oacMYR90:
-                return cbag::Orientation::MYR90;
-            case oa::oacMX:
-                return cbag::Orientation::MX;
-            case oa::oacMXR90:
-                return cbag::Orientation::MXR90;
-            default:
-                throw std::invalid_argument("Unknown orientation code.");
-        }
-    }
-
-    cbag::PathStyle convert_path_style(const oa::oaPathStyle &style) {
-        switch (style) {
-            case oa::oacTruncatePathStyle:
-                return cbag::PathStyle::truncate;
-            case oa::oacExtendPathStyle:
-                return cbag::PathStyle::extend;
-            case oa::oacRoundPathStyle:
-                return cbag::PathStyle::round;
-            case oa::oacVariablePathStyle:
-                return cbag::PathStyle::variable;
-            default:
-                throw std::invalid_argument("Unknown path style code.");
-        }
-    }
-
-    cbag::PathStyle convert_end_style(const oa::oaEndStyle &style) {
-        switch (style) {
-            case oa::oacTruncateEndStyle:
-                return cbag::PathStyle::truncate;
-            case oa::oacExtendEndStyle:
-                return cbag::PathStyle::extend;
-            case oa::oacVariableEndStyle:
-                return cbag::PathStyle::variable;
-            case oa::oacChamferEndStyle:
-                return cbag::PathStyle::chamfer;
-            case oa::oacCustomEndStyle:
-                return cbag::PathStyle::custom;
-            default:
-                throw std::invalid_argument("Unknown end style code.");
-        }
-    }
-
-    cbag::Alignment convert_alignment(const oa::oaTextAlign &align) {
-        switch (align) {
-            case oa::oacUpperLeftTextAlign:
-                return cbag::Alignment::upperLeft;
-            case oa::oacCenterLeftTextAlign:
-                return cbag::Alignment::centerLeft;
-            case oa::oacLowerLeftTextAlign:
-                return cbag::Alignment::lowerLeft;
-            case oa::oacUpperRightTextAlign:
-                return cbag::Alignment::upperRight;
-            case oa::oacCenterRightTextAlign:
-                return cbag::Alignment::centerRight;
-            case oa::oacLowerRightTextAlign:
-                return cbag::Alignment::lowerRight;
-            case oa::oacUpperCenterTextAlign:
-                return cbag::Alignment::upperCenter;
-            case oa::oacCenterCenterTextAlign:
-                return cbag::Alignment::centerCenter;
-            case oa::oacLowerCenterTextAlign:
-                return cbag::Alignment::lowerCenter;
-            default:
-                throw std::invalid_argument("Unknown text alignment code.");
-        }
-    }
-
-    cbag::Font convert_font(const oa::oaFont &font) {
-        switch (font) {
-            case oa::oacEuroStyleFont:
-                return cbag::Font::euroStyle;
-            case oa::oacGothicFont:
-                return cbag::Font::gothic;
-            case oa::oacMathFont:
-                return cbag::Font::math;
-            case oa::oacRomanFont:
-                return cbag::Font::roman;
-            case oa::oacScriptFont:
-                return cbag::Font::script;
-            case oa::oacStickFont:
-                return cbag::Font::stick;
-            case oa::oacFixedFont:
-                return cbag::Font::fixed;
-            case oa::oacSwedishFont:
-                return cbag::Font::swedish;
-            case oa::oacMilSpecFont:
-                return cbag::Font::milSpec;
-            default:
-                throw std::invalid_argument("Unknown font code.");
-        }
-    }
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 
@@ -296,9 +191,7 @@ namespace cbagoa {
                 uint32_t inst_size = inst_name.size();
 
                 cbag::SchInstance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                                       std::string(inst_view_oa),
-                                       cbag::Transform(xform.xOffset(), xform.yOffset(),
-                                                       convert_orient(xform.orient())));
+                                       std::string(inst_view_oa), xform);
                 auto inst_ret_val = ans.inst_map.emplace(std::move(inst_name), std::move(inst));
                 if (!inst_ret_val.second) {
                     throw std::invalid_argument(
@@ -508,107 +401,72 @@ namespace cbagoa {
     }
 
     cbag::Rect make_rect(oa::oaRect *p) {
-        oa::oaBox box;
-        p->getBBox(box);
-        return {p->getLayerNum(), p->getPurposeNum(), box.left(), box.bottom(),
-                box.right(), box.top()};
+        cbag::Rect ans(p->getLayerNum(), p->getPurposeNum());
+        p->getBBox(ans.bbox);
+        return ans;
     }
 
     cbag::Poly make_poly(oa::oaPolygon *p) {
-        oa::oaPointArray points;
-        p->getPoints(points);
-        size_t n = points.getNumElements();
-        cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), n);
-        for (size_t i = 0; i < n; ++i) {
-            ans.points[i] = {points[i].x(), points[i].y()};
-        }
+        cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
+        p->getPoints(ans.points);
         return ans;
     }
 
     cbag::Arc make_arc(oa::oaArc *p) {
-        oa::oaBox box;
-        p->getEllipseBBox(box);
-        return {p->getLayerNum(), p->getPurposeNum(), p->getStartAngle(), p->getStopAngle(),
-                box.left(), box.bottom(), box.right(), box.top()};
+        cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), p->getStartAngle(), p->getStopAngle());
+        p->getEllipseBBox(ans.bbox);
+        return ans;
     }
 
     cbag::Donut make_donut(oa::oaDonut *p) {
-        oa::oaPoint center;
-        p->getCenter(center);
-        return {p->getLayerNum(), p->getPurposeNum(), center.x(), center.y(),
-                p->getRadius(), p->getHoleRadius()};
+        cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), p->getRadius(), p->getHoleRadius());
+        p->getCenter(ans.center);
+        return ans;
     }
 
     cbag::Ellipse make_ellipse(oa::oaEllipse *p) {
-        oa::oaBox box;
-        p->getBBox(box);
-        return {p->getLayerNum(), p->getPurposeNum(), box.left(), box.bottom(),
-                box.right(), box.top()};
+        cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum());
+        p->getBBox(ans.bbox);
+        return ans;
     }
 
     cbag::Line make_line(oa::oaLine *p) {
-        oa::oaPointArray points;
-        p->getPoints(points);
-        size_t n = points.getNumElements();
-        cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), n);
-        for (size_t i = 0; i < n; ++i) {
-            ans.points[i] = {points[i].x(), points[i].y()};
-        }
+        cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
+        p->getPoints(ans.points);
         return ans;
     }
 
     cbag::Path make_path(oa::oaPath *p) {
-        oa::oaPointArray points;
-        p->getPoints(points);
-        size_t n = points.getNumElements();
-        cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), p->getWidth(), n,
-                       convert_path_style(p->getStyle()), p->getBeginExt(), p->getEndExt());
-        for (size_t i = 0; i < n; ++i) {
-            ans.points[i] = {points[i].x(), points[i].y()};
-        }
+        cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), p->getWidth(), p->getNumPoints(),
+                       p->getStyle(), p->getBeginExt(), p->getEndExt());
+        p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::PathSeg make_path_seg(oa::oaPathSeg *p) {
-        oa::oaSegStyle style;
-        oa::oaPoint p0, p1;
-        p->getStyle(style);
-        p->getPoints(p0, p1);
-        oa::oaDist e0, e1, ld0, ld1, rd0, rd1, rh0, rh1;
-        style.getBeginExt(e0, ld0, rd0, rh0);
-        style.getEndExt(e1, ld1, rd1, rh1);
-        cbag::SegEndStyle s0(convert_end_style(style.getBeginStyle()), e0, ld0, rd0, rh0);
-        cbag::SegEndStyle s1(convert_end_style(style.getEndStyle()), e1, ld1, rd1, rh1);
-        return {p->getLayerNum(), p->getPurposeNum(), p0.x(), p0.y(), p1.x(), p1.y(),
-                style.getWidth(), s0, s1};
-    }
-
     cbag::Text make_text(oa::oaText *p) {
-        oa::oaPoint orig;
         oa::oaString text;
-        p->getOrigin(orig);
         p->getText(text);
         bool overbar = (p->hasOverbar() != 0);
         bool visible = (p->isVisible() != 0);
         bool drafting = (p->isDrafting() != 0);
-        return {p->getLayerNum(), p->getPurposeNum(), std::string(text), orig.x(), orig.y(),
-                convert_alignment(p->getAlignment()), convert_orient(p->getOrient()),
-                convert_font(p->getFont()), p->getHeight(), overbar, visible, drafting};
+        cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), std::string(text), p->getAlignment(),
+                       p->getOrient(), p->getFont(), p->getHeight(), overbar, visible, drafting);
+        p->getOrigin(ans.origin);
+        return ans;
     }
 
     cbag::EvalText make_eval_text(oa::oaEvalText *p) {
-        oa::oaPoint orig;
         oa::oaString text, eval;
-        p->getOrigin(orig);
         p->getText(text);
         p->getEvaluatorName(eval);
         bool overbar = (p->hasOverbar() != 0);
         bool visible = (p->isVisible() != 0);
         bool drafting = (p->isDrafting() != 0);
-        return {p->getLayerNum(), p->getPurposeNum(), std::string(text), orig.x(), orig.y(),
-                convert_alignment(p->getAlignment()), convert_orient(p->getOrient()),
-                convert_font(p->getFont()), p->getHeight(), overbar, visible,
-                drafting, std::string(eval)};
+        cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), std::string(text),
+                           p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(),
+                           overbar, visible, drafting, std::string(eval));
+        p->getOrigin(ans.origin);
+        return ans;
     }
 
     void add_shape(cbag::SchSymbol &symbol, oa::oaShape *shape_ptr) {
@@ -649,11 +507,6 @@ namespace cbagoa {
             case oa::oacPathType : {
                 symbol.shapes.emplace_back(
                         make_path(static_cast<oa::oaPath *>(shape_ptr)));  // NOLINT
-                break;
-            }
-            case oa::oacPathSegType : {
-                symbol.shapes.emplace_back(
-                        make_path_seg(static_cast<oa::oaPathSeg *>(shape_ptr)));  // NOLINT
                 break;
             }
             case oa::oacTextType : {

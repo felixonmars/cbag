@@ -12,97 +12,17 @@
 #include <boost/serialization/vector.hpp>
 
 #include <cbag/database/datatypes.h>
-
+#include <cbag/database/primitives.h>
 
 namespace cbag {
-
-    /** Define the path style enum
-     */
-    BETTER_ENUM(PathStyle, uint32_t, truncate, extend, round, variable, chamfer, custom)
-
-    /** Define the alignment enum
-     */
-    BETTER_ENUM(Alignment, uint32_t, upperLeft, centerLeft, lowerLeft, upperCenter, centerCenter,
-                lowerCenter, upperRight, centerRight, lowerRight)
-
-    /** Define the font enum
-     */
-    BETTER_ENUM(Font, uint32_t, euroStyle, gothic, math, roman, script, stick, fixed,
-                swedish, milSpec)
-
-    /** A point
-     */
-    struct Point {
-        Point() : x(0), y(0) {}
-
-        Point(coord_t x, coord_t y) : x(x), y(y) {}
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(x);
-            ar & BOOST_SERIALIZATION_NVP(y);
-#pragma clang diagnostic pop
-        }
-
-        coord_t x, y;
-    };
-
-    /** A bounding box
-     */
-    struct BBox {
-        BBox() : xl(0), yl(0), xh(0), yh(0) {}
-
-        BBox(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-                : xl(xl), yl(yl), xh(xh), yh(yh) {}
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(xl);
-            ar & BOOST_SERIALIZATION_NVP(yl);
-            ar & BOOST_SERIALIZATION_NVP(xh);
-            ar & BOOST_SERIALIZATION_NVP(xh);
-#pragma clang diagnostic pop
-        }
-
-        coord_t xl, yl, xh, yh;
-    };
-
-    /** A class representing the end style of a path segment.
-     */
-    struct SegEndStyle {
-        SegEndStyle() : style(PathStyle::truncate), ext(0), left_diag(0),
-                        right_diag(0), right_half(0) {}
-
-        SegEndStyle(PathStyle style, dist_t e, dist_t ld, dist_t rd, dist_t rh)
-                : style(style), ext(e), left_diag(ld), right_diag(rd), right_half(rh) {}
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(style);
-            ar & BOOST_SERIALIZATION_NVP(ext);
-            ar & BOOST_SERIALIZATION_NVP(left_diag);
-            ar & BOOST_SERIALIZATION_NVP(right_diag);
-            ar & BOOST_SERIALIZATION_NVP(right_half);
-#pragma clang diagnostic pop
-        }
-
-        PathStyle style;
-        dist_t ext, left_diag, right_diag, right_half;
-    };
 
     /** A rectangular shape
      */
     struct Rect {
-        Rect() : layer(0), purpose(0), bbox(0, 0, 0, 0) {}
+        Rect() : layer(0), purpose(0), bbox() {}
+
+        Rect(lay_t lay, purp_t purp)
+                : layer(lay), purpose(purp), bbox() {}
 
         Rect(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
                 : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
@@ -128,7 +48,7 @@ namespace cbag {
     struct Poly {
         Poly() : layer(0), purpose(0), points() {}
 
-        Poly(lay_t lay, purp_t purp, size_t n)
+        Poly(lay_t lay, purp_t purp, uint32_t n)
                 : layer(lay), purpose(purp), points(n) {}
 
         // boost serialization
@@ -144,11 +64,15 @@ namespace cbag {
 
         lay_t layer;
         purp_t purpose;
-        std::vector<Point> points;
+        PointArray points;
     };
 
     struct Arc {
-        Arc() : layer(0), purpose(0), ang_start(0), ang_stop(0), bbox(0, 0, 0, 0) {}
+        Arc() : layer(0), purpose(0), ang_start(0), ang_stop(0), bbox() {}
+
+        Arc(lay_t lay, purp_t purp, double start, double stop)
+                : layer(lay), purpose(purp), ang_start(start), ang_stop(stop),
+                  bbox() {}
 
         Arc(lay_t lay, purp_t purp, double start, double stop, coord_t xl, coord_t yl,
             coord_t xh, coord_t yh)
@@ -177,7 +101,11 @@ namespace cbag {
     struct Donut {
         Donut() : layer(0), purpose(0), center(0, 0), radius(0), hole_radius(0) {}
 
-        Donut(lay_t lay, purp_t purp, coord_t x, coord_t y, dist_t r, dist_t hole_r)
+        Donut(lay_t lay, purp_t purp, dist_t r, dist_t hole_r)
+                : layer(lay), purpose(purp), radius(r), hole_radius(hole_r) {}
+
+
+        Donut(lay_t lay, purp_t purp, dist_t r, dist_t hole_r, coord_t x, coord_t y)
                 : layer(lay), purpose(purp), center(x, y), radius(r), hole_radius(hole_r) {}
 
         // boost serialization
@@ -200,7 +128,10 @@ namespace cbag {
     };
 
     struct Ellipse {
-        Ellipse() : layer(0), purpose(0), bbox(0, 0, 0, 0) {}
+        Ellipse() : layer(0), purpose(0), bbox() {}
+
+        Ellipse(lay_t lay, purp_t purp)
+                : layer(lay), purpose(purp), bbox() {}
 
         Ellipse(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
                 : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
@@ -224,7 +155,7 @@ namespace cbag {
     struct Line {
         Line() : layer(0), purpose(0), points() {}
 
-        Line(lay_t lay, purp_t purp, size_t n)
+        Line(lay_t lay, purp_t purp, uint32_t n)
                 : layer(lay), purpose(purp), points(n) {}
 
         // boost serialization
@@ -240,14 +171,14 @@ namespace cbag {
 
         lay_t layer;
         purp_t purpose;
-        std::vector<Point> points;
+        PointArray points;
     };
 
     struct Path {
-        Path() : layer(0), purpose(0), width(0), points(), style(PathStyle::truncate),
+        Path() : layer(0), purpose(0), width(0), points(), style(psTruncate),
                  begin_ext(0), end_ext(0) {}
 
-        Path(lay_t lay, purp_t purp, dist_t width, size_t n,
+        Path(lay_t lay, purp_t purp, dist_t width, uint32_t n,
              PathStyle style, dist_t begin_ext, dist_t end_ext)
                 : layer(lay), purpose(purp), width(width), points(n), style(style),
                   begin_ext(begin_ext), end_ext(end_ext) {}
@@ -270,57 +201,20 @@ namespace cbag {
         lay_t layer;
         purp_t purpose;
         dist_t width;
-        std::vector<Point> points;
+        PointArray points;
         PathStyle style;
         dist_t begin_ext, end_ext;
     };
 
-
-    struct PathSeg {
-        PathSeg() : layer(0), purpose(0), start(0, 0), stop(0, 0), width(0),
-                    begin_style(), end_style() {}
-
-        PathSeg(lay_t lay, purp_t purp, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                dist_t width, SegEndStyle s0, SegEndStyle s1)
-                : layer(lay), purpose(purp), start(x0, y0), stop(x0, y0), width(width),
-                  begin_style(s0), end_style(s1) {}
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
-            ar & BOOST_SERIALIZATION_NVP(start);
-            ar & BOOST_SERIALIZATION_NVP(stop);
-            ar & BOOST_SERIALIZATION_NVP(begin_style);
-            ar & BOOST_SERIALIZATION_NVP(end_style);
-#pragma clang diagnostic pop
-        }
-
-        lay_t layer;
-        purp_t purpose;
-        Point start, stop;
-        dist_t width;
-        SegEndStyle begin_style, end_style;
-    };
-
     struct Text {
-        Text() : layer(0), purpose(0), text(), origin(0, 0), alignment(Alignment::centerCenter),
-                 orient(Orientation::R0), font(Font::roman), height(0), overbar(false),
+        Text() : layer(0), purpose(0), text(), origin(0, 0), alignment(taCC),
+                 orient(oR0), font(fRoman), height(0), overbar(false),
                  visible(true), drafting(true) {}
 
-        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y,
-             Orientation orient, dist_t height)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y),
-                  alignment(Alignment::centerCenter), orient(orient), font(Font::roman),
-                  height(height), overbar(false), visible(true), drafting(true) {}
-
-        Text(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align,
+        Text(lay_t lay, purp_t purp, std::string text, TextAlign align,
              Orientation orient, Font font, dist_t height, bool overbar,
              bool visible, bool drafting)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(x, y), alignment(align),
+                : layer(lay), purpose(purp), text(std::move(text)), origin(), alignment(align),
                   orient(orient), font(font), height(height), overbar(overbar), visible(visible),
                   drafting(drafting) {}
 
@@ -348,7 +242,7 @@ namespace cbag {
         purp_t purpose;
         std::string text;
         Point origin;
-        Alignment alignment;
+        TextAlign alignment;
         Orientation orient;
         Font font;
         dist_t height;
@@ -358,19 +252,15 @@ namespace cbag {
     struct EvalText : Text {
         EvalText() : Text(), evaluator() {}
 
-        EvalText(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y,
-                 Orientation orient, dist_t height, std::string eval)
-                : Text(lay, purp, std::move(text), x, y, orient, height),
-                  evaluator(std::move(eval)) {}
-
-        EvalText(lay_t lay, purp_t purp, std::string text, coord_t x, coord_t y, Alignment align,
-                 Orientation orient, Font font, dist_t height, bool overbar,
-                 bool visible, bool drafting, std::string eval)
-                : Text(lay, purp, std::move(text), x, y, align, orient, font, height, overbar,
+        EvalText(lay_t lay, purp_t purp, std::string text, TextAlign align, Orientation orient,
+                 Font font, dist_t height, bool overbar, bool visible,
+                 bool drafting, std::string eval)
+                : Text(lay, purp, std::move(text), align, orient, font, height, overbar,
                        visible, drafting), evaluator(std::move(eval)) {}
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
@@ -380,20 +270,14 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(evaluator);
 #pragma clang diagnostic pop
         }
+
 #pragma clang diagnostic pop
 
         std::string evaluator;
     };
 
-    using Shape = boost::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, PathSeg,
+    using Shape = boost::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path,
             Text, EvalText>;
 }
-
-// Declare split serialization routines for enums
-
-BOOST_SERIALIZATION_SPLIT_FREE(cbag::Alignment)
-BOOST_SERIALIZATION_SPLIT_FREE(cbag::Font)
-BOOST_SERIALIZATION_SPLIT_FREE(cbag::PathStyle)
-
 
 #endif //CBAG_DATABASE_SHAPES_H
