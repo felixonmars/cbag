@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
-# make executable in build tree and install location have same rpaths
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # add rpaths to the final install executable
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -21,7 +19,10 @@ include(GNUInstallDirs)
 # Include Boost as an imported target
 find_package(Boost REQUIRED)
 add_library(boost INTERFACE IMPORTED)
-set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIR})
+set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+
+message("Boost include directory: " ${Boost_INCLUDE_DIRS})
+message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # add fmt library
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
@@ -29,7 +30,7 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIR}
+        ${Boost_INCLUDE_DIRS}
         )
 # fmt-header-only: for fmt: the string formatting library
 # boost_system: for Spirit X3 error handling
@@ -65,7 +66,7 @@ add_executable(test_oa ${SRC_FILES_OA})
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_oa PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}"
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}:${Boost_LIBRARY_DIRS}"
         )
 
 # shared library dependencies
@@ -88,9 +89,13 @@ add_executable(test_spirit
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_spirit PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}"
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}:${Boost_LIBRARY_DIRS}"
         )
 
 target_link_libraries(test_spirit
         cbag
         )
+
+install(TARGETS test_oa test_spirit cbag cbagoa
+        RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
+        LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)

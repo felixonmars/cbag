@@ -16,8 +16,6 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/variant.hpp>
 
-#include <enum.h>
-
 namespace cbag {
     /** A custom struct representing time data.
      *
