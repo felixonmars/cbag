@@ -24,6 +24,12 @@ set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
+# Include g3log as an imported target
+find_package(g3logger REQUIRED)
+
+message("g3log include directory: " ${G3LOG_INCLUDE_DIR})
+message("g3log library file: " ${G3LOG_LIBRARY})
+
 # add fmt library
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
@@ -31,11 +37,12 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
+        ${G3LOG_INCLUDE_DIR}
         )
 # fmt-header-only: for fmt: the string formatting library
 # boost_system: for Spirit X3 error handling
 # boost_serialization: for serialization
-link_libraries(fmt-header-only boost_system boost_serialization)
+link_libraries(fmt-header-only boost_system boost_serialization ${G3LOG_LIBRARY})
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp
@@ -66,7 +73,7 @@ add_executable(test_oa ${SRC_FILES_OA})
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_oa PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}:${Boost_LIBRARY_DIRS}"
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
         )
 
 # shared library dependencies
@@ -89,7 +96,7 @@ add_executable(test_spirit
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_spirit PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}:${Boost_LIBRARY_DIRS}"
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
         )
 
 target_link_libraries(test_spirit
