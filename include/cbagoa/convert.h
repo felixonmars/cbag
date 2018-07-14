@@ -49,7 +49,7 @@ namespace cbagoa {
 
     cbag::EvalText read_eval_text(oa::oaEvalText *p);
 
-    cbag::Shape read_shape(oa::oaShape *p);
+    cbag::Shape read_shape(oa::oaShape *p, const oa::oaNameSpace &ns);
 
     // Read method for references
 

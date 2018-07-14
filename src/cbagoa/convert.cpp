@@ -151,32 +151,41 @@ namespace cbagoa {
         return ans;
     }
 
-    cbag::Shape read_shape(oa::oaShape *p) {
+    cbag::Shape read_shape(oa::oaShape *p, const oa::oaNameSpace &ns) {
         // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
         // use NOLINT to suppress IDE warnings
         switch (p->getType()) {
             case oa::oacRectType :
-                return {read_rect(static_cast<oa::oaRect *>(p))};  //NOLINT
+                return read_rect(static_cast<oa::oaRect *>(p));  //NOLINT
             case oa::oacPolygonType :
-                return {read_poly(static_cast<oa::oaPolygon *>(p))};  //NOLINT
+                return read_poly(static_cast<oa::oaPolygon *>(p));  //NOLINT
             case oa::oacArcType :
-                return {read_arc(static_cast<oa::oaArc *>(p))};  //NOLINT
+                return read_arc(static_cast<oa::oaArc *>(p));  //NOLINT
             case oa::oacDonutType :
-                return {read_donut(static_cast<oa::oaDonut *>(p))};  //NOLINT
+                return read_donut(static_cast<oa::oaDonut *>(p));  //NOLINT
             case oa::oacEllipseType :
-                return {read_ellipse(static_cast<oa::oaEllipse *>(p))};  //NOLINT
+                return read_ellipse(static_cast<oa::oaEllipse *>(p));  //NOLINT
             case oa::oacLineType :
-                return {read_line(static_cast<oa::oaLine *>(p))};  //NOLINT
+                return read_line(static_cast<oa::oaLine *>(p));  //NOLINT
             case oa::oacPathType :
-                return {read_path(static_cast<oa::oaPath *>(p))};  //NOLINT
+                return read_path(static_cast<oa::oaPath *>(p));  //NOLINT
             case oa::oacTextType :
-                return {read_text(static_cast<oa::oaText *>(p))};  //NOLINT
+                return read_text(static_cast<oa::oaText *>(p));  //NOLINT
             case oa::oacEvalTextType :
-                return {read_eval_text(static_cast<oa::oaEvalText *>(p))};  //NOLINT
-            default :
+                return read_eval_text(static_cast<oa::oaEvalText *>(p));  //NOLINT
+            case oa::oacAttrDisplayType : {
+                oa::oaAttrDisplay *disp = static_cast<oa::oaAttrDisplay *>(p);
+                oa::oaString text;
+                disp->getText(ns, text);
+                LOG(INFO) << "AttrDisplay text: " << text;
+                LOG(INFO) << "AttrDisplay object type: " << disp->getObject()->getType().getName();
+                return cbag::Rect();
+            }
+            default : {
                 throw std::invalid_argument(
                         fmt::format("Unsupported OA shape type: {}, see developer.",
                                     p->getType().getName()));
+            }
         }
     }
 
@@ -381,7 +390,7 @@ namespace cbagoa {
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
             // skip shapes associated with pins.  We got those already.
             if (!shape_ptr->hasPin()) {
-                ans.shapes.push_back(read_shape(shape_ptr));
+                ans.shapes.push_back(read_shape(shape_ptr, ns));
             }
         }
 
