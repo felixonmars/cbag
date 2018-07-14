@@ -13,7 +13,7 @@
 #include <fmt/ostream.h>
 
 #include <cbagoa/database.h>
-#include <cbagoa/convert.h>
+#include <cbagoa/read_oa.h>
 
 
 namespace cbagoa {
@@ -28,39 +28,35 @@ namespace cbagoa {
 
 #pragma clang diagnostic pop
 
-    OALibrary::OALibrary()
-            : is_open(false), dbu_per_uu(1000), lib_def_obs(1), lib_ptr(nullptr),
-              tech_ptr(nullptr), log_worker(g3::LogWorker::createLogWorker()) {
+    OADatabase::OADatabase(const std::string &lib_def_file)
+            : lib_def_file(lib_def_file), lib_def_obs(1),
+              log_worker(g3::LogWorker::createLogWorker()) {
         auto handle = log_worker->addDefaultLogger("cbagoa", "./");
         g3::initializeLogging(log_worker.get());
-    }
 
-    OALibrary::~OALibrary() {
-        close();
-    }
-
-    void OALibrary::open_lib(const std::string &lib_file, const std::string &library,
-                             const std::string &lib_path, const std::string &tech_lib) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "NotAssignable"
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, // NOLINT
                      oacDataModelRevNumber); // NOLINT
 #pragma clang diagnostic pop
 
-        LOG(INFO) << "Opening OA library " << library;
+        LOG(INFO) << "Opening all libraries in definition file: " << lib_def_file;
+        oa::oaLibDefList::openLibs(oa::oaString(lib_def_file.c_str()));
+    }
 
-        // open library definition
-        LOG(INFO) << "Opening library definition file " << lib_file;
-        oa::oaLibDefList::openLibs(oa::oaString(lib_file.c_str()));
+
+    void OADatabase::create_lib(const std::string &library, const std::string &lib_path,
+                                const std::string &tech_lib) {
+
+        LOG(INFO) << "Creating OA library " << library;
 
         // open library
-        lib_name = library;
-        lib_name_oa = oa::oaScalarName(ns, library.c_str());
-        lib_ptr = oa::oaLib::find(lib_name_oa);
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library.c_str());
+        oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            LOGF(INFO, "Library %s not found, creating in path %s, with tech lib %s",
-                 library.c_str(), lib_file.c_str(), tech_lib.c_str());
+            LOGF(INFO, "Creating Library %s at path %s, with tech lib %s",
+                 library.c_str(), lib_path.c_str(), tech_lib.c_str());
             oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
             lib_ptr = oa::oaLib::create(lib_name_oa, oa::oaString(lib_path.c_str()));
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
@@ -68,40 +64,43 @@ namespace cbagoa {
             // NOTE: I cannot get open access to modify the library file, so
             // we just do it by hand.
             std::ofstream outfile;
-            outfile.open(lib_file, std::ios_base::app);
+            outfile.open(lib_def_file, std::ios_base::app);
             outfile << "DEFINE " << library << " " << lib_path << std::endl;
             outfile.close();
-        } else if (!lib_ptr->isValid()) {
-            throw std::invalid_argument("Invalid library: " + library);
+        } else {
+            LOG(INFO) << "OA library " << library << "already exists.  Do nothing.";
         }
+    }
 
+    oa::oaTech *OADatabase::read_tech(const std::string &library) {
         // open technology file
-        tech_ptr = oa::oaTech::find(lib_ptr);
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library.c_str());
+        oa::oaTech *tech_ptr = oa::oaTech::find(lib_name_oa);
         if (tech_ptr == nullptr) {
             // opened tech not found, attempt to open
-            if (!oa::oaTech::exists(lib_ptr)) {
-                throw std::runtime_error("Cannot find technology for library: " + library);
+            if (!oa::oaTech::exists(lib_name_oa)) {
+                throw std::runtime_error("Cannot find technology library: " + library);
             } else {
-                tech_ptr = oa::oaTech::open(lib_ptr, 'r');
+                tech_ptr = oa::oaTech::open(lib_name_oa, 'r');
                 if (tech_ptr == nullptr) {
-                    throw std::runtime_error("Cannot open technology for library: " + library);
+                    throw std::runtime_error("Cannot open technology library: " + library);
                 }
             }
         }
-
-        // get database unit
-        dbu_per_uu = tech_ptr->getDBUPerUU(oa::oaViewType::get(oa::oacMaskLayout));
-
-        is_open = true;
+        return tech_ptr;
     }
 
-    oa::oaDesign *
-    OALibrary::open_design(const std::string &cell_name, const std::string &view_name) {
-        oa::oaScalarName cell_oa(ns, cell_name.c_str());
-        oa::oaScalarName view_oa(ns, view_name.c_str());
+    oa::oaDesign *OADatabase::read_design(const std::string &lib_name, const std::string &cell_name,
+                                          const std::string &view_name) {
+        const char *lib = lib_name.c_str();
+        const char *cell = cell_name.c_str();
+        const char *view = view_name.c_str();
+        oa::oaScalarName lib_oa(ns, lib);
+        oa::oaScalarName cell_oa(ns, cell);
+        oa::oaScalarName view_oa(ns, view);
 
-        LOGF(INFO, "Opening cellview %s(%s)", cell_name.c_str(), view_name.c_str());
-        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name_oa, cell_oa, view_oa, 'r');
+        LOGF(INFO, "Opening cellview %s__%s(%s)", lib, cell, view);
+        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, 'r');
         if (dsn_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
                                                     lib_name, cell_name, view_name));
@@ -109,21 +108,9 @@ namespace cbagoa {
         return dsn_ptr;
     }
 
-    cbag::SchCellView OALibrary::parse_sch_cell_view(const std::string &cell_name,
-                                                     const std::string &view_name) {
-        // get OA design and block pointers
-        oa::oaDesign *design = open_design(cell_name, view_name);
-
-        return read_sch_cell_view(design, ns_cdba);
-    }
-
-    void OALibrary::close() {
-        if (is_open) {
-            LOG(INFO) << "Closing library " << lib_name;
-            tech_ptr->close();
-            lib_ptr->close();
-
-            is_open = false;
-        }
+    cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
+                                                    const std::string &cell_name,
+                                                    const std::string &view_name) {
+        return cbagoa::read_sch_cellview(read_design(lib_name, cell_name, view_name), ns_cdba);
     }
 }

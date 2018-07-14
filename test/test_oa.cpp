@@ -15,20 +15,18 @@ int read_oa() {
     try {
 
         std::string lib_file("cds.lib");
-        std::string library("schtest");
         std::string lib_path(".");
         std::string tech_lib("cds_ff_mpt");
+        std::string lib_name("schtest");
         std::string cell_name("inv");
         std::string view_name("schematic");
         std::string sym_view_name("symbol");
 
-        cbagoa::OALibrary lib;
+        cbagoa::OADatabase db(lib_file);
 
-        lib.open_lib(lib_file, library, lib_path, tech_lib);
+        cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
 
-        cbag::SchCellView sch_master = lib.parse_sch_cell_view(cell_name, view_name);
-
-        cbag::SchCellView sym_master = lib.parse_sch_cell_view(cell_name, sym_view_name);
+        cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
 
         std::ofstream outfile;
         outfile.open("inv_sch.xml", std::ios_base::out);
@@ -40,8 +38,6 @@ int read_oa() {
         boost::archive::xml_oarchive xml_out2(symfile);
         xml_out2 << BOOST_SERIALIZATION_NVP(sym_master);
         symfile.close();
-
-        lib.close();
     } catch (oa::oaCompatibilityError &ex) {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);

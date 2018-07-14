@@ -1,5 +1,5 @@
-/** \file convert.cpp
- *  \brief This file implements conversion methods between OpenAccess and internal data structure.
+/** \file read_oa.cpp
+ *  \brief This file converts OpenAccess objects to CBAG data structure.
  *
  *  \author Eric Chang
  *  \date   2018/07/13
@@ -17,7 +17,7 @@
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 
-#include <cbagoa/convert.h>
+#include <cbagoa/read_oa.h>
 
 
 namespace bsp = cbag::spirit;
@@ -354,7 +354,7 @@ namespace cbagoa {
 
     // Read method for schematic/symbol cell view
 
-    cbag::SchCellView read_sch_cell_view(oa::oaDesign *p, const oa::oaNameSpace &ns) {
+    cbag::SchCellView read_sch_cellview(oa::oaDesign *p, const oa::oaNameSpace &ns) {
         LOG(INFO) << "Reading schematic/symbol cellview";
         oa::oaBlock *block = p->getTopBlock();
         cbag::SchCellView ans;

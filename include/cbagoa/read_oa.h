@@ -1,12 +1,12 @@
-/** \file convert.h
- *  \brief This file defines conversion methods between OpenAccess and internal data structure.
+/** \file read_oa.h
+ *  \brief This file converts OpenAccess objects to CBAG data structure.
  *
  *  \author Eric Chang
  *  \date   2018/07/13
  */
 
-#ifndef CBAGOA_CONVERT_H
-#define CBAGOA_CONVERT_H
+#ifndef CBAGOA_READ_OA_H
+#define CBAGOA_READ_OA_H
 
 #include <oa/oaDesignDB.h>
 
@@ -68,7 +68,7 @@ namespace cbagoa {
 
     // Read method for schematic/symbol cell view
 
-    cbag::SchCellView read_sch_cell_view(oa::oaDesign *design, const oa::oaNameSpace &ns);
+    cbag::SchCellView read_sch_cellview(oa::oaDesign *design, const oa::oaNameSpace &ns);
 
     // Write methods for shapes
 
@@ -91,4 +91,4 @@ namespace cbagoa {
     oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
 }
 
-#endif //CBAGOA_CONVERT_H
+#endif //CBAGOA_READ_OA_H

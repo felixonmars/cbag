@@ -31,47 +31,51 @@ namespace cbagoa {
                                      oa::oaLibDefListWarningTypeEnum type) override;
     };
 
-    class OALibrary {
+    class OADatabase {
     public:
-        OALibrary();
-
-        ~OALibrary();
+        /** Open a OA database corresponding to the given library definition file.
+         *
+         *  @param lib_def_file the library definition file.
+         */
+        explicit OADatabase(const std::string &lib_def_file);
 
         // This class is neither copyable nor movable
 
-        OALibrary(const OALibrary &) = delete;
+        OADatabase(const OADatabase &) = delete;
 
-        OALibrary &operator=(const OALibrary &) = delete;
+        OADatabase &operator=(const OADatabase &) = delete;
 
-        OALibrary(OALibrary &&) = delete;
+        OADatabase(OADatabase &&) = delete;
 
-        OALibrary &operator=(OALibrary &&) = delete;
+        OADatabase &operator=(OADatabase &&) = delete;
 
-        void open_lib(const std::string &lib_file, const std::string &library,
-                      const std::string &lib_path, const std::string &tech_lib);
+        /** Create a new library if it didn't already exist.
+         *
+         * @param library the library name.
+         * @param lib_path directory to create the library at.
+         * @param tech_lib the technology library name.
+         */
+        void create_lib(const std::string &library, const std::string &lib_path,
+                        const std::string &tech_lib);
 
-        cbag::SchCellView parse_sch_cell_view(const std::string &cell_name,
-                                              const std::string &view_name);
-
-        void close();
+        cbag::SchCellView read_sch_cellview(const std::string &lib_name,
+                                            const std::string &cell_name,
+                                            const std::string &view_name);
 
     private:
 
-        oa::oaDesign *open_design(const std::string &cell_name, const std::string &view_name);
+        oa::oaTech *read_tech(const std::string &library);
+
+        oa::oaDesign *read_design(const std::string &lib_name, const std::string &cell_name,
+                                  const std::string &view_name);
 
         // OA namespace objects
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;
 
-        bool is_open;
-        oa::oaUInt4 dbu_per_uu;
-        LibDefObserver lib_def_obs;
-
-        oa::oaLib *lib_ptr;
-        oa::oaTech *tech_ptr;
-        std::string lib_name;
-        oa::oaScalarName lib_name_oa;
-        std::unique_ptr<g3::LogWorker> log_worker;
+        const std::string lib_def_file;
+        const LibDefObserver lib_def_obs;
+        const std::unique_ptr<g3::LogWorker> log_worker;
     };
 }
 
