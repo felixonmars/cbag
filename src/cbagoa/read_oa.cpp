@@ -7,11 +7,8 @@
 
 #include <utility>
 
-#include <fmt/format.h>
-// include fmt/ostream.h to support formatting oaStrings, which defines operator <<
-#include <fmt/ostream.h>
-
-#include <g3log/g3log.hpp>
+#include <spdlog/fmt/fmt.h>
+#include <spdlog/fmt/bundled/ostream.h>
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
@@ -27,19 +24,19 @@ namespace cbagoa {
 
     // string parsing methinds
 
-    bsa::name parse_name(const oa::oaString &source) {
+    bsa::name OAReader::parse_name(const oa::oaString &source) {
         return cbag::parse<bsa::name, bsp::parser::name_type>(source, source.getLength(),
                                                               bsp::name());
     }
 
-    bsa::name_unit parse_name_unit(const oa::oaString &source) {
+    bsa::name_unit OAReader::parse_name_unit(const oa::oaString &source) {
         return cbag::parse<bsa::name_unit,
                 bsp::parser::name_unit_type>(source, source.getLength(), bsp::name_unit());
     }
 
     // Read method for properties
 
-    std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr) {
+    std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *prop_ptr) {
         oa::oaString tmp_str;
         prop_ptr->getName(tmp_str);
         std::string key(tmp_str);
@@ -82,50 +79,50 @@ namespace cbagoa {
 
     // Read methods for shapes
 
-    cbag::Rect read_rect(oa::oaRect *p) {
+    cbag::Rect OAReader::read_rect(oa::oaRect *p) {
         cbag::Rect ans(p->getLayerNum(), p->getPurposeNum());
         p->getBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Poly read_poly(oa::oaPolygon *p) {
+    cbag::Poly OAReader::read_poly(oa::oaPolygon *p) {
         cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Arc read_arc(oa::oaArc *p) {
+    cbag::Arc OAReader::read_arc(oa::oaArc *p) {
         cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), p->getStartAngle(), p->getStopAngle());
         p->getEllipseBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Donut read_donut(oa::oaDonut *p) {
+    cbag::Donut OAReader::read_donut(oa::oaDonut *p) {
         cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), p->getRadius(), p->getHoleRadius());
         p->getCenter(ans.center);
         return ans;
     }
 
-    cbag::Ellipse read_ellipse(oa::oaEllipse *p) {
+    cbag::Ellipse OAReader::read_ellipse(oa::oaEllipse *p) {
         cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum());
         p->getBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Line read_line(oa::oaLine *p) {
+    cbag::Line OAReader::read_line(oa::oaLine *p) {
         cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Path read_path(oa::oaPath *p) {
+    cbag::Path OAReader::read_path(oa::oaPath *p) {
         cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), p->getWidth(), p->getNumPoints(),
                        p->getStyle(), p->getBeginExt(), p->getEndExt());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Text read_text(oa::oaText *p) {
+    cbag::Text OAReader::read_text(oa::oaText *p) {
         oa::oaString text;
         p->getText(text);
         bool overbar = (p->hasOverbar() != 0);
@@ -137,7 +134,7 @@ namespace cbagoa {
         return ans;
     }
 
-    cbag::EvalText read_eval_text(oa::oaEvalText *p) {
+    cbag::EvalText OAReader::read_eval_text(oa::oaEvalText *p) {
         oa::oaString text, eval;
         p->getText(text);
         p->getEvaluatorName(eval);
@@ -151,7 +148,7 @@ namespace cbagoa {
         return ans;
     }
 
-    cbag::Shape read_shape(oa::oaShape *p, const oa::oaNameSpace &ns) {
+    cbag::Shape OAReader::read_shape(oa::oaShape *p) {
         // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
         // use NOLINT to suppress IDE warnings
         switch (p->getType()) {
@@ -177,8 +174,8 @@ namespace cbagoa {
                 oa::oaAttrDisplay *disp = static_cast<oa::oaAttrDisplay *>(p);
                 oa::oaString text;
                 disp->getText(ns, text);
-                LOG(INFO) << "AttrDisplay text: " << text;
-                LOG(INFO) << "AttrDisplay object type: " << disp->getObject()->getType().getName();
+                logger->info("AttrDisplay text: {}", text);
+                logger->info("AttrDisplay object type: {}", disp->getObject()->getType().getName());
                 return cbag::Rect();
             }
             default : {
@@ -191,7 +188,7 @@ namespace cbagoa {
 
     // Read method for references
 
-    cbag::Instance read_instance(oa::oaInst *p, const oa::oaNameSpace &ns) {
+    cbag::Instance OAReader::read_instance(oa::oaInst *p) {
         // read cellview name
         oa::oaString inst_lib_oa, inst_cell_oa, inst_view_oa;
         p->getLibName(ns, inst_lib_oa);
@@ -293,18 +290,17 @@ namespace cbagoa {
         return inst;
     }
 
-    std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p,
-                                                                 const oa::oaNameSpace &ns) {
+    std::pair<bsa::name_unit, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
         oa::oaString inst_name_oa;
         p->getName(ns, inst_name_oa);
-        return {parse_name_unit(inst_name_oa), read_instance(p, ns)};
+        return {parse_name_unit(inst_name_oa), read_instance(p)};
     }
 
     // Read method for pin figures
 
-    cbag::PinFigure read_pin_figure(oa::oaPinFig *p, const oa::oaNameSpace &ns) {
+    cbag::PinFigure OAReader::read_pin_figure(oa::oaPinFig *p) {
         if (p->isInst()) {
-            cbag::PinFigure ans(read_instance(static_cast<oa::oaInst *>(p), ns));  // NOLINT
+            cbag::PinFigure ans(read_instance(static_cast<oa::oaInst *>(p)));  // NOLINT
             return ans;
         } else if (p->getType() == oa::oacRectType) {
             cbag::PinFigure ans(read_rect(static_cast<oa::oaRect *>(p)));  // NOLINT
@@ -318,8 +314,7 @@ namespace cbagoa {
 
     // Read method for terminals
 
-    std::pair<bsa::name, cbag::PinFigure> read_terminal_single(oa::oaTerm *term,
-                                                               const oa::oaNameSpace &ns) {
+    std::pair<bsa::name, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTerm *term) {
         // parse terminal name
         oa::oaString term_name_oa;
         term->getName(ns, term_name_oa);
@@ -347,20 +342,20 @@ namespace cbagoa {
         }
 
         std::pair<bsa::name, cbag::PinFigure> ans(parse_name(term_name_oa),
-                                                  read_pin_figure(fig_ptr, ns));
+                                                  read_pin_figure(fig_ptr));
 
         return ans;
     };
 
     // Read method for schematic/symbol cell view
 
-    cbag::SchCellView read_sch_cellview(oa::oaDesign *p, const oa::oaNameSpace &ns) {
-        LOG(INFO) << "Reading schematic/symbol cellview";
+    cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
+        logger->info("Reading schematic/symbol cellview");
         oa::oaBlock *block = p->getTopBlock();
         cbag::SchCellView ans;
 
         // read terminals
-        LOG(INFO) << "Reading terminals";
+        logger->info("Reading terminals");
         oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
         oa::oaTerm *term_ptr;
         oa::oaString term_name;
@@ -368,13 +363,13 @@ namespace cbagoa {
             term_ptr->getName(ns, term_name);
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
-                    ans.in_terms.insert(read_terminal_single(term_ptr, ns));
+                    ans.in_terms.insert(read_terminal_single(term_ptr));
                     break;
                 case oa::oacOutputTermType :
-                    ans.out_terms.insert(read_terminal_single(term_ptr, ns));
+                    ans.out_terms.insert(read_terminal_single(term_ptr));
                     break;
                 case oa::oacInputOutputTermType :
-                    ans.io_terms.insert(read_terminal_single(term_ptr, ns));
+                    ans.io_terms.insert(read_terminal_single(term_ptr));
                     break;
                 default:
                     throw std::invalid_argument(fmt::format("Terminal {} has invalid type: {}",
@@ -384,77 +379,77 @@ namespace cbagoa {
         }
 
         // read shapes
-        LOG(INFO) << "Reading shapes";
+        logger->info("Reading shapes");
         oa::oaIter<oa::oaShape> shape_iter(block->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
             // skip shapes associated with pins.  We got those already.
             if (!shape_ptr->hasPin()) {
-                ans.shapes.push_back(read_shape(shape_ptr, ns));
+                ans.shapes.push_back(read_shape(shape_ptr));
             }
         }
 
         // read instances
-        LOG(INFO) << "Reading instances";
+        logger->info("Reading instances");
         oa::oaIter<oa::oaInst> inst_iter(block->getInsts());
         oa::oaInst *inst_ptr;
         while ((inst_ptr = inst_iter.getNext()) != nullptr) {
             // skip instances associated with pins.  We got those already.
             if (!inst_ptr->hasPin()) {
-                ans.instances.insert(read_instance_pair(inst_ptr, ns));
+                ans.instances.insert(read_instance_pair(inst_ptr));
             }
         }
 
         // read properties
-        LOG(INFO) << "Reading properties";
+        logger->info("Reading properties");
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
         oa::oaProp *prop_ptr;
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
             ans.params.insert(read_prop(prop_ptr));
         }
 
-        LOG(INFO) << "Finish reading schematic/symbol cellview";
+        logger->info("Finish reading schematic/symbol cellview");
         return ans;
     }
 
     // Write methods for shapes
 
-    oa::oaRect *write_rect(oa::oaBlock *block, const cbag::Rect &v) {
+    oa::oaRect *OAReader::write_rect(oa::oaBlock *block, const cbag::Rect &v) {
         return oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
     }
 
-    oa::oaPolygon *write_poly(oa::oaBlock *block, const cbag::Poly &v) {
+    oa::oaPolygon *OAReader::write_poly(oa::oaBlock *block, const cbag::Poly &v) {
         return oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
     }
 
-    oa::oaArc *write_arc(oa::oaBlock *block, const cbag::Arc &v) {
+    oa::oaArc *OAReader::write_arc(oa::oaBlock *block, const cbag::Arc &v) {
         return oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start, v.ang_stop);
     }
 
-    oa::oaDonut *write_donut(oa::oaBlock *block, const cbag::Donut &v) {
+    oa::oaDonut *OAReader::write_donut(oa::oaBlock *block, const cbag::Donut &v) {
         return oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius, v.hole_radius);
     }
 
-    oa::oaEllipse *write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v) {
+    oa::oaEllipse *OAReader::write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v) {
         return oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
     }
 
-    oa::oaLine *write_line(oa::oaBlock *block, const cbag::Line &v) {
+    oa::oaLine *OAReader::write_line(oa::oaBlock *block, const cbag::Line &v) {
         return oa::oaLine::create(block, v.layer, v.purpose, v.points);
     }
 
-    oa::oaPath *write_path(oa::oaBlock *block, const cbag::Path &v) {
+    oa::oaPath *OAReader::write_path(oa::oaBlock *block, const cbag::Path &v) {
         return oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points, v.style,
                                   v.begin_ext, v.end_ext);
     }
 
-    oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v) {
+    oa::oaText *OAReader::write_text(oa::oaBlock *block, const cbag::Text &v) {
         return oa::oaText::create(block, v.layer, v.purpose, oa::oaString(v.text.c_str()),
                                   v.origin, v.alignment, v.orient, v.font, v.height, v.overbar,
                                   v.visible, v.drafting);
     }
 
-    oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v) {
+    oa::oaEvalText *OAReader::write_eval_text(oa::oaBlock *block, const cbag::EvalText &v) {
         return oa::oaEvalText::create(block, v.layer, v.purpose, oa::oaString(v.text.c_str()),
                                       v.origin, v.alignment, v.orient, v.font, v.height,
                                       oa::oaString(v.evaluator.c_str()), v.overbar,

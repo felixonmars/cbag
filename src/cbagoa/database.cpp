@@ -8,9 +8,9 @@
 // TODO: Debug only, remve later
 #include <iostream>
 
-#include <fmt/format.h>
-// include fmt/ostream.h to support formatting oaStrings, which defines operator <<
-#include <fmt/ostream.h>
+#include <spdlog/fmt/fmt.h>
+
+#include <spdlog/spdlog.h>
 
 #include <cbagoa/database.h>
 #include <cbagoa/read_oa.h>
@@ -29,10 +29,11 @@ namespace cbagoa {
 #pragma clang diagnostic pop
 
     OADatabase::OADatabase(const std::string &lib_def_file)
-            : lib_def_file(lib_def_file), lib_def_obs(1),
-              log_worker(g3::LogWorker::createLogWorker()) {
-        auto handle = log_worker->addDefaultLogger("cbagoa", "./");
-        g3::initializeLogging(log_worker.get());
+            : lib_def_file(lib_def_file), lib_def_obs(1) {
+
+        spdlog::set_async_mode(8192);
+        logger = spdlog::rotating_logger_st("cbagoa_logger", "cbagoa.log", 5242880, 5);
+        reader = std::make_unique<OAReader>(ns_cdba, logger);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "NotAssignable"
@@ -40,7 +41,7 @@ namespace cbagoa {
                      oacDataModelRevNumber); // NOLINT
 #pragma clang diagnostic pop
 
-        LOG(INFO) << "Opening all libraries in definition file: " << lib_def_file;
+        logger->info("Opening all libraries in definition file: {}", lib_def_file);
         oa::oaLibDefList::openLibs(oa::oaString(lib_def_file.c_str()));
     }
 
@@ -48,15 +49,15 @@ namespace cbagoa {
     void OADatabase::create_lib(const std::string &library, const std::string &lib_path,
                                 const std::string &tech_lib) {
 
-        LOG(INFO) << "Creating OA library " << library;
+        logger->info("Creating OA library {}", library);
 
         // open library
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            LOGF(INFO, "Creating Library %s at path %s, with tech lib %s",
-                 library.c_str(), lib_path.c_str(), tech_lib.c_str());
+            logger->info("Creating Library {} at path {}, with tech lib {}",
+                         library, lib_path, tech_lib);
             oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
             lib_ptr = oa::oaLib::create(lib_name_oa, oa::oaString(lib_path.c_str()));
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
@@ -68,7 +69,7 @@ namespace cbagoa {
             outfile << "DEFINE " << library << " " << lib_path << std::endl;
             outfile.close();
         } else {
-            LOG(INFO) << "OA library " << library << "already exists.  Do nothing.";
+            logger->info("OA library {} already exists.  Do nothing.", library);
         }
     }
 
@@ -92,14 +93,11 @@ namespace cbagoa {
 
     oa::oaDesign *OADatabase::read_design(const std::string &lib_name, const std::string &cell_name,
                                           const std::string &view_name) {
-        const char *lib = lib_name.c_str();
-        const char *cell = cell_name.c_str();
-        const char *view = view_name.c_str();
-        oa::oaScalarName lib_oa(ns, lib);
-        oa::oaScalarName cell_oa(ns, cell);
-        oa::oaScalarName view_oa(ns, view);
+        oa::oaScalarName lib_oa(ns, lib_name.c_str());
+        oa::oaScalarName cell_oa(ns, cell_name.c_str());
+        oa::oaScalarName view_oa(ns, view_name.c_str());
 
-        LOGF(INFO, "Opening cellview %s__%s(%s)", lib, cell, view);
+        logger->info("Opening design {}__{}({})", lib_name, cell_name, view_name);
         oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, 'r');
         if (dsn_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
@@ -111,6 +109,8 @@ namespace cbagoa {
     cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
                                                     const std::string &cell_name,
                                                     const std::string &view_name) {
-        return cbagoa::read_sch_cellview(read_design(lib_name, cell_name, view_name), ns_cdba);
+        oa::oaDesign *dsn_ptr = read_design(lib_name, cell_name, view_name);
+        logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
+        return reader->read_sch_cellview(dsn_ptr);
     }
 }

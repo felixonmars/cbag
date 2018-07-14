@@ -9,7 +9,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include <fmt/format.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <cbag/spirit/ast.h>
 

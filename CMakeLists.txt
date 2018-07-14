@@ -24,25 +24,23 @@ set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
-# Include g3log as an imported target
-find_package(g3logger REQUIRED)
+# Include spdlog
+find_package(spdlog REQUIRED)
+get_property(SPDLOG_INCLUDE_DIR TARGET spdlog::spdlog PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 
-message("g3log include directory: " ${G3LOG_INCLUDE_DIR})
-message("g3log library file: " ${G3LOG_LIBRARY})
-
-# add fmt library
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+message("spdlog include directory: " ${SPDLOG_INCLUDE_DIR})
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${G3LOG_INCLUDE_DIR}
+        ${SPDLOG_INCLUDE_DIR}
         )
-# fmt-header-only: for fmt: the string formatting library
-# boost_system: for Spirit X3 error handling
-# boost_serialization: for serialization
-link_libraries(fmt-header-only boost_system boost_serialization ${G3LOG_LIBRARY})
+
+# boost_system : for Spirit X3 error handling
+# boost_serialization : for serialization
+# spdlog::spdlog : the spdlog logging library
+link_libraries(boost_system boost_serialization spdlog::spdlog)
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp

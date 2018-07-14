@@ -11,12 +11,12 @@
 #include <map>
 #include <string>
 
-#include <g3log/g3log.hpp>
-#include <g3log/logworker.hpp>
+#include <spdlog/spdlog.h>
 
 #include <oa/oaDesignDB.h>
 
 #include <cbag/database/cellviews.h>
+#include <cbagoa/read_oa.h>
 
 
 namespace cbagoa {
@@ -75,7 +75,8 @@ namespace cbagoa {
 
         const std::string lib_def_file;
         const LibDefObserver lib_def_obs;
-        const std::unique_ptr<g3::LogWorker> log_worker;
+        std::shared_ptr<spdlog::logger> logger;
+        std::unique_ptr<OAReader> reader;
     };
 }
 

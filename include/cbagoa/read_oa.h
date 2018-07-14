@@ -8,6 +8,8 @@
 #ifndef CBAGOA_READ_OA_H
 #define CBAGOA_READ_OA_H
 
+#include <spdlog/spdlog.h>
+
 #include <oa/oaDesignDB.h>
 
 #include <cbag/spirit/ast.h>
@@ -19,76 +21,85 @@ namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
 
-    // String parsing methinds
+    class OAReader {
+    public:
 
-    bsa::name parse_name(const oa::oaString &source);
+        OAReader(const oa::oaCdbaNS &ns, std::shared_ptr<spdlog::logger> logger)
+                : ns(ns), logger(std::move(logger)) {};
 
-    bsa::name_unit parse_name_unit(const oa::oaString &source);
+        // String parsing methinds
 
-    // Read method for properties
+        bsa::name parse_name(const oa::oaString &source);
 
-    std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr);
+        bsa::name_unit parse_name_unit(const oa::oaString &source);
 
-    // Read methods for shapes
+        // Read method for properties
 
-    cbag::Rect read_rect(oa::oaRect *p);
+        std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr);
 
-    cbag::Poly read_poly(oa::oaPolygon *p);
+        // Read methods for shapes
 
-    cbag::Arc read_arc(oa::oaArc *p);
+        cbag::Rect read_rect(oa::oaRect *p);
 
-    cbag::Donut read_donut(oa::oaDonut *p);
+        cbag::Poly read_poly(oa::oaPolygon *p);
 
-    cbag::Ellipse read_ellipse(oa::oaEllipse *p);
+        cbag::Arc read_arc(oa::oaArc *p);
 
-    cbag::Line read_line(oa::oaLine *p);
+        cbag::Donut read_donut(oa::oaDonut *p);
 
-    cbag::Path read_path(oa::oaPath *p);
+        cbag::Ellipse read_ellipse(oa::oaEllipse *p);
 
-    cbag::Text read_text(oa::oaText *p);
+        cbag::Line read_line(oa::oaLine *p);
 
-    cbag::EvalText read_eval_text(oa::oaEvalText *p);
+        cbag::Path read_path(oa::oaPath *p);
 
-    cbag::Shape read_shape(oa::oaShape *p, const oa::oaNameSpace &ns);
+        cbag::Text read_text(oa::oaText *p);
 
-    // Read method for references
+        cbag::EvalText read_eval_text(oa::oaEvalText *p);
 
-    cbag::Instance read_instance(oa::oaInst *p, const oa::oaNameSpace &ns);
+        cbag::Shape read_shape(oa::oaShape *p);
 
-    std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p,
-                                                                 const oa::oaNameSpace &ns);
-    // Read method for pin figures
+        // Read method for references
 
-    cbag::PinFigure read_pin_figure(oa::oaPinFig *p, const oa::oaNameSpace &ns);
+        cbag::Instance read_instance(oa::oaInst *p);
 
-    // Read method for terminals
+        std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p);
+        // Read method for pin figures
 
-    std::pair<bsa::name, cbag::PinFigure> read_terminal_single(oa::oaTerm *term,
-                                                               const oa::oaNameSpace &ns);
+        cbag::PinFigure read_pin_figure(oa::oaPinFig *p);
 
-    // Read method for schematic/symbol cell view
+        // Read method for terminals
 
-    cbag::SchCellView read_sch_cellview(oa::oaDesign *design, const oa::oaNameSpace &ns);
+        std::pair<bsa::name, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
 
-    // Write methods for shapes
+        // Read method for schematic/symbol cell view
 
-    oa::oaRect *write_rect(oa::oaBlock *block, const cbag::Rect &v);
+        cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
 
-    oa::oaPolygon *write_poly(oa::oaBlock *block, const cbag::Poly &v);
+        // Write methods for shapes
 
-    oa::oaArc *write_arc(oa::oaBlock *block, const cbag::Arc &v);
+        oa::oaRect *write_rect(oa::oaBlock *block, const cbag::Rect &v);
 
-    oa::oaDonut *write_donut(oa::oaBlock *block, const cbag::Donut &v);
+        oa::oaPolygon *write_poly(oa::oaBlock *block, const cbag::Poly &v);
 
-    oa::oaEllipse *write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v);
+        oa::oaArc *write_arc(oa::oaBlock *block, const cbag::Arc &v);
 
-    oa::oaLine *write_line(oa::oaBlock *block, const cbag::Line &v);
+        oa::oaDonut *write_donut(oa::oaBlock *block, const cbag::Donut &v);
 
-    oa::oaPath *write_path(oa::oaBlock *block, const cbag::Path &v);
+        oa::oaEllipse *write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v);
 
-    oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v);
+        oa::oaLine *write_line(oa::oaBlock *block, const cbag::Line &v);
 
-    oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
+        oa::oaPath *write_path(oa::oaBlock *block, const cbag::Path &v);
+
+        oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v);
+
+        oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
+
+    private:
+        const oa::oaCdbaNS ns;
+        std::shared_ptr<spdlog::logger> logger;
+    };
 }
 
 #endif //CBAGOA_READ_OA_H
