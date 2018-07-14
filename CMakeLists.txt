@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.7)
+# Version 3.8 required because of C++17 support.
+cmake_minimum_required(VERSION 3.8)
 project(cbag)
 
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
@@ -28,8 +30,6 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIR}
-        ${CMAKE_SOURCE_DIR}/better-enums
-        ${CMAKE_SOURCE_DIR}/json/single_include
         )
 # fmt-header-only: for fmt: the string formatting library
 # boost_system: for Spirit X3 error handling
