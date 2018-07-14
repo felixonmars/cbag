@@ -212,16 +212,17 @@ namespace cbag {
         dist_t begin_ext, end_ext;
     };
 
-    struct Text {
-        Text() : layer(0), purpose(0), text(), origin(0, 0), alignment(taCC),
-                 orient(oR0), font(fRoman), height(0), overbar(false),
-                 visible(true), drafting(true) {}
+    /** Base class for all text-like object.
+     */
+    struct TextBase {
+        TextBase() : layer(0), purpose(0), origin(0, 0), alignment(taCC),
+                     orient(oR0), font(fRoman), height(0), overbar(false),
+                     visible(true), drafting(true) {}
 
-        Text(lay_t lay, purp_t purp, std::string text, TextAlign align,
-             Orientation orient, Font font, dist_t height, bool overbar,
-             bool visible, bool drafting)
-                : layer(lay), purpose(purp), text(std::move(text)), origin(), alignment(align),
-                  orient(orient), font(font), height(height), overbar(overbar), visible(visible),
+        TextBase(lay_t lay, purp_t purp, TextAlign align, Orientation orient,
+                 Font font, dist_t height, bool overbar, bool visible, bool drafting)
+                : layer(lay), purpose(purp), origin(), alignment(align), orient(orient),
+                  font(font), height(height), overbar(overbar), visible(visible),
                   drafting(drafting) {}
 
         // boost serialization
@@ -231,7 +232,6 @@ namespace cbag {
 #pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(layer);
             ar & BOOST_SERIALIZATION_NVP(purpose);
-            ar & BOOST_SERIALIZATION_NVP(text);
             ar & BOOST_SERIALIZATION_NVP(origin);
             ar & BOOST_SERIALIZATION_NVP(alignment);
             ar & BOOST_SERIALIZATION_NVP(orient);
@@ -246,13 +246,39 @@ namespace cbag {
 
         lay_t layer;
         purp_t purpose;
-        std::string text;
         Point origin;
         TextAlign alignment;
         Orientation orient;
         Font font;
         dist_t height;
         bool overbar, visible, drafting;
+    };
+
+    struct Text : TextBase {
+        Text() : TextBase(), text() {}
+
+        Text(lay_t lay, purp_t purp, std::string text, TextAlign align,
+             Orientation orient, Font font, dist_t height, bool overbar,
+             bool visible, bool drafting)
+                : TextBase(lay, purp, align, orient, font, height, overbar, visible, drafting),
+                  text(std::move(text)) {}
+
+        // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextBase);
+            ar & BOOST_SERIALIZATION_NVP(text);
+#pragma clang diagnostic pop
+        }
+
+#pragma clang diagnostic pop
+
+        std::string text;
     };
 
     struct EvalText : Text {
@@ -264,10 +290,10 @@ namespace cbag {
                 : Text(lay, purp, std::move(text), align, orient, font, height, overbar,
                        visible, drafting), evaluator(std::move(eval)) {}
 
+        // boost serialization
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "HidingNonVirtualFunction"
 
-        // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
@@ -280,6 +306,35 @@ namespace cbag {
 #pragma clang diagnostic pop
 
         std::string evaluator;
+    };
+
+    struct TermAttr : TextBase {
+        TermAttr() : TextBase(), attr_type(tatName), format(tdfNameValue) {}
+
+        TermAttr(TermAttrType attr_type, lay_t lay, purp_t purp, TextAlign align,
+                 Orientation orient, Font font, dist_t height, TextDispFormat format, bool overbar,
+                 bool visible, bool drafting)
+                : TextBase(lay, purp, align, orient, font, height, overbar, visible, drafting),
+                  attr_type(attr_type), format(format) {}
+
+        // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(TextBase);
+            ar & BOOST_SERIALIZATION_NVP(attr_type);
+            ar & BOOST_SERIALIZATION_NVP(format);
+#pragma clang diagnostic pop
+        }
+
+#pragma clang diagnostic pop
+
+        TermAttrType attr_type;
+        TextDispFormat format;
     };
 
     using Shape = boost::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path,
@@ -325,9 +380,42 @@ namespace cbag {
         ParamMap params;
     };
 
+    /** A schematic object that can represent a pin.
+     *
+     *  In OpenAccess schematics, pins are represented using an Instance and an AttrDisplay.
+     *  This object encapsulates those two.
+     */
+    struct SchPinObject {
+        /** Create an empty instance.
+         */
+        SchPinObject() = default;
+
+        /** Create an instance with empty parameter and terminal mappings.
+         *
+         * @param lib the library name.
+         * @param cell the cell name.
+         * @param view the view name.
+         * @param xform the instance location.
+         */
+        SchPinObject(Instance &&inst, TermAttr &&attr) : inst(inst), attr(attr) {};
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(inst);
+            ar & BOOST_SERIALIZATION_NVP(attr);
+#pragma clang diagnostic pop
+        }
+
+        Instance inst;
+        TermAttr attr;
+    };
+
     // figures
 
-    using PinFigure = boost::variant<Rect, Instance>;
+    using PinFigure = boost::variant<Rect, SchPinObject>;
 }
 
 #endif //CBAG_DATABASE_SHAPES_H

@@ -24,8 +24,8 @@ namespace cbagoa {
     class OAReader {
     public:
 
-        OAReader(const oa::oaCdbaNS &ns, std::shared_ptr<spdlog::logger> logger)
-                : ns(ns), logger(std::move(logger)) {};
+        OAReader(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
+                : ns(std::move(ns)), logger(std::move(logger)) {};
 
         // String parsing methinds
 
@@ -64,9 +64,10 @@ namespace cbagoa {
         cbag::Instance read_instance(oa::oaInst *p);
 
         std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p);
+
         // Read method for pin figures
 
-        cbag::PinFigure read_pin_figure(oa::oaPinFig *p);
+        cbag::PinFigure read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p);
 
         // Read method for terminals
 

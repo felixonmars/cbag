@@ -76,6 +76,25 @@ namespace cbag {
     constexpr Font fSwedish = swedish;
     constexpr Font fMilSpec = milSpec;
 
+    /** Terminal attribute type enum
+     */
+    enum TermAttrType {
+        name, hasPins, numBits
+    };
+    constexpr TermAttrType tatName = TermAttrType::name;
+    constexpr TermAttrType tatHasPin = TermAttrType::hasPins;
+    constexpr TermAttrType tatNumBits = TermAttrType::numBits;
+
+    /** Text display format enum
+     */
+    enum TextDispFormat {
+        name, value, nameValue
+    };
+    constexpr TextDispFormat tdfName = TextDispFormat::name;
+    constexpr TextDispFormat tdfValue = TextDispFormat::value;
+    constexpr TextDispFormat tdfNameValue = TextDispFormat::nameValue;
+
+
     /** Represents locations/orientation of an instance.
      */
     class Transform {

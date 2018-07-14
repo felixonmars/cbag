@@ -148,6 +148,35 @@ namespace cbagoa {
         return ans;
     }
 
+    /** Returns true if the given shape should be included.
+     *
+     *  The rules are:
+     *  1. if a shape has a pin, don't include it (we already added it to the pins).
+     *  2. if a shape is an attribute display of a terminal, don't include it (we already added it).
+     *  3. otherwise, include it.
+     */
+    bool include_shape(oa::oaShape *p) {
+        if (!p->hasPin()) {
+            if (p->getType() == oa::oacAttrDisplayType) {
+                auto disp = static_cast<oa::oaAttrDisplay *>(p); // NOLINT
+                if (disp->getObject()->isDesign()) {
+                    auto obj = static_cast<oa::oaDesignObject *>(disp->getObject()); // NOLINT
+                    if (obj->isBlockObject()) {
+                        return !((static_cast<oa::oaBlockObject *>(obj))->isTerm()); // NOLINT
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     cbag::Shape OAReader::read_shape(oa::oaShape *p) {
         // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
         // use NOLINT to suppress IDE warnings
@@ -170,14 +199,6 @@ namespace cbagoa {
                 return read_text(static_cast<oa::oaText *>(p));  //NOLINT
             case oa::oacEvalTextType :
                 return read_eval_text(static_cast<oa::oaEvalText *>(p));  //NOLINT
-            case oa::oacAttrDisplayType : {
-                oa::oaAttrDisplay *disp = static_cast<oa::oaAttrDisplay *>(p);
-                oa::oaString text;
-                disp->getText(ns, text);
-                logger->info("AttrDisplay text: {}", text);
-                logger->info("AttrDisplay object type: {}", disp->getObject()->getType().getName());
-                return cbag::Rect();
-            }
             default : {
                 throw std::invalid_argument(
                         fmt::format("Unsupported OA shape type: {}, see developer.",
@@ -298,10 +319,32 @@ namespace cbagoa {
 
     // Read method for pin figures
 
-    cbag::PinFigure OAReader::read_pin_figure(oa::oaPinFig *p) {
+    cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
         if (p->isInst()) {
-            cbag::PinFigure ans(read_instance(static_cast<oa::oaInst *>(p)));  // NOLINT
-            return ans;
+            cbag::Instance inst = read_instance(static_cast<oa::oaInst *>(p)); // NOLINT
+
+            oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
+            auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext()); // NOLINT
+            if (disp_ptr == nullptr) {
+                throw std::invalid_argument(fmt::format("Terminal has no attr display."));
+            }
+            if (disp_iter.getNext() != nullptr) {
+                throw std::invalid_argument(
+                        fmt::format("Terminal has more than one attr display."));
+            }
+
+            bool overbar = (disp_ptr->hasOverbar() != 0);
+            bool visible = (disp_ptr->isVisible() != 0);
+            bool drafting = (disp_ptr->isDrafting() != 0);
+            cbag::TermAttr attr(
+                    oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
+                    disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(),
+                    disp_ptr->getAlignment(), disp_ptr->getOrient(),
+                    disp_ptr->getFont(), disp_ptr->getHeight(), disp_ptr->getFormat(),
+                    overbar, visible, drafting);
+            disp_ptr->getOrigin(attr.origin);
+
+            return cbag::SchPinObject(std::move(inst), std::move(attr));
         } else if (p->getType() == oa::oacRectType) {
             cbag::PinFigure ans(read_rect(static_cast<oa::oaRect *>(p)));  // NOLINT
             return ans;
@@ -342,7 +385,7 @@ namespace cbagoa {
         }
 
         std::pair<bsa::name, cbag::PinFigure> ans(parse_name(term_name_oa),
-                                                  read_pin_figure(fig_ptr));
+                                                  read_pin_figure(term, fig_ptr));
 
         return ans;
     };
@@ -384,7 +427,7 @@ namespace cbagoa {
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
             // skip shapes associated with pins.  We got those already.
-            if (!shape_ptr->hasPin()) {
+            if (include_shape(shape_ptr)) {
                 ans.shapes.push_back(read_shape(shape_ptr));
             }
         }

@@ -56,6 +56,16 @@ namespace cbag {
     constexpr Font fSwedish = Font::oacSwedishFont;
     constexpr Font fMilSpec = Font::oacMilSpecFont;
 
+    using TermAttrType = oa::oaTermAttrTypeEnum;
+    constexpr TermAttrType tatName = TermAttrType::oacNameTermAttrType;
+    constexpr TermAttrType tatHasPin = TermAttrType::oacHasPinsTermAttrType;
+    constexpr TermAttrType tatNumBits = TermAttrType::oacNumBitsTermAttrType;
+
+    using TextDispFormat = oa::oaTextDisplayFormatEnum;
+    constexpr TextDispFormat tdfName = TextDispFormat::oacNameTextDisplayFormat;
+    constexpr TextDispFormat tdfValue = TextDispFormat::oacValueTextDisplayFormat;
+    constexpr TextDispFormat tdfNameValue = TextDispFormat::oacNameValueTextDisplayFormat;
+
     using Transform = oa::oaTransform;
     using Point = oa::oaPoint;
     using BBox = oa::oaBox;
