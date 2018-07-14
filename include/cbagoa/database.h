@@ -11,6 +11,9 @@
 #include <map>
 #include <string>
 
+#include <g3log/g3log.hpp>
+#include <g3log/logworker.hpp>
+
 #include <oa/oaDesignDB.h>
 
 #include <cbag/database/cellviews.h>
@@ -30,9 +33,7 @@ namespace cbagoa {
 
     class OALibrary {
     public:
-        OALibrary()
-                : is_open(false), dbu_per_uu(1000), lib_def_obs(1),
-                  lib_ptr(nullptr), tech_ptr(nullptr) {}
+        OALibrary();
 
         ~OALibrary();
 
@@ -70,6 +71,7 @@ namespace cbagoa {
         oa::oaTech *tech_ptr;
         std::string lib_name;
         oa::oaScalarName lib_name_oa;
+        std::unique_ptr<g3::LogWorker> log_worker;
     };
 }
 

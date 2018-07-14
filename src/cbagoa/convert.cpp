@@ -11,6 +11,8 @@
 // include fmt/ostream.h to support formatting oaStrings, which defines operator <<
 #include <fmt/ostream.h>
 
+#include <g3log/g3log.hpp>
+
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
@@ -293,9 +295,11 @@ namespace cbagoa {
 
     cbag::PinFigure read_pin_figure(oa::oaPinFig *p, const oa::oaNameSpace &ns) {
         if (p->isInst()) {
-            return read_instance(static_cast<oa::oaInst *>(p), ns);  // NOLINT
+            cbag::PinFigure ans(read_instance(static_cast<oa::oaInst *>(p), ns));  // NOLINT
+            return ans;
         } else if (p->getType() == oa::oacRectType) {
-            return read_rect(static_cast<oa::oaRect *>(p));  // NOLINT
+            cbag::PinFigure ans(read_rect(static_cast<oa::oaRect *>(p)));  // NOLINT
+            return ans;
         } else {
             throw std::invalid_argument(
                     fmt::format("Unsupported OA pin figure type: {}, see developer.",
@@ -333,16 +337,21 @@ namespace cbagoa {
                                                     term_name_oa));
         }
 
-        return {parse_name(term_name_oa), read_pin_figure(fig_ptr, ns)};
+        std::pair<bsa::name, cbag::PinFigure> ans(parse_name(term_name_oa),
+                                                  read_pin_figure(fig_ptr, ns));
+
+        return ans;
     };
 
     // Read method for schematic/symbol cell view
 
     cbag::SchCellView read_sch_cell_view(oa::oaDesign *p, const oa::oaNameSpace &ns) {
+        LOG(INFO) << "Reading schematic/symbol cellview";
         oa::oaBlock *block = p->getTopBlock();
         cbag::SchCellView ans;
 
         // read terminals
+        LOG(INFO) << "Reading terminals";
         oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
         oa::oaTerm *term_ptr;
         oa::oaString term_name;
@@ -366,6 +375,7 @@ namespace cbagoa {
         }
 
         // read shapes
+        LOG(INFO) << "Reading shapes";
         oa::oaIter<oa::oaShape> shape_iter(block->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
@@ -376,6 +386,7 @@ namespace cbagoa {
         }
 
         // read instances
+        LOG(INFO) << "Reading instances";
         oa::oaIter<oa::oaInst> inst_iter(block->getInsts());
         oa::oaInst *inst_ptr;
         while ((inst_ptr = inst_iter.getNext()) != nullptr) {
@@ -386,12 +397,14 @@ namespace cbagoa {
         }
 
         // read properties
+        LOG(INFO) << "Reading properties";
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
         oa::oaProp *prop_ptr;
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
             ans.params.insert(read_prop(prop_ptr));
         }
 
+        LOG(INFO) << "Finish reading schematic/symbol cellview";
         return ans;
     }
 

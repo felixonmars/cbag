@@ -6,9 +6,6 @@
 
 #include <boost/archive/xml_oarchive.hpp>
 
-#include <g3log/g3log.hpp>
-#include <g3log/logworker.hpp>
-
 #include <oa/oaDesignDB.h>
 
 #include <cbagoa/database.h>
@@ -62,11 +59,5 @@ int read_oa() {
 }
 
 int main(int argc, char *argv[]) {
-    // setup logging
-    auto worker = g3::LogWorker::createLogWorker();
-    auto handle = worker->addDefaultLogger("test_oa", "./");
-    g3::initializeLogging(worker.get());
-
-    LOG(INFO) << "G3 log started.";
     return read_oa();
 }

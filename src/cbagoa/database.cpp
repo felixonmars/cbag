@@ -28,6 +28,13 @@ namespace cbagoa {
 
 #pragma clang diagnostic pop
 
+    OALibrary::OALibrary()
+            : is_open(false), dbu_per_uu(1000), lib_def_obs(1), lib_ptr(nullptr),
+              tech_ptr(nullptr), log_worker(g3::LogWorker::createLogWorker()) {
+        auto handle = log_worker->addDefaultLogger("cbagoa", "./");
+        g3::initializeLogging(log_worker.get());
+    }
+
     OALibrary::~OALibrary() {
         close();
     }
@@ -40,9 +47,11 @@ namespace cbagoa {
                      oacDataModelRevNumber); // NOLINT
 #pragma clang diagnostic pop
 
+        LOG(INFO) << "Opening OA library " << library;
+
         // open library definition
-        oa::oaString lib_def_file(lib_file.c_str());
-        oa::oaLibDefList::openLibs(lib_def_file);
+        LOG(INFO) << "Opening library definition file " << lib_file;
+        oa::oaLibDefList::openLibs(oa::oaString(lib_file.c_str()));
 
         // open library
         lib_name = library;
@@ -50,9 +59,10 @@ namespace cbagoa {
         lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            oa::oaString oa_lib_path(lib_path.c_str());
+            LOGF(INFO, "Library %s not found, creating in path %s, with tech lib %s",
+                 library.c_str(), lib_file.c_str(), tech_lib.c_str());
             oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
-            lib_ptr = oa::oaLib::create(lib_name_oa, oa_lib_path);
+            lib_ptr = oa::oaLib::create(lib_name_oa, oa::oaString(lib_path.c_str()));
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
             // NOTE: I cannot get open access to modify the library file, so
@@ -90,6 +100,7 @@ namespace cbagoa {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
+        LOGF(INFO, "Opening cellview %s(%s)", cell_name.c_str(), view_name.c_str());
         oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_name_oa, cell_oa, view_oa, 'r');
         if (dsn_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
@@ -108,11 +119,11 @@ namespace cbagoa {
 
     void OALibrary::close() {
         if (is_open) {
+            LOG(INFO) << "Closing library " << lib_name;
             tech_ptr->close();
             lib_ptr->close();
 
             is_open = false;
         }
-
     }
 }
