@@ -26,9 +26,9 @@ int read_oa() {
 
         lib.open_lib(lib_file, library, lib_path, tech_lib);
 
-        cbag::SchMaster sch_master = lib.parse_schematic(cell_name, view_name);
+        cbag::SchCellView sch_master = lib.parse_sch_cell_view(cell_name, view_name);
 
-        cbag::SchSymbol sym_master = lib.parse_symbol(cell_name, sym_view_name);
+        cbag::SchCellView sym_master = lib.parse_sch_cell_view(cell_name, sym_view_name);
 
         std::ofstream outfile;
         outfile.open("inv_sch.xml", std::ios_base::out);

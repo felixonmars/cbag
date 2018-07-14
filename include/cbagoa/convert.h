@@ -12,11 +12,22 @@
 
 #include <cbag/spirit/ast.h>
 #include <cbag/database/figures.h>
+#include <cbag/database/cellviews.h>
 
 
 namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
+
+    // String parsing methinds
+
+    bsa::name parse_name(const oa::oaString &source);
+
+    bsa::name_unit parse_name_unit(const oa::oaString &source);
+
+    // Read method for properties
+
+    std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr);
 
     // Read methods for shapes
 
@@ -38,7 +49,26 @@ namespace cbagoa {
 
     cbag::EvalText read_eval_text(oa::oaEvalText *p);
 
-    cbag::Shape read_shape(oa::oaShape *shape_ptr);
+    cbag::Shape read_shape(oa::oaShape *p);
+
+    // Read method for references
+
+    cbag::Instance read_instance(oa::oaInst *p, const oa::oaNameSpace &ns);
+
+    std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p,
+                                                                 const oa::oaNameSpace &ns);
+    // Read method for pin figures
+
+    cbag::PinFigure read_pin_figure(oa::oaPinFig *p, const oa::oaNameSpace &ns);
+
+    // Read method for terminals
+
+    std::pair<bsa::name, cbag::PinFigure> read_terminal_single(oa::oaTerm *term,
+                                                               const oa::oaNameSpace &ns);
+
+    // Read method for schematic/symbol cell view
+
+    cbag::SchCellView read_sch_cell_view(oa::oaDesign *design, const oa::oaNameSpace &ns);
 
     // Write methods for shapes
 
@@ -59,14 +89,6 @@ namespace cbagoa {
     oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v);
 
     oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
-
-    // Read method for terminals
-
-    std::pair<bsa::name, std::vector<cbag::PinFigure>> read_terminals(oa::oaBlock *block);
-
-    // Read method for properties
-
-    std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr);
 }
 
 #endif //CBAGOA_CONVERT_H

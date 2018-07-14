@@ -25,55 +25,31 @@ namespace bsa = cbag::spirit::ast;
 
 namespace cbag {
 
-    /** A schematic master, in other words, a schematic cellview.
+    /** A schematic or symbol cell view
      *
-     *  Note that the terminal lists and instance list are all sorted in ascending order.
      */
-    struct SchMaster {
-        SchMaster() = default;
+    struct SchCellView {
+        SchCellView() = default;
 
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(symbols);
-            ar & BOOST_SERIALIZATION_NVP(in_pins);
-            ar & BOOST_SERIALIZATION_NVP(out_pins);
-            ar & BOOST_SERIALIZATION_NVP(io_pins);
-            ar & BOOST_SERIALIZATION_NVP(inst_map);
-#pragma clang diagnostic pop
-        }
-
-        std::set<std::string> symbols;
-        std::set<bsa::name> in_pins, out_pins, io_pins;
-        std::map<bsa::name_unit, Instance> inst_map;
-    };
-
-    /** A schematic symbol, in other words, a symbol cellview.
-     *
-     */
-    struct SchSymbol {
-        SchSymbol() = default;
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(in_pins);
-            ar & BOOST_SERIALIZATION_NVP(out_pins);
-            ar & BOOST_SERIALIZATION_NVP(io_pins);
+            ar & BOOST_SERIALIZATION_NVP(in_terms);
+            ar & BOOST_SERIALIZATION_NVP(out_terms);
+            ar & BOOST_SERIALIZATION_NVP(io_terms);
             ar & BOOST_SERIALIZATION_NVP(shapes);
+            ar & BOOST_SERIALIZATION_NVP(instances);
             ar & BOOST_SERIALIZATION_NVP(params);
 #pragma clang diagnostic pop
         }
 
-        std::map<bsa::name, Rect> in_pins, out_pins, io_pins;
+        std::map<bsa::name, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
+        std::map<bsa::name_unit, Instance> instances;
         ParamMap params;
     };
-
 }
 
 #endif //CBAG_DATABASE_CELLVIEWS_H
