@@ -32,8 +32,10 @@ namespace cbagoa {
             : lib_def_file(lib_def_file), lib_def_obs(1) {
 
         spdlog::set_async_mode(8192);
-        logger = spdlog::rotating_logger_st("cbagoa_logger", "cbagoa.log", 5242880, 5);
+        logger = spdlog::rotating_logger_st("OADatabase", "cbagoa.log", 5242880, 5);
         reader = std::make_unique<OAReader>(ns_cdba, logger);
+
+        logger->info("Creating new OADatabase with file: {}", lib_def_file);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "NotAssignable"
@@ -89,6 +91,10 @@ namespace cbagoa {
             }
         }
         return tech_ptr;
+    }
+
+    OADatabase::~OADatabase() {
+        logger->info("Destroying new OADatabase with file: {}", lib_def_file);
     }
 
     oa::oaDesign *OADatabase::read_design(const std::string &lib_name, const std::string &cell_name,

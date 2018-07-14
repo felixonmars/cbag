@@ -39,6 +39,8 @@ namespace cbagoa {
          */
         explicit OADatabase(const std::string &lib_def_file);
 
+        ~OADatabase();
+
         // This class is neither copyable nor movable
 
         OADatabase(const OADatabase &) = delete;
