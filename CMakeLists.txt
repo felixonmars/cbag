@@ -24,23 +24,25 @@ set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
-# Include spdlog
-find_package(spdlog REQUIRED)
-get_property(SPDLOG_INCLUDE_DIR TARGET spdlog::spdlog PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+# Include fmt library
+find_package(fmt REQUIRED)
 
-message("spdlog include directory: " ${SPDLOG_INCLUDE_DIR})
+# Include easylogging++
+find_package(easyloggingpp MODULE REQUIRED)
+
+message("easylogging++ include directory: " ${EASYLOGGINGPP_INCLUDE_DIR})
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${SPDLOG_INCLUDE_DIR}
+        ${EASYLOGGINGPP_INCLUDE_DIR}
         )
 
 # boost_system : for Spirit X3 error handling
 # boost_serialization : for serialization
 # spdlog::spdlog : the spdlog logging library
-link_libraries(boost_system boost_serialization spdlog::spdlog)
+link_libraries(boost_system boost_serialization)
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp

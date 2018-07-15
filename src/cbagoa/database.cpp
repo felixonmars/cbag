@@ -31,7 +31,6 @@ namespace cbagoa {
     OADatabase::OADatabase(const std::string &lib_def_file)
             : lib_def_file(lib_def_file), lib_def_obs(1) {
 
-        spdlog::set_async_mode(8192);
         logger = spdlog::rotating_logger_st("OADatabase", "cbagoa.log", 5242880, 5);
         reader = std::make_unique<OAReader>(ns_cdba, logger);
         writer = std::make_unique<OAWriter>(ns_cdba, logger);
