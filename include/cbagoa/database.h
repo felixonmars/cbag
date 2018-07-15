@@ -11,8 +11,6 @@
 #include <map>
 #include <string>
 
-#include <spdlog/spdlog.h>
-
 #include <oa/oaDesignDB.h>
 
 #include <cbag/database/cellviews.h>
@@ -83,7 +81,7 @@ namespace cbagoa {
 
         const std::string lib_def_file;
         const LibDefObserver lib_def_obs;
-        std::shared_ptr<spdlog::logger> logger;
+        el::Logger *logger;
         std::unique_ptr<OAReader> reader;
         std::unique_ptr<OAWriter> writer;
     };

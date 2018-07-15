@@ -9,8 +9,8 @@
 
 #include <boost/variant.hpp>
 
-#include <spdlog/fmt/fmt.h>
-#include <spdlog/fmt/bundled/ostream.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <cbag/spirit/ast.h>
 

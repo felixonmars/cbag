@@ -8,12 +8,14 @@
 // TODO: Debug only, remve later
 #include <iostream>
 
-#include <spdlog/fmt/fmt.h>
+#include <easylogging++.h>
 
-#include <spdlog/spdlog.h>
+#include <fmt/format.h>
 
 #include <cbagoa/database.h>
 #include <cbagoa/read_oa.h>
+
+INITIALIZE_EASYLOGGINGPP
 
 
 namespace cbagoa {
@@ -31,11 +33,11 @@ namespace cbagoa {
     OADatabase::OADatabase(const std::string &lib_def_file)
             : lib_def_file(lib_def_file), lib_def_obs(1) {
 
-        logger = spdlog::rotating_logger_st("OADatabase", "cbagoa.log", 5242880, 5);
+        logger = el::Loggers::getLogger("default");
         reader = std::make_unique<OAReader>(ns_cdba, logger);
         writer = std::make_unique<OAWriter>(ns_cdba, logger);
 
-        logger->info("Creating new OADatabase with file: {}", lib_def_file);
+        logger->info("Creating new OADatabase with file: %v", lib_def_file);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "NotAssignable"
@@ -43,7 +45,7 @@ namespace cbagoa {
                      oacDataModelRevNumber); // NOLINT
 #pragma clang diagnostic pop
 
-        logger->info("Opening all libraries in definition file: {}", lib_def_file);
+        logger->info("Opening all libraries in definition file: %v", lib_def_file);
         oa::oaLibDefList::openLibs(lib_def_file.c_str());
     }
 
@@ -51,14 +53,14 @@ namespace cbagoa {
     void OADatabase::create_lib(const std::string &library, const std::string &lib_path,
                                 const std::string &tech_lib) {
 
-        logger->info("Creating OA library {}", library);
+        logger->info("Creating OA library %v", library);
 
         // open library
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            logger->info("Creating Library {} at path {}, with tech lib {}",
+            logger->info("Creating Library %v at path %v, with tech lib %v",
                          library, lib_path, tech_lib);
             oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
             lib_ptr = oa::oaLib::create(lib_name_oa, lib_path.c_str());
@@ -71,7 +73,7 @@ namespace cbagoa {
             outfile << "DEFINE " << library << " " << lib_path << std::endl;
             outfile.close();
         } else {
-            logger->info("OA library {} already exists.  Do nothing.", library);
+            logger->info("OA library %v already exists.  Do nothing.", library);
         }
     }
 
@@ -94,7 +96,7 @@ namespace cbagoa {
     }
 
     OADatabase::~OADatabase() {
-        logger->info("Destroying new OADatabase with file: {}", lib_def_file);
+        logger->info("Destroying new OADatabase with file: %v", lib_def_file);
     }
 
     oa::oaDesign *OADatabase::open_design(const std::string &lib_name, const std::string &cell_name,
@@ -103,7 +105,7 @@ namespace cbagoa {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
-        logger->info("Opening design {}__{}({}) with mode {}", lib_name, cell_name,
+        logger->info("Opening design %v__%v(%v) with mode %v", lib_name, cell_name,
                      view_name, mode);
         oa::oaDesign *dsn_ptr = nullptr;
         if (mode == 'r') {
@@ -124,7 +126,7 @@ namespace cbagoa {
                                                     const std::string &cell_name,
                                                     const std::string &view_name) {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'r');
-        logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
+        logger->info("Reading cellview %v__%v(%v)", lib_name, cell_name, view_name);
         cbag::SchCellView ans = reader->read_sch_cellview(dsn_ptr);
         dsn_ptr->close();
         return ans;

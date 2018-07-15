@@ -7,8 +7,8 @@
 
 #include <utility>
 
-#include <spdlog/fmt/fmt.h>
-#include <spdlog/fmt/bundled/ostream.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>

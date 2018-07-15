@@ -8,9 +8,9 @@
 #ifndef CBAGOA_WRITE_OA_H
 #define CBAGOA_WRITE_OA_H
 
-#include <spdlog/spdlog.h>
-
 #include <oa/oaDesignDB.h>
+
+#include <easylogging++.h>
 
 #include <cbag/database/figures.h>
 #include <cbag/database/cellviews.h>
@@ -23,8 +23,8 @@ namespace cbagoa {
     class OAWriter {
     public:
 
-        OAWriter(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-                : ns(std::move(ns)), logger(std::move(logger)) {};
+        OAWriter(oa::oaCdbaNS ns, el::Logger *logger)
+                : ns(std::move(ns)), logger(logger) {};
 
         // Write method for schematic/symbol cell view
 
@@ -32,7 +32,7 @@ namespace cbagoa {
 
     private:
         const oa::oaCdbaNS ns;
-        std::shared_ptr<spdlog::logger> logger;
+        el::Logger *logger;
     };
 }
 

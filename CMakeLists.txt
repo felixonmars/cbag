@@ -25,24 +25,19 @@ message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # Include fmt library
-find_package(fmt REQUIRED)
-
-# Include easylogging++
-find_package(easyloggingpp MODULE REQUIRED)
-
-message("easylogging++ include directory: " ${EASYLOGGINGPP_INCLUDE_DIR})
+add_subdirectory(fmt)
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${EASYLOGGINGPP_INCLUDE_DIR}
+        ${CMAKE_SOURCE_DIR}/easyloggingpp/src
         )
 
 # boost_system : for Spirit X3 error handling
 # boost_serialization : for serialization
 # spdlog::spdlog : the spdlog logging library
-link_libraries(boost_system boost_serialization)
+link_libraries(boost_system boost_serialization fmt-header-only)
 
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp
@@ -59,7 +54,9 @@ set(SRC_FILES_LIB_CBAGOA
         src/cbagoa/name.cpp
         src/cbagoa/read_oa.cpp
         src/cbagoa/write_oa.cpp
-        src/cbagoa/database.cpp)
+        src/cbagoa/database.cpp
+        ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
+        )
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies
