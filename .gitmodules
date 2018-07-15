@@ -1,0 +1,6 @@
+[submodule "fmt"]
+	path = fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "easyloggingpp"]
+	path = easyloggingpp
+	url = https://github.com/muflihun/easyloggingpp.git
