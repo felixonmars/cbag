@@ -63,22 +63,81 @@ namespace cbag {
                 }
             }
 
-            name_bit name_unit::operator[](uint32_t index) const {
+            name_bit name_vector::operator[](uint32_t index) const {
                 uint32_t range_size = idx_range.size();
-                return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index % range_size]);
+                return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index]);
             }
 
-            bool name_unit::operator==(const name_unit &other) const {
-                return base == other.base && idx_range == other.idx_range && mult == other.mult;
+            bool name_vector::operator==(const name_vector &other) const {
+                return base == other.base && idx_range == other.idx_range;
             }
 
-            bool name_unit::operator<(const name_unit &other) const {
-                return base < other.base
-                       || (base == other.base && (idx_range < other.idx_range
-                                                  || (idx_range == other.idx_range && mult < other.mult)));
+            bool name_vector::operator<(const name_vector &other) const {
+                return base < other.base || (base == other.base && (idx_range < other.idx_range));
             }
 
-            name::const_iterator &name::const_iterator::operator++() {
+            class pre_inc_pair_first : public boost::static_visitor<> {
+            public:
+                template<typename T>
+                void operator()(std::pair<T, T> &operand) const {
+                    ++operand.first;
+                }
+            };
+
+            class reset_pair_first : public boost::static_visitor<> {
+            public:
+                template<typename T>
+                void operator()(std::pair<T, T> &operand) const {
+                    operand.first.reset();
+                }
+            };
+
+            class pair_equal : public boost::static_visitor<bool> {
+            public:
+                template<typename T>
+                bool operator()(const std::pair<T, T> &operand) const {
+                    return operand.first == operand.second;
+                }
+            };
+
+            class eval_pair_first : public boost::static_visitor<name_bit> {
+            public:
+                template<typename T>
+                name_bit operator()(const std::pair<T, T> &operand) const {
+                    return *(operand.first);
+                }
+            };
+
+            void const_list_iterator::reset() {
+                list_idx = 0;
+                boost::apply_visitor(reset_pair_first(), iter_pair);
+            }
+
+            const_list_iterator &const_list_iterator::operator++() {
+                if (boost::apply_visitor(pair_equal(), iter_pair)) {
+                    ++list_idx;
+                    iter_pair = ptr->get_iter_pair(list_idx);
+                } else {
+                    boost::apply_visitor(pre_inc_pair_first(), iter_pair);
+                }
+                return *this;
+            }
+
+            bool const_list_iterator::operator!=(const const_list_iterator &other) const {
+                return ptr != other.ptr || list_idx != other.list_idx
+                       || iter_pair != other.iter_pair;
+            }
+
+            bool const_list_iterator::operator==(const const_list_iterator &other) const {
+                return ptr == other.ptr && list_idx == other.list_idx
+                       && iter_pair == other.iter_pair;
+            }
+
+            name_bit const_list_iterator::operator*() const {
+                return boost::apply_visitor(eval_pair_first(), iter_pair);
+            }
+
+            name_list::const_iterator &name_list::const_iterator::operator++() {
                 if (bit_index < (ptr->unit_list[unit_index]).size() - 1) {
                     ++bit_index;
                 } else {
