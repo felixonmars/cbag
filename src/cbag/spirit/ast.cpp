@@ -35,30 +35,6 @@ namespace cbag {
                 }
             }
 
-            std::string range::to_string() const {
-                if (step == 0) {
-                    return "";
-                }
-
-                if (start == stop) {
-                    return fmt::format("<{}>", start);
-                } else {
-                    if (step == 1) {
-                        return fmt::format("<{}:{}>", start, stop);
-                    } else {
-                        return fmt::format("<{}:{}:{}>", start, stop, step);
-                    }
-                }
-            }
-
-            std::string name_bit::to_string() const {
-                if (index) {
-                    return fmt::format("{}<{}>", base, *index);
-                } else {
-                    return base;
-                }
-            }
-
             bool range::operator==(const range &other) const {
                 return start == other.start && stop == other.stop && step == other.step;
             }
@@ -84,14 +60,6 @@ namespace cbag {
                     }
                 } else {
                     return false;
-                }
-            }
-
-            std::string name_unit::to_string() const {
-                if (mult > 1) {
-                    return fmt::format("<*{}>{}{}", mult, base, idx_range.to_string());
-                } else {
-                    return base + idx_range.to_string();
                 }
             }
 

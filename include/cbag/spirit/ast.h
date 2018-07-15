@@ -43,8 +43,6 @@ namespace cbag {
 
                 uint32_t get_stop_exclude() const;
 
-                std::string to_string() const;
-
                 inline uint32_t operator[](uint32_t index) const {
                     return (stop >= start) ? start + step * index : start - step * index;
                 }
@@ -84,8 +82,6 @@ namespace cbag {
 
                 name_bit(std::string base, uint32_t index) : base(std::move(base)), index(index) {}
 
-                std::string to_string() const;
-
                 bool operator==(const name_bit &other) const;
 
                 inline bool operator!=(const name_bit &other) const { return !(*this == other); }
@@ -118,8 +114,6 @@ namespace cbag {
                 inline uint32_t size() const { return mult * std::max(idx_range.size(), 1u); }
 
                 inline bool is_vector() { return idx_range.size() > 0; }
-
-                std::string to_string() const;
 
                 name_bit operator[](uint32_t index) const;
 

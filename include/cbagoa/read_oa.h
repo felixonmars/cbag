@@ -77,26 +77,6 @@ namespace cbagoa {
 
         cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
 
-        // Write methods for shapes
-
-        oa::oaRect *write_rect(oa::oaBlock *block, const cbag::Rect &v);
-
-        oa::oaPolygon *write_poly(oa::oaBlock *block, const cbag::Poly &v);
-
-        oa::oaArc *write_arc(oa::oaBlock *block, const cbag::Arc &v);
-
-        oa::oaDonut *write_donut(oa::oaBlock *block, const cbag::Donut &v);
-
-        oa::oaEllipse *write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v);
-
-        oa::oaLine *write_line(oa::oaBlock *block, const cbag::Line &v);
-
-        oa::oaPath *write_path(oa::oaBlock *block, const cbag::Path &v);
-
-        oa::oaText *write_text(oa::oaBlock *block, const cbag::Text &v);
-
-        oa::oaEvalText *write_eval_text(oa::oaBlock *block, const cbag::EvalText &v);
-
     private:
         const oa::oaCdbaNS ns;
         std::shared_ptr<spdlog::logger> logger;

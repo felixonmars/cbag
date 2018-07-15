@@ -54,8 +54,10 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAGOA
-        src/cbagoa/database.cpp
-        src/cbagoa/read_oa.cpp)
+        src/cbagoa/name.cpp
+        src/cbagoa/read_oa.cpp
+        src/cbagoa/write_oa.cpp
+        src/cbagoa/database.cpp)
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies

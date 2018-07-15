@@ -14,6 +14,7 @@
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 
+#include <cbagoa/name.h>
 #include <cbagoa/read_oa.h>
 
 
@@ -265,7 +266,7 @@ namespace cbagoa {
                         (conn_ret.first->second)[0] = *nname_iter;
                     } else {
                         throw std::invalid_argument(fmt::format("Instance has duplicate pin {}",
-                                                                term_name_bit.to_string()));
+                                                                to_string(term_name_bit)));
                     }
                 }
                 if (nname_iter != nname_end) {
@@ -291,7 +292,7 @@ namespace cbagoa {
                         ptr_list.push_back(conn_ret.first);
                     } else {
                         throw std::invalid_argument(fmt::format("Instance has duplicate pin {}",
-                                                                term_name_bit.to_string()));
+                                                                to_string(term_name_bit)));
                     }
                 }
                 for (uint32_t idx = 1; idx < inst_size; ++idx) {
@@ -393,7 +394,6 @@ namespace cbagoa {
     // Read method for schematic/symbol cell view
 
     cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
-        logger->info("Reading schematic/symbol cellview");
         oa::oaBlock *block = p->getTopBlock();
         cbag::SchCellView ans;
 
@@ -453,49 +453,5 @@ namespace cbagoa {
 
         logger->info("Finish reading schematic/symbol cellview");
         return ans;
-    }
-
-    // Write methods for shapes
-
-    oa::oaRect *OAReader::write_rect(oa::oaBlock *block, const cbag::Rect &v) {
-        return oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
-    }
-
-    oa::oaPolygon *OAReader::write_poly(oa::oaBlock *block, const cbag::Poly &v) {
-        return oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
-    }
-
-    oa::oaArc *OAReader::write_arc(oa::oaBlock *block, const cbag::Arc &v) {
-        return oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start, v.ang_stop);
-    }
-
-    oa::oaDonut *OAReader::write_donut(oa::oaBlock *block, const cbag::Donut &v) {
-        return oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius, v.hole_radius);
-    }
-
-    oa::oaEllipse *OAReader::write_ellipse(oa::oaBlock *block, const cbag::Ellipse &v) {
-        return oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
-    }
-
-    oa::oaLine *OAReader::write_line(oa::oaBlock *block, const cbag::Line &v) {
-        return oa::oaLine::create(block, v.layer, v.purpose, v.points);
-    }
-
-    oa::oaPath *OAReader::write_path(oa::oaBlock *block, const cbag::Path &v) {
-        return oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points, v.style,
-                                  v.begin_ext, v.end_ext);
-    }
-
-    oa::oaText *OAReader::write_text(oa::oaBlock *block, const cbag::Text &v) {
-        return oa::oaText::create(block, v.layer, v.purpose, oa::oaString(v.text.c_str()),
-                                  v.origin, v.alignment, v.orient, v.font, v.height, v.overbar,
-                                  v.visible, v.drafting);
-    }
-
-    oa::oaEvalText *OAReader::write_eval_text(oa::oaBlock *block, const cbag::EvalText &v) {
-        return oa::oaEvalText::create(block, v.layer, v.purpose, oa::oaString(v.text.c_str()),
-                                      v.origin, v.alignment, v.orient, v.font, v.height,
-                                      oa::oaString(v.evaluator.c_str()), v.overbar,
-                                      v.visible, v.drafting);
     }
 }
