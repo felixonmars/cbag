@@ -113,7 +113,7 @@ namespace cbag {
 
                 inline uint32_t size() const { return mult * std::max(idx_range.size(), 1u); }
 
-                inline bool is_vector() { return idx_range.size() > 0; }
+                inline bool is_vector() const { return idx_range.size() > 0; }
 
                 name_bit operator[](uint32_t index) const;
 

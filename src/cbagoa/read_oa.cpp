@@ -56,19 +56,18 @@ namespace cbagoa {
                 return {std::move(key),
                         static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()}; // NOLINT
             }
-            case oa::oacFloatPropType : {
-                return {std::move(key),
-                        static_cast<oa::oaFloatProp *>(prop_ptr)->getValue()}; // NOLINT
-            }
             case oa::oacTimePropType : {
                 return {std::move(key),
                         cbag::Time(static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())}; // NOLINT
             }
             case oa::oacAppPropType : {
                 oa::oaByteArray data;
-                static_cast<oa::oaAppProp *>(prop_ptr)->getValue(data); // NOLINT
+                oa::oaString app_str;
+                oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(prop_ptr);
+                app_ptr->getValue(data); // NOLINT
+                app_ptr->getAppType(app_str);
                 return {std::move(key),
-                        cbag::Binary(data.getElements(), data.getNumElements())};
+                        cbag::Binary(app_str, data.getElements(), data.getNumElements())};
             }
             default : {
                 throw std::invalid_argument(

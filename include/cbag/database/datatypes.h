@@ -27,11 +27,6 @@ namespace cbag {
 
         explicit Time(time_t time_val) : time_val(time_val) {}
 
-        // standard out printing
-        friend std::ostream &operator<<(std::ostream &os, const Time &t) {
-            return os << "[time, " << t.time_val << "]";
-        }
-
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
@@ -52,22 +47,20 @@ namespace cbag {
     struct Binary {
         Binary() = default;
 
-        Binary(const unsigned char *data, unsigned int size) : bin_val(data, data + size) {}
-
-        // standard out printing
-        friend std::ostream &operator<<(std::ostream &os, const Binary &s) {
-            return os << "[bin, " << s.bin_val << "]";
-        }
+        Binary(const char *name, const unsigned char *data, unsigned int size)
+                : name(name), bin_val(data, data + size) {}
 
         // boost serialization
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(name);
             ar & BOOST_SERIALIZATION_NVP(bin_val);
 #pragma clang diagnostic pop
         }
 
+        std::string name;
         std::string bin_val;
     };
 

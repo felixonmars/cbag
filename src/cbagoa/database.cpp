@@ -34,6 +34,7 @@ namespace cbagoa {
         spdlog::set_async_mode(8192);
         logger = spdlog::rotating_logger_st("OADatabase", "cbagoa.log", 5242880, 5);
         reader = std::make_unique<OAReader>(ns_cdba, logger);
+        writer = std::make_unique<OAWriter>(ns_cdba, logger);
 
         logger->info("Creating new OADatabase with file: {}", lib_def_file);
 
@@ -44,7 +45,7 @@ namespace cbagoa {
 #pragma clang diagnostic pop
 
         logger->info("Opening all libraries in definition file: {}", lib_def_file);
-        oa::oaLibDefList::openLibs(oa::oaString(lib_def_file.c_str()));
+        oa::oaLibDefList::openLibs(lib_def_file.c_str());
     }
 
 
@@ -61,7 +62,7 @@ namespace cbagoa {
             logger->info("Creating Library {} at path {}, with tech lib {}",
                          library, lib_path, tech_lib);
             oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
-            lib_ptr = oa::oaLib::create(lib_name_oa, oa::oaString(lib_path.c_str()));
+            lib_ptr = oa::oaLib::create(lib_name_oa, lib_path.c_str());
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
             // NOTE: I cannot get open access to modify the library file, so
@@ -97,17 +98,25 @@ namespace cbagoa {
         logger->info("Destroying new OADatabase with file: {}", lib_def_file);
     }
 
-    oa::oaDesign *OADatabase::read_design(const std::string &lib_name, const std::string &cell_name,
-                                          const std::string &view_name) {
+    oa::oaDesign *OADatabase::open_design(const std::string &lib_name, const std::string &cell_name,
+                                          const std::string &view_name, char mode, bool is_sch) {
         oa::oaScalarName lib_oa(ns, lib_name.c_str());
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
-        logger->info("Opening design {}__{}({})", lib_name, cell_name, view_name);
-        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, 'r');
+        logger->info("Opening design {}__{}({}) with mode {}", lib_name, cell_name,
+                     view_name, mode);
+        oa::oaDesign *dsn_ptr = nullptr;
+        if (mode == 'r') {
+            dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, mode);
+        } else {
+            oa::oaViewType *view_type = oa::oaViewType::get(
+                    (is_sch) ? oa::oacSchematic : oa::oacSchematicSymbol);
+            dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, view_type, mode);
+        }
         if (dsn_ptr == nullptr) {
-            throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({})",
-                                                    lib_name, cell_name, view_name));
+            throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({}) with mode {}",
+                                                    lib_name, cell_name, view_name, mode));
         }
         return dsn_ptr;
     }
@@ -115,8 +124,19 @@ namespace cbagoa {
     cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
                                                     const std::string &cell_name,
                                                     const std::string &view_name) {
-        oa::oaDesign *dsn_ptr = read_design(lib_name, cell_name, view_name);
+        oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'r');
         logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
-        return reader->read_sch_cellview(dsn_ptr);
+        cbag::SchCellView ans = reader->read_sch_cellview(dsn_ptr);
+        dsn_ptr->close();
+        return ans;
+    }
+
+    void OADatabase::write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                        const std::string &view_name, bool is_sch,
+                                        const cbag::SchCellView &cv) {
+        oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
+        writer->write_sch_cellview(cv, dsn_ptr);
+        dsn_ptr->save();
+        dsn_ptr->close();
     }
 }

@@ -17,6 +17,7 @@
 
 #include <cbag/database/cellviews.h>
 #include <cbagoa/read_oa.h>
+#include <cbagoa/write_oa.h>
 
 
 namespace cbagoa {
@@ -64,12 +65,17 @@ namespace cbagoa {
                                             const std::string &cell_name,
                                             const std::string &view_name);
 
+        void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                const std::string &view_name, bool is_sch,
+                                const cbag::SchCellView &cv);
+
     private:
 
         oa::oaTech *read_tech(const std::string &library);
 
-        oa::oaDesign *read_design(const std::string &lib_name, const std::string &cell_name,
-                                  const std::string &view_name);
+        oa::oaDesign *open_design(const std::string &lib_name, const std::string &cell_name,
+                                  const std::string &view_name,
+                                  char mode = 'r', bool is_sch = true);
 
         // OA namespace objects
         const oa::oaNativeNS ns;
@@ -79,6 +85,7 @@ namespace cbagoa {
         const LibDefObserver lib_def_obs;
         std::shared_ptr<spdlog::logger> logger;
         std::unique_ptr<OAReader> reader;
+        std::unique_ptr<OAWriter> writer;
     };
 }
 

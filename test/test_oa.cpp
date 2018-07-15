@@ -19,6 +19,7 @@ int read_oa() {
         std::string tech_lib("cds_ff_mpt");
         std::string lib_name("schtest");
         std::string cell_name("inv");
+        std::string cell_name2("inv2");
         std::string view_name("schematic");
         std::string sym_view_name("symbol");
 
@@ -38,6 +39,10 @@ int read_oa() {
         boost::archive::xml_oarchive xml_out2(symfile);
         xml_out2 << BOOST_SERIALIZATION_NVP(sym_master);
         symfile.close();
+
+        db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
+
+
     } catch (oa::oaCompatibilityError &ex) {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Compatibility Error: " + msg_std);
