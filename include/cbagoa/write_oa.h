@@ -31,6 +31,11 @@ namespace cbagoa {
         void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn);
 
     private:
+
+        void
+        create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
+                            const std::map<bsa::name, cbag::PinFigure> &map);
+
         const oa::oaCdbaNS ns;
         el::Logger *logger;
     };

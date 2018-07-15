@@ -33,6 +33,12 @@ namespace cbagoa {
     OADatabase::OADatabase(const std::string &lib_def_file)
             : lib_def_file(lib_def_file), lib_def_obs(1) {
 
+        el::Configurations logging_conf;
+        logging_conf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
+        logging_conf.setGlobally(el::ConfigurationType::Filename, "cbagoa.log");
+        logging_conf.setGlobally(el::ConfigurationType ::MaxLogFileSize, "16777216");
+        el::Loggers::reconfigureLogger("default", logging_conf);
+
         logger = el::Loggers::getLogger("default");
         reader = std::make_unique<OAReader>(ns_cdba, logger);
         writer = std::make_unique<OAWriter>(ns_cdba, logger);
