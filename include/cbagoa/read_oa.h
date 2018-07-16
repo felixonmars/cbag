@@ -36,23 +36,23 @@ namespace cbagoa {
 
         // Read methods for shapes
 
-        cbag::Rect read_rect(oa::oaRect *p);
+        cbag::Rect read_rect(oa::oaRect *p, std::string &&net);
 
-        cbag::Poly read_poly(oa::oaPolygon *p);
+        cbag::Poly read_poly(oa::oaPolygon *p, std::string &&net);
 
-        cbag::Arc read_arc(oa::oaArc *p);
+        cbag::Arc read_arc(oa::oaArc *p, std::string &&net);
 
-        cbag::Donut read_donut(oa::oaDonut *p);
+        cbag::Donut read_donut(oa::oaDonut *p, std::string &&net);
 
-        cbag::Ellipse read_ellipse(oa::oaEllipse *p);
+        cbag::Ellipse read_ellipse(oa::oaEllipse *p, std::string &&net);
 
-        cbag::Line read_line(oa::oaLine *p);
+        cbag::Line read_line(oa::oaLine *p, std::string &&net);
 
-        cbag::Path read_path(oa::oaPath *p);
+        cbag::Path read_path(oa::oaPath *p, std::string &&net);
 
-        cbag::Text read_text(oa::oaText *p);
+        cbag::Text read_text(oa::oaText *p, std::string &&net);
 
-        cbag::EvalText read_eval_text(oa::oaEvalText *p);
+        cbag::EvalText read_eval_text(oa::oaEvalText *p, std::string &&net);
 
         cbag::Shape read_shape(oa::oaShape *p);
 

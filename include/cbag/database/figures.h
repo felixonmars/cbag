@@ -4,8 +4,8 @@
  *  \author Eric Chang
  *  \date   2018/07/10
  */
-#ifndef CBAG_DATABASE_SHAPES_H
-#define CBAG_DATABASE_SHAPES_H
+#ifndef CBAG_DATABASE_FIGURES_H
+#define CBAG_DATABASE_FIGURES_H
 
 #include <boost/variant.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -22,16 +22,11 @@ namespace cbag {
 
     // shapes
 
-    /** A rectangular shape
-     */
-    struct Rect {
-        Rect() : layer(0), purpose(0), bbox() {}
+    struct ShapeBase {
+        ShapeBase() : layer(0), purpose(0), net() {}
 
-        Rect(lay_t lay, purp_t purp)
-                : layer(lay), purpose(purp), bbox() {}
-
-        Rect(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-                : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
+        ShapeBase(lay_t lay, purp_t purp, std::string net)
+                : layer(lay), purpose(purp), net(std::move(net)) {}
 
         // boost serialization
         template<class Archive>
@@ -40,162 +35,206 @@ namespace cbag {
 #pragma clang diagnostic ignored "-Wunused-value"
             ar & BOOST_SERIALIZATION_NVP(layer);
             ar & BOOST_SERIALIZATION_NVP(purpose);
-            ar & BOOST_SERIALIZATION_NVP(bbox);
+            ar & BOOST_SERIALIZATION_NVP(net);
 #pragma clang diagnostic pop
         }
 
         lay_t layer;
         purp_t purpose;
+        std::string net;
+    };
+
+    /** A rectangular shape
+     */
+    struct Rect : ShapeBase {
+        Rect() : ShapeBase(), bbox() {}
+
+        Rect(lay_t lay, purp_t purp, std::string net)
+                : ShapeBase(lay, purp, std::move(net)), bbox() {}
+
+        Rect(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl,
+             coord_t xh, coord_t yh)
+                : ShapeBase(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
+
+        // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
+            ar & BOOST_SERIALIZATION_NVP(bbox);
+#pragma clang diagnostic pop
+        }
+
+#pragma clang diagnostic pop
+
         BBox bbox;
     };
 
     /** A polygon shape.
      */
-    struct Poly {
-        Poly() : layer(0), purpose(0), points() {}
+    struct Poly : ShapeBase {
+        Poly() : ShapeBase(), points() {}
 
-        Poly(lay_t lay, purp_t purp, uint32_t n)
-                : layer(lay), purpose(purp), points(n) {}
+        Poly(lay_t lay, purp_t purp, std::string net, uint32_t n)
+                : ShapeBase(lay, purp, std::move(net)), points(n) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(points);
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         PointArray points;
     };
 
-    struct Arc {
-        Arc() : layer(0), purpose(0), ang_start(0), ang_stop(0), bbox() {}
+    struct Arc : ShapeBase {
+        Arc() : ShapeBase(), ang_start(0), ang_stop(0), bbox() {}
 
-        Arc(lay_t lay, purp_t purp, double start, double stop)
-                : layer(lay), purpose(purp), ang_start(start), ang_stop(stop),
+        Arc(lay_t lay, purp_t purp, std::string net, double start, double stop)
+                : ShapeBase(lay, purp, std::move(net)), ang_start(start), ang_stop(stop),
                   bbox() {}
 
-        Arc(lay_t lay, purp_t purp, double start, double stop, coord_t xl, coord_t yl,
-            coord_t xh, coord_t yh)
-                : layer(lay), purpose(purp), ang_start(start), ang_stop(stop),
+        Arc(lay_t lay, purp_t purp, std::string net, double start, double stop, coord_t xl,
+            coord_t yl, coord_t xh, coord_t yh)
+                : ShapeBase(lay, purp, std::move(net)), ang_start(start), ang_stop(stop),
                   bbox(xl, yl, xh, yh) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(ang_start);
             ar & BOOST_SERIALIZATION_NVP(ang_stop);
             ar & BOOST_SERIALIZATION_NVP(bbox);
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         double ang_start, ang_stop;
         BBox bbox;
     };
 
-    struct Donut {
-        Donut() : layer(0), purpose(0), center(0, 0), radius(0), hole_radius(0) {}
+    struct Donut : ShapeBase {
+        Donut() : ShapeBase(), center(0, 0), radius(0), hole_radius(0) {}
 
-        Donut(lay_t lay, purp_t purp, dist_t r, dist_t hole_r)
-                : layer(lay), purpose(purp), radius(r), hole_radius(hole_r) {}
+        Donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r)
+                : ShapeBase(lay, purp, std::move(net)), radius(r), hole_radius(hole_r) {}
 
-
-        Donut(lay_t lay, purp_t purp, dist_t r, dist_t hole_r, coord_t x, coord_t y)
-                : layer(lay), purpose(purp), center(x, y), radius(r), hole_radius(hole_r) {}
+        Donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r,
+              coord_t x, coord_t y)
+                : ShapeBase(lay, purp, std::move(net)), center(x, y),
+                  radius(r), hole_radius(hole_r) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(center);
             ar & BOOST_SERIALIZATION_NVP(radius);
             ar & BOOST_SERIALIZATION_NVP(hole_radius);
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         Point center;
         dist_t radius, hole_radius;
     };
 
-    struct Ellipse {
-        Ellipse() : layer(0), purpose(0), bbox() {}
+    struct Ellipse : ShapeBase {
+        Ellipse() : ShapeBase(), bbox() {}
 
-        Ellipse(lay_t lay, purp_t purp)
-                : layer(lay), purpose(purp), bbox() {}
+        Ellipse(lay_t lay, purp_t purp, std::string net)
+                : ShapeBase(lay, purp, std::move(net)), bbox() {}
 
-        Ellipse(lay_t lay, purp_t purp, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-                : layer(lay), purpose(purp), bbox(xl, yl, xh, yh) {}
+        Ellipse(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl,
+                coord_t xh, coord_t yh)
+                : ShapeBase(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(bbox);
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         BBox bbox;
     };
 
-    struct Line {
-        Line() : layer(0), purpose(0), points() {}
+    struct Line : ShapeBase {
+        Line() : ShapeBase(), points() {}
 
-        Line(lay_t lay, purp_t purp, uint32_t n)
-                : layer(lay), purpose(purp), points(n) {}
+        Line(lay_t lay, purp_t purp, std::string net, uint32_t n)
+                : ShapeBase(lay, purp, std::move(net)), points(n) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(points);
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         PointArray points;
     };
 
-    struct Path {
-        Path() : layer(0), purpose(0), width(0), points(), style(psTruncate),
+    struct Path : ShapeBase {
+        Path() : ShapeBase(), width(0), points(), style(psTruncate),
                  begin_ext(0), end_ext(0) {}
 
-        Path(lay_t lay, purp_t purp, dist_t width, uint32_t n,
+        Path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n,
              PathStyle style, dist_t begin_ext, dist_t end_ext)
-                : layer(lay), purpose(purp), width(width), points(n), style(style),
+                : ShapeBase(lay, purp, std::move(net)), width(width), points(n), style(style),
                   begin_ext(begin_ext), end_ext(end_ext) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(width);
             ar & BOOST_SERIALIZATION_NVP(points);
             ar & BOOST_SERIALIZATION_NVP(style);
@@ -204,8 +243,8 @@ namespace cbag {
 #pragma clang diagnostic pop
         }
 
-        lay_t layer;
-        purp_t purpose;
+#pragma clang diagnostic pop
+
         dist_t width;
         PointArray points;
         PathStyle style;
@@ -214,24 +253,26 @@ namespace cbag {
 
     /** Base class for all text-like object.
      */
-    struct TextBase {
-        TextBase() : layer(0), purpose(0), origin(0, 0), alignment(taCC),
+    struct TextBase : ShapeBase {
+        TextBase() : ShapeBase(), origin(0, 0), alignment(taCC),
                      orient(oR0), font(fRoman), height(0), overbar(false),
                      visible(true), drafting(true) {}
 
-        TextBase(lay_t lay, purp_t purp, TextAlign align, Orientation orient,
+        TextBase(lay_t lay, purp_t purp, std::string net, TextAlign align, Orientation orient,
                  Font font, dist_t height, bool overbar, bool visible, bool drafting)
-                : layer(lay), purpose(purp), origin(), alignment(align), orient(orient),
+                : ShapeBase(lay, purp, std::move(net)), origin(), alignment(align), orient(orient),
                   font(font), height(height), overbar(overbar), visible(visible),
                   drafting(drafting) {}
 
         // boost serialization
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(layer);
-            ar & BOOST_SERIALIZATION_NVP(purpose);
+            ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ShapeBase);
             ar & BOOST_SERIALIZATION_NVP(origin);
             ar & BOOST_SERIALIZATION_NVP(alignment);
             ar & BOOST_SERIALIZATION_NVP(orient);
@@ -242,10 +283,8 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(drafting);
 #pragma clang diagnostic pop
         }
+#pragma clang diagnostic pop
 
-
-        lay_t layer;
-        purp_t purpose;
         Point origin;
         TextAlign alignment;
         Orientation orient;
@@ -257,11 +296,11 @@ namespace cbag {
     struct Text : TextBase {
         Text() : TextBase(), text() {}
 
-        Text(lay_t lay, purp_t purp, std::string text, TextAlign align,
+        Text(lay_t lay, purp_t purp, std::string net, std::string text, TextAlign align,
              Orientation orient, Font font, dist_t height, bool overbar,
              bool visible, bool drafting)
-                : TextBase(lay, purp, align, orient, font, height, overbar, visible, drafting),
-                  text(std::move(text)) {}
+                : TextBase(lay, purp, std::move(net), align, orient, font, height, overbar,
+                           visible, drafting), text(std::move(text)) {}
 
         // boost serialization
 #pragma clang diagnostic push
@@ -284,11 +323,11 @@ namespace cbag {
     struct EvalText : Text {
         EvalText() : Text(), evaluator() {}
 
-        EvalText(lay_t lay, purp_t purp, std::string text, TextAlign align, Orientation orient,
-                 Font font, dist_t height, bool overbar, bool visible,
+        EvalText(lay_t lay, purp_t purp, std::string net, std::string text, TextAlign align,
+                 Orientation orient, Font font, dist_t height, bool overbar, bool visible,
                  bool drafting, std::string eval)
-                : Text(lay, purp, std::move(text), align, orient, font, height, overbar,
-                       visible, drafting), evaluator(std::move(eval)) {}
+                : Text(lay, purp, std::move(net), std::move(text), align, orient, font, height,
+                       overbar, visible, drafting), evaluator(std::move(eval)) {}
 
         // boost serialization
 #pragma clang diagnostic push
@@ -311,11 +350,11 @@ namespace cbag {
     struct TermAttr : TextBase {
         TermAttr() : TextBase(), attr_type(tatName), format(tdfNameValue) {}
 
-        TermAttr(TermAttrType attr_type, lay_t lay, purp_t purp, TextAlign align,
+        TermAttr(TermAttrType attr_type, lay_t lay, purp_t purp, std::string net, TextAlign align,
                  Orientation orient, Font font, dist_t height, TextDispFormat format, bool overbar,
                  bool visible, bool drafting)
-                : TextBase(lay, purp, align, orient, font, height, overbar, visible, drafting),
-                  attr_type(attr_type), format(format) {}
+                : TextBase(lay, purp, std::move(net), align, orient, font, height, overbar,
+                           visible, drafting), attr_type(attr_type), format(format) {}
 
         // boost serialization
 #pragma clang diagnostic push
@@ -434,4 +473,4 @@ namespace cbag {
     };
 }
 
-#endif //CBAG_DATABASE_SHAPES_H
+#endif //CBAG_DATABASE_FIGURES_H

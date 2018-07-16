@@ -81,69 +81,72 @@ namespace cbagoa {
 
     // Read methods for shapes
 
-    cbag::Rect OAReader::read_rect(oa::oaRect *p) {
-        cbag::Rect ans(p->getLayerNum(), p->getPurposeNum());
+    cbag::Rect OAReader::read_rect(oa::oaRect *p, std::string &&net) {
+        cbag::Rect ans(p->getLayerNum(), p->getPurposeNum(), net);
         p->getBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Poly OAReader::read_poly(oa::oaPolygon *p) {
-        cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
+    cbag::Poly OAReader::read_poly(oa::oaPolygon *p, std::string &&net) {
+        cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Arc OAReader::read_arc(oa::oaArc *p) {
-        cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), p->getStartAngle(), p->getStopAngle());
+    cbag::Arc OAReader::read_arc(oa::oaArc *p, std::string &&net) {
+        cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(),
+                      p->getStopAngle());
         p->getEllipseBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Donut OAReader::read_donut(oa::oaDonut *p) {
-        cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), p->getRadius(), p->getHoleRadius());
+    cbag::Donut OAReader::read_donut(oa::oaDonut *p, std::string &&net) {
+        cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(),
+                        p->getHoleRadius());
         p->getCenter(ans.center);
         return ans;
     }
 
-    cbag::Ellipse OAReader::read_ellipse(oa::oaEllipse *p) {
-        cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum());
+    cbag::Ellipse OAReader::read_ellipse(oa::oaEllipse *p, std::string &&net) {
+        cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum(), net);
         p->getBBox(ans.bbox);
         return ans;
     }
 
-    cbag::Line OAReader::read_line(oa::oaLine *p) {
-        cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), p->getNumPoints());
+    cbag::Line OAReader::read_line(oa::oaLine *p, std::string &&net) {
+        cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Path OAReader::read_path(oa::oaPath *p) {
-        cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), p->getWidth(), p->getNumPoints(),
+    cbag::Path OAReader::read_path(oa::oaPath *p, std::string &&net) {
+        cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
                        p->getStyle(), p->getBeginExt(), p->getEndExt());
         p->getPoints(ans.points);
         return ans;
     }
 
-    cbag::Text OAReader::read_text(oa::oaText *p) {
+    cbag::Text OAReader::read_text(oa::oaText *p, std::string &&net) {
         oa::oaString text;
         p->getText(text);
         bool overbar = (p->hasOverbar() != 0);
         bool visible = (p->isVisible() != 0);
         bool drafting = (p->isDrafting() != 0);
-        cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), std::string(text), p->getAlignment(),
-                       p->getOrient(), p->getFont(), p->getHeight(), overbar, visible, drafting);
+        cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
+                       p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(), overbar,
+                       visible, drafting);
         p->getOrigin(ans.origin);
         return ans;
     }
 
-    cbag::EvalText OAReader::read_eval_text(oa::oaEvalText *p) {
+    cbag::EvalText OAReader::read_eval_text(oa::oaEvalText *p, std::string &&net) {
         oa::oaString text, eval;
         p->getText(text);
         p->getEvaluatorName(eval);
         bool overbar = (p->hasOverbar() != 0);
         bool visible = (p->isVisible() != 0);
         bool drafting = (p->isDrafting() != 0);
-        cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), std::string(text),
+        cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
                            p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(),
                            overbar, visible, drafting, std::string(eval));
         p->getOrigin(ans.origin);
@@ -180,27 +183,34 @@ namespace cbagoa {
     }
 
     cbag::Shape OAReader::read_shape(oa::oaShape *p) {
+        std::string net;
+        if (p->hasNet()) {
+            oa::oaString net_name;
+            p->getNet()->getName(ns, net_name);
+            net = std::string(net_name);
+        }
+
         // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
         // use NOLINT to suppress IDE warnings
         switch (p->getType()) {
             case oa::oacRectType :
-                return read_rect(static_cast<oa::oaRect *>(p));  //NOLINT
+                return read_rect(static_cast<oa::oaRect *>(p), std::move(net));  //NOLINT
             case oa::oacPolygonType :
-                return read_poly(static_cast<oa::oaPolygon *>(p));  //NOLINT
+                return read_poly(static_cast<oa::oaPolygon *>(p), std::move(net));  //NOLINT
             case oa::oacArcType :
-                return read_arc(static_cast<oa::oaArc *>(p));  //NOLINT
+                return read_arc(static_cast<oa::oaArc *>(p), std::move(net));  //NOLINT
             case oa::oacDonutType :
-                return read_donut(static_cast<oa::oaDonut *>(p));  //NOLINT
+                return read_donut(static_cast<oa::oaDonut *>(p), std::move(net));  //NOLINT
             case oa::oacEllipseType :
-                return read_ellipse(static_cast<oa::oaEllipse *>(p));  //NOLINT
+                return read_ellipse(static_cast<oa::oaEllipse *>(p), std::move(net));  //NOLINT
             case oa::oacLineType :
-                return read_line(static_cast<oa::oaLine *>(p));  //NOLINT
+                return read_line(static_cast<oa::oaLine *>(p), std::move(net));  //NOLINT
             case oa::oacPathType :
-                return read_path(static_cast<oa::oaPath *>(p));  //NOLINT
+                return read_path(static_cast<oa::oaPath *>(p), std::move(net));  //NOLINT
             case oa::oacTextType :
-                return read_text(static_cast<oa::oaText *>(p));  //NOLINT
+                return read_text(static_cast<oa::oaText *>(p), std::move(net));  //NOLINT
             case oa::oacEvalTextType :
-                return read_eval_text(static_cast<oa::oaEvalText *>(p));  //NOLINT
+                return read_eval_text(static_cast<oa::oaEvalText *>(p), std::move(net));  //NOLINT
             default : {
                 throw std::invalid_argument(
                         fmt::format("Unsupported OA shape type: {}, see developer.",
@@ -290,9 +300,15 @@ namespace cbagoa {
             bool overbar = (disp_ptr->hasOverbar() != 0);
             bool visible = (disp_ptr->isVisible() != 0);
             bool drafting = (disp_ptr->isDrafting() != 0);
+            std::string net;
+            if (disp_ptr->hasNet()) {
+                oa::oaString net_name;
+                disp_ptr->getNet()->getName(ns, net_name);
+                net = std::string(net_name);
+            }
             cbag::TermAttr attr(
                     oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
-                    disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(),
+                    disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net,
                     disp_ptr->getAlignment(), disp_ptr->getOrient(),
                     disp_ptr->getFont(), disp_ptr->getHeight(), disp_ptr->getFormat(),
                     overbar, visible, drafting);
@@ -300,7 +316,14 @@ namespace cbagoa {
 
             return {cbag::SchPinObject(std::move(inst), std::move(attr)), sig};
         } else if (p->getType() == oa::oacRectType) {
-            return {read_rect(static_cast<oa::oaRect *>(p)), sig}; // NOLINT
+            oa::oaRect *r = static_cast<oa::oaRect *>(p);
+            std::string net;
+            if (r->hasNet()) {
+                oa::oaString tmp;
+                r->getNet()->getName(ns, tmp);
+                net = std::string(tmp);
+            }
+            return {read_rect(r, std::move(net)), sig}; // NOLINT
         } else {
             throw std::invalid_argument(
                     fmt::format("Unsupported OA pin figure type: {}, see developer.",
