@@ -168,7 +168,6 @@ namespace cbagoa {
             oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
             LOG(INFO) << fmt::format("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
             writer->write_sch_cellview(cv, dsn_ptr);
-            dsn_ptr->save();
             dsn_ptr->close();
         } catch (...) {
             handle_oa_exceptions();

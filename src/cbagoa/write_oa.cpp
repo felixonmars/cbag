@@ -251,18 +251,18 @@ namespace cbagoa {
             }
         }
 
-        dsn->save();
-
         LOG(INFO) << "Writing properties";
         for (auto const &prop_pair : cv.params) {
-            if (prop_pair.first == "lastSchematicExtraction") {
-                oa::oaTimeProp::create(dsn, "lastSchematicExtraction", std::time(nullptr));
-            } else {
+            if (prop_pair.first != "lastSchematicExtraction") {
                 boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
             }
 
         }
-
+        dsn->save();
+        time_t val = std::time(nullptr);
+        LOG(INFO) << "Writing time stamp: " << val;
+        oa::oaTimeProp::create(dsn, "lastSchematicExtraction", val);
+        dsn->save();
         LOG(INFO) << "Finish writing schematic/symbol cellview";
     }
 }

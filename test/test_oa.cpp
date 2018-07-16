@@ -37,7 +37,7 @@ int read_oa() {
     symfile.close();
     */
 
-    /*
+
     db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
 
     sch_master = db.read_sch_cellview(lib_name, cell_name2, view_name);
@@ -47,7 +47,7 @@ int read_oa() {
     (*xml_out) << boost::serialization::make_nvp("master", sch_master);
     xml_out.reset();
     outfile.close();
-    */
+
     return 0;
 }
 
