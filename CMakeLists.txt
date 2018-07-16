@@ -31,7 +31,6 @@ add_subdirectory(fmt)
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}/easyloggingpp/src
         )
 
 # boost_system : for Spirit X3 error handling

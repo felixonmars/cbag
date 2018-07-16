@@ -11,6 +11,8 @@
 #include <map>
 #include <string>
 
+#include <easylogging++.h>
+
 #include <oa/oaDesignDB.h>
 
 #include <cbag/database/cellviews.h>

@@ -5,9 +5,6 @@
  *  \date   2018/07/10
  */
 
-// TODO: Debug only, remve later
-#include <iostream>
-
 #include <easylogging++.h>
 
 #include <fmt/format.h>

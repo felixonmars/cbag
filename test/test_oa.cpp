@@ -31,13 +31,15 @@ int read_oa() {
 
         std::ofstream outfile;
         outfile.open("inv_sch.xml", std::ios_base::out);
-        boost::archive::xml_oarchive xml_out(outfile);
-        xml_out << BOOST_SERIALIZATION_NVP(sch_master);
+        auto xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
+        (*xml_out) << boost::serialization::make_nvp("master", sch_master);
+        xml_out.reset();
         outfile.close();
 
         std::ofstream symfile("inv_sym.xml", std::ios_base::out);
-        boost::archive::xml_oarchive xml_out2(symfile);
-        xml_out2 << BOOST_SERIALIZATION_NVP(sym_master);
+        xml_out = std::make_unique<boost::archive::xml_oarchive>(symfile);
+        (*xml_out) << boost::serialization::make_nvp("master", sym_master);
+        xml_out.reset();
         symfile.close();
 
         db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
