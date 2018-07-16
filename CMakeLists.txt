@@ -33,11 +33,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include
         ${Boost_INCLUDE_DIRS}
         )
 
-# boost_system : for Spirit X3 error handling
-# boost_serialization : for serialization
-# spdlog::spdlog : the spdlog logging library
-link_libraries(boost_system boost_serialization fmt-header-only)
-
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp
         src/cbag/spirit/range.cpp
@@ -45,6 +40,13 @@ set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/name.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
+
+# shared library dependencies
+target_link_libraries(cbag
+        boost_system
+        boost_serialization
+        fmt-header-only
+        )
 
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
@@ -101,6 +103,29 @@ target_link_libraries(test_spirit
         cbag
         )
 
-install(TARGETS test_oa test_spirit cbag cbagoa
+
+add_executable(read_prop
+        test/read_prop.cpp
+        )
+
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(read_prop PROPERTIES
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+        )
+
+# shared library dependencies
+target_link_libraries(read_prop
+        oaCommon
+        oaBase
+        oaPlugIn
+        oaDM
+        oaDMFileSysBase
+        oaTech
+        oaDesign
+        ${CMAKE_DL_LIBS}
+        )
+
+install(TARGETS test_oa test_spirit cbag cbagoa read_prop
         RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
         LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)
