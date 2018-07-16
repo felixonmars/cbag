@@ -12,6 +12,8 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <easylogging++.h>
+
 #include <cbag/spirit/ast.h>
 
 #include <cbagoa/write_oa.h>
@@ -147,40 +149,39 @@ namespace cbagoa {
         for (auto const &pair : map) {
             // create terminal, net, and pin
             std::string key = to_string(pair.first);
-            logger->debug("Creating terminal: %v", key);
+            LOG(DEBUG) << "Creating terminal: " << key;
             oa::oaName term_name(ns, key.c_str());
-            logger->debug("Creating terminal net");
+            LOG(DEBUG) << "Creating terminal net";
             oa::oaNet *term_net = oa::oaNet::create(block, term_name);
-            logger->debug("Creating terminal");
+            LOG(DEBUG) << "Creating terminal";
             oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, oa::oacInputTermType);
-            logger->debug("Creating terminal pin");
+            LOG(DEBUG) << "Creating terminal pin";
             oa::oaPin *pin = oa::oaPin::create(term);
 
-            logger->debug("Creating terminal shape");
+            LOG(DEBUG) << "Creating terminal shape";
             boost::apply_visitor(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt),
                                  pair.second);
         }
     }
 
     void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn) {
-        logger->info("Writing schematic/symbol cellview");
         oa::oaBlock *block = oa::oaBlock::create(dsn);
 
         int pin_cnt = 0;
-        logger->info("Writing input terminals");
+        LOG(INFO) << "Writing input terminals";
         create_terminal_pin(block, pin_cnt, cv.in_terms);
-        logger->info("Writing output terminals");
+        LOG(INFO) << "Writing output terminals";
         create_terminal_pin(block, pin_cnt, cv.out_terms);
-        logger->info("Writing inout terminals");
+        LOG(INFO) << "Writing inout terminals";
         create_terminal_pin(block, pin_cnt, cv.io_terms);
 
-        logger->info("Writing shapes");
+        LOG(INFO) << "Writing shapes";
         make_shape_visitor shape_visitor(block);
         for (auto const &shape : cv.shapes) {
             boost::apply_visitor(shape_visitor, shape);
         }
 
-        logger->info("Writing instances");
+        LOG(INFO) << "Writing instances";
         for (auto const &pair : cv.instances) {
             oa::oaScalarName lib(ns, pair.second.lib_name.c_str());
             oa::oaScalarName cell(ns, pair.second.cell_name.c_str());
@@ -199,11 +200,11 @@ namespace cbagoa {
             }
         }
 
-        logger->info("Writing properties");
+        LOG(INFO) << "Writing properties";
         for (auto const &prop_pair : cv.params) {
             boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
         }
 
-        logger->info("Finish writing schematic/symbol cellview");
+        LOG(INFO) << "Finish writing schematic/symbol cellview";
     }
 }

@@ -10,6 +10,8 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <easylogging++.h>
+
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
@@ -397,7 +399,7 @@ namespace cbagoa {
         cbag::SchCellView ans;
 
         // read terminals
-        logger->info("Reading terminals");
+        LOG(INFO) <<"Reading terminals";
         oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
         oa::oaTerm *term_ptr;
         oa::oaString term_name;
@@ -421,7 +423,7 @@ namespace cbagoa {
         }
 
         // read shapes
-        logger->info("Reading shapes");
+        LOG(INFO) <<"Reading shapes";
         oa::oaIter<oa::oaShape> shape_iter(block->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
@@ -432,7 +434,7 @@ namespace cbagoa {
         }
 
         // read instances
-        logger->info("Reading instances");
+        LOG(INFO) <<"Reading instances";
         oa::oaIter<oa::oaInst> inst_iter(block->getInsts());
         oa::oaInst *inst_ptr;
         while ((inst_ptr = inst_iter.getNext()) != nullptr) {
@@ -443,14 +445,14 @@ namespace cbagoa {
         }
 
         // read properties
-        logger->info("Reading properties");
+        LOG(INFO) <<"Reading properties";
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
         oa::oaProp *prop_ptr;
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
             ans.params.insert(read_prop(prop_ptr));
         }
 
-        logger->info("Finish reading schematic/symbol cellview");
+        LOG(INFO) <<"Finish reading schematic/symbol cellview";
         return ans;
     }
 }

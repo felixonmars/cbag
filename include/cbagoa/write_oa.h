@@ -10,8 +10,6 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <easylogging++.h>
-
 #include <cbag/database/figures.h>
 #include <cbag/database/cellviews.h>
 
@@ -23,8 +21,7 @@ namespace cbagoa {
     class OAWriter {
     public:
 
-        OAWriter(oa::oaCdbaNS ns, el::Logger *logger)
-                : ns(std::move(ns)), logger(logger) {};
+        explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
 
         // Write method for schematic/symbol cell view
 
@@ -37,7 +34,6 @@ namespace cbagoa {
                             const std::map<bsa::name, cbag::PinFigure> &map);
 
         const oa::oaCdbaNS ns;
-        el::Logger *logger;
     };
 }
 

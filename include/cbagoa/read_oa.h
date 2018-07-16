@@ -8,8 +8,6 @@
 #ifndef CBAGOA_READ_OA_H
 #define CBAGOA_READ_OA_H
 
-#include <easylogging++.h>
-
  #include <oa/oaDesignDB.h>
 
 #include <cbag/spirit/ast.h>
@@ -24,8 +22,7 @@ namespace cbagoa {
     class OAReader {
     public:
 
-        OAReader(oa::oaCdbaNS ns, el::Logger *logger)
-                : ns(std::move(ns)), logger(logger) {};
+        explicit OAReader(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
 
         // String parsing methinds
 
@@ -79,7 +76,6 @@ namespace cbagoa {
 
     private:
         const oa::oaCdbaNS ns;
-        el::Logger *logger;
     };
 }
 
