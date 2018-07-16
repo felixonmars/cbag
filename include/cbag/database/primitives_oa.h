@@ -66,6 +66,19 @@ namespace cbag {
     constexpr TextDispFormat tdfValue = TextDispFormat::oacValueTextDisplayFormat;
     constexpr TextDispFormat tdfNameValue = TextDispFormat::oacNameValueTextDisplayFormat;
 
+    using SigType = oa::oaSigTypeEnum ;
+    constexpr SigType stSignal = SigType::oacSignalSigType;
+    constexpr SigType stPower = SigType::oacPowerSigType;
+    constexpr SigType stGround = SigType::oacGroundSigType;
+    constexpr SigType stClock = SigType::oacClockSigType;
+    constexpr SigType stTieoff = SigType::oacTieoffSigType;
+    constexpr SigType stTieHi = SigType::oacTieHiSigType;
+    constexpr SigType stTieLo = SigType::oacTieLoSigType;
+    constexpr SigType stAnalog = SigType::oacAnalogSigType;
+    constexpr SigType stScan = SigType::oacScanSigType;
+    constexpr SigType stReset = SigType::oacResetSigType;
+
+
     using Transform = oa::oaTransform;
     using Point = oa::oaPoint;
     using BBox = oa::oaBox;

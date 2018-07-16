@@ -95,6 +95,21 @@ namespace cbag {
     constexpr TextDispFormat tdfNameValue = TextDispFormat::nameValue;
 
 
+    enum SigType {
+        signal, power, ground, clock, tieOff, tieHi, tieLo, analog, scan, reset
+    };
+    constexpr SigType stSignal = SigType::signal;
+    constexpr SigType stPower = SigType::power;
+    constexpr SigType stGround = SigType::ground;
+    constexpr SigType stClock = SigType::clock;
+    constexpr SigType stTieoff = SigType::tieOff;
+    constexpr SigType stTieHi = SigType::tieHi;
+    constexpr SigType stTieLo = SigType::tieLo;
+    constexpr SigType stAnalog = SigType::analog;
+    constexpr SigType stScan = SigType::scan;
+    constexpr SigType stReset = SigType::reset;
+
+
     /** Represents locations/orientation of an instance.
      */
     class Transform {

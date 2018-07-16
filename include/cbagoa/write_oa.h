@@ -31,7 +31,8 @@ namespace cbagoa {
 
         void
         create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                            const std::map<bsa::name, cbag::PinFigure> &map);
+                            const std::map<bsa::name, cbag::PinFigure> &map,
+                            oa::oaTermTypeEnum term_type);
 
         const oa::oaCdbaNS ns;
     };

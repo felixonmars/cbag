@@ -414,8 +414,24 @@ namespace cbag {
     };
 
     // figures
+    struct PinFigure {
+        PinFigure(Rect &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
 
-    using PinFigure = boost::variant<Rect, SchPinObject>;
+        PinFigure(SchPinObject &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
+
+        // boost serialization
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-value"
+            ar & BOOST_SERIALIZATION_NVP(obj);
+            ar & BOOST_SERIALIZATION_NVP(sig_type);
+#pragma clang diagnostic pop
+        }
+
+        boost::variant<Rect, SchPinObject> obj;
+        SigType sig_type;
+    };
 }
 
 #endif //CBAG_DATABASE_SHAPES_H

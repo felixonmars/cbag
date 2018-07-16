@@ -322,6 +322,7 @@ namespace cbagoa {
     // Read method for pin figures
 
     cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
+        cbag::SigType sig = t->getNet()->getSigType();
         if (p->isInst()) {
             cbag::Instance inst = read_instance(static_cast<oa::oaInst *>(p)); // NOLINT
 
@@ -346,10 +347,9 @@ namespace cbagoa {
                     overbar, visible, drafting);
             disp_ptr->getOrigin(attr.origin);
 
-            return cbag::SchPinObject(std::move(inst), std::move(attr));
+            return {cbag::SchPinObject(std::move(inst), std::move(attr)), sig};
         } else if (p->getType() == oa::oacRectType) {
-            cbag::PinFigure ans(read_rect(static_cast<oa::oaRect *>(p)));  // NOLINT
-            return ans;
+            return {read_rect(static_cast<oa::oaRect *>(p)), sig}; // NOLINT
         } else {
             throw std::invalid_argument(
                     fmt::format("Unsupported OA pin figure type: {}, see developer.",

@@ -157,6 +157,7 @@ namespace cbagoa {
             return ans;
         } catch (...) {
             handle_oa_exceptions();
+            throw;
         }
     }
 

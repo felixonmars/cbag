@@ -145,22 +145,23 @@ namespace cbagoa {
     };
 
     void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                                       const std::map<bsa::name, cbag::PinFigure> &map) {
+                                       const std::map<bsa::name, cbag::PinFigure> &map,
+                                       oa::oaTermTypeEnum term_type) {
         for (auto const &pair : map) {
             // create terminal, net, and pin
             std::string key = to_string(pair.first);
             LOG(DEBUG) << "Creating terminal: " << key;
             oa::oaName term_name(ns, key.c_str());
             LOG(DEBUG) << "Creating terminal net";
-            oa::oaNet *term_net = oa::oaNet::create(block, term_name);
+            oa::oaNet *term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
             LOG(DEBUG) << "Creating terminal";
-            oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, oa::oacInputTermType);
+            oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
             LOG(DEBUG) << "Creating terminal pin";
             oa::oaPin *pin = oa::oaPin::create(term);
 
             LOG(DEBUG) << "Creating terminal shape";
             boost::apply_visitor(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt),
-                                 pair.second);
+                                 pair.second.obj);
         }
     }
 
@@ -169,11 +170,11 @@ namespace cbagoa {
 
         int pin_cnt = 0;
         LOG(INFO) << "Writing input terminals";
-        create_terminal_pin(block, pin_cnt, cv.in_terms);
+        create_terminal_pin(block, pin_cnt, cv.in_terms, oa::oacInputTermType);
         LOG(INFO) << "Writing output terminals";
-        create_terminal_pin(block, pin_cnt, cv.out_terms);
+        create_terminal_pin(block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
         LOG(INFO) << "Writing inout terminals";
-        create_terminal_pin(block, pin_cnt, cv.io_terms);
+        create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
         LOG(INFO) << "Writing shapes";
         make_shape_visitor shape_visitor(block);
