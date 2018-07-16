@@ -147,13 +147,17 @@ namespace cbagoa {
     void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                                        const std::map<bsa::name, cbag::PinFigure> &map,
                                        oa::oaTermTypeEnum term_type) {
+        oa::oaName term_name;
         for (auto const &pair : map) {
             // create terminal, net, and pin
             std::string key = to_string(pair.first);
             LOG(DEBUG) << "Creating terminal: " << key;
-            oa::oaName term_name(ns, key.c_str());
+            term_name.init(ns, key.c_str());
             LOG(DEBUG) << "Creating terminal net";
-            oa::oaNet *term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
+            oa::oaNet *term_net = oa::oaNet::find(block, term_name);
+            if (term_net == nullptr || term_net->isImplicit()) {
+                term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
+            }
             LOG(DEBUG) << "Creating terminal";
             oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
             LOG(DEBUG) << "Creating terminal pin";
@@ -183,11 +187,14 @@ namespace cbagoa {
         }
 
         LOG(INFO) << "Writing instances";
+        oa::oaScalarName lib, cell, view, name;
+        oa::oaName term_name, net_name;
         for (auto const &pair : cv.instances) {
-            oa::oaScalarName lib(ns, pair.second.lib_name.c_str());
-            oa::oaScalarName cell(ns, pair.second.cell_name.c_str());
-            oa::oaScalarName view(ns, pair.second.view_name.c_str());
-            oa::oaScalarName name(ns, pair.first.base.c_str());
+            std::string inst_name = to_string(pair.first);
+            lib.init(ns, pair.second.lib_name.c_str());
+            cell.init(ns, pair.second.cell_name.c_str());
+            view.init(ns, pair.second.view_name.c_str());
+            name.init(ns, pair.first.base.c_str());
             oa::oaInst *ptr;
             if (pair.first.is_vector()) {
                 ptr = oa::oaVectorInst::create(block, lib, cell, view, name,
@@ -196,6 +203,23 @@ namespace cbagoa {
             } else {
                 ptr = oa::oaScalarInst::create(block, lib, cell, view, name, pair.second.xform);
             }
+            oa::oaNetTermNameArray conn_data(
+                    static_cast<oa::oaUInt4>(pair.second.connections.size()));
+            for (auto const &term_net_pair : pair.second.connections) {
+                std::string term_str = to_string(term_net_pair.first);
+                std::string net_str = to_string(term_net_pair.second);
+                LOG(INFO) << "Connecting inst " << inst_name << " terminal " << term_str
+                          << " to " << net_str;
+                term_name.init(ns, term_str.c_str());
+                net_name.init(ns, net_str.c_str());
+                oa::oaNet *term_net = oa::oaNet::find(block, net_name);
+                if (term_net == nullptr || term_net->isImplicit()) {
+                    term_net = oa::oaNet::create(block, net_name);
+                }
+                conn_data.append(term_net, term_name);
+            }
+            oa::oaInstTerm::create(ptr, conn_data);
+
             for (auto const &prop_pair : pair.second.params) {
                 boost::apply_visitor(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
             }

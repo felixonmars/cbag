@@ -357,8 +357,8 @@ namespace cbag {
          * @param xform the instance location.
          */
         Instance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
-                : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections({}),
-                  params({}) {}
+                : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections(),
+                  params() {}
 
         // boost serialization
         template<class Archive>
@@ -376,7 +376,7 @@ namespace cbag {
 
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        std::map<bsa::name_bit, std::vector<bsa::name_bit>> connections;
+        std::map<bsa::name, bsa::name> connections;
         ParamMap params;
     };
 
