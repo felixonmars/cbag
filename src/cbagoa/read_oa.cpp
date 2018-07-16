@@ -316,14 +316,14 @@ namespace cbagoa {
 
             return {cbag::SchPinObject(std::move(inst), std::move(attr)), sig};
         } else if (p->getType() == oa::oacRectType) {
-            oa::oaRect *r = static_cast<oa::oaRect *>(p);
+            oa::oaRect *r = static_cast<oa::oaRect *>(p); // NOLINT
             std::string net;
             if (r->hasNet()) {
                 oa::oaString tmp;
                 r->getNet()->getName(ns, tmp);
                 net = std::string(tmp);
             }
-            return {read_rect(r, std::move(net)), sig}; // NOLINT
+            return {read_rect(r, std::move(net)), sig};
         } else {
             throw std::invalid_argument(
                     fmt::format("Unsupported OA pin figure type: {}, see developer.",
@@ -473,7 +473,20 @@ namespace cbagoa {
         while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
             oa::oaString app_str;
             appdef_ptr->getName(app_str);
-            LOG(INFO) << "appdef " << app_str << " type: " << appdef_ptr->getType().getName();
+            oa::oaType app_type = appdef_ptr->getType();
+            LOG(INFO) << "appdef " << app_str << " type: " << app_type.getName();
+            switch (app_type) {
+                case oa::oacIntAppDefType :
+                    LOG(INFO) << "appdef value: "
+                              << (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(appdef_ptr))->get(p);
+                    break;
+                case oa::oacStringAppDefType :
+                    (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(appdef_ptr))->get(p, app_str);
+                    LOG(INFO) << "appdef value: " << app_str;
+                    break;
+                default:
+                    break;
+            }
         }
 
         LOG(INFO) << "Reading design groups";
@@ -484,8 +497,10 @@ namespace cbagoa {
         while ((grp_ptr = grp_iter.getNext()) != nullptr) {
             oa::oaString grp_str;
             grp_ptr->getName(grp_str);
-            LOG(INFO) << "group name: " << grp_str << ", domain: " << grp_ptr->getGroupDomain().getName();
-            LOG(INFO) << "group has prop: " << grp_ptr->hasProp() << ", has appdef: " << grp_ptr->hasAppDef();
+            LOG(INFO) << "group name: " << grp_str << ", domain: "
+                      << grp_ptr->getGroupDomain().getName();
+            LOG(INFO) << "group has prop: " << grp_ptr->hasProp() << ", has appdef: "
+                      << grp_ptr->hasAppDef();
             grp_ptr->getDef()->getName(grp_str);
             LOG(INFO) << "group def name: " << grp_str;
             oa::oaIter<oa::oaGroupMember> mem_iter(grp_ptr->getMembers());

@@ -6,6 +6,7 @@
  */
 
 #include <utility>
+#include <ctime>
 
 #include <boost/variant.hpp>
 
@@ -63,52 +64,77 @@ namespace cbagoa {
 
     class make_shape_visitor : public boost::static_visitor<> {
     public:
-        explicit make_shape_visitor(oa::oaBlock *block) : block(block) {}
+        explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS *ns)
+                : block(block), ns(ns) {}
 
         void operator()(const cbag::Rect &v) const {
-            oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
+            oa::oaShape *p = oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Poly &v) const {
-            oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
+            oa::oaShape *p = oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Arc &v) const {
-            oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start, v.ang_stop);
+            oa::oaShape *p = oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start,
+                                               v.ang_stop);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Donut &v) const {
-            oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius, v.hole_radius);
+            oa::oaShape *p = oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius,
+                                                 v.hole_radius);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Ellipse &v) const {
-            oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
+            oa::oaShape *p = oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Line &v) const {
-            oa::oaLine::create(block, v.layer, v.purpose, v.points);
+            oa::oaShape *p = oa::oaLine::create(block, v.layer, v.purpose, v.points);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Path &v) const {
-            oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points, v.style,
-                               v.begin_ext, v.end_ext);
+            oa::oaShape *p = oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points,
+                                                v.style, v.begin_ext, v.end_ext);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::Text &v) const {
-            oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(),
-                               v.origin, v.alignment, v.orient, v.font, v.height, v.overbar,
-                               v.visible, v.drafting);
+            oa::oaShape *p = oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(),
+                                                v.origin, v.alignment, v.orient, v.font, v.height,
+                                                v.overbar, v.visible, v.drafting);
+            add_shape_to_net(p, v.net);
         }
 
         void operator()(const cbag::EvalText &v) const {
-            oa::oaEvalText::create(block, v.layer, v.purpose, v.text.c_str(),
-                                   v.origin, v.alignment, v.orient, v.font, v.height,
-                                   v.evaluator.c_str(), v.overbar,
-                                   v.visible, v.drafting);
+            oa::oaShape *p = oa::oaEvalText::create(block, v.layer, v.purpose, v.text.c_str(),
+                                                    v.origin, v.alignment, v.orient, v.font,
+                                                    v.height, v.evaluator.c_str(), v.overbar,
+                                                    v.visible, v.drafting);
+            add_shape_to_net(p, v.net);
         }
 
     private:
+
+        void add_shape_to_net(oa::oaShape *ptr, const std::string &net) const {
+            if (!net.empty()) {
+                oa::oaName net_name(*ns, net.c_str());
+                oa::oaNet *np = oa::oaNet::find(block, net_name);
+                if (np == nullptr || np->isImplicit()) {
+                    np = oa::oaNet::create(block, net_name);
+                }
+                ptr->addToNet(np);
+            }
+        }
+
         oa::oaBlock *block;
+        const oa::oaCdbaNS *ns;
     };
 
     class make_prop_visitor : public boost::static_visitor<> {
@@ -181,7 +207,7 @@ namespace cbagoa {
         create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
         LOG(INFO) << "Writing shapes";
-        make_shape_visitor shape_visitor(block);
+        make_shape_visitor shape_visitor(block, &ns);
         for (auto const &shape : cv.shapes) {
             boost::apply_visitor(shape_visitor, shape);
         }
@@ -225,9 +251,16 @@ namespace cbagoa {
             }
         }
 
+        dsn->save();
+
         LOG(INFO) << "Writing properties";
         for (auto const &prop_pair : cv.params) {
-            boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
+            if (prop_pair.first == "lastSchematicExtraction") {
+                oa::oaTimeProp::create(dsn, "lastSchematicExtraction", std::time(nullptr));
+            } else {
+                boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
+            }
+
         }
 
         LOG(INFO) << "Finish writing schematic/symbol cellview";

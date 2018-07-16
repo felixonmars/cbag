@@ -37,8 +37,17 @@ int read_oa() {
     symfile.close();
     */
 
-    // db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
+    /*
+    db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
 
+    sch_master = db.read_sch_cellview(lib_name, cell_name2, view_name);
+
+    outfile.open("inv_sch2.xml", std::ios_base::out);
+    xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
+    (*xml_out) << boost::serialization::make_nvp("master", sch_master);
+    xml_out.reset();
+    outfile.close();
+    */
     return 0;
 }
 
