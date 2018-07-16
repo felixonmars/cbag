@@ -236,6 +236,7 @@ namespace cbagoa {
         }
 
         // read instance connections
+        LOG(INFO) << "Reading connections";
         oa::oaIter<oa::oaInstTerm> iterm_iter(p->getInstTerms(oacInstTermIterAll));
         oa::oaInstTerm *iterm_ptr;
         oa::oaString term_name_oa, net_name_oa;
@@ -243,7 +244,20 @@ namespace cbagoa {
             // get terminal and net names
             iterm_ptr->getTerm()->getName(ns, term_name_oa);
             iterm_ptr->getNet()->getName(ns, net_name_oa);
+            LOG(INFO) << "Terminal " << term_name_oa << " connected to net " << net_name_oa;
             inst.connections.emplace(parse_name(term_name_oa), parse_name(net_name_oa));
+            oa::oaIter<oa::oaRoute> route_iter(iterm_ptr->getConnRoutes());
+            oa::oaRoute *route_ptr;
+            LOG(INFO) << "Reading inst term routes.";
+            while ((route_ptr = route_iter.getNext()) != nullptr) {
+                LOG(INFO) << "Terminal " << term_name_oa << " routes:";
+                oa::oaRouteObjectArray arr;
+                route_ptr->getObjects(arr);
+                for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
+                    LOG(INFO) << "Route object " << robj_idx << " type: "
+                              << arr[robj_idx]->getType().getName();
+                }
+            }
         }
 
         return inst;
@@ -252,6 +266,7 @@ namespace cbagoa {
     std::pair<bsa::name_unit, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
         oa::oaString inst_name_oa;
         p->getName(ns, inst_name_oa);
+        LOG(INFO) << "Reading instance " << inst_name_oa;
         return {parse_name_unit(inst_name_oa), read_instance(p)};
     }
 
@@ -335,7 +350,7 @@ namespace cbagoa {
         cbag::SchCellView ans;
 
         // read terminals
-        LOG(INFO) <<"Reading terminals";
+        LOG(INFO) << "Reading terminals";
         oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
         oa::oaTerm *term_ptr;
         oa::oaString term_name;
@@ -359,18 +374,37 @@ namespace cbagoa {
         }
 
         // read shapes
-        LOG(INFO) <<"Reading shapes";
+        LOG(INFO) << "Reading shapes";
         oa::oaIter<oa::oaShape> shape_iter(block->getShapes());
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
+            LOG(INFO) << "shape type: " << shape_ptr->getType().getName();
+            LOG(INFO) << "shape has prop: " << shape_ptr->hasProp() << " has appdef: "
+                      << shape_ptr->hasAppDef();
+            LOG(INFO) << "shape has net: " << shape_ptr->hasNet();
+
+            LOG(INFO) << "shape conn routes: ";
+            oa::oaIter<oa::oaRoute> route_iter(shape_ptr->getConnRoutes());
+            oa::oaRoute *route_ptr;
+            while ((route_ptr = route_iter.getNext()) != nullptr) {
+                oa::oaRouteObjectArray arr;
+                route_ptr->getObjects(arr);
+                for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
+                    LOG(INFO) << "Route object " << robj_idx << " type: "
+                              << arr[robj_idx]->getType().getName();
+                }
+            }
+
             // skip shapes associated with pins.  We got those already.
             if (include_shape(shape_ptr)) {
                 ans.shapes.push_back(read_shape(shape_ptr));
+            } else {
+                LOG(INFO) << "Skipping";
             }
         }
 
         // read instances
-        LOG(INFO) <<"Reading instances";
+        LOG(INFO) << "Reading instances";
         oa::oaIter<oa::oaInst> inst_iter(block->getInsts());
         oa::oaInst *inst_ptr;
         while ((inst_ptr = inst_iter.getNext()) != nullptr) {
@@ -381,14 +415,64 @@ namespace cbagoa {
         }
 
         // read properties
-        LOG(INFO) <<"Reading properties";
+        LOG(INFO) << "Reading properties";
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
         oa::oaProp *prop_ptr;
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
             ans.params.insert(read_prop(prop_ptr));
         }
 
-        LOG(INFO) <<"Finish reading schematic/symbol cellview";
+        LOG(INFO) << "Reading routes";
+        oa::oaIter<oa::oaRoute> route_iter(block->getRoutes());
+        oa::oaRoute *route_ptr;
+        while ((route_ptr = route_iter.getNext()) != nullptr) {
+            oa::oaRouteObjectArray arr;
+            route_ptr->getObjects(arr);
+            for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
+                LOG(INFO) << "Route object " << robj_idx << " type: "
+                          << arr[robj_idx]->getType().getName();
+            }
+        }
+
+        LOG(INFO) << "Reading steiners";
+        oa::oaIter<oa::oaSteiner> steiner_iter(block->getSteiners());
+        oa::oaSteiner *steiner_ptr;
+        while ((steiner_ptr = steiner_iter.getNext()) != nullptr) {
+            oa::oaBox box;
+            steiner_ptr->getBBox(box);
+            LOG(INFO) << fmt::format("Steiner object bbox: ({}, {}, {}, {})",
+                                     box.left(), box.bottom(), box.right(), box.top());
+        }
+
+        LOG(INFO) << "design has appdef: " << p->hasAppDef();
+        oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
+        oa::oaAppDef *appdef_ptr;
+        while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
+            oa::oaString app_str;
+            appdef_ptr->getName(app_str);
+            LOG(INFO) << "appdef " << app_str << " type: " << appdef_ptr->getType().getName();
+        }
+
+        LOG(INFO) << "Reading design groups";
+        oa::oaIter<oa::oaGroup> grp_iter(p->getGroups(
+                oacGroupIterBlockDomain | oacGroupIterModDomain | oacGroupIterNoDomain |
+                oacGroupIterOccDomain));
+        oa::oaGroup *grp_ptr;
+        while ((grp_ptr = grp_iter.getNext()) != nullptr) {
+            oa::oaString grp_str;
+            grp_ptr->getName(grp_str);
+            LOG(INFO) << "group name: " << grp_str << ", domain: " << grp_ptr->getGroupDomain().getName();
+            LOG(INFO) << "group has prop: " << grp_ptr->hasProp() << ", has appdef: " << grp_ptr->hasAppDef();
+            grp_ptr->getDef()->getName(grp_str);
+            LOG(INFO) << "group def name: " << grp_str;
+            oa::oaIter<oa::oaGroupMember> mem_iter(grp_ptr->getMembers());
+            oa::oaGroupMember *mem_ptr;
+            while ((mem_ptr = mem_iter.getNext()) != nullptr) {
+                LOG(INFO) << "group object type: " << mem_ptr->getObject()->getType().getName();
+            }
+        }
+
+        LOG(INFO) << "Finish reading schematic/symbol cellview";
         return ans;
     }
 }
