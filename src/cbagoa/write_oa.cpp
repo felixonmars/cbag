@@ -210,7 +210,7 @@ namespace cbagoa {
 
 
     void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                                       const std::map<bsa::name, cbag::PinFigure> &map,
+                                       const std::map <bsa::name, cbag::PinFigure> &map,
                                        oa::oaTermTypeEnum term_type) {
         oa::oaName term_name;
         for (auto const &pair : map) {
@@ -306,9 +306,31 @@ namespace cbagoa {
 
         // save, then update extraction timestamp
         dsn->save();
-        time_t val = std::time(nullptr);
-        LOG(INFO) << "Writing time stamp: " << val;
-        oa::oaTimeProp::create(dsn, "lastSchematicExtraction", val);
+
+        /*
+        oa::oaDesignDataTypeEnum etypes[] = {oa::oacPropDataType, oa::oacNetDataType,
+                                             oa::oacLayerHeaderDataType, oa::oacShapeDataType,
+                                             oa::oacTDLinkDataType};
+
+        uint32_t timestamp = 0;
+        for (auto e : etypes) {
+            timestamp = std::max(static_cast<uint32_t>(dsn->getTimeStamp(e)), timestamp);
+        }
+
+        auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+        pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+        auto ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbLastSavedCounter");
+        ptr->set(dsn, timestamp);
+        ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbvCvTimeStamp");
+        ptr->set(dsn, timestamp);
+        for (auto e : etypes) {
+            dsn->getTimeStamp(e).set(timestamp);
+        }
+        */
+        oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime());
+
         dsn->save();
         LOG(INFO) << "Finish writing schematic/symbol cellview";
     }
