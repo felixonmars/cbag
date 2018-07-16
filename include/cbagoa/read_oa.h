@@ -32,7 +32,9 @@ namespace cbagoa {
 
         // Read method for properties
 
-        std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *prop_ptr);
+        std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p);
+
+        std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);
 
         // Read methods for shapes
 

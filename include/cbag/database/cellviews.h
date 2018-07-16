@@ -41,14 +41,16 @@ namespace cbag {
             ar & BOOST_SERIALIZATION_NVP(io_terms);
             ar & BOOST_SERIALIZATION_NVP(shapes);
             ar & BOOST_SERIALIZATION_NVP(instances);
-            ar & BOOST_SERIALIZATION_NVP(params);
+            ar & BOOST_SERIALIZATION_NVP(props);
+            ar & BOOST_SERIALIZATION_NVP(app_defs);
 #pragma clang diagnostic pop
         }
 
         std::map<bsa::name, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
         std::map<bsa::name_unit, Instance> instances;
-        ParamMap params;
+        ParamMap props;
+        ParamMap app_defs;
     };
 }
 

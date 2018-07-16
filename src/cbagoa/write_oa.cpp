@@ -170,6 +170,45 @@ namespace cbagoa {
         oa::oaString name;
     };
 
+    class make_app_def_visitor : public boost::static_visitor<> {
+    public:
+        explicit make_app_def_visitor(oa::oaDesign *obj, const std::string &name)
+                : obj(obj), name(name.c_str()) {}
+
+        void operator()(const int32_t &v) const {
+            auto ptr = oa::oaIntAppDef<oa::oaDesign>::find(name);
+            if (ptr == nullptr) {
+                ptr = oa::oaIntAppDef<oa::oaDesign>::get(name);
+            }
+            ptr->set(obj, v);
+        }
+
+        void operator()(const double &v) const {
+            throw std::invalid_argument("double AppDef not supported yet.");
+        }
+
+        void operator()(const std::string &v) const {
+            auto ptr = oa::oaStringAppDef<oa::oaDesign>::find(name);
+            if (ptr == nullptr) {
+                ptr = oa::oaStringAppDef<oa::oaDesign>::get(name);
+            }
+            ptr->set(obj, v.c_str());
+        }
+
+        void operator()(const cbag::Time &v) const {
+            throw std::invalid_argument("time AppDef not supported yet.");
+        }
+
+        void operator()(const cbag::Binary &v) const {
+            throw std::invalid_argument("binary AppDef not supported yet.");
+        }
+
+    private:
+        oa::oaDesign *obj;
+        oa::oaString name;
+    };
+
+
     void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                                        const std::map<bsa::name, cbag::PinFigure> &map,
                                        oa::oaTermTypeEnum term_type) {
@@ -252,12 +291,20 @@ namespace cbagoa {
         }
 
         LOG(INFO) << "Writing properties";
-        for (auto const &prop_pair : cv.params) {
+        for (auto const &prop_pair : cv.props) {
+            // skip last extraction timestamp
             if (prop_pair.first != "lastSchematicExtraction") {
                 boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
             }
 
         }
+
+        LOG(INFO) << "Writing AppDefs";
+        for (auto const &prop_pair : cv.app_defs) {
+            boost::apply_visitor(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
+        }
+
+        // save, then update extraction timestamp
         dsn->save();
         time_t val = std::time(nullptr);
         LOG(INFO) << "Writing time stamp: " << val;

@@ -39,33 +39,33 @@ namespace cbagoa {
 
     // Read method for properties
 
-    std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *prop_ptr) {
+    std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         oa::oaString tmp_str;
-        prop_ptr->getName(tmp_str);
+        p->getName(tmp_str);
         std::string key(tmp_str);
         // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
         // use NOLINT to suppress IDE warnings
-        switch (prop_ptr->getType()) {
+        switch (p->getType()) {
             case oa::oacStringPropType : {
-                prop_ptr->getValue(tmp_str);
+                p->getValue(tmp_str);
                 return {std::move(key), std::string(tmp_str)};
             }
             case oa::oacIntPropType : {
                 return {std::move(key),
-                        static_cast<oa::oaIntProp *>(prop_ptr)->getValue()}; // NOLINT
+                        static_cast<oa::oaIntProp *>(p)->getValue()}; // NOLINT
             }
             case oa::oacDoublePropType : {
                 return {std::move(key),
-                        static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()}; // NOLINT
+                        static_cast<oa::oaDoubleProp *>(p)->getValue()}; // NOLINT
             }
             case oa::oacTimePropType : {
                 return {std::move(key),
-                        cbag::Time(static_cast<oa::oaTimeProp *>(prop_ptr)->getValue())}; // NOLINT
+                        cbag::Time(static_cast<oa::oaTimeProp *>(p)->getValue())}; // NOLINT
             }
             case oa::oacAppPropType : {
                 oa::oaByteArray data;
                 oa::oaString app_str;
-                oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(prop_ptr); // NOLINT
+                oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(p); // NOLINT
                 app_ptr->getValue(data); // NOLINT
                 app_ptr->getAppType(app_str);
                 return {std::move(key),
@@ -74,7 +74,31 @@ namespace cbagoa {
             default : {
                 throw std::invalid_argument(
                         fmt::format("Unsupported OA property {} with type: {}, see developer.",
-                                    key, prop_ptr->getType().getName()));
+                                    key, p->getType().getName()));
+            }
+        }
+    }
+
+    std::pair<std::string, cbag::value_t>
+    OAReader::read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
+        oa::oaString tmp_str;
+        p->getName(tmp_str);
+        std::string key(tmp_str);
+        // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
+        // use NOLINT to suppress IDE warnings
+        switch (p->getType()) {
+            case oa::oacIntAppDefType : {
+                return {std::move(key),
+                        (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn)}; // NOLINT
+            }
+            case oa::oacStringAppDefType : {
+                (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, tmp_str); // NOLINT
+                return {std::move(key), std::string(tmp_str)};
+            }
+            default : {
+                throw std::invalid_argument(
+                        fmt::format("Unsupported OA AppDef {} with type: {}, see developer.",
+                                    key, p->getType().getName()));
             }
         }
     }
@@ -256,18 +280,6 @@ namespace cbagoa {
             iterm_ptr->getNet()->getName(ns, net_name_oa);
             LOG(INFO) << "Terminal " << term_name_oa << " connected to net " << net_name_oa;
             inst.connections.emplace(parse_name(term_name_oa), parse_name(net_name_oa));
-            oa::oaIter<oa::oaRoute> route_iter(iterm_ptr->getConnRoutes());
-            oa::oaRoute *route_ptr;
-            LOG(INFO) << "Reading inst term routes.";
-            while ((route_ptr = route_iter.getNext()) != nullptr) {
-                LOG(INFO) << "Terminal " << term_name_oa << " routes:";
-                oa::oaRouteObjectArray arr;
-                route_ptr->getObjects(arr);
-                for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
-                    LOG(INFO) << "Route object " << robj_idx << " type: "
-                              << arr[robj_idx]->getType().getName();
-                }
-            }
         }
 
         return inst;
@@ -402,22 +414,6 @@ namespace cbagoa {
         oa::oaShape *shape_ptr;
         while ((shape_ptr = shape_iter.getNext()) != nullptr) {
             LOG(INFO) << "shape type: " << shape_ptr->getType().getName();
-            LOG(INFO) << "shape has prop: " << shape_ptr->hasProp() << " has appdef: "
-                      << shape_ptr->hasAppDef();
-            LOG(INFO) << "shape has net: " << shape_ptr->hasNet();
-
-            LOG(INFO) << "shape conn routes: ";
-            oa::oaIter<oa::oaRoute> route_iter(shape_ptr->getConnRoutes());
-            oa::oaRoute *route_ptr;
-            while ((route_ptr = route_iter.getNext()) != nullptr) {
-                oa::oaRouteObjectArray arr;
-                route_ptr->getObjects(arr);
-                for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
-                    LOG(INFO) << "Route object " << robj_idx << " type: "
-                              << arr[robj_idx]->getType().getName();
-                }
-            }
-
             // skip shapes associated with pins.  We got those already.
             if (include_shape(shape_ptr)) {
                 ans.shapes.push_back(read_shape(shape_ptr));
@@ -442,51 +438,14 @@ namespace cbagoa {
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
         oa::oaProp *prop_ptr;
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-            ans.params.insert(read_prop(prop_ptr));
+            ans.props.insert(read_prop(prop_ptr));
         }
 
-        LOG(INFO) << "Reading routes";
-        oa::oaIter<oa::oaRoute> route_iter(block->getRoutes());
-        oa::oaRoute *route_ptr;
-        while ((route_ptr = route_iter.getNext()) != nullptr) {
-            oa::oaRouteObjectArray arr;
-            route_ptr->getObjects(arr);
-            for (uint32_t robj_idx = 0; robj_idx < arr.getNumElements(); ++robj_idx) {
-                LOG(INFO) << "Route object " << robj_idx << " type: "
-                          << arr[robj_idx]->getType().getName();
-            }
-        }
-
-        LOG(INFO) << "Reading steiners";
-        oa::oaIter<oa::oaSteiner> steiner_iter(block->getSteiners());
-        oa::oaSteiner *steiner_ptr;
-        while ((steiner_ptr = steiner_iter.getNext()) != nullptr) {
-            oa::oaBox box;
-            steiner_ptr->getBBox(box);
-            LOG(INFO) << fmt::format("Steiner object bbox: ({}, {}, {}, {})",
-                                     box.left(), box.bottom(), box.right(), box.top());
-        }
-
-        LOG(INFO) << "design has appdef: " << p->hasAppDef();
+        LOG(INFO) << "Reading AppDefs";
         oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
         oa::oaAppDef *appdef_ptr;
         while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
-            oa::oaString app_str;
-            appdef_ptr->getName(app_str);
-            oa::oaType app_type = appdef_ptr->getType();
-            LOG(INFO) << "appdef " << app_str << " type: " << app_type.getName();
-            switch (app_type) {
-                case oa::oacIntAppDefType :
-                    LOG(INFO) << "appdef value: "
-                              << (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(appdef_ptr))->get(p);
-                    break;
-                case oa::oacStringAppDefType :
-                    (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(appdef_ptr))->get(p, app_str);
-                    LOG(INFO) << "appdef value: " << app_str;
-                    break;
-                default:
-                    break;
-            }
+            ans.app_defs.insert(read_app_def(p, appdef_ptr));
         }
 
         LOG(INFO) << "Reading design groups";
