@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <unordered_set>
 
 #include <boost/functional/hash.hpp>
@@ -23,8 +24,8 @@
 
 namespace cbagoa {
 
-    using cv_set_t = std::unordered_set<std::pair<std::string, std::string>,
-            boost::hash<std::pair<std::string, std::string>>>;
+    using cell_key_t = std::pair<std::string, std::string>;
+    using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
 
 
     class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
@@ -60,6 +61,10 @@ namespace cbagoa {
 
         OADatabase &operator=(OADatabase &&) = delete;
 
+        std::vector<std::string> get_cells_in_library(const char *library);
+
+        std::string get_lib_path(const char *library);
+
         /** Create a new library if it didn't already exist.
          *
          * @param library the library name.
@@ -83,17 +88,17 @@ namespace cbagoa {
             return read_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str());
         }
 
-        void
+        std::vector<cell_key_t>
         read_sch_recursive(const char *lib_name, const char *cell_name,
                            const char *view_name, const char *root_path,
                            const std::unordered_set<std::string> &exclude_libs);
 
-        void
+        std::vector<cell_key_t>
         read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
                            const std::string &view_name, const std::string &root_path,
                            const std::unordered_set<std::string> &exclude_libs) {
-            read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
-                               root_path.c_str(), exclude_libs);
+            return read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
+                                      root_path.c_str(), exclude_libs);
         }
 
         void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
@@ -116,7 +121,7 @@ namespace cbagoa {
         read_sch_recursive2(std::pair<std::string, std::string> &key,
                             const char *view_name, const char *root_path,
                             const std::unordered_set<std::string> &exclude_libs,
-                            cv_set_t &exclude_cells);
+                            cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

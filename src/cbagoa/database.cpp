@@ -92,6 +92,45 @@ namespace cbagoa {
         }
     }
 
+    std::vector<std::string> OADatabase::get_cells_in_library(const char *library) {
+        std::vector<std::string> ans;
+        try {
+            oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
+            oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
+            if (lib_ptr == nullptr) {
+                throw std::invalid_argument(fmt::format("Cannot find library {}", library));
+            }
+            oa::oaIter<oa::oaCell> cell_iter(lib_ptr->getCells());
+            oa::oaCell *cell_ptr;
+            oa::oaString tmp_str;
+            while ((cell_ptr = cell_iter.getNext()) != nullptr) {
+                cell_ptr->getName(ns, tmp_str);
+                ans.emplace_back(tmp_str);
+            }
+        } catch (...) {
+            handle_oa_exceptions();
+        }
+        return ans;
+    }
+
+    std::string OADatabase::get_lib_path(const char *library) {
+        std::string ans;
+        try {
+            oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
+            oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
+            if (lib_ptr == nullptr) {
+                throw std::invalid_argument(fmt::format("Cannot find library {}", library));
+            }
+            oa::oaString tmp_str;
+            lib_ptr->getFullPath(tmp_str);
+            return {tmp_str};
+        } catch (...) {
+            handle_oa_exceptions();
+        }
+        // should never get here
+        return "";
+    }
+
     void OADatabase::create_lib(const char *library, const char *lib_path,
                                 const char *tech_lib) {
         try {
@@ -136,12 +175,15 @@ namespace cbagoa {
         }
     }
 
-    void OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name,
-                                        const char *view_name, const char *root_path,
-                                        const std::unordered_set<std::string> &exclude_libs) {
+    std::vector<cell_key_t>
+    OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name,
+                                   const char *view_name, const char *root_path,
+                                   const std::unordered_set<std::string> &exclude_libs) {
         std::pair<std::string, std::string> key(lib_name, cell_name);
-        cv_set_t exclude_cells;
-        read_sch_recursive2(key, view_name, root_path, exclude_libs, exclude_cells);
+        cell_set_t exclude_cells;
+        std::vector<cell_key_t> ans;
+        read_sch_recursive2(key, view_name, root_path, exclude_libs, exclude_cells, ans);
+        return ans;
     }
 
     void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
@@ -205,7 +247,8 @@ namespace cbagoa {
     void OADatabase::read_sch_recursive2(std::pair<std::string, std::string> &key,
                                          const char *view_name, const char *root_path,
                                          const std::unordered_set<std::string> &exclude_libs,
-                                         cv_set_t &exclude_cells) {
+                                         cell_set_t &exclude_cells,
+                                         std::vector<cell_key_t> &cell_list) {
         // parse schematic
         cbag::SchCellView ans = read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
 
@@ -214,7 +257,8 @@ namespace cbagoa {
         fs::create_directories(cur_path);
         cur_path /= fs::path(key.second + ".xml");
 
-        // update exclude_cells
+        // update cell_list and exclude_cells
+        cell_list.push_back(key);
         exclude_cells.insert(std::move(key));
 
         // write to file
@@ -231,7 +275,8 @@ namespace cbagoa {
                 std::pair<std::string, std::string> ikey(pair.second.lib_name,
                                                          pair.second.cell_name);
                 if (exclude_cells.find(ikey) == exclude_cells.end()) {
-                    read_sch_recursive2(ikey, view_name, root_path, exclude_libs, exclude_cells);
+                    read_sch_recursive2(ikey, view_name, root_path, exclude_libs, exclude_cells,
+                                        cell_list);
                 }
             }
         }

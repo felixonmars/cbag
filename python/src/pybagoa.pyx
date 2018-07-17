@@ -4,6 +4,8 @@ from cython.operator cimport dereference as deref
 
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
+from libcpp.utility cimport pair
+from libcpp.vector cimport vector
 from libcpp.unordered_set cimport unordered_set
 
 
@@ -13,11 +15,17 @@ cdef extern from "cbagoa/database.h" namespace "cbagoa":
 
     cdef cppclass OADatabase:
         OADatabase(const char* lib_def_file) except +
+
+        vector[string] get_cells_in_library(const char* library) except +
+
+        string get_lib_path(const char* library) except +
+
         void create_lib(const char* library, const char* lib_path,
                         const char* tech_lib) except +
-        void read_sch_recursive(const char* lib_name, const char* cell_name,
-                                const char* view_name, const char* root_path,
-                                const unordered_set[string]& exclude_libs) except +
+
+        vector[pair[string, string]] read_sch_recursive(const char* lib_name, const char* cell_name,
+                                                        const char* view_name, const char* root_path,
+                                                        const unordered_set[string]& exclude_libs) except +
 
 
 cdef class PyOADatabase:
@@ -35,6 +43,18 @@ cdef class PyOADatabase:
 
     def close(self):
         self.db_ptr.reset()
+
+    def get_cells_in_library(self, unicode library):
+        pylib = library.encode(self.encoding)
+        cdef char* clib = pylib
+        cdef vector[string] ans = deref(self.db_ptr).get_cells_in_library(clib)
+        return [v.decode(self.encoding) for v in ans]
+
+    def get_lib_path(self, unicode library):
+        pylib = library.encode(self.encoding)
+        cdef char* clib = pylib
+        cdef string ans = deref(self.db_ptr).get_lib_path(clib)
+        return ans.decode(self.encoding)
 
     def create_lib(self, unicode library, unicode lib_path, unicode tech_lib):
         pylib = library.encode(self.encoding)
@@ -55,7 +75,10 @@ cdef class PyOADatabase:
         cdef char* ccell = pycell
         cdef char* cview = pyview
         cdef char* croot = pyroot
-        cdef unordered_set[string] exc_set = {a.encode(self.encoding) for a in exclude_libs}
-        for v in exc_set:
-            print(v)
-        deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot, exc_set)
+        cdef unordered_set[string] exc_set
+        for v in exclude_libs:
+            exc_set.insert(v.encode(self.encoding))
+        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot, exc_set)
+        return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
+                for p in ans]
+
