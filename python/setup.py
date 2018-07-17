@@ -16,12 +16,16 @@ setup(
                                         '../src/cbagoa/read_oa.cpp',
                                         '../src/cbagoa/write_oa.cpp',
                                         '../src/cbagoa/database.cpp',
+                                        '../fmt/src/format.cc',
+                                        '../fmt/src/posix.cc',
                                         '../easyloggingpp/src/easylogging++.cc',
                                     ],
                                     language='c++',
                                     include_dirs=[
                                         os.environ['OA_INCLUDE_DIR'],
                                         '../include',
+                                        '../fmt/include',
+                                        '../easyloggingpp/src',
                                     ],
                                     libraries=[
                                         'boost_system',

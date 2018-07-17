@@ -46,7 +46,7 @@ cdef class PyOADatabase:
         deref(self.db_ptr).create_lib(clib, cpath, ctech);
 
     def read_sch_recursive(self, unicode lib_name, unicode cell_name, unicode view_name,
-                           unicode root_path, set[unicode] exclude_libs):
+                           unicode root_path, exclude_libs):
         pylib = lib_name.encode(self.encoding)
         pycell = cell_name.encode(self.encoding)
         pyview = view_name.encode(self.encoding)
@@ -55,5 +55,7 @@ cdef class PyOADatabase:
         cdef char* ccell = pycell
         cdef char* cview = pyview
         cdef char* croot = pyroot
-        cdef unordered_set[string] exc_set = exclude_libs
+        cdef unordered_set[string] exc_set = {a.encode(self.encoding) for a in exclude_libs}
+        for v in exc_set:
+            print(v)
         deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot, exc_set)
