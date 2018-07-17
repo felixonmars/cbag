@@ -5,6 +5,11 @@
  *  \date   2018/07/10
  */
 
+#include <fstream>
+#include <filesystem>
+
+#include <boost/archive/xml_oarchive.hpp>
+
 #include <easylogging++.h>
 
 #include <fmt/format.h>
@@ -14,6 +19,8 @@
 
 INITIALIZE_EASYLOGGINGPP // NOLINT
 
+
+namespace fs = std::filesystem;
 
 namespace cbagoa {
 
@@ -158,6 +165,49 @@ namespace cbagoa {
         } catch (...) {
             handle_oa_exceptions();
             throw;
+        }
+    }
+
+    void OADatabase::read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
+                                        const std::string &view_name, const std::string &root_path,
+                                        const std::unordered_set<std::string> &exclude_libs) {
+        std::pair<std::string, std::string> key(lib_name, cell_name);
+        cv_set_t exclude_cells;
+        read_sch_recursive2(key, view_name, root_path, exclude_libs, exclude_cells);
+    }
+
+    void OADatabase::read_sch_recursive2(std::pair<std::string, std::string> &key,
+                                         const std::string &view_name, const std::string &root_path,
+                                         const std::unordered_set<std::string> &exclude_libs,
+                                         cv_set_t &exclude_cells) {
+        // parse schematic
+        cbag::SchCellView ans = read_sch_cellview(key.first, key.second, view_name);
+
+        // create directory if not exist, then compute output filename
+        fs::path cur_path = fs::path(root_path) / fs::path(key.first) / fs::path("netlist_info");
+        fs::create_directories(cur_path);
+        cur_path /= fs::path(key.second + ".xml");
+
+        // update exclude_cells
+        exclude_cells.insert(std::move(key));
+
+        // write to file
+        std::ofstream outfile(cur_path, std::ios_base::out);
+        auto xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
+        (*xml_out) << boost::serialization::make_nvp("master", ans);
+        xml_out.reset();
+        outfile.close();
+
+        // recurse
+        auto exc_lib_end = exclude_libs.end();
+        for (const auto &pair : ans.instances) {
+            if (exclude_libs.find(pair.second.lib_name) == exc_lib_end) {
+                std::pair<std::string, std::string> ikey(pair.second.lib_name,
+                                                         pair.second.cell_name);
+                if (exclude_cells.find(ikey) == exclude_cells.end()) {
+                    read_sch_recursive2(ikey, view_name, root_path, exclude_libs, exclude_cells);
+                }
+            }
         }
     }
 

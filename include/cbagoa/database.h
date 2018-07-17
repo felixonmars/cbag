@@ -10,6 +10,9 @@
 
 #include <map>
 #include <string>
+#include <unordered_set>
+
+#include <boost/functional/hash.hpp>
 
 #include <oa/oaDesignDB.h>
 
@@ -19,6 +22,10 @@
 
 
 namespace cbagoa {
+
+    using cv_set_t = std::unordered_set<std::pair<std::string, std::string>,
+            boost::hash<std::pair<std::string, std::string>>>;
+
 
     class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
     public:
@@ -63,6 +70,11 @@ namespace cbagoa {
                                             const std::string &cell_name,
                                             const std::string &view_name);
 
+        void
+        read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
+                           const std::string &view_name, const std::string &root_path,
+                           const std::unordered_set<std::string> &exclude_libs);
+
         void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                                 const std::string &view_name, bool is_sch,
                                 const cbag::SchCellView &cv);
@@ -74,6 +86,12 @@ namespace cbagoa {
         oa::oaDesign *open_design(const std::string &lib_name, const std::string &cell_name,
                                   const std::string &view_name,
                                   char mode = 'r', bool is_sch = true);
+
+        void
+        read_sch_recursive2(std::pair<std::string, std::string> &key,
+                            const std::string &view_name, const std::string &root_path,
+                            const std::unordered_set<std::string> &exclude_libs,
+                            cv_set_t &exclude_cells);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

@@ -4,6 +4,7 @@ project(cbag)
 
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
+# std::filesystem requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
@@ -63,6 +64,7 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 # shared library dependencies
 target_link_libraries(cbagoa
         cbag
+        stdc++fs
         )
 
 set(SRC_FILES_OA
