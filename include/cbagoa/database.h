@@ -89,16 +89,18 @@ namespace cbagoa {
         }
 
         std::vector<cell_key_t>
-        read_sch_recursive(const char *lib_name, const char *cell_name,
-                           const char *view_name, const char *root_path,
+        read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
+                           const char *new_root_path,
+                           const std::unordered_map<std::string, std::string> &lib_map,
                            const std::unordered_set<std::string> &exclude_libs);
 
         std::vector<cell_key_t>
         read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
-                           const std::string &view_name, const std::string &root_path,
+                           const std::string &view_name, const std::string &new_root_path,
+                           const std::unordered_map<std::string, std::string> &lib_map,
                            const std::unordered_set<std::string> &exclude_libs) {
             return read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
-                                      root_path.c_str(), exclude_libs);
+                                      new_root_path.c_str(), lib_map, exclude_libs);
         }
 
         void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
@@ -118,10 +120,11 @@ namespace cbagoa {
                                   const char *view_name, char mode = 'r', bool is_sch = true);
 
         void
-        read_sch_recursive2(std::pair<std::string, std::string> &key,
-                            const char *view_name, const char *root_path,
-                            const std::unordered_set<std::string> &exclude_libs,
-                            cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
+        read_sch_helper(std::pair<std::string, std::string> &key, const char *view_name,
+                        const char *new_root_path,
+                        const std::unordered_map<std::string, std::string> &lib_map,
+                        const std::unordered_set<std::string> &exclude_libs,
+                        cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
         // OA namespace objects
         const oa::oaNativeNS ns;

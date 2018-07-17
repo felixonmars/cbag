@@ -177,12 +177,13 @@ namespace cbagoa {
 
     std::vector<cell_key_t>
     OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name,
-                                   const char *view_name, const char *root_path,
+                                   const char *view_name, const char *new_root_path,
+                                   const std::unordered_map<std::string, std::string> &lib_map,
                                    const std::unordered_set<std::string> &exclude_libs) {
         std::pair<std::string, std::string> key(lib_name, cell_name);
         cell_set_t exclude_cells;
         std::vector<cell_key_t> ans;
-        read_sch_recursive2(key, view_name, root_path, exclude_libs, exclude_cells, ans);
+        read_sch_helper(key, view_name, new_root_path, lib_map, exclude_libs, exclude_cells, ans);
         return ans;
     }
 
@@ -244,16 +245,24 @@ namespace cbagoa {
     }
 
 
-    void OADatabase::read_sch_recursive2(std::pair<std::string, std::string> &key,
-                                         const char *view_name, const char *root_path,
-                                         const std::unordered_set<std::string> &exclude_libs,
-                                         cell_set_t &exclude_cells,
-                                         std::vector<cell_key_t> &cell_list) {
+    void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key,
+                                     const char *view_name, const char *new_root_path,
+                                     const std::unordered_map<std::string, std::string> &lib_map,
+                                     const std::unordered_set<std::string> &exclude_libs,
+                                     cell_set_t &exclude_cells,
+                                     std::vector<cell_key_t> &cell_list) {
         // parse schematic
         cbag::SchCellView ans = read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
 
+        // find root_path
+        auto const map_iter = lib_map.find(key.first);
+        fs::path root_path(new_root_path);
+        if (map_iter != lib_map.cend()) {
+            root_path = fs::path(map_iter->second);
+        }
+
         // create directory if not exist, then compute output filename
-        fs::path cur_path = fs::path(root_path) / fs::path(key.first) / fs::path("netlist_info");
+        fs::path cur_path = root_path / fs::path(key.first) / fs::path("netlist_info");
         fs::create_directories(cur_path);
         cur_path /= fs::path(key.second + ".xml");
 
@@ -275,8 +284,8 @@ namespace cbagoa {
                 std::pair<std::string, std::string> ikey(pair.second.lib_name,
                                                          pair.second.cell_name);
                 if (exclude_cells.find(ikey) == exclude_cells.end()) {
-                    read_sch_recursive2(ikey, view_name, root_path, exclude_libs, exclude_cells,
-                                        cell_list);
+                    read_sch_helper(ikey, view_name, new_root_path, lib_map, exclude_libs,
+                                    exclude_cells, cell_list);
                 }
             }
         }

@@ -6,6 +6,7 @@ from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from libcpp.utility cimport pair
 from libcpp.vector cimport vector
+from libcpp.unordered_map cimport unordered_map
 from libcpp.unordered_set cimport unordered_set
 
 
@@ -24,7 +25,9 @@ cdef extern from "cbagoa/database.h" namespace "cbagoa":
                         const char* tech_lib) except +
 
         vector[pair[string, string]] read_sch_recursive(const char* lib_name, const char* cell_name,
-                                                        const char* view_name, const char* root_path,
+                                                        const char* view_name,
+                                                        const char* new_root_path,
+                                                        const unordered_map[string, string]& lib_map,
                                                         const unordered_set[string]& exclude_libs) except +
 
 
@@ -66,19 +69,24 @@ cdef class PyOADatabase:
         deref(self.db_ptr).create_lib(clib, cpath, ctech);
 
     def read_sch_recursive(self, unicode lib_name, unicode cell_name, unicode view_name,
-                           unicode root_path, exclude_libs):
+                           unicode new_root_path, lib_map, exclude_libs):
         pylib = lib_name.encode(self.encoding)
         pycell = cell_name.encode(self.encoding)
         pyview = view_name.encode(self.encoding)
-        pyroot = root_path.encode(self.encoding)
+        pyroot = new_root_path.encode(self.encoding)
         cdef char* clib = pylib
         cdef char* ccell = pycell
         cdef char* cview = pyview
         cdef char* croot = pyroot
         cdef unordered_set[string] exc_set
+        cdef unordered_map[string, string] cmap
         for v in exclude_libs:
             exc_set.insert(v.encode(self.encoding))
-        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot, exc_set)
+        for key, val in lib_map.items():
+            cmap[key.encode(self.encoding)] = val.encode(self.encoding)
+
+        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot,
+                                                                                      cmap, exc_set)
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
                 for p in ans]
 
