@@ -64,7 +64,7 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 # shared library dependencies
 target_link_libraries(cbagoa
         cbag
-        stdc++fs
+        boost_filesystem
         )
 
 set(SRC_FILES_OA

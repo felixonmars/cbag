@@ -6,8 +6,8 @@
  */
 
 #include <fstream>
-#include <filesystem>
 
+#include <boost/filesystem.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 
 #include <easylogging++.h>
@@ -20,7 +20,7 @@
 INITIALIZE_EASYLOGGINGPP // NOLINT
 
 
-namespace fs = std::filesystem;
+namespace fs = boost::filesystem;
 
 namespace cbagoa {
 
@@ -127,7 +127,18 @@ namespace cbagoa {
     }
 
     OADatabase::~OADatabase() {
-        LOG(INFO) << "Destroying OADatabase with file: " << lib_def_file;
+        try {
+            LOG(INFO) << "Closing all OA libraries from definition file: " << lib_def_file;
+            oa::oaIter<oa::oaLib> lib_iter(oa::oaLib::getOpenLibs());
+            oa::oaLib *lib_ptr;
+            while ((lib_ptr = lib_iter.getNext()) != nullptr) {
+                oa::oaString tmp_str;
+                lib_ptr->getName(ns_cdba, tmp_str);
+                lib_ptr->close();
+            }
+        } catch (...) {
+            handle_oa_exceptions();
+        }
     }
 
     oa::oaDesign *OADatabase::open_design(const std::string &lib_name, const std::string &cell_name,
@@ -192,7 +203,7 @@ namespace cbagoa {
         exclude_cells.insert(std::move(key));
 
         // write to file
-        std::ofstream outfile(cur_path, std::ios_base::out);
+        std::ofstream outfile(cur_path.c_str(), std::ios_base::out);
         auto xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
         (*xml_out) << boost::serialization::make_nvp("master", ans);
         xml_out.reset();
