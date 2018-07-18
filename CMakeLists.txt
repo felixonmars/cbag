@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
+# make sure linker raise errors if shared library has undefined symbols
+# this makes it a lot easier to debug
+set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 # add rpaths to the final install executable
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
@@ -38,6 +41,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include
         ${YAML_CPP_INCLUDE_DIR}
         )
 
+# setup link library path.  Must call before defining target.
+link_directories($ENV{OA_LINK_DIR})
+
 set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/ast.cpp
         src/cbag/spirit/range.cpp
@@ -50,10 +56,17 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
         fmt-header-only
+        # for Spirit X3 error code
+        boost_system
+        # for primitives YAML serialization
+        yaml-cpp
+        # for primitives YAML serialization
+        oaBase
+        oaCommon
+        oaPlugIn
+        m
+        ${CMAKE_DL_LIBS}
         )
-
-# setup link library path.  Must call before defining target.
-link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAGOA
         src/cbagoa/name.cpp
@@ -68,7 +81,6 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 target_link_libraries(cbagoa
         cbag
         boost_filesystem
-        yaml-cpp
         )
 
 set(SRC_FILES_OA

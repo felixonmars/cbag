@@ -9,6 +9,9 @@
 
 #include <cbag/database/primitives.h>
 
+#include <yaml_serialization.h>
+
+
 namespace YAML {
     template<>
     struct convert<cbag::Point> {

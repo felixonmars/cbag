@@ -69,8 +69,8 @@ namespace cbag {
                 : ShapeBase(lay, purp, std::move(net)), ang_start(start), ang_stop(stop),
                   bbox(xl, yl, xh, yh) {}
 
-        BBox bbox;
         double ang_start, ang_stop;
+        BBox bbox;
     };
 
     struct Donut : ShapeBase {

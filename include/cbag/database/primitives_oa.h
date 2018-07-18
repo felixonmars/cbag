@@ -17,10 +17,10 @@
 #include <oa/oaTerm.h>
 #include <oa/oaTextDisplay.h>
 #include <oa/oaSigType.h>
-#include <oa/oaTransform.h>
-#include <oa/oaBox.h>
-#include <oa/oaPoint.h>
-#include <oa/oaPointArray.h>
+#include <oa/oaTransform.inl>
+#include <oa/oaBox.inl>
+#include <oa/oaPoint.inl>
+#include <oa/oaPointArray.inl>
 
 
 namespace cbag {

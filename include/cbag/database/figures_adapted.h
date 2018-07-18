@@ -20,7 +20,7 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::Rect,
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::Arc,
-                          layer, purpose, net, bbox, ang_start, ang_stop
+                          layer, purpose, net, ang_start, ang_stop, bbox
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::Donut,
