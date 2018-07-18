@@ -10,7 +10,7 @@ from libcpp.unordered_map cimport unordered_map
 from libcpp.unordered_set cimport unordered_set
 
 
-cdef extern from "cbagoa/database.h" namespace "cbagoa":
+cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass LibDefObserver:
         pass
 

@@ -265,7 +265,7 @@ namespace cbagoa {
         // create directory if not exist, then compute output filename
         fs::path cur_path = root_path / fs::path(key.first) / fs::path("netlist_info");
         fs::create_directories(cur_path);
-        cur_path /= fs::path(key.second + ".xml");
+        cur_path /= fs::path(key.second + ".yaml");
 
         // update cell_list and exclude_cells
         cell_list.push_back(key);
