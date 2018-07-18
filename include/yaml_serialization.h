@@ -206,57 +206,21 @@ namespace yaml {
         template<typename Base>
         std::string to_yaml(const Base &v) {
             YAML::Emitter emitter;
-
-            typedef typename sequence<Base>::indices indices;
-
-            // Make a root node to insert into
-            YAML::Node root;
-
-            // Create an inserter for the root node
-            inserter<Base> inserter(root);
-
-            // Insert each member of the structure
-            boost::fusion::for_each(boost::fusion::zip(indices(), v), inserter);
-
-            // Emit yaml
+            YAML::Node root = YAML::convert<Base>::encode(v);
             emitter << root;
-
-            // Return string representation
             return emitter.c_str();
         }
 
         // Load yaml into this object
         template<typename Base>
         bool from_yaml(std::string const &yaml_string, Base &obj) {
-            // Create a root node to load into
-            YAML::Node root;
-
+            YAML::Node n;
             try {
-                // Try loading the root node
-                root = YAML::Load(yaml_string);
-            }
-            catch (...) {
+                n = YAML::Load(yaml_string);
+            } catch(...) {
                 return false;
             }
-
-            // Get a range representing the size of the structure
-            typedef typename sequence<Base>::indices indices;
-
-            // Create an extractor for the root node
-            extractor<Base> extractor(root);
-
-            // Extract each member of the structure
-            try {
-                // An exception is thrown if any item in the loop cannot be read
-                boost::fusion::for_each(boost::fusion::zip(indices(), obj), extractor);
-            }
-                // Catch all exceptions and prevent them from propagating
-            catch (...) {
-                return false;
-            }
-
-            // If we made it here, all fields were read correctly
-            return true;
+            return YAML::convert<Base>::decode(n, obj);
         }
     }
 }

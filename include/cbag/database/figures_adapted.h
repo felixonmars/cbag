@@ -11,11 +11,11 @@
 #include <cbag/database/figures.h>
 
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Poly,
+BOOST_FUSION_ADAPT_STRUCT(cbag::Rect,
                           layer, purpose, net, bbox
 )
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Rect,
+BOOST_FUSION_ADAPT_STRUCT(cbag::Poly,
                           layer, purpose, net, points
 )
 

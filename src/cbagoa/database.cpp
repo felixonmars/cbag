@@ -15,7 +15,9 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/database/cellviews.h>
+#include <yaml_serialization.h>
+
+#include <cbag/database/cellviews_adapted.h>
 #include <cbagoa/read_oa.h>
 #include <cbagoa/write_oa.h>
 #include <cbagoa/database.h>

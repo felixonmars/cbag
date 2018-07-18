@@ -49,7 +49,9 @@ set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
         src/cbag/spirit/name.cpp
-        src/cbag/database/primitives.cpp
+        src/cbag/database/yaml_primitives.cpp
+        src/cbag/database/yaml_datatypes.cpp
+        src/cbag/database/yaml_figures.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
