@@ -1,9 +1,6 @@
 #include <fstream>
 
-#include <yaml-cpp/yaml.h>
-
-#include <cbag/database/cellviews.h>
-#include <cbagoa/database.h>
+#include <cbagoa/cbagoa.h>
 
 
 int read_oa() {

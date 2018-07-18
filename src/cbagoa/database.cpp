@@ -13,11 +13,7 @@
 
 #include <fmt/format.h>
 
-#include <yaml-cpp/yaml.h>
-
-#include <yaml_serialization.h>
-
-#include <cbag/database/cellviews_adapted.h>
+#include <cbag/database/yaml_cellviews.h>
 #include <cbagoa/read_oa.h>
 #include <cbagoa/write_oa.h>
 #include <cbagoa/database.h>

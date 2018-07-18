@@ -82,6 +82,10 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 # shared library dependencies
 target_link_libraries(cbagoa
         cbag
+        oaDM
+        oaDMFileSysBase
+        oaTech
+        oaDesign
         boost_filesystem
         )
 
@@ -99,14 +103,6 @@ set_target_properties(test_oa PROPERTIES
 # shared library dependencies
 target_link_libraries(test_oa
         cbagoa
-        oaCommon
-        oaBase
-        oaPlugIn
-        oaDM
-        oaDMFileSysBase
-        oaTech
-        oaDesign
-        ${CMAKE_DL_LIBS}
         )
 
 add_executable(test_spirit
