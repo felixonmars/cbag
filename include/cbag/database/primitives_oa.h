@@ -8,19 +8,7 @@
 #ifndef CBAG_DATABASE_PRIMITIVES_OA_H
 #define CBAG_DATABASE_PRIMITIVES_OA_H
 
-#include <oa/oaTechDBTypes.h>
-#include <oa/oaBaseTypes.h>
-#include <oa/oaOrient.h>
-#include <oa/oaPath.h>
-#include <oa/oaTextAlign.h>
-#include <oa/oaFont.h>
-#include <oa/oaTerm.h>
-#include <oa/oaTextDisplay.h>
-#include <oa/oaSigType.h>
-#include <oa/oaTransform.inl>
-#include <oa/oaBox.inl>
-#include <oa/oaPoint.inl>
-#include <oa/oaPointArray.inl>
+#include <oa/oaDesignDB.h>
 
 
 namespace cbag {

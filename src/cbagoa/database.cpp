@@ -6,6 +6,8 @@
  */
 
 #include <fstream>
+#include <unordered_set>
+#include <unordered_map>
 
 #include <boost/filesystem.hpp>
 
