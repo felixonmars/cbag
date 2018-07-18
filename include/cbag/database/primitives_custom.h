@@ -109,6 +109,26 @@ namespace cbag {
     constexpr SigType stScan = SigType::scan;
     constexpr SigType stReset = SigType::reset;
 
+    /** A point
+     */
+    class Point {
+    public:
+        Point() : xv(0), yv(0) {}
+
+        Point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
+
+        coord_t x() const { return xv; }
+
+        coord_t y() const { return yv; }
+
+        void set(coord_t x, coord_t y) {
+            xv = x;
+            yv = y;
+        }
+
+    private:
+        coord_t xv, yv;
+    };
 
     /** Represents locations/orientation of an instance.
      */
@@ -135,27 +155,6 @@ namespace cbag {
     private:
         coord_t x, y;
         Orientation oval;
-    };
-
-    /** A point
-     */
-    class Point {
-    public:
-        Point() : xv(0), yv(0) {}
-
-        Point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
-
-        coord_t x() const { return xv; }
-
-        coord_t y() const { return yv; }
-
-        void set(coord_t x, coord_t y) {
-            xv = x;
-            yv = y;
-        }
-
-    private:
-        coord_t xv, yv;
     };
 
     /** A bounding box

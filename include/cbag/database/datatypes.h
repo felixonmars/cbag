@@ -9,12 +9,12 @@
 #ifndef CBAG_DATABASE_COMMON_H
 #define CBAG_DATABASE_COMMON_H
 
-#include <iostream>
 #include <cstdint>
 
 #include <boost/variant.hpp>
-#include <boost/serialization/nvp.hpp>
-#include <boost/serialization/variant.hpp>
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
+
 
 namespace cbag {
     /** A custom struct representing time data.
@@ -26,15 +26,6 @@ namespace cbag {
         Time() = default;
 
         explicit Time(time_t time_val) : time_val(time_val) {}
-
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(time_val);
-#pragma clang diagnostic pop
-        }
 
         time_t time_val;
     };
@@ -50,16 +41,6 @@ namespace cbag {
         Binary(const char *name, const unsigned char *data, unsigned int size)
                 : name(name), bin_val(data, data + size) {}
 
-        // boost serialization
-        template<class Archive>
-        void serialize(Archive &ar, const unsigned int version) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-            ar & BOOST_SERIALIZATION_NVP(name);
-            ar & BOOST_SERIALIZATION_NVP(bin_val);
-#pragma clang diagnostic pop
-        }
-
         std::string name;
         std::string bin_val;
     };
@@ -73,5 +54,13 @@ namespace cbag {
     typedef std::map<std::string, value_t> ParamMap;
 
 }
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::Time,
+        time_val
+)
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::Binary,
+                          name, bin_val
+)
 
 #endif //CBAG_DATABASE_COMMON_H

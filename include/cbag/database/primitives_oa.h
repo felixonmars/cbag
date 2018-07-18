@@ -8,7 +8,19 @@
 #ifndef CBAG_DATABASE_PRIMITIVES_OA_H
 #define CBAG_DATABASE_PRIMITIVES_OA_H
 
-#include <oa/oaDesignDB.h>
+#include <oa/oaTechDBTypes.h>
+#include <oa/oaBaseTypes.h>
+#include <oa/oaOrient.h>
+#include <oa/oaPath.h>
+#include <oa/oaTextAlign.h>
+#include <oa/oaFont.h>
+#include <oa/oaTerm.h>
+#include <oa/oaTextDisplay.h>
+#include <oa/oaSigType.h>
+#include <oa/oaTransform.h>
+#include <oa/oaBox.h>
+#include <oa/oaPoint.h>
+#include <oa/oaPointArray.h>
 
 
 namespace cbag {
@@ -78,9 +90,8 @@ namespace cbag {
     constexpr SigType stScan = SigType::oacScanSigType;
     constexpr SigType stReset = SigType::oacResetSigType;
 
-
-    using Transform = oa::oaTransform;
     using Point = oa::oaPoint;
+    using Transform = oa::oaTransform;
     using BBox = oa::oaBox;
     using PointArray = oa::oaPointArray;
 }

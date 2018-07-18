@@ -8,7 +8,8 @@
 #ifndef CBAG_SPIRIT_AST_ADAPTED_H
 #define CBAG_SPIRIT_AST_ADAPTED_H
 
-#include <boost/fusion/adapted.hpp>
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 
 #include <cbag/spirit/ast.h>
 
