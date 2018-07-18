@@ -21,7 +21,7 @@ struct One {
     bool four;
 };
 
-struct Five : public yaml::serialization::Yaml<Five> {
+struct Five {
     typedef std::map<int, One> Map_t;
     Map_t six;
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     v.nine.push_back(temp);
     v.nine.push_back(temp);
 
-    std::cout << v.to_yaml() << std::endl;
+    std::cout << yaml::serialization::to_yaml(v) << std::endl;
 
     ///////////////////////////////////////////
     std::cout << "==============" << std::endl;
@@ -92,6 +92,6 @@ int main(int argc, char *argv[]) {
        << "    - 7.8       \n"
        << "    - 9.0       \n";
 
-    v.from_yaml(ss.str());
-    std::cout << v.to_yaml() << std::endl;
+    yaml::serialization::from_yaml(ss.str(), v);
+    std::cout << yaml::serialization::to_yaml(v) << std::endl;
 }

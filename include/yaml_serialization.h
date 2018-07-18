@@ -126,7 +126,7 @@ namespace yaml {
 
                 // Get the field type
                 typedef BOOST_TYPEOF(boost
-                ::fusion::at_c<1>(zip)) FieldType;
+                                     ::fusion::at_c<1>(zip)) FieldType;
 
                 // Alias the member
                 FieldType const &member = boost::fusion::at_c<1>(zip);
@@ -162,7 +162,7 @@ namespace yaml {
 
                 // Get the field native type
                 typedef BOOST_TYPEOF(boost
-                ::fusion::at_c<1>(zip)) FieldType;
+                                     ::fusion::at_c<1>(zip)) FieldType;
 
                 // Alias the member
                 // We need to const cast this because "boost::fusion::for_each"
@@ -197,83 +197,61 @@ namespace yaml {
             int mItem;
         };
 
-        template<typename T>
-        class Yaml {
-        public:
+        template<typename Base>
+        std::string to_yaml(const Base &v) {
+            YAML::Emitter emitter;
 
-            typedef T Base;
+            typedef typename sequence<Base>::indices indices;
 
-            // Convert this object to yaml
-            std::string to_yaml() {
-                // Create an emitter
-                YAML::Emitter emitter;
+            // Make a root node to insert into
+            YAML::Node root;
 
-                // Emit yaml
-                return emit(emitter);
+            // Create an inserter for the root node
+            inserter<Base> inserter(root);
+
+            // Insert each member of the structure
+            boost::fusion::for_each(boost::fusion::zip(indices(), v), inserter);
+
+            // Emit yaml
+            emitter << root;
+
+            // Return string representation
+            return emitter.c_str();
+        }
+
+        // Load yaml into this object
+        template<typename Base>
+        bool from_yaml(std::string const &yaml_string, Base &obj) {
+            // Create a root node to load into
+            YAML::Node root;
+
+            try {
+                // Try loading the root node
+                root = YAML::Load(yaml_string);
+            }
+            catch (...) {
+                return false;
             }
 
-            // Load yaml into this object
-            bool from_yaml(std::string const &yaml_string) {
-                // Create a root node to load into
-                YAML::Node root;
+            // Get a range representing the size of the structure
+            typedef typename sequence<Base>::indices indices;
 
-                try {
-                    // Try loading the root node
-                    root = YAML::Load(yaml_string);
-                }
-                catch (...) {
-                    return false;
-                }
+            // Create an extractor for the root node
+            extractor<Base> extractor(root);
 
-                // Get a range representing the size of the structure
-                typedef typename sequence<Base>::indices indices;
-
-                // Create an extractor for the root node
-                extractor<Base> extractor(root);
-
-                // Extract each member of the structure
-                try {
-                    // An exception is thrown if any item in the loop cannot be read
-                    boost::fusion::for_each(boost::fusion::zip(indices(), self()), extractor);
-                }
-                    // Catch all exceptions and prevent them from propagating
-                catch (...) {
-                    return false;
-                }
-
-                // If we made it here, all fields were read correctly
-                return true;
+            // Extract each member of the structure
+            try {
+                // An exception is thrown if any item in the loop cannot be read
+                boost::fusion::for_each(boost::fusion::zip(indices(), obj), extractor);
+            }
+                // Catch all exceptions and prevent them from propagating
+            catch (...) {
+                return false;
             }
 
-        protected:
-
-            std::string emit(YAML::Emitter &emitter) {
-                // Get a range representing the size of the structure
-                typedef typename sequence<Base>::indices indices;
-
-                // Make a root node to insert into
-                YAML::Node root;
-
-                // Create an inserter for the root node
-                inserter<Base> inserter(root);
-
-                // Insert each member of the structure
-                boost::fusion::for_each(boost::fusion::zip(indices(), self()), inserter);
-
-                // Emit yaml
-                emitter << root;
-
-                // Return string representation
-                return emitter.c_str();
-            }
-
-        private:
-
-            // Cast ourselves to our CRTP base
-            Base &self() {
-                return static_cast<Base &>(*this);
-            }
-        };
+            // If we made it here, all fields were read correctly
+            return true;
+        }
     }
 }
 

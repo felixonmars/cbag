@@ -5,7 +5,10 @@
  *  \date   2018/07/10
  */
 
+#include <cstdint>
 #include <limits>
+#include <algorithm>
+#include <vector>
 
 #include <boost/functional/hash.hpp>
 
@@ -17,6 +20,11 @@
 namespace cbag {
     namespace spirit {
         namespace ast {
+            range::range() : start(0), stop(0), step(0) {}
+
+            range::range(uint32_t start, uint32_t stop, uint32_t step)
+                    : start(start), stop(stop), step(step) {}
+
             uint32_t range::size() const {
                 if (step == 0)
                     return 0;
@@ -35,8 +43,16 @@ namespace cbag {
                 }
             }
 
+            uint32_t range::operator[](uint32_t index) const {
+                return (stop >= start) ? start + step * index : start - step * index;
+            }
+
             bool range::operator==(const range &other) const {
                 return start == other.start && stop == other.stop && step == other.step;
+            }
+
+            bool range::operator!=(const range &other) const {
+                return !(*this == other);
             }
 
             bool range::operator<(const range &other) const {
@@ -45,8 +61,19 @@ namespace cbag {
                                                     || (stop == other.stop && step < other.step)));
             }
 
+            name_bit::name_bit() : base("") {}
+
+            name_bit::name_bit(std::string base) : base(std::move(base)) {}
+
+            name_bit::name_bit(std::string base, uint32_t index)
+                    : base(std::move(base)), index(index) {}
+
             bool name_bit::operator==(const name_bit &other) const {
                 return base == other.base && index == other.index;
+            }
+
+            bool operator!=(const name_bit &other) const {
+                return !(*this == other);
             }
 
             bool name_bit::operator<(const name_bit &other) const {
@@ -63,20 +90,41 @@ namespace cbag {
                 }
             }
 
+            name_unit::name_unit()
+                    : mult(1), base(""), idx_range({0, 0, 0}) {}
+
+            uint32_t name_unit::size() const {
+                return mult * std::max(idx_range.size(), 1u);
+            }
+
+            bool name_unit::is_vector() const {
+                return idx_range.size() > 0;
+            }
+
             name_bit name_unit::operator[](uint32_t index) const {
                 uint32_t range_size = idx_range.size();
-                return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index % range_size]);
+                return (range_size == 0) ? name_bit(base) : name_bit(base,
+                                                                     idx_range[index % range_size]);
             }
 
             bool name_unit::operator==(const name_unit &other) const {
                 return base == other.base && idx_range == other.idx_range && mult == other.mult;
             }
 
+            bool name_unit::operator!=(const name_unit &other) const {
+                return !(*this == other);
+            }
+
             bool name_unit::operator<(const name_unit &other) const {
                 return base < other.base
                        || (base == other.base && (idx_range < other.idx_range
-                                                  || (idx_range == other.idx_range && mult < other.mult)));
+                                                  || (idx_range == other.idx_range &&
+                                                      mult < other.mult)));
             }
+
+            name::const_iterator::const_iterator(const name *ptr, unsigned long unit_index,
+                                                 uint32_t bit_index)
+                    : ptr(ptr), unit_index(unit_index), bit_index(bit_index) {}
 
             name::const_iterator &name::const_iterator::operator++() {
                 if (bit_index < (ptr->unit_list[unit_index]).size() - 1) {
@@ -87,6 +135,28 @@ namespace cbag {
                 }
 
                 return *this;
+            }
+
+            bool name::const_iterator::operator!=(const const_iterator &other) const {
+                return ptr != other.ptr || unit_index != other.unit_index ||
+                       bit_index != other.bit_index;
+            }
+
+            bool name::const_iterator::operator==(const const_iterator &other) const {
+                return ptr == other.ptr && unit_index == other.unit_index &&
+                       bit_index == other.bit_index;
+            }
+
+            name_bit name::const_iterator::operator*() const {
+                return ptr->unit_list[unit_index][bit_index];
+            }
+
+            name::const_iterator name::begin() const {
+                return {this, 0, 0};
+            }
+
+            name::const_iterator name::end() const {
+                return {this, unit_list.size(), 0};
             }
 
             bool name::operator==(const name &other) const {
@@ -103,6 +173,10 @@ namespace cbag {
                 } else {
                     return false;
                 }
+            }
+
+            bool name::operator!=(const name &other) const {
+                return !(*this == other);
             }
 
             bool name::operator<(const name &other) const {
