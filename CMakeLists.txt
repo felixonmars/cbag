@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
+# set optimzation level for release
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 # make sure linker raise errors if shared library has undefined symbols
 # this makes it a lot easier to debug
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
@@ -33,6 +36,8 @@ add_subdirectory(fmt)
 
 # include yaml-cpp
 find_package(yaml-cpp)
+message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
+message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
@@ -45,13 +50,13 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAG
-        src/cbag/spirit/ast.cpp
-        src/cbag/spirit/range.cpp
-        src/cbag/spirit/name_unit.cpp
-        src/cbag/spirit/name.cpp
-        src/cbag/database/yaml_primitives.cpp
-        src/cbag/database/yaml_datatypes.cpp
-        src/cbag/database/yaml_figures.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
@@ -71,10 +76,10 @@ target_link_libraries(cbag
         )
 
 set(SRC_FILES_LIB_CBAGOA
-        src/cbagoa/name.cpp
-        src/cbagoa/read_oa.cpp
-        src/cbagoa/write_oa.cpp
-        src/cbagoa/database.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbagoa/name.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp
         ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
         )
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
@@ -90,7 +95,7 @@ target_link_libraries(cbagoa
         )
 
 set(SRC_FILES_OA
-        test/test_oa.cpp
+        ${CMAKE_SOURCE_DIR}/test/test_oa.cpp
         )
 add_executable(test_oa ${SRC_FILES_OA})
 
@@ -106,7 +111,7 @@ target_link_libraries(test_oa
         )
 
 add_executable(test_spirit
-        test/test_spirit.cpp
+        ${CMAKE_SOURCE_DIR}/test/test_spirit.cpp
         )
 
 # append build directory to RPATH
@@ -121,7 +126,7 @@ target_link_libraries(test_spirit
 
 
 add_executable(read_prop
-        test/read_prop.cpp
+        ${CMAKE_SOURCE_DIR}/test/read_prop.cpp
         )
 
 # append build directory to RPATH
@@ -143,7 +148,7 @@ target_link_libraries(read_prop
         )
 
 add_executable(test_yaml
-        test/test_yaml.cpp
+        ${CMAKE_SOURCE_DIR}/test/test_yaml.cpp
         )
 
 # append build directory to RPATH
@@ -155,10 +160,10 @@ set_target_properties(test_yaml PROPERTIES
 # shared library dependencies
 target_link_libraries(test_yaml
         fmt-header-only
-        ${YAML_CPP_LIBRARIES}
+        yaml-cpp
         )
 
 
-install(TARGETS test_oa test_spirit cbag cbagoa read_prop
+install(TARGETS test_oa test_spirit cbag cbagoa read_prop test_yaml
         RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
         LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)
