@@ -72,7 +72,7 @@ namespace cbag {
                 return base == other.base && index == other.index;
             }
 
-            bool operator!=(const name_bit &other) const {
+            bool name_bit::operator!=(const name_bit &other) const {
                 return !(*this == other);
             }
 

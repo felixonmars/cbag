@@ -1,11 +1,10 @@
 #include <iostream>
-#include <fstream>
 
-#include <boost/archive/xml_oarchive.hpp>
-
+#include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 
+#include <yaml_serialization.h>
 
 namespace bsp = cbag::spirit;
 
@@ -21,14 +20,12 @@ int main() {
 
         try {
             std::ostringstream ofs;
-            boost::archive::xml_oarchive xml_out(ofs);
             auto name_obj = cbag::parse<bsp::ast::name,
                     bsp::parser::name_type>(str.c_str(), str.size(), bsp::name());
-            xml_out << BOOST_SERIALIZATION_NVP(name_obj);
 
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";
-            std::cout << ofs.str() << std::endl;
+            std::cout << yaml::serialization::to_yaml(name_obj) << std::endl;
             std::cout << "-------------------------\n";
         } catch (std::invalid_argument &ex) {
             std::cout << "-------------------------\n";

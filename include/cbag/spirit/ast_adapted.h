@@ -8,7 +8,7 @@
 #ifndef CBAG_SPIRIT_AST_ADAPTED_H
 #define CBAG_SPIRIT_AST_ADAPTED_H
 
-#include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/fusion/adapted.hpp>
 
 #include <cbag/spirit/ast.h>
 
@@ -18,15 +18,20 @@
 // be in global scope.
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range,
-                          start, stop, step
+                          (uint32_t, start)(uint32_t, stop)(uint32_t, step)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_bit,
+                          (std::string, base)(cbag::spirit::ast::name_bit::optint_t, index)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
-                          mult, base, idx_range
+                          (uint32_t, mult)(std::string, base)
+                          (cbag::spirit::ast::range, idx_range)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name,
-                          unit_list
+                          (cbag::spirit::ast::name::namelist_t, unit_list)
 )
 
 #endif //CBAG_SPIRIT_AST_ADAPTED_H
