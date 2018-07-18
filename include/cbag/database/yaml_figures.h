@@ -8,6 +8,7 @@
 #ifndef CBAG_DATABASE_YAML_FIGURES_H
 #define CBAG_DATABASE_YAML_FIGURES_H
 
+#include <cbag/spirit/ast_adapted.h>
 #include <cbag/database/yaml_primitives.h>
 #include <cbag/database/yaml_datatypes.h>
 #include <cbag/database/figures_adapted.h>
