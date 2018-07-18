@@ -18,20 +18,19 @@
 // be in global scope.
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range,
-                          (uint32_t, start)(uint32_t, stop)(uint32_t, step)
+                          start, stop, step
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_bit,
-                          (std::string, base)(cbag::spirit::ast::name_bit::optint_t, index)
+                          base, index
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
-                          (uint32_t, mult)(std::string, base)
-                          (cbag::spirit::ast::range, idx_range)
+                          mult, base, idx_range
 )
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name,
-                          (cbag::spirit::ast::name::namelist_t, unit_list)
+                          unit_list
 )
 
 #endif //CBAG_SPIRIT_AST_ADAPTED_H

@@ -53,8 +53,6 @@ namespace cbag {
              *  Could be either a scalar name ("foo") or a vector bit name ("bar<3>").
              */
             struct name_bit : x3::position_tagged {
-                using optint_t = boost::optional<uint32_t>;
-
                 name_bit();
 
                 explicit name_bit(std::string base);
@@ -68,7 +66,7 @@ namespace cbag {
                 bool operator<(const name_bit &other) const;
 
                 std::string base;
-                optint_t index;
+                boost::optional<uint32_t> index;
             };
 
             /** Represents a name unit
@@ -99,8 +97,6 @@ namespace cbag {
             /** Represents a list of name units.
              */
             struct name : x3::position_tagged {
-                using namelist_t = std::vector<name_unit>;
-
                 class const_iterator {
                 public:
                     const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index);
@@ -129,7 +125,7 @@ namespace cbag {
 
                 bool operator<(const name &other) const;
 
-                namelist_t unit_list;
+                std::vector<name_unit> unit_list;
             };
         }
     }

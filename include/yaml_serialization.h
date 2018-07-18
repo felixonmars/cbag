@@ -17,7 +17,7 @@
 #include <boost/mpl/range_c.hpp>
 
 // boost::fusion::extension::struct_member_name
-#include <boost/fusion/adapted.hpp>
+#include <boost/fusion/adapted/struct/detail/extension.hpp>
 
 // boost::fusion::result_of::value_at
 #include <boost/fusion/sequence/intrinsic/value_at.hpp>
@@ -26,6 +26,9 @@
 // boost::fusion::result_of::size
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/fusion/include/size.hpp>
+
+// BOOST_TYPEOF
+#include <boost/typeof/typeof.hpp>
 
 // boost::fusion::at
 #include <boost/fusion/sequence/intrinsic/at.hpp>

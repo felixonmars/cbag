@@ -1,10 +1,11 @@
 #include <iostream>
 
+#include <yaml_serialization.h>
+
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
 
-#include <yaml_serialization.h>
 
 namespace bsp = cbag::spirit;
 
