@@ -8,14 +8,17 @@
 #include <fstream>
 
 #include <boost/filesystem.hpp>
-#include <boost/archive/xml_oarchive.hpp>
 
 #include <easylogging++.h>
 
 #include <fmt/format.h>
 
-#include <cbagoa/database.h>
+#include <yaml-cpp/yaml.h>
+
+#include <cbag/database/cellviews.h>
 #include <cbagoa/read_oa.h>
+#include <cbagoa/write_oa.h>
+#include <cbagoa/database.h>
 
 INITIALIZE_EASYLOGGINGPP // NOLINT
 
@@ -272,9 +275,10 @@ namespace cbagoa {
 
         // write to file
         std::ofstream outfile(cur_path.c_str(), std::ios_base::out);
-        auto xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
-        (*xml_out) << boost::serialization::make_nvp("master", ans);
-        xml_out.reset();
+        YAML::Node node(ans);
+        YAML::Emitter emitter;
+        emitter << node;
+        outfile << emitter.c_str() << std::endl;
         outfile.close();
 
         // recurse

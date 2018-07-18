@@ -12,8 +12,6 @@
 #include <cstdint>
 
 #include <boost/variant.hpp>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 
 
 namespace cbag {
@@ -54,13 +52,5 @@ namespace cbag {
     typedef std::map<std::string, value_t> ParamMap;
 
 }
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Time,
-        time_val
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Binary,
-                          name, bin_val
-)
 
 #endif //CBAG_DATABASE_COMMON_H

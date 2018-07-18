@@ -17,12 +17,17 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/cellviews.h>
-#include <cbagoa/read_oa.h>
-#include <cbagoa/write_oa.h>
+namespace cbag {
+    // forward declare structures to reduce dependencies
+    struct SchCellView;
+}
 
 
 namespace cbagoa {
+
+    // forward declare structures to reduce dependencies
+    struct OAReader;
+    struct OAWriter;
 
     using cell_key_t = std::pair<std::string, std::string>;
     using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;

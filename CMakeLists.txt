@@ -49,10 +49,7 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
 target_link_libraries(cbag
-        boost_system
-        boost_serialization
         fmt-header-only
-        ${YAML_CPP_LIBRARIES}
         )
 
 # setup link library path.  Must call before defining target.
@@ -71,6 +68,7 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 target_link_libraries(cbagoa
         cbag
         boost_filesystem
+        yaml-cpp
         )
 
 set(SRC_FILES_OA

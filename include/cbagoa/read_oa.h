@@ -8,7 +8,7 @@
 #ifndef CBAGOA_READ_OA_H
 #define CBAGOA_READ_OA_H
 
- #include <oa/oaDesignDB.h>
+#include <oa/oaDesignDB.h>
 
 #include <cbag/spirit/ast.h>
 #include <cbag/database/figures.h>

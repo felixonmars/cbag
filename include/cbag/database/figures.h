@@ -8,10 +8,8 @@
 #define CBAG_DATABASE_FIGURES_H
 
 #include <boost/variant.hpp>
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 
-#include <cbag/spirit/ast_adapted.h>
+#include <cbag/spirit/ast.h>
 #include <cbag/database/primitives.h>
 #include <cbag/database/datatypes.h>
 
@@ -248,59 +246,4 @@ namespace cbag {
     };
 }
 
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Poly,
-                          layer, purpose, net, bbox
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Rect,
-                          layer, purpose, net, points
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Arc,
-                          layer, purpose, net, bbox, ang_start, ang_stop
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Donut,
-                          layer, purpose, net, center, radius, hole_radius
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Ellipse,
-                          layer, purpose, net, bbox
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Line,
-                          layer, purpose, net, points
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Path,
-                          layer, purpose, net, width, points, style, begin_ext, end_ext
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Text,
-                          layer, purpose, net, origin, alignment, orient, font, height,
-                          overbar, visible, drafting, text
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::EvalText,
-                          layer, purpose, net, origin, alignment, orient, font, height,
-                          overbar, visible, drafting, evaluator
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::TermAttr,
-                          layer, purpose, net, origin, alignment, orient, font, height,
-                          overbar, visible, drafting, attr_type, format
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::Instance,
-                          lib_name, cell_name, view_name, xform, connections, params
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchPinObject,
-                          inst, attr
-)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::PinFigure,
-                          obj, sig_type
-)
 #endif //CBAG_DATABASE_FIGURES_H

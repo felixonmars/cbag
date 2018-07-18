@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include <cbag/spirit/ast_adapted.h>
+#include <cbag/spirit/ast.h>
 #include <cbag/database/datatypes.h>
 #include <cbag/database/figures.h>
 
@@ -32,10 +32,5 @@ namespace cbag {
         ParamMap app_defs;
     };
 }
-
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView,
-                          in_terms, out_terms, io_terms, shapes, instances, props, app_defs
-)
 
 #endif //CBAG_DATABASE_CELLVIEWS_H

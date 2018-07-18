@@ -1,8 +1,8 @@
 #include <fstream>
-#include <sstream>
 
-#include <boost/archive/xml_oarchive.hpp>
+#include <yaml-cpp/yaml.h>
 
+#include <cbag/database/cellviews.h>
 #include <cbagoa/database.h>
 
 
@@ -22,9 +22,11 @@ int read_oa() {
 
     std::ofstream outfile;
     outfile.open("inv_sch.xml", std::ios_base::out);
-    auto xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
-    (*xml_out) << boost::serialization::make_nvp("master", sch_master);
-    xml_out.reset();
+
+    YAML::Node node(sch_master);
+    YAML::Emitter emitter;
+    emitter << node;
+    outfile << emitter.c_str() << std::endl;
     outfile.close();
 
     /*
@@ -42,10 +44,10 @@ int read_oa() {
 
     sch_master = db.read_sch_cellview(lib_name, cell_name2, view_name);
 
-    outfile.open("inv_sch2.xml", std::ios_base::out);
-    xml_out = std::make_unique<boost::archive::xml_oarchive>(outfile);
-    (*xml_out) << boost::serialization::make_nvp("master", sch_master);
-    xml_out.reset();
+    YAML::Node node2(sch_master);
+    YAML::Emitter emitter2;
+    emitter2 << node2;
+    outfile << emitter2.c_str() << std::endl;
     outfile.close();
 
     return 0;

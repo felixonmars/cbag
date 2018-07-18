@@ -7,8 +7,6 @@
 
 #include <sstream>
 
-#include <boost/algorithm/string/join.hpp>
-
 #include <fmt/format.h>
 
 #include <cbagoa/name.h>
