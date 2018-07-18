@@ -28,10 +28,14 @@ message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 # Include fmt library
 add_subdirectory(fmt)
 
+# include yaml-cpp
+find_package(yaml-cpp)
+
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
         $ENV{OA_INCLUDE_DIR}
         ${Boost_INCLUDE_DIRS}
+        ${YAML_CPP_INCLUDE_DIR}
         )
 
 set(SRC_FILES_LIB_CBAG
@@ -39,7 +43,7 @@ set(SRC_FILES_LIB_CBAG
         src/cbag/spirit/range.cpp
         src/cbag/spirit/name_unit.cpp
         src/cbag/spirit/name.cpp
-        )
+        include/yaml_serialization.h)
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
@@ -47,6 +51,7 @@ target_link_libraries(cbag
         boost_system
         boost_serialization
         fmt-header-only
+        ${YAML_CPP_LIBRARIES}
         )
 
 # setup link library path.  Must call before defining target.
@@ -127,6 +132,23 @@ target_link_libraries(read_prop
         oaDesign
         ${CMAKE_DL_LIBS}
         )
+
+add_executable(test_yaml
+        test/test_yaml.cpp
+        )
+
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(test_yaml PROPERTIES
+        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+        )
+
+# shared library dependencies
+target_link_libraries(test_yaml
+        fmt-header-only
+        ${YAML_CPP_LIBRARIES}
+        )
+
 
 install(TARGETS test_oa test_spirit cbag cbagoa read_prop
         RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
