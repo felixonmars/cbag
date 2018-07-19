@@ -15,22 +15,10 @@
 
 #include <easylogging++.h>
 
-#include <cbag/spirit/ast.h>
-#include <cbag/spirit/name_unit.h>
-#include <cbag/spirit/parsers.h>
-
 #include <cbagoa/write_oa.h>
 
 
-namespace bsp = cbag::spirit;
-namespace bsa = cbag::spirit::ast;
-
 namespace cbagoa {
-
-    bsa::name_unit OAWriter::parse_name_unit(const std::string &source) {
-        return cbag::parse<bsa::name_unit,
-                           bsp::parser::name_unit_type>(source.c_str(), source.size(), bsp::name_unit());
-    }
 
     class make_pin_fig_visitor : public boost::static_visitor<> {
     public:
@@ -264,7 +252,7 @@ namespace cbagoa {
         oa::oaScalarName lib, cell, view, name;
         oa::oaName term_name, net_name;
         for (auto const &pair : cv.instances) {
-            bsa::name_unit nu = parse_name_unit(pair.first);
+            cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
             lib.init(ns, pair.second.lib_name.c_str());
             cell.init(ns, pair.second.cell_name.c_str());
             view.init(ns, pair.second.view_name.c_str());

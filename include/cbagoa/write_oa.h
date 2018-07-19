@@ -10,10 +10,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/spirit/parsers.h>
-#include <cbag/spirit/name_unit.h>
-#include <cbag/database/figures.h>
-#include <cbag/database/cellviews.h>
+#include <cbag/cbag.h>
 
 
 namespace bsa = cbag::spirit::ast;
@@ -24,10 +21,6 @@ namespace cbagoa {
     public:
 
         explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
-
-        // String parsing methods
-
-        bsa::name_unit parse_name_unit(const std::string &source);
 
         // Write method for schematic/symbol cell view
 

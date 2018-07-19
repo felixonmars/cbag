@@ -10,8 +10,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/database/figures.h>
-#include <cbag/database/cellviews.h>
+#include <cbag/cbag.h>
 
 
 namespace cbagoa {

@@ -81,7 +81,6 @@ target_link_libraries(cbag
         )
 
 set(SRC_FILES_LIB_CBAGOA
-        ${CMAKE_SOURCE_DIR}/src/cbagoa/name.cpp
         ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
         ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
         ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp

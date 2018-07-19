@@ -10,6 +10,8 @@
 #include <yaml-cpp/yaml.h>
 #include <easylogging++.h>
 
+#include <cbag/spirit/parsers.h>
+#include <cbag/spirit/name_unit.h>
 #include <cbag/database/yaml_cellviews.h>
 
 INITIALIZE_EASYLOGGINGPP // NOLINT
@@ -25,5 +27,10 @@ namespace cbag {
         emitter << node;
         outfile << emitter.c_str() << std::endl;
         outfile.close();
+    }
+
+    spirit::ast::name_unit parse_cdba_name_unit(const std::string &source) {
+        return parse<spirit::ast::name_unit,
+                spirit::parser::name_unit_type>(source.c_str(), source.size(), spirit::name_unit());
     }
 }
