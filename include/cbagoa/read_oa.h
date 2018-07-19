@@ -24,10 +24,6 @@ namespace cbagoa {
 
         explicit OAReader(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
 
-        // String parsing methinds
-
-        bsa::name parse_name(const oa::oaString &source);
-
         // Read method for properties
 
         std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p);

@@ -14,8 +14,6 @@
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
-
-#include <cbagoa/name.h>
 #include <cbagoa/read_oa.h>
 
 
@@ -23,13 +21,6 @@ namespace bsp = cbag::spirit;
 namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
-
-    // string parsing methinds
-
-    bsa::name OAReader::parse_name(const oa::oaString &source) {
-        return cbag::parse<bsa::name, bsp::parser::name_type>(source, source.getLength(),
-                                                              bsp::name());
-    }
 
     // Read method for properties
 
@@ -276,7 +267,7 @@ namespace cbagoa {
             iterm_ptr->getTermName(ns, term_name_oa);
             iterm_ptr->getNet()->getName(ns, net_name_oa);
             LOG(INFO) << "Terminal " << term_name_oa << " connected to net " << net_name_oa;
-            inst.connections.emplace(parse_name(term_name_oa), parse_name(net_name_oa));
+            inst.connections.emplace(std::string(term_name_oa), std::string(net_name_oa));
         }
 
         return inst;

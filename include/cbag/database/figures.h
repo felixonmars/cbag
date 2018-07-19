@@ -208,7 +208,7 @@ namespace cbag {
 
         std::string lib_name, cell_name, view_name;
         Transform xform;
-        std::map<bsa::name, bsa::name> connections;
+        std::map<std::string, std::string> connections;
         ParamMap params;
     };
 

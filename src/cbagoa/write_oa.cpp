@@ -20,7 +20,7 @@
 #include <cbag/spirit/parsers.h>
 
 #include <cbagoa/write_oa.h>
-#include <cbagoa/name.h>
+
 
 namespace bsp = cbag::spirit;
 namespace bsa = cbag::spirit::ast;
@@ -280,12 +280,10 @@ namespace cbagoa {
             oa::oaNetTermNameArray conn_data(
                     static_cast<oa::oaUInt4>(pair.second.connections.size()));
             for (auto const &term_net_pair : pair.second.connections) {
-                std::string term_str = to_string(term_net_pair.first);
-                std::string net_str = to_string(term_net_pair.second);
-                LOG(INFO) << "Connecting inst " << pair.first << " terminal " << term_str
-                          << " to " << net_str;
-                term_name.init(ns, term_str.c_str());
-                net_name.init(ns, net_str.c_str());
+                LOG(INFO) << "Connecting inst " << pair.first << " terminal " << term_net_pair.first
+                          << " to " << term_net_pair.second;
+                term_name.init(ns, term_net_pair.first.c_str());
+                net_name.init(ns, term_net_pair.second.c_str());
                 oa::oaNet *term_net = oa::oaNet::find(block, net_name);
                 if (term_net == nullptr || term_net->isImplicit()) {
                     term_net = oa::oaNet::create(block, net_name);
