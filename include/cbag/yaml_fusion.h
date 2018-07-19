@@ -47,9 +47,6 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <fmt/format.h>
-
-#include <iostream>
 
 namespace yaml {
     namespace serialization {
@@ -132,8 +129,7 @@ namespace yaml {
                 std::string field_name = element_at<Type, Index>::name();
 
                 // Get the field type
-                typedef BOOST_TYPEOF(boost
-                                     ::fusion::at_c<1>(zip)) FieldType;
+                typedef BOOST_TYPEOF(boost::fusion::at_c<1>(zip)) FieldType;
 
                 // Alias the member
                 FieldType const &member = boost::fusion::at_c<1>(zip);
@@ -168,8 +164,7 @@ namespace yaml {
                 std::string field_name = element_at<Type, Index>::name();
 
                 // Get the field native type
-                typedef BOOST_TYPEOF(boost
-                                     ::fusion::at_c<1>(zip)) FieldType;
+                typedef BOOST_TYPEOF(boost::fusion::at_c<1>(zip)) FieldType;
 
                 // Alias the member
                 // We need to const cast this because "boost::fusion::for_each"
@@ -194,10 +189,8 @@ namespace yaml {
                     // Catch any exceptions
                 catch (YAML::Exception const &e) {
                     std::string type_name = type<FieldType>::name();
-                    std::cout << fmt::format("Error loading item {} : {} {}", item, type_name, field_name) << std::endl;
-                    
-                    throw std::invalid_argument(fmt::format("Error loading item {} : {} {}",
-                                                            item, type_name, field_name));
+
+                    throw std::invalid_argument("Error loading item.");
                 }
             }
 
@@ -220,7 +213,7 @@ namespace yaml {
             YAML::Node n;
             try {
                 n = YAML::Load(yaml_string);
-            } catch(...) {
+            } catch (...) {
                 return false;
             }
             return YAML::convert<Base>::decode(n, obj);
@@ -258,7 +251,6 @@ namespace YAML {
         static bool decode(Node const &node, T &rhs,
                            typename boost::enable_if<typename boost::fusion::traits::is_sequence<
                                    T>::type>::type * = 0) {
-            std::cout << "In decode" << std::endl;
             // For each item in T
             // Call extractor recursively
             // Every sequence is made up of primitives at some level
@@ -279,11 +271,8 @@ namespace YAML {
             }
                 // Catch all exceptions and prevent them from propagating
             catch (...) {
-                std::cout << "Decode fail" << std::endl;
                 return false;
             }
-            std::cout << "Decode success" << std::endl;
-            
             // If we made it here, all fields were read correctly
             return true;
         }

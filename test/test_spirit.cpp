@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <yaml_serialization.h>
+#include <cbag/yaml_fusion.h>
 
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/parsers.h>

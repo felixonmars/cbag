@@ -12,13 +12,8 @@
 
 #include <easylogging++.h>
 
-#include <cbag/spirit/parsers.h>
-#include <cbag/spirit/name.h>
 #include <cbagoa/read_oa.h>
 
-
-namespace bsp = cbag::spirit;
-namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
 

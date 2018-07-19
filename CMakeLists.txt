@@ -4,7 +4,6 @@ project(cbag)
 
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
-# std::filesystem requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
@@ -32,7 +31,7 @@ message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # Include fmt library
-add_subdirectory(fmt)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # include yaml-cpp
 find_package(yaml-cpp)
@@ -57,22 +56,26 @@ set(SRC_FILES_LIB_CBAG
         ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_shapes.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
 target_link_libraries(cbag
-        fmt-header-only
-        # for Spirit X3 error code
-        boost_system
-        # for primitives YAML serialization
-        yaml-cpp
+        PUBLIC
         # for primitives YAML serialization
         oaBase
         oaCommon
         oaPlugIn
+        PRIVATE
+        # for primitives YAML serialization
+        yaml-cpp
+        fmt-header-only
+        # for Spirit X3 error code
+        boost_system
         m
         ${CMAKE_DL_LIBS}
         )
@@ -88,12 +91,18 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies
 target_link_libraries(cbagoa
+        PUBLIC
         cbag
+        PRIVATE
         oaDM
         oaDMFileSysBase
         oaTech
         oaDesign
         boost_filesystem
+        boost_system
+        fmt-header-only
+        m
+        ${CMAKE_DL_LIBS}
         )
 
 set(SRC_FILES_OA
@@ -124,6 +133,8 @@ set_target_properties(test_spirit PROPERTIES
 
 target_link_libraries(test_spirit
         cbag
+        yaml-cpp
+        boost_system
         )
 
 

@@ -3,7 +3,7 @@
 
 #include <boost/fusion/adapted.hpp>
 
-#include <yaml_serialization.h>
+#include <cbag/yaml_fusion.h>
 
 struct One {
     One() :

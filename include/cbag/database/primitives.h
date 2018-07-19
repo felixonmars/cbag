@@ -12,7 +12,6 @@
 #if __has_include(<oa/oaDesignDB.h>)
 // use OpenAccess primitive types
 # include <cbag/database/primitives_oa.h>
-
 #else
 // use custom primitive types
 # include <cbag/database/primitives_custom.h>

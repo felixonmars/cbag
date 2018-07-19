@@ -17,14 +17,7 @@ int read_oa() {
 
     cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
 
-    std::ofstream outfile;
-    outfile.open("inv_sch.xml", std::ios_base::out);
-
-    YAML::Node node(sch_master);
-    YAML::Emitter emitter;
-    emitter << node;
-    outfile << emitter.c_str() << std::endl;
-    outfile.close();
+    cbag::to_file(sch_master, "inv_sch.yaml");
 
     /*
     cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
@@ -41,11 +34,7 @@ int read_oa() {
 
     sch_master = db.read_sch_cellview(lib_name, cell_name2, view_name);
 
-    YAML::Node node2(sch_master);
-    YAML::Emitter emitter2;
-    emitter2 << node2;
-    outfile << emitter2.c_str() << std::endl;
-    outfile.close();
+    cbag::to_file(sch_master, "inv_sch2.yaml");
 
     return 0;
 }

@@ -10,6 +10,8 @@
 
 #include <oa/oaDesignDB.h>
 
+#include <cbag/spirit/parsers.h>
+#include <cbag/spirit/name_unit.h>
 #include <cbag/database/figures.h>
 #include <cbag/database/cellviews.h>
 

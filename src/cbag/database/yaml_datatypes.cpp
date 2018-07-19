@@ -5,6 +5,8 @@
  *  \date   2018/07/12
  */
 
+#include <easylogging++.h>
+
 #include <cbag/database/yaml_datatypes.h>
 
 
@@ -18,10 +20,13 @@ namespace YAML {
 
     bool convert<cbag::value_t>::decode(const Node &node, cbag::value_t &rhs) {
         if (!node.IsSequence() || node.size() != 2) {
+            LOG(WARNING) << "cbag::value_t YAML decode: not a sequence or size != 2.  Node:\n"
+                         << node;
             return false;
         }
         try {
-            switch (node[0].as<int>()) {
+            int value = node[0].as<int>();
+            switch (value) {
                 case 0:
                     rhs = node[1].as<int32_t>();
                     return true;
@@ -41,9 +46,12 @@ namespace YAML {
                     rhs = node[1].as<cbag::Binary>();
                     return true;
                 default:
+                    LOG(WARNING) << "cbag::value_t YAML decode: unexpected which value: "
+                                 << value << ".  Node:\n" << node;
                     return false;
             }
         } catch (...) {
+            LOG(WARNING) << "cbag::value_t YAML decode exception.  Node:\n" << node;
             return false;
         }
     }

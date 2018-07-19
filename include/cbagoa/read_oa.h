@@ -10,12 +10,9 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/spirit/ast.h>
 #include <cbag/database/figures.h>
 #include <cbag/database/cellviews.h>
 
-
-namespace bsa = cbag::spirit::ast;
 
 namespace cbagoa {
 

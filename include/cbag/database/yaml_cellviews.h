@@ -7,8 +7,9 @@
 #ifndef CBAG_DATABASE_YAML_CELLVIEWS_H
 #define CBAG_DATABASE_YAML_CELLVIEWS_H
 
-#include <yaml_serialization.h>
+#include <cbag/yaml_fusion.h>
 
+#include <cbag/database/yaml_datatypes.h>
 #include <cbag/database/yaml_figures.h>
 #include <cbag/database/cellviews_adapted.h>
 

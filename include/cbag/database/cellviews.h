@@ -10,14 +10,14 @@
 
 #include <map>
 
-#include <cbag/spirit/ast.h>
 #include <cbag/database/datatypes.h>
-#include <cbag/database/figures.h>
+#include <cbag/database/shapes.h>
 
-
-namespace bsa = cbag::spirit::ast;
 
 namespace cbag {
+
+    struct PinFigure;
+    struct Instance;
 
     /** A schematic or symbol cell view
      *

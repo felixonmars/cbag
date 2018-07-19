@@ -12,8 +12,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <yaml_serialization.h>
-
+#include <cbag/yaml_fusion.h>
 #include <cbag/database/datatypes_adapted.h>
 
 

@@ -15,7 +15,7 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/yaml_cellviews.h>
+#include <cbag/cbag.h>
 #include <cbagoa/read_oa.h>
 #include <cbagoa/write_oa.h>
 #include <cbagoa/database.h>
@@ -272,12 +272,7 @@ namespace cbagoa {
         exclude_cells.insert(std::move(key));
 
         // write to file
-        std::ofstream outfile(cur_path.c_str(), std::ios_base::out);
-        YAML::Node node(ans);
-        YAML::Emitter emitter;
-        emitter << node;
-        outfile << emitter.c_str() << std::endl;
-        outfile.close();
+        cbag::to_file(ans, cur_path.c_str());
 
         // recurse
         auto exc_lib_end = exclude_libs.end();

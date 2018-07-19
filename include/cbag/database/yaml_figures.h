@@ -8,20 +8,14 @@
 #ifndef CBAG_DATABASE_YAML_FIGURES_H
 #define CBAG_DATABASE_YAML_FIGURES_H
 
-#include <cbag/spirit/ast_adapted.h>
-#include <cbag/database/yaml_primitives.h>
-#include <cbag/database/yaml_datatypes.h>
+#include <yaml-cpp/yaml.h>
+
+#include <cbag/yaml_fusion.h>
+#include <cbag/database/yaml_shapes.h>
 #include <cbag/database/figures_adapted.h>
 
 
 namespace YAML {
-    template<>
-    struct convert<cbag::Shape> {
-        static Node encode(const cbag::Shape &rhs);
-
-        static bool decode(const Node &node, cbag::Shape &rhs);
-    };
-
     template<>
     struct convert<boost::variant<cbag::Rect, cbag::SchPinObject>> {
         static Node encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
