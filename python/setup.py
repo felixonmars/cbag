@@ -8,7 +8,7 @@ setup(
     ext_modules=cythonize(Extension('pybag',
                                     sources=[
                                         'src/pybag.pyx',
-                                        'src/pybagoa.pyx',
+                                        # 'src/pybagoa.pyx',
                                     ],
                                     language='c++',
                                     include_dirs=[
