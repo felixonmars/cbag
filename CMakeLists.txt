@@ -57,6 +57,7 @@ set(SRC_FILES_LIB_CBAG
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
         )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 

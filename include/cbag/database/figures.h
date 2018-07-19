@@ -237,6 +237,8 @@ namespace cbag {
 
     // figures
     struct PinFigure {
+        PinFigure() : sig_type(stSignal) {}
+
         PinFigure(Rect &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
 
         PinFigure(SchPinObject &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}

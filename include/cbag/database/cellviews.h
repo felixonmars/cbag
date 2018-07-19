@@ -25,6 +25,8 @@ namespace cbag {
     struct SchCellView {
         SchCellView() = default;
 
+        explicit SchCellView(const char *yaml_fname);
+
         std::map<bsa::name, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
         std::map<bsa::name_unit, Instance> instances;
