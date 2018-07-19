@@ -7,6 +7,7 @@
 
 #include <cbag/database/yaml_figures.h>
 
+#include <iostream>
 
 namespace YAML {
     Node convert<cbag::Shape>::encode(const cbag::Shape &rhs) {
@@ -26,6 +27,7 @@ namespace YAML {
                     rhs = node[1].as<cbag::Rect>();
                     return true;
                 case 1:
+                    std::cout << "decoding poly: " << node[1] << std::endl;                    
                     rhs = node[1].as<cbag::Poly>();
                     return true;
                 case 2:
@@ -38,6 +40,7 @@ namespace YAML {
                     rhs = node[1].as<cbag::Ellipse>();
                     return true;
                 case 5:
+                    std::cout << "decoding line: " << node[1] << std::endl;                    
                     rhs = node[1].as<cbag::Line>();
                     return true;
                 case 6:

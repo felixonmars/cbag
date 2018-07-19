@@ -1,6 +1,7 @@
 # distutils: language = c++
 
 from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as inc
 
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
@@ -13,7 +14,9 @@ from libcpp.unordered_set cimport unordered_set
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef cppclass Instance:
-        pass
+        string lib_name
+        string cell_name
+        string view_name
 
     cdef cppclass SchCellView:
         SchCellView(const char* yaml_fname) except +
@@ -39,12 +42,32 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                         const unordered_set[string]& exclude_libs) except +
 
 
+cdef class PyInstance:
+    cdef map[string, Instance].iterator ptr
+    cdef unicode encoding
+
+    def __init__(self, unicode encoding):
+        self.encoding = encoding
+
+    def change_lib(self, new_lib):
+        deref(self.ptr).second.lib_name = new_lib.encode(self.encoding)
+
+    def get_name(self):
+        return deref(self.ptr).first.decode(self.encoding)
+
+    def get_lib(self):
+        return deref(self.ptr).second.lib_name.decode(self.encoding)
+
+        
 cdef class PySchCellView:
     cdef unique_ptr[SchCellView] cv_ptr
     cdef unicode encoding
 
     def __cinit__(self, unicode yaml_fname, unicode encoding):
-        pyfname = yaml_fname.encode(encoding)
+        with open(yaml_fname, 'r') as f:
+            pyfname = f.read().encode(encoding)
+        print(pyfname)
+        
         cdef char* cfname = pyfname
         self.cv_ptr.reset(new SchCellView(cfname))
         self.encoding = encoding
@@ -55,12 +78,24 @@ cdef class PySchCellView:
     def close(self):
         self.cv_ptr.reset()
 
+    def get_instances(self):
+        ans = []
+        cdef map[string, Instance].iterator biter = deref(self.cv_ptr).instances.begin()
+        cdef map[string, Instance].iterator eiter = deref(self.cv_ptr).instances.end()
+        while biter != eiter:
+            inst = PyInstance(self.encoding)
+            inst.ptr = deref(self.cv_ptr).instances.find(deref(biter).first)
+            ans.append(inst)
+            inc(biter)
 
+        return ans
+
+    
 cdef class PyOADatabase:
     cdef unique_ptr[OADatabase] db_ptr
     cdef unicode encoding
 
-    def __cinit__(self, unicode lib_def_file, unicode encoding):
+    def __init__(self, unicode lib_def_file, unicode encoding):
         pylib_def_str = lib_def_file.encode(encoding)
         cdef char* clib_def_str = pylib_def_str
         self.db_ptr.reset(new OADatabase(clib_def_str))

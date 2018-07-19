@@ -7,6 +7,7 @@
 
 #include <cbag/database/yaml_primitives.h>
 
+#include <iostream>
 
 namespace YAML {
     Node convert<cbag::Point>::encode(const cbag::Point &rhs) {
@@ -18,11 +19,15 @@ namespace YAML {
 
     bool convert<cbag::Point>::decode(const Node &node, cbag::Point &rhs) {
         if (!node.IsSequence() || node.size() != 2) {
+            std::cout << "Point Error: node is not sequence or size != 2.  Node:" << std::endl;
+            std::cout << node << std::endl;
             return false;
         }
         try {
             rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>());
         } catch (...) {
+            std::cout << "Point Exception.  node:" << std::endl;
+            std::cout << node << std::endl;
             return false;
         }
         return true;
@@ -83,19 +88,27 @@ namespace YAML {
 
     bool convert<cbag::PointArray>::decode(const Node &node, cbag::PointArray &rhs) {
         if (!node.IsMap()) {
+            std::cout << "PointArray Error: node is not map.  Node:" << std::endl;
+            std::cout << node << std::endl;
             return false;
         }
         try {
-            auto size = node["size'"].as<uint32_t>();
+            auto size = node["size"].as<uint32_t>();
             Node pnode = node["points"];
             if (!pnode.IsSequence() || pnode.size() != size) {
+                std::cout << "PointArray Error: points is not sequence, or size != " << size << ", node:" << std::endl;
+                std::cout << node << std::endl;
                 return false;
             }
             rhs.setSize(size);
             for (uint32_t i = 0; i < size; i++) {
+                
                 rhs[i] = pnode[i].as<cbag::Point>();
             }
         } catch (...) {
+            std::cout << "PointArray Exception.  node:" << std::endl;
+            std::cout << node << std::endl;
+                
             return false;
         }
         return true;

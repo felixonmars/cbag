@@ -50,6 +50,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAG
+        ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
         ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp

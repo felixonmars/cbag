@@ -20,8 +20,6 @@
 #include <cbagoa/write_oa.h>
 #include <cbagoa/database.h>
 
-INITIALIZE_EASYLOGGINGPP // NOLINT
-
 
 namespace fs = boost::filesystem;
 
