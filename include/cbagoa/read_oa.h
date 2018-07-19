@@ -28,8 +28,6 @@ namespace cbagoa {
 
         bsa::name parse_name(const oa::oaString &source);
 
-        bsa::name_unit parse_name_unit(const oa::oaString &source);
-
         // Read method for properties
 
         std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p);
@@ -62,7 +60,7 @@ namespace cbagoa {
 
         cbag::Instance read_instance(oa::oaInst *p);
 
-        std::pair<bsa::name_unit, cbag::Instance> read_instance_pair(oa::oaInst *p);
+        std::pair<std::string, cbag::Instance> read_instance_pair(oa::oaInst *p);
 
         // Read method for pin figures
 
@@ -70,7 +68,7 @@ namespace cbagoa {
 
         // Read method for terminals
 
-        std::pair<bsa::name, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
+        std::pair<std::string, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
 
         // Read method for schematic/symbol cell view
 

@@ -27,9 +27,9 @@ namespace cbag {
 
         explicit SchCellView(const char *yaml_fname);
 
-        std::map<bsa::name, PinFigure> in_terms, out_terms, io_terms;
+        std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
-        std::map<bsa::name_unit, Instance> instances;
+        std::map<std::string, Instance> instances;
         ParamMap props;
         ParamMap app_defs;
     };

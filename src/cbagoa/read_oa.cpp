@@ -14,7 +14,6 @@
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/name_unit.h>
 
 #include <cbagoa/name.h>
 #include <cbagoa/read_oa.h>
@@ -30,11 +29,6 @@ namespace cbagoa {
     bsa::name OAReader::parse_name(const oa::oaString &source) {
         return cbag::parse<bsa::name, bsp::parser::name_type>(source, source.getLength(),
                                                               bsp::name());
-    }
-
-    bsa::name_unit OAReader::parse_name_unit(const oa::oaString &source) {
-        return cbag::parse<bsa::name_unit,
-                bsp::parser::name_unit_type>(source, source.getLength(), bsp::name_unit());
     }
 
     // Read method for properties
@@ -288,11 +282,11 @@ namespace cbagoa {
         return inst;
     }
 
-    std::pair<bsa::name_unit, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
+    std::pair<std::string, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
         oa::oaString inst_name_oa;
         p->getName(ns, inst_name_oa);
         LOG(INFO) << "Reading instance " << inst_name_oa;
-        return {parse_name_unit(inst_name_oa), read_instance(p)};
+        return {std::string(inst_name_oa), read_instance(p)};
     }
 
     // Read method for pin figures
@@ -348,7 +342,7 @@ namespace cbagoa {
 
     // Read method for terminals
 
-    std::pair<bsa::name, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTerm *term) {
+    std::pair<std::string, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTerm *term) {
         // parse terminal name
         oa::oaString term_name_oa;
         term->getName(ns, term_name_oa);
@@ -375,10 +369,7 @@ namespace cbagoa {
                                                     term_name_oa));
         }
 
-        std::pair<bsa::name, cbag::PinFigure> ans(parse_name(term_name_oa),
-                                                  read_pin_figure(term, fig_ptr));
-
-        return ans;
+        return {std::string(term_name_oa), read_pin_figure(term, fig_ptr)};
     };
 
     // Read method for schematic/symbol cell view
