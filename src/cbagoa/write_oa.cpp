@@ -150,6 +150,10 @@ namespace cbagoa {
             oa::oaDoubleProp::create(obj, name, v);
         }
 
+        void operator()(const bool &v) const {
+            oa::oaBooleanProp::create(obj, name, static_cast<oa::oaBoolean>(v));
+        }
+
         void operator()(const std::string &v) const {
             oa::oaStringProp::create(obj, name, v.c_str());
         }

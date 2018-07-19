@@ -71,6 +71,9 @@ namespace cbagoa {
                 return {std::move(key),
                         cbag::Binary(app_str, data.getElements(), data.getNumElements())};
             }
+            case oa::oacBooleanPropType : {
+                return {std::move(key), static_cast<bool>(static_cast<oa::oaBooleanProp *>(p)->getValue())};
+            }
             default : {
                 throw std::invalid_argument(
                         fmt::format("Unsupported OA property {} with type: {}, see developer.",
@@ -276,7 +279,7 @@ namespace cbagoa {
         oa::oaString term_name_oa, net_name_oa;
         while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
             // get terminal and net names
-            iterm_ptr->getTerm()->getName(ns, term_name_oa);
+            iterm_ptr->getTermName(ns, term_name_oa);
             iterm_ptr->getNet()->getName(ns, net_name_oa);
             LOG(INFO) << "Terminal " << term_name_oa << " connected to net " << net_name_oa;
             inst.connections.emplace(parse_name(term_name_oa), parse_name(net_name_oa));

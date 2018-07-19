@@ -29,12 +29,15 @@ namespace YAML {
                     rhs = node[1].as<double>();
                     return true;
                 case 2:
-                    rhs = node[1].as<std::string>();
+                    rhs = node[1].as<bool>();
                     return true;
                 case 3:
-                    rhs = node[1].as<cbag::Time>();
+                    rhs = node[1].as<std::string>();
                     return true;
                 case 4:
+                    rhs = node[1].as<cbag::Time>();
+                    return true;
+                case 5:
                     rhs = node[1].as<cbag::Binary>();
                     return true;
                 default:
