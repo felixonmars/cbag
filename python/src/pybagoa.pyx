@@ -11,9 +11,6 @@ from libcpp.unordered_set cimport unordered_set
 
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
-    cdef cppclass LibDefObserver:
-        pass
-
     cdef cppclass OADatabase:
         OADatabase(const char* lib_def_file) except +
 

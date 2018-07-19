@@ -1,6 +1,5 @@
 build
-libcbag.so
-libcbagoa.so
+lib
 
 src/*.cpp
 src/*.html

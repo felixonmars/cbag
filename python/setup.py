@@ -5,8 +5,9 @@ from distutils.core import setup, Extension
 from Cython.Build import cythonize
 
 setup(
-    ext_modules=cythonize(Extension('pybagoa',
+    ext_modules=cythonize(Extension('pybag',
                                     sources=[
+                                        'src/pybag.pyx',
                                         'src/pybagoa.pyx',
                                     ],
                                     language='c++',
@@ -16,6 +17,7 @@ setup(
                                         '../fmt/include',
                                     ],
                                     libraries=[
+                                        'cbag',
                                         'cbagoa',
                                         'oaCommon',
                                         'oaBase',
@@ -27,7 +29,7 @@ setup(
                                         'dl',
                                     ],
                                     library_dirs=[
-                                        '.',
+                                        './lib',
                                         os.environ['OA_LINK_DIR'],
                                     ],
                                     extra_compile_args=[
@@ -39,6 +41,6 @@ setup(
                                         "-std=c++17",
                                         "-Wl,--no-undefined",
                                     ],
-                                    )
-                          ),
+    )
+    ),
 )
