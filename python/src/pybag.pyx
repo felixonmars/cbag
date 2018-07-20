@@ -93,31 +93,81 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
 init_logging()
 
 
-cdef class PySchInstance:
+cdef class DesignInstance:
+    cdef _master
+    cdef _db
+    cdef _lib_name
+    cdef _cell_name
+    def __init__(self, db, lib_name, cell_name):
+        self._db = db
+        self._master = None
+        self._lib_name = lib_name
+        self._cell_name = cell_name
+
+    @property
+    def master(self):
+        return self._master
+
+    @property
+    def gen_lib_name(self):
+        return self._lib_name
+
+    @property
+    def gen_cell_name(self):
+        return self._cell_name
+
+    def set_param(self, key, val):
+        raise Exception('Cannot set parameters on a DesignInstance; '
+                        'instance of primitive maters are not allowed.')
+    
+    def design_specs(self, *args, **kwargs):
+        self._update_master('design_specs', args, kwargs)
+
+    def design(self, *args, **kwargs):
+        self._update_master('design', args, kwargs)
+
+    def _update_master(self, design_fun, args, kwargs):
+        if args:
+            key = 'args'
+            idx = 1
+            while key in kwargs:
+                key = 'args_{:d}'.format(idx)
+                idx += 1
+            kwargs[key] = args
+        else:
+            key = None
+        self._master = self._db.new_master(self.gen_lib_name, self.gen_cell_name,
+                                           params=kwargs, design_args=key,
+                                           design_fun=design_fun)
+
+        if self._master.is_primitive():
+            for key, val in self._master.get_schematic_parameters().items():
+                self.set_param(key, val)
+
+    def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='', **kwargs):
+        debug = kwargs.get('debug', False)
+        rename_dict = kwargs.get('rename_dict', None)
+
+        if not top_cell_name:
+            top_cell_name = None
+
+        if 'lib_path' in kwargs:
+            self._db.lib_path = kwargs['lib_path']
+        self._db.cell_prefix = prefix
+        self._db.cell_suffix = suffix
+        self._db.instantiate_masters([self._master], [top_cell_name], lib_name=lib_name,
+                                     debug=debug, rename_dict=rename_dict)
+
+
+cdef class PySchInstance(DesignInstance):
     cdef map[string, Instance].iterator ptr
     cdef cbool _static
     cdef encoding
-    cdef _master
-    cdef _db
 
     def __init__(self, db, encoding, is_static):
+        DesignInstance.__init__(self, db, '', '')
         self._static = is_static
         self.encoding = encoding
-        self._master = None
-        self._db = db
-
-    def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
-        self._master = None
-        deref(self.ptr).second.lib_name = gen_lib_name.encode(self.encoding)
-        deref(self.ptr).second.cell_name = gen_cell_name.encode(self.encoding)
-        self._static = static
-        deref(self.ptr).second.clear_params()
-        deref(self.ptr).second.connections.clear()
-
-    def update_connection(self, term_name, net_name):
-        n_term = term_name.encode(self.encoding)
-        n_net = net_name.encode(self.encoding)
-        deref(self.ptr).second.update_connection(deref(self.ptr).first, n_term, n_net)
 
     def set_param(self, key, val):
         if isinstance(val, str):
@@ -131,6 +181,27 @@ cdef class PySchInstance:
         else:
             raise ValueError('Unsupported value for key {}: {}'.format(key, val))
 
+    @property
+    def gen_lib_name(self):
+        return deref(self.ptr).second.lib_name.decode(self.encoding)
+
+    @property
+    def gen_cell_name(self):
+        return deref(self.ptr).second.cell_name.decode(self.encoding)
+
+    def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
+        self._master = None
+        deref(self.ptr).second.lib_name = gen_lib_name.encode(self.encoding)
+        deref(self.ptr).second.cell_name = gen_cell_name.encode(self.encoding)
+        self._static = static
+        deref(self.ptr).second.clear_params()
+        deref(self.ptr).second.connections.clear()
+
+    def update_connection(self, term_name, net_name):
+        n_term = term_name.encode(self.encoding)
+        n_net = net_name.encode(self.encoding)
+        deref(self.ptr).second.update_connection(deref(self.ptr).first, n_term, n_net)
+        
     @property
     def name(self):
         return deref(self.ptr).first.decode(self.encoding)
@@ -146,18 +217,6 @@ cdef class PySchInstance:
     @property
     def should_delete(self):
         return self._master is not None and self._master.should_delete_instance()
-
-    @property
-    def master(self):
-        return self._master
-
-    @property
-    def gen_lib_name(self):
-        return deref(self.ptr).second.lib_name.decode(self.encoding)
-
-    @property
-    def gen_cell_name(self):
-        return deref(self.ptr).second.cell_name.decode(self.encoding)
     
     @property
     def master_cell_name(self):
@@ -169,54 +228,6 @@ cdef class PySchInstance:
 
     def get_master_lib_name(self, impl_lib):
         return self.gen_lib_name if self.is_primitive else impl_lib
-
-    def design_specs(self, *args, **kwargs):
-        self._update_master('design_specs', args, kwargs)
-
-    def design(self, *args, **kwargs):
-        self._update_master('design', args, kwargs)
-
-    def _update_master(self, design_fun, args, kwargs):
-        if args:
-            key = 'args'
-            idx = 1
-            while key in kwargs:
-                key = 'args_%d' % idx
-                idx += 1
-            kwargs[key] = args
-        else:
-            key = None
-        self._master = self._db.new_master(self.gen_lib_name, self.gen_cell_name,
-                                           params=kwargs, design_args=key,
-                                           design_fun=design_fun)
-
-        if self._master.is_primitive():
-            for key, val in self._master.get_schematic_parameters().items():
-                if isinstance(val, str):
-                    deref(self.ptr).second.set_string_param(key.encode(self.encoding),
-                                                            val.encode(self.encoding))
-                elif isinstance(val, numbers.Integral):
-                    deref(self.ptr).second.set_int_param(key.encode(self.encoding), val)
-                elif isinstance(val, numbers.Real):
-                    deref(self.ptr).second.set_double_param(key.encode(self.encoding), val)
-                elif isinstance(val, bool):
-                    deref(self.ptr).second.set_bool_param(key.encode(self.encoding), val)
-                else:
-                    raise ValueError('Unsupported value type: {}'.format(val))
-
-    def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='', **kwargs):
-        debug = kwargs.get('debug', False)
-        rename_dict = kwargs.get('rename_dict', None)
-
-        if not top_cell_name:
-            top_cell_name = None
-
-        if 'lib_path' in kwargs:
-            self._db.lib_path = kwargs['lib_path']
-        self._db.cell_prefix = prefix
-        self._db.cell_suffix = suffix
-        self._db.instantiate_masters([self._master], [top_cell_name], lib_name=lib_name,
-                                     debug=debug, rename_dict=rename_dict)
     
     
 cdef class PySchCellView:
