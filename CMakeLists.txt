@@ -4,6 +4,7 @@ project(cbag)
 
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
+# map.insert_or_assign requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
@@ -58,6 +59,7 @@ set(SRC_FILES_LIB_CBAG
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_shapes.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
+        ${CMAKE_SOURCE_DIR}/src/cbag/database/figures.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
         ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
         )

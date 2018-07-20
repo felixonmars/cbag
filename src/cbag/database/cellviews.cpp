@@ -9,8 +9,8 @@
 
 
 namespace cbag {
-    SchCellView::SchCellView(const char *yaml_fname) {
-        YAML::Node n = YAML::Load(yaml_fname);
+    SchCellView::SchCellView(const std::string &yaml_fname) {
+        YAML::Node n = YAML::LoadFile(yaml_fname);
         (*this) = n.as<SchCellView>();
     }
 }

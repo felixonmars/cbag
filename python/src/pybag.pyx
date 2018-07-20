@@ -11,15 +11,30 @@ from libcpp.vector cimport vector
 from libcpp.unordered_map cimport unordered_map
 from libcpp.unordered_set cimport unordered_set
 
+import numbers
+
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
+    cdef void init_logging()
+
     cdef cppclass Instance:
         string lib_name
         string cell_name
         string view_name
+        map[string, string] connections
 
+        void clear_params() except +
+
+        void set_int_param(const char* name, int value) except +
+
+        void set_double_param(const char* name, double value) except +
+
+        void set_bool_param(const char* name, bool value) except +
+
+        void set_string_param(const char* name, const char* value) except +
+        
     cdef cppclass SchCellView:
-        SchCellView(const char* yaml_fname) except +
+        SchCellView(const string& yaml_fname) except +
 
         map[string, Instance] instances
 
@@ -41,35 +56,127 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                         const unordered_map[string, string]& lib_map,
                                                         const unordered_set[string]& exclude_libs) except +
 
+# initialize logging
+init_logging()
 
-cdef class PyInstance:
+
+cdef class PySchInstance:
     cdef map[string, Instance].iterator ptr
-    cdef unicode encoding
+    cdef bool _static
+    cdef encoding
+    cdef _master
+    cdef _db
 
-    def __init__(self, unicode encoding):
+    def __init__(self, db, encoding):
+        self._static = False
         self.encoding = encoding
+        self._master = None
+        self._db = db
+        
 
-    def change_lib(self, new_lib):
-        deref(self.ptr).second.lib_name = new_lib.encode(self.encoding)
+    def change_generator(self, gen_lib_name, gen_cell_name, bool static=False):
+        self._master = None
+        deref(self.ptr).second.lib_name = gen_lib_name
+        deref(self.ptr).second.cell_name = gen_cell_name
+        self._static = static
+        deref(self.ptr).second.clear_params()
+        deref(self.ptr).second.connections.clear()
 
-    def get_name(self):
+    @property
+    def name(self):
         return deref(self.ptr).first.decode(self.encoding)
+    
+    @property
+    def is_primitive(self):
+        if self._static:
+            return True
+        if self._master is None:
+            raise ValueError('Instance {} has no master.  Did you forget to call design()?'.format(self.name))
+        return self._master.is_primitive()
+        
+    @property
+    def should_delete(self):
+        return self._master is not None and self._master.should_delete_instance()
 
-    def get_lib(self):
+    @property
+    def master(self):
+        return self._master
+
+    @property
+    def gen_lib_name(self):
         return deref(self.ptr).second.lib_name.decode(self.encoding)
 
-        
+    @property
+    def gen_cell_name(self):
+        return deref(self.ptr).second.cell_name.decode(self.encoding)
+    
+    @property
+    def master_cell_name(self):
+        return self.gen_cell_name if self._master is None else self._master.cell_name
+
+    @property
+    def master_key(self):
+        return self._master.key
+
+    def get_master_lib_name(self, impl_lib):
+        return self.gen_lib_name if self.is_primitive else impl_lib
+
+    def design_specs(self, *args, **kwargs):
+        self._update_master('design_specs', args, kwargs)
+
+    def design(self, *args, **kwargs):
+        self._update_master('design', args, kwargs)
+
+    def _update_master(self, design_fun, args, kwargs):
+        if args:
+            key = 'args'
+            idx = 1
+            while key in kwargs:
+                key = 'args_%d' % idx
+                idx += 1
+            kwargs[key] = args
+        else:
+            key = None
+        self._master = self._db.new_master(self.gen_lib_name, self.gen_cell_name,
+                                           params=kwargs, design_args=key,
+                                           design_fun=design_fun)
+
+        cdef char* ckey;
+        if self._master.is_primitive():
+            for key, val in self._master.get_schematic_parameters().items():
+                ckey = key.encode(self.encoding)
+                if isinstance(val, str):
+                    deref(self.ptr).second.set_string_param(ckey, val.encode(self.encoding))
+                elif isinstance(val, numbers.Integral):
+                    deref(self.ptr).second.set_int_param(ckey, val)
+                elif isinstance(val, numbers.Real):
+                    deref(self.ptr).second.set_double_param(ckey, val)
+                elif isinstance(val, bool):
+                    deref(self.ptr).second.set_bool_param(ckey, val)
+                else:
+                    raise ValueError('Unsupported value type: {}'.format(val))
+
+    def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='', **kwargs):
+        debug = kwargs.get('debug', False)
+        rename_dict = kwargs.get('rename_dict', None)
+
+        if not top_cell_name:
+            top_cell_name = None
+
+        if 'lib_path' in kwargs:
+            self._db.lib_path = kwargs['lib_path']
+        self._db.cell_prefix = prefix
+        self._db.cell_suffix = suffix
+        self._db.instantiate_masters([self._master], [top_cell_name], lib_name=lib_name,
+                                     debug=debug, rename_dict=rename_dict)
+    
+    
 cdef class PySchCellView:
     cdef unique_ptr[SchCellView] cv_ptr
     cdef unicode encoding
 
-    def __cinit__(self, unicode yaml_fname, unicode encoding):
-        with open(yaml_fname, 'r') as f:
-            pyfname = f.read().encode(encoding)
-        print(pyfname)
-        
-        cdef char* cfname = pyfname
-        self.cv_ptr.reset(new SchCellView(cfname))
+    def __init__(self, unicode yaml_fname, unicode encoding):
+        self.cv_ptr.reset(new SchCellView(yaml_fname.encode(encoding)))
         self.encoding = encoding
 
     def __dealloc__(self):
@@ -77,18 +184,6 @@ cdef class PySchCellView:
 
     def close(self):
         self.cv_ptr.reset()
-
-    def get_instances(self):
-        ans = []
-        cdef map[string, Instance].iterator biter = deref(self.cv_ptr).instances.begin()
-        cdef map[string, Instance].iterator eiter = deref(self.cv_ptr).instances.end()
-        while biter != eiter:
-            inst = PyInstance(self.encoding)
-            inst.ptr = deref(self.cv_ptr).instances.find(deref(biter).first)
-            ans.append(inst)
-            inc(biter)
-
-        return ans
 
     
 cdef class PyOADatabase:

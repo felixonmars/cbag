@@ -1,5 +1,5 @@
 /** \file figures.h
- *  \brief This file defines various figures (shapes or references) used by the database.
+ *  \brief This file defines various figures used by the database.
  *
  *  \author Eric Chang
  *  \date   2018/07/10
@@ -35,6 +35,18 @@ namespace cbag {
         Instance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
                 : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections(),
                   params() {}
+
+        // methods to manipulate parameters, so Cython doesn't have to worry about variants
+
+        void clear_params();
+
+        void set_int_param(const char *name, int value);
+
+        void set_double_param(const char *name, double value);
+
+        void set_bool_param(const char *name, bool value);
+
+        void set_string_param(const char *name, const char *value);
 
         std::string lib_name, cell_name, view_name;
         Transform xform;
