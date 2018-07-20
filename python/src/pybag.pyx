@@ -17,7 +17,7 @@ import numbers
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
-
+    
     cdef cppclass PinFigure:
         pass
     
@@ -60,7 +60,13 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
         void rename_pin(const char* old_name, const char* new_name) except +
 
+        void add_pin(const char* new_name, unsigned int term_type) except +
+
+        cbool remove_pin(const char* name);
+
         void rename_instance(const char* old_name, const char* new_name) except +
+
+        cbool remove_instance(const char* name) except +
         
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":

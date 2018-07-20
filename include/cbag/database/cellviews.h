@@ -42,7 +42,7 @@ namespace cbag {
 
         void rename_pin(const char *old_name, const char *new_name);
 
-        void add_pin(const char *new_name, TermType term_type);
+        void add_pin(const char *new_name, uint32_t term_type);
 
         bool remove_pin(const char *name);
 

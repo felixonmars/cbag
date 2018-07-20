@@ -9,6 +9,7 @@
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
+#include <cbag/spirit/name_unit.h>
 #include <cbag/database/yaml_cellviews.h>
 
 
@@ -46,6 +47,10 @@ namespace cbag {
             || io_terms.find(nkey) != io_terms.end()) {
             throw std::invalid_argument(fmt::format("Terminal {} already exists.", nkey));
         }
+        // check the new name is legal.  Parse will throw exception if not passed
+        spirit::ast::name ast;
+        parse(new_name, nkey.size(), spirit::name(), ast);
+
 
         std::string key(old_name);
         auto nh = in_terms.extract(key);
@@ -68,7 +73,7 @@ namespace cbag {
         }
     }
 
-    void SchCellView::add_pin(const char *new_name, TermType term_type) {
+    void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
         std::string key(new_name);
         // check the pin name is legal.  Parse will throw exception if not passed
         spirit::ast::name ast;
@@ -107,6 +112,16 @@ namespace cbag {
     }
 
     void SchCellView::rename_instance(const char *old_name, const char *new_name) {
+        // check the old name does not exist
+        std::string nkey(new_name);
+        if (instances.find(nkey) != instances.end()) {
+            throw std::invalid_argument(fmt::format("Instance {} already exists.", nkey));
+        }
+        // check the new name is legal.  Parse will throw exception if not passed
+        spirit::ast::name_unit ast;
+        parse(new_name, nkey.size(), spirit::name_unit(), ast);
+
+        // do the swap
         std::string key(old_name);
         auto nh = instances.extract(key);
         if (nh.empty()) {
