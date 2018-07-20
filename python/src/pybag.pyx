@@ -270,10 +270,31 @@ cdef class PySchCellView:
         newn = new_name.encode(self.encoding)
         deref(self.cv_ptr).rename_pin(oldn, newn)
 
+    def add_pin(self, new_name, pin_type):
+        if pin_type == 'input':
+            term_type = 0
+        elif pin_type == 'output':
+            term_type = 1
+        elif pin_type == 'inputOutput':
+            term_type = 2
+        else:
+            raise ValueError('Unknown pin type: {}'.format(pin_type))
+
+        newn = new_name.encode(self.encoding)
+        deref(self.cv_ptr).add_pin(newn, term_type)
+
+    def remove_pin(self, name):
+        n = name.encode(self.encoding)
+        return deref(self.cv_ptr).remove_pin(n)
+        
     def rename_instance(self, old_name, new_name):
         oldn = old_name.encode(self.encoding)
         newn = new_name.encode(self.encoding)
         deref(self.cv_ptr).rename_instance(oldn, newn)
+
+    def remove_instance(self, name):
+        n = name.encode(self.encoding)
+        return deref(self.cv_ptr).remove_instance(n)
 
     
 cdef class PyOADatabase:
