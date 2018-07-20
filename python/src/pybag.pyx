@@ -73,12 +73,11 @@ cdef class PySchInstance:
         self.encoding = encoding
         self._master = None
         self._db = db
-        
 
     def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
         self._master = None
-        deref(self.ptr).second.lib_name = gen_lib_name
-        deref(self.ptr).second.cell_name = gen_cell_name
+        deref(self.ptr).second.lib_name = gen_lib_name.encode(self.encoding)
+        deref(self.ptr).second.cell_name = gen_cell_name.encode(self.encoding)
         self._static = static
         deref(self.ptr).second.clear_params()
         deref(self.ptr).second.connections.clear()
@@ -185,6 +184,18 @@ cdef class PySchCellView:
     def close(self):
         self.cv_ptr.reset()
 
+    def get_instances(self, db):
+        result = {}
+        cdef map[string, Instance].iterator biter = deref(self.cv_ptr).instances.begin()
+        cdef map[string, Instance].iterator eiter = deref(self.cv_ptr).instances.end()
+        while biter != eiter:
+            key = deref(biter).first.decode(self.encoding)
+            inst = PySchInstance(db, self.encoding)
+            inst.ptr = biter
+            inc(biter)
+            result[key] = inst
+
+        return result
     
 cdef class PyOADatabase:
     cdef unique_ptr[OADatabase] db_ptr
