@@ -112,7 +112,7 @@ namespace cbag {
     }
 
     void SchCellView::rename_instance(const char *old_name, const char *new_name) {
-        // check the old name does not exist
+        // check the new name does not exist
         std::string nkey(new_name);
         if (instances.find(nkey) != instances.end()) {
             throw std::invalid_argument(fmt::format("Instance {} already exists.", nkey));
@@ -135,5 +135,47 @@ namespace cbag {
     bool SchCellView::remove_instance(const char *name) {
         std::string key(name);
         return instances.erase(key) > 0;
+    }
+
+    inst_iter_t
+    SchCellView::copy_instance(const char *old_name, const std::string &new_name, coord_t dx,
+                               coord_t dy, const conn_list_t &conns) {
+        // find the instance to copy
+        std::string key(old_name);
+        std::map<std::string, Instance>::const_iterator iter = instances.find(key); // NOLINT
+        if (iter == instances.end()) {
+            throw std::invalid_argument("Cannot find instance: " + key);
+        }
+
+        // check the new name is legal.  Parse will throw exception if not passed
+        spirit::ast::name_unit new_nu;
+        parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_nu);
+
+        // create new copy
+        auto emp_iter = instances.emplace(new_name, iter->second);
+        if (!emp_iter.second) {
+            throw std::invalid_argument(fmt::format("Instance {} already exists.",
+                                                    emp_iter.first->first));
+        }
+
+        // shift and update connections
+        emp_iter.first->second.xform.xOffset() += dx;
+        emp_iter.first->second.xform.xOffset() += dy;
+        for (auto const &p : conns) {
+            emp_iter.first->second.connections.insert_or_assign(p.first, p.second);
+        }
+        return emp_iter.first;
+    }
+
+    std::vector<inst_iter_t>
+    SchCellView::array_instance(const char *old_name, const std::vector<std::string> &name_list,
+                                coord_t dx, coord_t dy,
+                                const std::vector<conn_list_t> &conns_list) {
+        coord_t num_inst = static_cast<coord_t>(name_list.size());
+        std::vector<inst_iter_t> ans(num_inst);
+        for (coord_t idx = 0; idx < num_inst; ++idx) {
+            ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx, conns_list[idx]);
+        }
+        return ans;
     }
 }

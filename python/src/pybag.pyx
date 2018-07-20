@@ -15,6 +15,8 @@ from libcpp.unordered_set cimport unordered_set
 import numbers
 
 
+ctypedef map[string, Instance].iterator inst_iter_t
+
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
     
@@ -70,7 +72,14 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         void rename_instance(const char* old_name, const char* new_name) except +
 
         cbool remove_instance(const char* name) except +
-        
+
+        inst_iter_t copy_instance(const char* old_name, const string& new_name,
+                                  int dx, int dy, vector[pair[string, string]] conns) except +
+
+        vector[inst_iter_t] array_instance(const char* old_name, const vector[string]& name_list,
+                                           int dx, int dy,
+                                           const vector[vector[pair[string, string]]]& conn_list) except +
+
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass OADatabase:
@@ -326,6 +335,37 @@ cdef class PySchCellView:
     def remove_instance(self, name):
         n = name.encode(self.encoding)
         return deref(self.cv_ptr).remove_instance(n)
+
+    def array_instance(self, inst_dict, name, name_list, term_list, int dx=0, int dy=0):
+        cdef num_inst = len(name_list)
+        if num_inst != len(term_list):
+            raise ValueError('name_list and term_list length mismatch.')
+        
+        # convert python data structures to C++ data structures
+        pyname = name.encode(self.encoding)
+        cdef vector[string] cname_list
+        cdef vector[vector[pair[string, string]]] conns_list
+        cdef char* cname = pyname
+        cname_list.resize(num_inst)
+        conns_list.resize(num_inst)
+        for idx, (nn, term) in enumerate(zip(name_list, term_list)):
+            cname_list[idx] = nn.encode(self.encoding)
+            conns_list[idx].resize(len(term))
+            for idx2, (key, val) in enumerate(term.items()):
+                conns_list[idx][idx2].first = key.encode(self.encoding)
+                conns_list[idx][idx2].second = key.encode(self.encoding)
+
+        # array instance
+        cdef vector[inst_iter_t] results
+        results = deref(self.cv_ptr).array_instance(cname, cname_list, dx, dy, conns_list)
+        
+        # populate instance dictionary
+        orig_inst = inst_dict[name]
+        db = orig_inst._db
+        is_static = orig_inst._static
+        for idx, nn in enumerate(name_list):
+            inst = inst_dict[nn] = PySchInstance(db, self.encoding, is_static)
+            inst.ptr = results[idx]
 
     
 cdef class PyOADatabase:

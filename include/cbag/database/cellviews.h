@@ -20,6 +20,9 @@ namespace cbag {
     struct PinFigure;
     struct Instance;
 
+    using conn_list_t = std::vector<std::pair<std::string, std::string>>;
+    using inst_iter_t = std::map<std::string, Instance>::iterator;
+
     /** A schematic or symbol cell view
      *
      */
@@ -49,6 +52,14 @@ namespace cbag {
         void rename_instance(const char *old_name, const char *new_name);
 
         bool remove_instance(const char *name);
+
+        inst_iter_t
+        copy_instance(const char *old_name, const std::string &new_name, coord_t dx, coord_t dy,
+                      const conn_list_t &conns);
+
+        std::vector<inst_iter_t>
+        array_instance(const char *old_name, const std::vector<std::string> &name_list,
+                       coord_t dx, coord_t dy, const std::vector<conn_list_t> &conns_list);
 
         std::string lib_name, cell_name, view_name;
         std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
