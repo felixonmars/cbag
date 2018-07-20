@@ -171,8 +171,9 @@ namespace cbag {
     SchCellView::array_instance(const char *old_name, const std::vector<std::string> &name_list,
                                 coord_t dx, coord_t dy,
                                 const std::vector<conn_list_t> &conns_list) {
-        coord_t num_inst = static_cast<coord_t>(name_list.size());
-        std::vector<inst_iter_t> ans(num_inst);
+        size_t num = name_list.size();
+        std::vector<inst_iter_t> ans(num);
+        auto num_inst = static_cast<coord_t>(num);
         for (coord_t idx = 0; idx < num_inst; ++idx) {
             ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx, conns_list[idx]);
         }
