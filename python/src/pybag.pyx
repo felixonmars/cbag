@@ -18,6 +18,9 @@ import numbers
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
 
+    cdef cppclass PinFigure:
+        pass
+    
     cdef cppclass Instance:
         string lib_name
         string cell_name
@@ -35,10 +38,27 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         void set_string_param(const char* name, const char* value) except +
         
     cdef cppclass SchCellView:
+        string lib_name
+        string cell_name
+        string view_name
+        map[string, Instance] instances
+        map[string, PinFigure] in_terms
+        map[string, PinFigure] out_terms
+        map[string, PinFigure] io_terms
+
         SchCellView(const string& yaml_fname) except +
 
-        map[string, Instance] instances
+        void clear_params() except +
 
+        void set_int_param(const char* name, int value) except +
+
+        void set_double_param(const char* name, double value) except +
+
+        void set_bool_param(const char* name, cbool value) except +
+
+        void set_string_param(const char* name, const char* value) except +
+
+        
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass OADatabase:
@@ -68,8 +88,8 @@ cdef class PySchInstance:
     cdef _master
     cdef _db
 
-    def __init__(self, db, encoding):
-        self._static = False
+    def __init__(self, db, encoding, is_static):
+        self._static = is_static
         self.encoding = encoding
         self._master = None
         self._db = db
@@ -181,8 +201,35 @@ cdef class PySchCellView:
     def __dealloc__(self):
         self.cv_ptr.reset()
 
+    @property
+    def lib_name(self):
+        return deref(self.cv_ptr).lib_name.decode(self.encoding)
+
+    @property
+    def cell_name(self):
+        return deref(self.cv_ptr).cell_name.decode(self.encoding)
+
+    @property
+    def view_name(self):
+        return deref(self.cv_ptr).view_name.decode(self.encoding)
+
     def close(self):
         self.cv_ptr.reset()
+
+    def clear_params(self):
+        deref(self.cv_ptr).clear_params();
+        
+    def set_param(self, key, val):
+        if isinstance(val, str):
+            deref(self.cv_ptr).set_string_param(key.encode(self.encoding), val.encode(self.encoding))
+        elif isinstance(val, numbers.Integral):
+            deref(self.cv_ptr).set_int_param(key.encode(self.encoding), val)
+        elif isinstance(val, numbers.Real):
+            deref(self.cv_ptr).set_double_param(key.encode(self.encoding), val)
+        elif isinstance(val, bool):
+            deref(self.cv_ptr).set_bool_param(key.encode(self.encoding), val)
+        else:
+            raise ValueError('Unsupported value for key {}: {}'.format(key, val))
 
     def get_instances(self, db):
         result = {}
@@ -190,12 +237,25 @@ cdef class PySchCellView:
         cdef map[string, Instance].iterator eiter = deref(self.cv_ptr).instances.end()
         while biter != eiter:
             key = deref(biter).first.decode(self.encoding)
-            inst = PySchInstance(db, self.encoding)
+            inst = PySchInstance(db, self.encoding,
+                                 db.is_lib_excluded(deref(biter).second.lib_name.decode(self.encoding)))
+            # invoke copy constructor
             inst.ptr = biter
+            # incrementing biter is okay, because inst.ptr copied biter
             inc(biter)
             result[key] = inst
 
         return result
+
+    def get_inputs(self):
+        return {pair.first.decode(self.encoding) for pair in self.in_terms}
+
+    def get_outputs(self):
+        return {pair.first.decode(self.encoding) for pair in self.out_terms}
+
+    def get_inouts(self):
+        return {pair.first.decode(self.encoding) for pair in self.io_terms}
+
     
 cdef class PyOADatabase:
     cdef unique_ptr[OADatabase] db_ptr

@@ -27,6 +27,19 @@ namespace cbag {
 
         explicit SchCellView(const std::string &yaml_fname);
 
+        // methods to manipulate parameters, so Cython doesn't have to worry about variants
+
+        void clear_params();
+
+        void set_int_param(const char *name, int value);
+
+        void set_double_param(const char *name, double value);
+
+        void set_bool_param(const char *name, bool value);
+
+        void set_string_param(const char *name, const char *value);
+
+        std::string lib_name, cell_name, view_name;
         std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
         std::map<std::string, Instance> instances;

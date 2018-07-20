@@ -12,7 +12,8 @@
 
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView,
-        in_terms, out_terms, io_terms, shapes, instances, props, app_defs
+                          lib_name, cell_name, view_name, in_terms, out_terms, io_terms,
+                          shapes, instances, props, app_defs
 )
 
 #endif //CBAG_DATABASE_CELLVIEWS_ADAPTED_H

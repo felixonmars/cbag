@@ -363,14 +363,20 @@ namespace cbagoa {
     cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
         oa::oaBlock *block = p->getTopBlock();
         cbag::SchCellView ans;
+        oa::oaString tmp;
+        p->getLibName(ns, tmp);
+        ans.lib_name = std::string(tmp);
+        p->getCellName(ns, tmp);
+        ans.cell_name = std::string(tmp);
+        p->getViewName(ns, tmp);
+        ans.view_name = std::string(tmp);
 
         // read terminals
         LOG(INFO) << "Reading terminals";
         oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
         oa::oaTerm *term_ptr;
-        oa::oaString term_name;
         while ((term_ptr = term_iter.getNext()) != nullptr) {
-            term_ptr->getName(ns, term_name);
+            term_ptr->getName(ns, tmp);
             switch (term_ptr->getTermType()) {
                 case oa::oacInputTermType :
                     ans.in_terms.insert(read_terminal_single(term_ptr));
@@ -383,7 +389,7 @@ namespace cbagoa {
                     break;
                 default:
                     throw std::invalid_argument(fmt::format("Terminal {} has invalid type: {}",
-                                                            term_name,
+                                                            tmp,
                                                             term_ptr->getTermType().getName()));
             }
         }

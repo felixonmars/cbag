@@ -13,4 +13,25 @@ namespace cbag {
         YAML::Node n = YAML::LoadFile(yaml_fname);
         (*this) = n.as<SchCellView>();
     }
+
+    void SchCellView::clear_params() {
+        props.clear();
+    }
+
+    void SchCellView::set_int_param(const char *name, int value) {
+        props.insert_or_assign(name, value);
+    }
+
+
+    void SchCellView::set_double_param(const char *name, double value) {
+        props.insert_or_assign(name, value);
+    }
+
+    void SchCellView::set_bool_param(const char *name, bool value) {
+        props.insert_or_assign(name, value);
+    }
+
+    void SchCellView::set_string_param(const char *name, const char *value) {
+        props.insert_or_assign(name, value);
+    }
 }
