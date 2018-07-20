@@ -58,6 +58,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
         void set_string_param(const char* name, const char* value) except +
 
+        void rename_pin(const char* old_name, const char* new_name) except +
+
+        void rename_instance(const char* old_name, const char* new_name) except +
         
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
@@ -248,13 +251,23 @@ cdef class PySchCellView:
         return result
 
     def get_inputs(self):
-        return {pair.first.decode(self.encoding) for pair in self.in_terms}
+        return {pair.first.decode(self.encoding) for pair in deref(self.cv_ptr).in_terms}
 
     def get_outputs(self):
-        return {pair.first.decode(self.encoding) for pair in self.out_terms}
+        return {pair.first.decode(self.encoding) for pair in deref(self.cv_ptr).out_terms}
 
     def get_inouts(self):
-        return {pair.first.decode(self.encoding) for pair in self.io_terms}
+        return {pair.first.decode(self.encoding) for pair in deref(self.cv_ptr).io_terms}
+
+    def rename_pin(self, old_name, new_name):
+        oldn = old_name.encode(self.encoding)
+        newn = new_name.encode(self.encoding)
+        deref(self.cv_ptr).rename_pin(oldn, newn)
+
+    def rename_instance(self, old_name, new_name):
+        oldn = old_name.encode(self.encoding)
+        newn = new_name.encode(self.encoding)
+        deref(self.cv_ptr).rename_instance(oldn, newn)
 
     
 cdef class PyOADatabase:

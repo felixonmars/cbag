@@ -39,6 +39,10 @@ namespace cbag {
 
         void set_string_param(const char *name, const char *value);
 
+        void rename_pin(const char *old_name, const char *new_name);
+
+        void rename_instance(const char *old_name, const char *new_name);
+
         std::string lib_name, cell_name, view_name;
         std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
         std::vector<Shape> shapes;
