@@ -3,6 +3,7 @@
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
+from libcpp cimport bool as cbool
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from libcpp.map cimport map
@@ -29,7 +30,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
         void set_double_param(const char* name, double value) except +
 
-        void set_bool_param(const char* name, bool value) except +
+        void set_bool_param(const char* name, cbool value) except +
 
         void set_string_param(const char* name, const char* value) except +
         
@@ -62,7 +63,7 @@ init_logging()
 
 cdef class PySchInstance:
     cdef map[string, Instance].iterator ptr
-    cdef bool _static
+    cdef cbool _static
     cdef encoding
     cdef _master
     cdef _db
@@ -74,7 +75,7 @@ cdef class PySchInstance:
         self._db = db
         
 
-    def change_generator(self, gen_lib_name, gen_cell_name, bool static=False):
+    def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
         self._master = None
         deref(self.ptr).second.lib_name = gen_lib_name
         deref(self.ptr).second.cell_name = gen_cell_name
@@ -141,18 +142,17 @@ cdef class PySchInstance:
                                            params=kwargs, design_args=key,
                                            design_fun=design_fun)
 
-        cdef char* ckey;
         if self._master.is_primitive():
             for key, val in self._master.get_schematic_parameters().items():
-                ckey = key.encode(self.encoding)
                 if isinstance(val, str):
-                    deref(self.ptr).second.set_string_param(ckey, val.encode(self.encoding))
+                    deref(self.ptr).second.set_string_param(key.encode(self.encoding),
+                                                            val.encode(self.encoding))
                 elif isinstance(val, numbers.Integral):
-                    deref(self.ptr).second.set_int_param(ckey, val)
+                    deref(self.ptr).second.set_int_param(key.encode(self.encoding), val)
                 elif isinstance(val, numbers.Real):
-                    deref(self.ptr).second.set_double_param(ckey, val)
+                    deref(self.ptr).second.set_double_param(key.encode(self.encoding), val)
                 elif isinstance(val, bool):
-                    deref(self.ptr).second.set_bool_param(ckey, val)
+                    deref(self.ptr).second.set_bool_param(key.encode(self.encoding), val)
                 else:
                     raise ValueError('Unsupported value type: {}'.format(val))
 
