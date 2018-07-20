@@ -119,6 +119,18 @@ cdef class PySchInstance:
         n_net = net_name.encode(self.encoding)
         deref(self.ptr).second.update_connection(deref(self.ptr).first, n_term, n_net)
 
+    def set_param(self, key, val):
+        if isinstance(val, str):
+            deref(self.ptr).second.set_string_param(key.encode(self.encoding), val.encode(self.encoding))
+        elif isinstance(val, numbers.Integral):
+            deref(self.ptr).second.set_int_param(key.encode(self.encoding), val)
+        elif isinstance(val, numbers.Real):
+            deref(self.ptr).second.set_double_param(key.encode(self.encoding), val)
+        elif isinstance(val, bool):
+            deref(self.ptr).second.set_bool_param(key.encode(self.encoding), val)
+        else:
+            raise ValueError('Unsupported value for key {}: {}'.format(key, val))
+
     @property
     def name(self):
         return deref(self.ptr).first.decode(self.encoding)
