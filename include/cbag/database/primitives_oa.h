@@ -78,6 +78,11 @@ namespace cbag {
     constexpr SigType stScan = SigType::oacScanSigType;
     constexpr SigType stReset = SigType::oacResetSigType;
 
+    using TermType = oa::oaTermTypeEnum;
+    constexpr TermType trmInput = TermType::oacInputTermType;
+    constexpr TermType trmOutput = TermType::oacOutputTermType;
+    constexpr TermType trmInout = TermType::oacInputOutputTermType;
+
     using Point = oa::oaPoint;
     using Transform = oa::oaTransform;
     using BBox = oa::oaBox;

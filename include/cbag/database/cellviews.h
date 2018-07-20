@@ -11,6 +11,7 @@
 #include <map>
 
 #include <cbag/database/datatypes.h>
+#include <cbag/database/primitives.h>
 #include <cbag/database/shapes.h>
 
 
@@ -41,7 +42,13 @@ namespace cbag {
 
         void rename_pin(const char *old_name, const char *new_name);
 
+        void add_pin(const char *new_name, TermType term_type);
+
+        bool remove_pin(const char *name);
+
         void rename_instance(const char *old_name, const char *new_name);
+
+        bool remove_instance(const char *name);
 
         std::string lib_name, cell_name, view_name;
         std::map<std::string, PinFigure> in_terms, out_terms, io_terms;

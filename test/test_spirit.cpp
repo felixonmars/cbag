@@ -21,8 +21,8 @@ int main() {
 
         try {
             std::ostringstream ofs;
-            auto name_obj = cbag::parse<bsp::ast::name,
-                    bsp::parser::name_type>(str.c_str(), str.size(), bsp::name());
+            bsp::ast::name name_obj;
+            cbag::parse(str.c_str(), str.size(), bsp::name(), name_obj);
 
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";

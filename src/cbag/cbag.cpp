@@ -30,7 +30,8 @@ namespace cbag {
     }
 
     spirit::ast::name_unit parse_cdba_name_unit(const std::string &source) {
-        return parse<spirit::ast::name_unit,
-                spirit::parser::name_unit_type>(source.c_str(), source.size(), spirit::name_unit());
+        spirit::ast::name_unit ast;
+        parse(source.c_str(), source.size(), spirit::name_unit(), ast);
+        return ast;
     }
 }

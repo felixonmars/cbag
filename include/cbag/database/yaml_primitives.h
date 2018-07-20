@@ -168,6 +168,28 @@ namespace YAML {
     };
 
     template<>
+    struct convert<cbag::TermType> {
+        static Node encode(const cbag::TermType &rhs) {
+            Node n;
+            n = static_cast<int>(rhs);
+            return n;
+        }
+
+        static bool decode(const Node &node, cbag::TermType &rhs) {
+            if (node.IsScalar()) {
+                try {
+                    rhs = static_cast<cbag::TermType>(node.as<int>());
+                    return true;
+                } catch (...) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    };
+
+    template<>
     struct convert<cbag::Point> {
         static Node encode(const cbag::Point &rhs);
 

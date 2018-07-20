@@ -109,6 +109,13 @@ namespace cbag {
     constexpr SigType stScan = SigType::scan;
     constexpr SigType stReset = SigType::reset;
 
+    enum TermType {
+        input, output, inout
+    };
+    constexpr TermType trmInput = TermType::input;
+    constexpr TermType trmOutput = TermType::output;
+    constexpr TermType trmInout = TermType::inout;
+
     /** A point
      */
     class Point {
