@@ -36,6 +36,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         void set_bool_param(const char* name, cbool value) except +
 
         void set_string_param(const char* name, const char* value) except +
+
+        void update_connection(const string& inst_name, const char* term,
+                               const char* net) except +
         
     cdef cppclass SchCellView:
         string lib_name
@@ -110,6 +113,11 @@ cdef class PySchInstance:
         self._static = static
         deref(self.ptr).second.clear_params()
         deref(self.ptr).second.connections.clear()
+
+    def update_connection(self, term_name, net_name):
+        n_term = term_name.encode(self.encoding)
+        n_net = net_name.encode(self.encoding)
+        deref(self.ptr).second.update_connection(deref(self.ptr).first, n_term, n_net)
 
     @property
     def name(self):

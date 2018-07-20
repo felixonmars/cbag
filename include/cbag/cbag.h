@@ -22,5 +22,10 @@ namespace cbag {
     void to_file(const SchCellView &cv, const char *fname);
 
     spirit::ast::name_unit parse_cdba_name_unit(const std::string &source);
+
+    spirit::ast::name parse_cdba_name(const std::string &source);
+
+    spirit::ast::name parse_cdba_name(const char *source);
+
 }
 #endif //CBAG_CBAG_H

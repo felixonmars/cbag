@@ -48,6 +48,8 @@ namespace cbag {
 
         void set_string_param(const char *name, const char *value);
 
+        void update_connection(const std::string &inst_name, const char *term, const char *net);
+
         std::string lib_name, cell_name, view_name;
         Transform xform;
         std::map<std::string, std::string> connections;

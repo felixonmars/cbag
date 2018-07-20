@@ -159,6 +159,14 @@ namespace cbag {
                 return {this, unit_list.size(), 0};
             }
 
+            uint32_t name::size() const {
+                uint32_t tot = 0;
+                for (auto const &nu : unit_list) {
+                    tot += nu.size();
+                }
+                return tot;
+            }
+
             bool name::operator==(const name &other) const {
                 unsigned long size1 = unit_list.size();
                 unsigned long size2 = other.unit_list.size();

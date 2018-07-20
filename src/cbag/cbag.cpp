@@ -5,6 +5,7 @@
  *  \date   2018/07/18
  */
 
+#include <cstring>
 #include <fstream>
 
 #include <yaml-cpp/yaml.h>
@@ -12,6 +13,7 @@
 
 #include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name_unit.h>
+#include <cbag/spirit/name.h>
 #include <cbag/database/yaml_cellviews.h>
 
 INITIALIZE_EASYLOGGINGPP // NOLINT
@@ -32,6 +34,24 @@ namespace cbag {
     spirit::ast::name_unit parse_cdba_name_unit(const std::string &source) {
         spirit::ast::name_unit ast;
         parse(source.c_str(), source.size(), spirit::name_unit(), ast);
+        return ast;
+    }
+
+    spirit::ast::name_unit parse_cdba_name_unit(const char *source) {
+        spirit::ast::name_unit ast;
+        parse(source, strlen(source), spirit::name_unit(), ast);
+        return ast;
+    }
+
+    spirit::ast::name parse_cdba_name(const std::string &source) {
+        spirit::ast::name ast;
+        parse(source.c_str(), source.size(), spirit::name(), ast);
+        return ast;
+    }
+
+    spirit::ast::name parse_cdba_name(const char *source) {
+        spirit::ast::name ast;
+        parse(source, strlen(source), spirit::name(), ast);
         return ast;
     }
 }

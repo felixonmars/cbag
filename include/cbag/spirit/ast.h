@@ -119,6 +119,8 @@ namespace cbag {
 
                 const_iterator end() const;
 
+                uint32_t size() const;
+
                 bool operator==(const name &other) const;
 
                 bool operator!=(const name &other) const;
