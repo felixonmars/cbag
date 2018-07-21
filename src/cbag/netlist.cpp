@@ -99,11 +99,9 @@ namespace cbag {
 
     void NetlistBuilder::add_cellview(const std::string &name, const SchCellView &cv) {
         write_cv_header(name, cv.in_terms, cv.out_terms, cv.io_terms);
-
         for (auto const &p : cv.instances) {
-
+            write_instance(p.first, p.second);
         }
-
         write_cv_end(name);
     }
 
@@ -144,6 +142,10 @@ namespace cbag {
 
     void SpiceBuilder::write_cv_end(const std::string &name) {
         out_file << ".ENDS" << std::endl;
+    }
+
+    void SpiceBuilder::write_instance(const std::string &name, const Instance &inst) {
+
     }
 
 }
