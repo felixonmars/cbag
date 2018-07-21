@@ -114,6 +114,10 @@ cdef class DesignInstance:
         self._cell_name = cell_name
 
     @property
+    def database(self):
+        return self._db
+
+    @property
     def master(self):
         return self._master
 
@@ -124,6 +128,9 @@ cdef class DesignInstance:
     @property
     def gen_cell_name(self):
         return self._cell_name
+
+    def set_master(self, new_master):
+        self._master = new_master
 
     def set_param(self, key, val):
         raise Exception('Cannot set parameters on a DesignInstance; '
@@ -153,19 +160,17 @@ cdef class DesignInstance:
             for key, val in self._master.get_schematic_parameters().items():
                 self.set_param(key, val)
 
-    def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='', **kwargs):
-        debug = kwargs.get('debug', False)
-        rename_dict = kwargs.get('rename_dict', None)
-
+    def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='',
+                         debug=False, rename_dict=None, lib_path='', output='schematic'):
         if not top_cell_name:
             top_cell_name = None
 
-        if 'lib_path' in kwargs:
-            self._db.lib_path = kwargs['lib_path']
+        if lib_path:
+            self._db.lib_path = lib_path
         self._db.cell_prefix = prefix
         self._db.cell_suffix = suffix
         self._db.instantiate_masters([self._master], [top_cell_name], lib_name=lib_name,
-                                     debug=debug, rename_dict=rename_dict)
+                                     debug=debug, rename_dict=rename_dict, output=output)
 
 
 cdef class PySchInstance(DesignInstance):
@@ -177,6 +182,50 @@ cdef class PySchInstance(DesignInstance):
         DesignInstance.__init__(self, db, '', '')
         self._static = is_static
         self.encoding = encoding
+
+    @property
+    def static(self):
+        return self._static
+
+    @property
+    def gen_lib_name(self):
+        return deref(self.ptr).second.lib_name.decode(self.encoding)
+
+    @property
+    def gen_cell_name(self):
+        return deref(self.ptr).second.cell_name.decode(self.encoding)
+
+    @property
+    def name(self):
+        return deref(self.ptr).first.decode(self.encoding)
+    
+    @property
+    def is_primitive(self):
+        if self._static:
+            return True
+        if self.master is None:
+            raise ValueError('Instance {} has no master.  Did you forget to call design()?'.format(self.name))
+        return self.master.is_primitive()
+        
+    @property
+    def should_delete(self):
+        return self.master is not None and self.master.should_delete_instance()
+    
+    @property
+    def master_cell_name(self):
+        return self.gen_cell_name if self.master is None else self.master.cell_name
+
+    @property
+    def master_key(self):
+        return self.master.key
+
+    def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
+        self.master = None
+        deref(self.ptr).second.lib_name = gen_lib_name.encode(self.encoding)
+        deref(self.ptr).second.cell_name = gen_cell_name.encode(self.encoding)
+        self._static = static
+        deref(self.ptr).second.clear_params()
+        deref(self.ptr).second.connections.clear()
 
     def set_param(self, key, val):
         if isinstance(val, str):
@@ -190,50 +239,10 @@ cdef class PySchInstance(DesignInstance):
         else:
             raise ValueError('Unsupported value for key {}: {}'.format(key, val))
 
-    @property
-    def gen_lib_name(self):
-        return deref(self.ptr).second.lib_name.decode(self.encoding)
-
-    @property
-    def gen_cell_name(self):
-        return deref(self.ptr).second.cell_name.decode(self.encoding)
-
-    def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
-        self._master = None
-        deref(self.ptr).second.lib_name = gen_lib_name.encode(self.encoding)
-        deref(self.ptr).second.cell_name = gen_cell_name.encode(self.encoding)
-        self._static = static
-        deref(self.ptr).second.clear_params()
-        deref(self.ptr).second.connections.clear()
-
     def update_connection(self, term_name, net_name):
         n_term = term_name.encode(self.encoding)
         n_net = net_name.encode(self.encoding)
         deref(self.ptr).second.update_connection(deref(self.ptr).first, n_term, n_net)
-        
-    @property
-    def name(self):
-        return deref(self.ptr).first.decode(self.encoding)
-    
-    @property
-    def is_primitive(self):
-        if self._static:
-            return True
-        if self._master is None:
-            raise ValueError('Instance {} has no master.  Did you forget to call design()?'.format(self.name))
-        return self._master.is_primitive()
-        
-    @property
-    def should_delete(self):
-        return self._master is not None and self._master.should_delete_instance()
-    
-    @property
-    def master_cell_name(self):
-        return self.gen_cell_name if self._master is None else self._master.cell_name
-
-    @property
-    def master_key(self):
-        return self._master.key
 
     def get_master_lib_name(self, impl_lib):
         return self.gen_lib_name if self.is_primitive else impl_lib
@@ -361,11 +370,12 @@ cdef class PySchCellView:
         
         # populate instance dictionary
         orig_inst = inst_dict[name]
-        db = orig_inst._db
-        is_static = orig_inst._static
+        db = orig_inst.database
+        is_static = orig_inst.static
         for idx, nn in enumerate(name_list):
             inst = inst_dict[nn] = PySchInstance(db, self.encoding, is_static)
             inst.ptr = results[idx]
+            inst.set_master(orig_inst.master)
 
     
 cdef class PyOADatabase:
