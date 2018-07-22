@@ -59,7 +59,7 @@ namespace cbag {
             bool break_before;
         };
 
-        explicit NetlistBuilder(const char *fname);
+      explicit NetlistBuilder(const char *fname);
 
         void build();
 
@@ -84,7 +84,7 @@ namespace cbag {
 
     class SpiceBuilder : NetlistBuilder {
     public:
-        explicit SpiceBuilder(const char *fname) : NetlistBuilder(fname) {}
+      explicit SpiceBuilder(const char *fname);
 
     private:
         void write_header() override;

@@ -131,6 +131,9 @@ namespace cbagoa {
                         const std::unordered_set<std::string> &exclude_libs,
                         cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
+        void
+        read_prim_instance(const char *fname, const cbag::Instance &inst);
+
         // OA namespace objects
         const oa::oaNativeNS ns;
         const oa::oaCdbaNS ns_cdba;

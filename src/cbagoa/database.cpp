@@ -256,14 +256,17 @@ namespace cbagoa {
         cbag::SchCellView ans = read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
 
         // find root_path
-        auto const map_iter = lib_map.find(key.first);
-        fs::path root_path(new_root_path);
+        std::unordered_map<std::string, std::string>::const_iterator map_iter; // NOLINT
+        map_iter = lib_map.find(key.first);
+        fs::path root_path;
         if (map_iter != lib_map.cend()) {
             root_path = fs::path(map_iter->second);
+        } else {
+            root_path = fs::path(new_root_path);
         }
 
         // create directory if not exist, then compute output filename
-        fs::path cur_path = root_path / fs::path(key.first) / fs::path("netlist_info");
+        fs::path cur_path = root_path / key.first / "netlist_info";
         fs::create_directories(cur_path);
         cur_path /= fs::path(key.second + ".yaml");
 
@@ -277,15 +280,34 @@ namespace cbagoa {
         // recurse
         auto exc_lib_end = exclude_libs.end();
         for (const auto &pair : ans.instances) {
-            if (exclude_libs.find(pair.second.lib_name) == exc_lib_end) {
-                std::pair<std::string, std::string> ikey(pair.second.lib_name,
-                                                         pair.second.cell_name);
-                if (exclude_cells.find(ikey) == exclude_cells.end()) {
+            std::pair<std::string, std::string> ikey(pair.second.lib_name,
+                                                     pair.second.cell_name);
+            if (exclude_cells.find(ikey) == exclude_cells.end()) {
+                // did not see this schematic master before
+                if (exclude_libs.find(pair.second.lib_name) == exc_lib_end) {
+                    // non-primitive master, parse normally
                     read_sch_helper(ikey, view_name, new_root_path, lib_map, exclude_libs,
                                     exclude_cells, cell_list);
+                } else {
+                    // primitive master, read terminal information
+                    // first, figure out root path for this instance
+                    map_iter = lib_map.find(ikey.first);
+                    if (map_iter != lib_map.cend()) {
+                        root_path = fs::path(map_iter->second);
+                    } else {
+                        root_path = fs::path(new_root_path);
+                    }
+                    cur_path = root_path / ikey.first / "netlist_info";
+                    fs::create_directories(cur_path);
+                    cur_path /= fs::path(ikey.second + ".yaml");
+                    read_prim_instance(cur_path.c_str(), pair.second);
                 }
             }
         }
+    }
+
+    void OADatabase::read_prim_instance(const char *fname, const cbag::Instance &inst) {
+
     }
 
 
