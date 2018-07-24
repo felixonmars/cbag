@@ -2,9 +2,11 @@
 *~
 .idea
 
+# emacs related files
+TAGS
+
 # CMake related files
-cmake-build-debug
-cmake-build-release
+build
 CMakeCache.txt
 CMakeFiles
 Makefile

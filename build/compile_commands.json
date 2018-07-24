@@ -1,0 +1,117 @@
+[
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbagoa_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbagoa.dir/src/cbagoa/read_oa.cpp.o -c /home/erichang/projects/cbag/src/cbagoa/read_oa.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbagoa/read_oa.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbagoa_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbagoa.dir/src/cbagoa/write_oa.cpp.o -c /home/erichang/projects/cbag/src/cbagoa/write_oa.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbagoa/write_oa.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbagoa_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbagoa.dir/src/cbagoa/database.cpp.o -c /home/erichang/projects/cbag/src/cbagoa/database.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbagoa/database.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbagoa_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbagoa.dir/easyloggingpp/src/easylogging++.cc.o -c /home/erichang/projects/cbag/easyloggingpp/src/easylogging++.cc",
+  "file": "/home/erichang/projects/cbag/easyloggingpp/src/easylogging++.cc"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/easyloggingpp/src/easylogging++.cc.o -c /home/erichang/projects/cbag/easyloggingpp/src/easylogging++.cc",
+  "file": "/home/erichang/projects/cbag/easyloggingpp/src/easylogging++.cc"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/spirit/ast.cpp.o -c /home/erichang/projects/cbag/src/cbag/spirit/ast.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/spirit/ast.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/spirit/range.cpp.o -c /home/erichang/projects/cbag/src/cbag/spirit/range.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/spirit/range.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/spirit/name_unit.cpp.o -c /home/erichang/projects/cbag/src/cbag/spirit/name_unit.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/spirit/name_unit.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/spirit/name.cpp.o -c /home/erichang/projects/cbag/src/cbag/spirit/name.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/spirit/name.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/yaml_primitives.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/yaml_primitives.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/yaml_primitives.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/yaml_datatypes.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/yaml_datatypes.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/yaml_datatypes.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/yaml_shapes.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/yaml_shapes.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/yaml_shapes.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/yaml_figures.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/yaml_figures.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/yaml_figures.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/figures.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/figures.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/figures.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/cellviews.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/cellviews.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/database/cellviews.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/netlist.cpp.o -c /home/erichang/projects/cbag/src/cbag/netlist.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/netlist.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/cbag.cpp.o -c /home/erichang/projects/cbag/src/cbag/cbag.cpp",
+  "file": "/home/erichang/projects/cbag/src/cbag/cbag.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++   -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/read_prop.dir/test/read_prop.cpp.o -c /home/erichang/projects/cbag/test/read_prop.cpp",
+  "file": "/home/erichang/projects/cbag/test/read_prop.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++   -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/test_oa.dir/test/test_oa.cpp.o -c /home/erichang/projects/cbag/test/test_oa.cpp",
+  "file": "/home/erichang/projects/cbag/test/test_oa.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++   -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/test_spirit.dir/test/test_spirit.cpp.o -c /home/erichang/projects/cbag/test/test_spirit.cpp",
+  "file": "/home/erichang/projects/cbag/test/test_spirit.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build",
+  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/test_yaml.dir/test/test_yaml.cpp.o -c /home/erichang/projects/cbag/test/test_yaml.cpp",
+  "file": "/home/erichang/projects/cbag/test/test_yaml.cpp"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build/fmt",
+  "command": "/usr/bin/c++   -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/fmt.dir/src/format.cc.o -c /home/erichang/projects/cbag/fmt/src/format.cc",
+  "file": "/home/erichang/projects/cbag/fmt/src/format.cc"
+},
+{
+  "directory": "/home/erichang/projects/cbag/build/fmt",
+  "command": "/usr/bin/c++   -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g   -std=gnu++1z -o CMakeFiles/fmt.dir/src/posix.cc.o -c /home/erichang/projects/cbag/fmt/src/posix.cc",
+  "file": "/home/erichang/projects/cbag/fmt/src/posix.cc"
+}
+]

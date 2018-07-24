@@ -151,4 +151,10 @@ void SpiceBuilder::write_cv_end(const std::string &name) {
 void SpiceBuilder::write_instance(const std::string &name,
                                   const Instance &inst) {}
 
+int foobar() {
+    int a = 50;
+    double b = 100;
+    return a * b;
+}
+
 } // namespace cbag

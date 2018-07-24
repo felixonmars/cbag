@@ -12,6 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
 -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
 # set optimzation level for release
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+# generate compilation commands file for emacs
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # make sure linker raise errors if shared library has undefined symbols
 # this makes it a lot easier to debug
