@@ -8,18 +8,17 @@
 #ifndef CBAG_CBAG_H
 #define CBAG_CBAG_H
 
-#include <cbag/database/primitives.h>
-#include <cbag/database/datatypes.h>
-#include <cbag/database/shapes.h>
-#include <cbag/database/figures.h>
 #include <cbag/database/cellviews.h>
+#include <cbag/database/datatypes.h>
+#include <cbag/database/figures.h>
+#include <cbag/database/primitives.h>
+#include <cbag/database/shapes.h>
 #include <cbag/netlist.h>
 
-
 namespace cbag {
-    void init_logging();
+void init_logging();
 
-    void to_file(const SchCellView &cv, const char *fname);
+void to_file(const SchCellView &cv, const char *fname);
 
-}
-#endif //CBAG_CBAG_H
+} // namespace cbag
+#endif // CBAG_CBAG_H

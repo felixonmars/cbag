@@ -5,16 +5,15 @@
  *  \date   2018/07/12
  */
 
-
 #ifndef CBAG_DATABASE_PRIMITIVES_H
 #define CBAG_DATABASE_PRIMITIVES_H
 
 #if __has_include(<oa/oaDesignDB.h>)
 // use OpenAccess primitive types
-# include <cbag/database/primitives_oa.h>
+#include <cbag/database/primitives_oa.h>
 #else
 // use custom primitive types
-# include <cbag/database/primitives_custom.h>
+#include <cbag/database/primitives_custom.h>
 #endif
 
-#endif //CBAG_DATABASE_PRIMITIVES_H
+#endif // CBAG_DATABASE_PRIMITIVES_H

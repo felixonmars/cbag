@@ -7,9 +7,9 @@
 
 #include <fmt/format.h>
 
-#include <cbag/netlist.h>
 #include <cbag/database/cellviews.h>
 #include <cbag/database/figures.h>
+#include <cbag/netlist.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>

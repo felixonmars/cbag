@@ -12,22 +12,21 @@
 
 #include <cbag/spirit/ast.h>
 
-
 namespace x3 = boost::spirit::x3;
 
 namespace cbag {
-    namespace spirit {
-        namespace parser {
+namespace spirit {
+namespace parser {
 
-            struct range_class;
+struct range_class;
 
-            using range_type = x3::rule<range_class, ast::range, true>;
+using range_type = x3::rule<range_class, ast::range, true>;
 
-            BOOST_SPIRIT_DECLARE(range_type);
-        }
+BOOST_SPIRIT_DECLARE(range_type);
+} // namespace parser
 
-        parser::range_type const &range();
-    }
-}
+parser::range_type const &range();
+} // namespace spirit
+} // namespace cbag
 
-#endif //CBAG_SPIRIT_RANGE_H
+#endif // CBAG_SPIRIT_RANGE_H

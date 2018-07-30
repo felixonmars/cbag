@@ -13,25 +13,16 @@
 
 #include <cbag/spirit/ast.h>
 
-
 // We need to tell fusion about our structs
 // to make it a first-class fusion citizen. This has to
 // be in global scope.
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range,
-                          start, stop, step
-)
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::range, start, stop, step)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_bit,
-                          base, index
-)
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_bit, base, index)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit,
-                          mult, base, idx_range
-)
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name_unit, mult, base, idx_range)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name,
-                          unit_list
-)
+BOOST_FUSION_ADAPT_STRUCT(cbag::spirit::ast::name, unit_list)
 
-#endif //CBAG_SPIRIT_AST_ADAPTED_H
+#endif // CBAG_SPIRIT_AST_ADAPTED_H

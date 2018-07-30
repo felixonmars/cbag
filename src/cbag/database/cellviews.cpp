@@ -145,8 +145,7 @@ inst_iter_t SchCellView::copy_instance(const char *old_name,
                                        coord_t dy, const conn_list_t &conns) {
     // find the instance to copy
     std::string key(old_name);
-    std::map<std::string, Instance>::const_iterator iter =
-        instances.find(key); // NOLINT
+    std::map<std::string, Instance>::const_iterator iter = instances.find(key);
     if (iter == instances.end()) {
         throw std::invalid_argument("Cannot find instance: " + key);
     }

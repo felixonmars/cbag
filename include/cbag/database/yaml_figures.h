@@ -10,19 +10,18 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/yaml_fusion.h>
-#include <cbag/database/yaml_shapes.h>
 #include <cbag/database/figures_adapted.h>
-
+#include <cbag/database/yaml_shapes.h>
+#include <cbag/yaml_fusion.h>
 
 namespace YAML {
-    template<>
-    struct convert<boost::variant<cbag::Rect, cbag::SchPinObject>> {
-        static Node encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+template <> struct convert<boost::variant<cbag::Rect, cbag::SchPinObject>> {
+    static Node
+    encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
 
-        static bool decode(const Node &node, boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
-    };
-}
+    static bool decode(const Node &node,
+                       boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+};
+} // namespace YAML
 
-
-#endif //CBAG_DATABASE_YAML_FIGURES_H
+#endif // CBAG_DATABASE_YAML_FIGURES_H

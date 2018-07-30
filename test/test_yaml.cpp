@@ -6,15 +6,9 @@
 #include <cbag/yaml_fusion.h>
 
 struct One {
-    One() :
-            two(0),
-            three(0.0),
-            four(false) {}
+    One() : two(0), three(0.0), four(false) {}
 
-    One(int a, double b, bool c) :
-            two(a),
-            three(b),
-            four(c) {}
+    One(int a, double b, bool c) : two(a), three(b), four(c) {}
 
     int two;
     double three;
@@ -30,18 +24,14 @@ struct Five {
 
     std::string eight;
 
-    typedef std::vector<std::vector<double> > Matrix_t;
+    typedef std::vector<std::vector<double>> Matrix_t;
     Matrix_t nine;
 };
 
 BOOST_FUSION_ADAPT_STRUCT(One, (int, two)(double, three)(bool, four))
 
-BOOST_FUSION_ADAPT_STRUCT(Five,
-                          (Five::Map_t, six)
-                                  (Five::Vector_t, seven)
-                                  (std::string, eight)
-                                  (Five::Matrix_t, nine)
-)
+BOOST_FUSION_ADAPT_STRUCT(Five, (Five::Map_t, six)(Five::Vector_t, seven)(
+                                    std::string, eight)(Five::Matrix_t, nine))
 
 int main(int argc, char *argv[]) {
     Five v;

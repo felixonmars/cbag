@@ -1,5 +1,6 @@
 /** \file cellviews_adapted.h
- *  \brief This file adapts cellview classes to Boost random access data structures.
+ *  \brief This file adapts cellview classes to Boost random access data
+ * structures.
  *
  *  \author Eric Chang
  *  \date   2018/07/10

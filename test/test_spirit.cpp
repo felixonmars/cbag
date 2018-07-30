@@ -3,9 +3,8 @@
 #include <cbag/yaml_fusion.h>
 
 #include <cbag/spirit/ast_adapted.h>
-#include <cbag/spirit/parsers.h>
 #include <cbag/spirit/name.h>
-
+#include <cbag/spirit/parsers.h>
 
 namespace bsp = cbag::spirit;
 
@@ -17,7 +16,6 @@ int main() {
     while (getline(std::cin, str)) {
         if (str.empty() || str[0] == 'q' || str[0] == 'Q')
             break;
-
 
         try {
             std::ostringstream ofs;

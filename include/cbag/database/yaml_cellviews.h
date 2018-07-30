@@ -9,8 +9,8 @@
 
 #include <cbag/yaml_fusion.h>
 
+#include <cbag/database/cellviews_adapted.h>
 #include <cbag/database/yaml_datatypes.h>
 #include <cbag/database/yaml_figures.h>
-#include <cbag/database/cellviews_adapted.h>
 
-#endif //CBAG_DATABASE_YAML_CELLVIEWS_H
+#endif // CBAG_DATABASE_YAML_CELLVIEWS_H

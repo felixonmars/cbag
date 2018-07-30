@@ -2,7 +2,6 @@
 
 #include <cbagoa/cbagoa.h>
 
-
 int read_oa() {
     std::string lib_file("cds.lib");
     std::string lib_path(".");
@@ -15,12 +14,14 @@ int read_oa() {
 
     cbagoa::OADatabase db(lib_file);
 
-    cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
+    cbag::SchCellView sch_master =
+        db.read_sch_cellview(lib_name, cell_name, view_name);
 
     cbag::to_file(sch_master, "inv_sch.yaml");
 
     /*
-    cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
+    cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name,
+    sym_view_name);
 
     std::ofstream symfile("inv_sym.xml", std::ios_base::out);
     xml_out = std::make_unique<boost::archive::xml_oarchive>(symfile);
@@ -28,7 +29,6 @@ int read_oa() {
     xml_out.reset();
     symfile.close();
     */
-
 
     db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
 
@@ -39,6 +39,4 @@ int read_oa() {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
-    return read_oa();
-}
+int main(int argc, char *argv[]) { return read_oa(); }

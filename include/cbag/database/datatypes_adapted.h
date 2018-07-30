@@ -10,13 +10,8 @@
 
 #include <cbag/database/datatypes.h>
 
+BOOST_FUSION_ADAPT_STRUCT(cbag::Time, time_val)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Time,
-        time_val
-)
+BOOST_FUSION_ADAPT_STRUCT(cbag::Binary, name, bin_val)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Binary,
-        name, bin_val
-)
-
-#endif //CBAG_DATABASE_DATATYPES_ADAPTED_H
+#endif // CBAG_DATABASE_DATATYPES_ADAPTED_H

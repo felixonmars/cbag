@@ -12,23 +12,21 @@
 
 #include <cbag/spirit/ast.h>
 
-
 namespace x3 = boost::spirit::x3;
 
 namespace cbag {
-    namespace spirit {
-        namespace parser {
+namespace spirit {
+namespace parser {
 
-            struct name_class;
+struct name_class;
 
-            using name_type = x3::rule<name_class, ast::name, true>;
+using name_type = x3::rule<name_class, ast::name, true>;
 
-            BOOST_SPIRIT_DECLARE(name_type);
-        }
+BOOST_SPIRIT_DECLARE(name_type);
+} // namespace parser
 
-        parser::name_type const &name();
-    }
-}
+parser::name_type const &name();
+} // namespace spirit
+} // namespace cbag
 
-
-#endif //CBAG_SPIRIT_NAME_H
+#endif // CBAG_SPIRIT_NAME_H
