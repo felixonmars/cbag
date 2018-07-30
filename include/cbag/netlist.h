@@ -11,6 +11,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <cbag/spirit/ast.h>
@@ -31,6 +32,7 @@ std::string to_string_cdba(const spirit::ast::name_bit &bit);
 
 struct Instance;
 struct SchCellView;
+struct SchCellViewInfo;
 struct PinFigure;
 using term_t = std::map<std::string, PinFigure>;
 

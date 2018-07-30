@@ -7,8 +7,9 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/cellviews.h>
 #include <cbag/netlist.h>
+#include <cbag/database/cellviews.h>
+#include <cbag/database/figures.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
@@ -150,11 +151,5 @@ void SpiceBuilder::write_cv_end(const std::string &name) {
 
 void SpiceBuilder::write_instance(const std::string &name,
                                   const Instance &inst) {}
-
-int foobar() {
-    int a = 50;
-    double b = 100;
-    return a * b;
-}
 
 } // namespace cbag
