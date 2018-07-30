@@ -42,7 +42,7 @@ spirit::ast::name parse_cdba_name(const char *source) {
 
 std::string to_string_cdba(const spirit::ast::name_bit &bit) {
     if (bit.index) {
-        return fmt::format("{}<{}>", bit.base, bit.index);
+        return fmt::format("{}<{}>", bit.base, *bit.index);
     }
     return std::string(bit.base);
 }

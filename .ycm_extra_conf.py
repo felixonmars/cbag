@@ -53,26 +53,26 @@ def FlagsForFile(filename, **_):
         ddir, db = FindCompilationDatabaseAndDir(fdir, fname)
         if ddir is None:
             # no database found, just return default flags.
-            # print_log('database not found')
+            # print_log('database not found.  Return defaults')
             return GetDefaultFlags(fdir)
         # found database, update cache
         # print_log('Adding database to cache')
         completion_database[ddir] = db
+    # print_log('Database at: {}'.format(ddir))  
 
     # find compilation info for this file
     # print_log('Try to get compilation flag from database')
     compilation_info = GetCompilationInfoForFile(fdir, fname, ddir, db, False)
 
-    if compilation_info is None:
+    if compilation_info is None or len(compilation_info.compiler_flags_) == 0:
         # cannot find compilation info in database, try updating cache
         # print_log('Flags not found, refreshing database')
-        db = ycm_core.CompilationDatabase(ddir)
-        completion_database[ddir] = db
+        completion_database[ddir] = db = ycm_core.CompilationDatabase(ddir)
         # try again after updating cache
         # print_log('Try to get compilation flags again')
         compilation_info = GetCompilationInfoForFile(fdir, fname, ddir, db, True)
 
-    if compilation_info is None:
+    if compilation_info is None or len(compilation_info.compiler_flags_) == 0:
         # print_log('Still no flags, return None')
         # We cannot find compilation info even after refresh.  Since we return default flags for
         # headers, this must be a source file that is not added to build system yet.  Return None to
@@ -80,7 +80,7 @@ def FlagsForFile(filename, **_):
         return None
 
     # return compilation flags
-    # print_log('Flags found')
+    # print_log('Flags found: {}'.format(compilation_info.compiler_flags_))
     return {'flags': list(compilation_info.compiler_flags_),
             'include_paths_relative_to_dir':
             compilation_info.compiler_working_dir_}
@@ -117,6 +117,7 @@ def GetCompilationInfoForFile(fdir, fname, ddir, db, use_default_for_header=Fals
     exists, the flags for that file should be good enough.
     """
     basename, ext = os.path.splitext(fname)
+    # print_log('Find comp info for basename: {}, extension: {}'.format(basename, ext))
     if ext in header_file_extensions:
         comp_info = FindHeaderCompilationInfo(fdir, basename, ddir, db)
         if comp_info is None:
@@ -125,6 +126,7 @@ def GetCompilationInfoForFile(fdir, fname, ddir, db, use_default_for_header=Fals
         else:
             return comp_info
     else:
+        # print_log('Is not header, file is: {}'.format(os.path.join(fdir, fname)))
         return db.GetCompilationInfoForFile(os.path.join(fdir, fname))
     
 
