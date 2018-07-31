@@ -66,11 +66,6 @@
 },
 {
   "directory": "/home/erichang/projects/cbag/build",
-  "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/yaml_cellviews.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/yaml_cellviews.cpp",
-  "file": "/home/erichang/projects/cbag/src/cbag/database/yaml_cellviews.cpp"
-},
-{
-  "directory": "/home/erichang/projects/cbag/build",
   "command": "/usr/bin/c++  -DFMT_HEADER_ONLY=1 -Dcbag_EXPORTS -I/home/erichang/projects/cbag/include -I/home/erichang/programs/oa_dist/include -I/usr/lib64/cmake/yaml-cpp/../../../include -I/home/erichang/projects/cbag/fmt/include   -fexceptions -g -Wall -Wno-unknown-pragmas -Wno-delete-non-virtual-dtor -g -fPIC   -std=gnu++1z -o CMakeFiles/cbag.dir/src/cbag/database/figures.cpp.o -c /home/erichang/projects/cbag/src/cbag/database/figures.cpp",
   "file": "/home/erichang/projects/cbag/src/cbag/database/figures.cpp"
 },
