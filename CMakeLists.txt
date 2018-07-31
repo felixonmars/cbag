@@ -8,8 +8,7 @@ project(cbag)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall \
--Wno-unknown-pragmas -Wno-delete-non-virtual-dtor")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -Wno-delete-non-virtual-dtor")
 # set optimzation level for release
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # generate compilation commands file for emacs
@@ -97,13 +96,14 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 target_link_libraries(cbagoa
         PUBLIC
         cbag
+        boost_filesystem
+        boost_system
+        yaml-cpp
         PRIVATE
         oaDM
         oaDMFileSysBase
         oaTech
         oaDesign
-        boost_filesystem
-        boost_system
         fmt-header-only
         m
         ${CMAKE_DL_LIBS}

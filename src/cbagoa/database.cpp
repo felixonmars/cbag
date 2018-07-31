@@ -178,6 +178,13 @@ cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name,
     }
 }
 
+cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
+                                                const std::string &cell_name,
+                                                const std::string &view_name) {
+    return read_sch_cellview(lib_name.c_str(), cell_name.c_str(),
+                             view_name.c_str());
+}
+
 std::vector<cell_key_t> OADatabase::read_sch_recursive(
     const char *lib_name, const char *cell_name, const char *view_name,
     const char *new_root_path,
