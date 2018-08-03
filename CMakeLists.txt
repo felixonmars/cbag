@@ -4,7 +4,6 @@ project(cbag)
 
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
-# map.insert_or_assign and map.extract requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings

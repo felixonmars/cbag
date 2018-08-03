@@ -21,19 +21,19 @@ SchCellView::SchCellView(const std::string &yaml_fname) {
 void SchCellView::clear_params() { props.clear(); }
 
 void SchCellView::set_int_param(const char *name, int value) {
-    props.insert_or_assign(name, value);
+    props[name] = value;
 }
 
 void SchCellView::set_double_param(const char *name, double value) {
-    props.insert_or_assign(name, value);
+    props[name] = value;
 }
 
 void SchCellView::set_bool_param(const char *name, bool value) {
-    props.insert_or_assign(name, value);
+    props[name] = value;
 }
 
 void SchCellView::set_string_param(const char *name, const char *value) {
-    props.insert_or_assign(name, value);
+    props[name] = value;
 }
 
 void SchCellView::rename_pin(const char *old_name, const char *new_name) {
@@ -165,7 +165,7 @@ inst_iter_t SchCellView::copy_instance(const char *old_name,
     emp_iter.first->second.xform.xOffset() += dx;
     emp_iter.first->second.xform.xOffset() += dy;
     for (auto const &p : conns) {
-        emp_iter.first->second.connections.insert_or_assign(p.first, p.second);
+        emp_iter.first->second.connections[p.first] = p.second;
     }
     return emp_iter.first;
 }
@@ -180,6 +180,24 @@ std::vector<inst_iter_t> SchCellView::array_instance(
         ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx,
                                  conns_list[idx]);
     }
+    return ans;
+}
+
+SchCellViewInfo SchCellView::get_info() const {
+    SchCellViewInfo ans(in_terms.size(), out_terms.size(), io_terms.size());
+
+    for (auto const &pair : in_terms) {
+        ans.in_terms.push_back(pair.first);
+    }
+
+    for (auto const &pair : out_terms) {
+        ans.out_terms.push_back(pair.first);
+    }
+
+    for (auto const &pair : io_terms) {
+        ans.io_terms.push_back(pair.first);
+    }
+
     return ans;
 }
 

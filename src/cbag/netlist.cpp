@@ -7,6 +7,9 @@
 
 #include <fmt/format.h>
 
+#include <boost/range/join.hpp>
+#include <boost/variant.hpp>
+
 #include <cbag/database/cellviews.h>
 #include <cbag/database/figures.h>
 #include <cbag/netlist.h>
@@ -91,18 +94,39 @@ std::ofstream &operator<<(std::ofstream &stream,
 NetlistBuilder::NetlistBuilder(const char *fname)
     : out_file(fname, std::ios_base::out) {}
 
+void NetlistBuilder::init() { write_header(); }
+
 void NetlistBuilder::build() {
     write_end();
     out_file.close();
 }
 
 void NetlistBuilder::add_cellview(const std::string &name,
-                                  const SchCellView &cv) {
+                                  const SchCellView &cv,
+                                  const netlist_map_t &cell_map) {
     write_cv_header(name, cv.in_terms, cv.out_terms, cv.io_terms);
     for (auto const &p : cv.instances) {
-        write_instance(p.first, p.second);
+        write_instance(p.first, p.second, cell_map);
     }
     write_cv_end(name);
+}
+
+void NetlistBuilder::write_instance(const std::string &name,
+                                    const Instance &inst,
+                                    const netlist_map_t &cell_map) {
+    auto libmap_iter = cell_map.find(inst.lib_name);
+    if (libmap_iter == cell_map.end()) {
+        throw std::invalid_argument(fmt::format(
+            "Cannot find library {} in netlist map.", inst.lib_name));
+    }
+    auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
+    if (cellmap_iter == libmap_iter->second.end()) {
+        throw std::invalid_argument(
+            fmt::format("Cannot find cell {}__{} in netlist map.",
+                        inst.lib_name, inst.cell_name));
+    }
+
+    write_instance_helper(name, inst, cellmap_iter->second);
 }
 
 SpiceBuilder::SpiceBuilder(const char *fname) : NetlistBuilder(fname) {
@@ -123,19 +147,8 @@ void SpiceBuilder::write_cv_header(const std::string &name,
     LineBuilder b(ncol, cnt_char, break_before);
     b << ".SUBCKT";
     b << name;
-    for (auto const &pair : in_terms) {
-        spirit::ast::name ast = parse_cdba_name(pair.first);
-        for (auto const &bit : ast) {
-            b << to_string_cdba(bit);
-        }
-    }
-    for (auto const &pair : out_terms) {
-        spirit::ast::name ast = parse_cdba_name(pair.first);
-        for (auto const &bit : ast) {
-            b << to_string_cdba(bit);
-        }
-    }
-    for (auto const &pair : io_terms) {
+    auto tmp_range = boost::join(in_terms, out_terms);
+    for (auto const &pair : boost::join(tmp_range, io_terms)) {
         spirit::ast::name ast = parse_cdba_name(pair.first);
         for (auto const &bit : ast) {
             b << to_string_cdba(bit);
@@ -149,7 +162,74 @@ void SpiceBuilder::write_cv_end(const std::string &name) {
     out_file << ".ENDS" << std::endl;
 }
 
-void SpiceBuilder::write_instance(const std::string &name,
-                                  const Instance &inst) {}
+// Boost visitor for recording parameter values
+class write_param_visitor : public boost::static_visitor<> {
+  public:
+    write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key)
+        : ptr(ptr), key(key) {}
+
+    // only support writing string values
+    void operator()(const std::string &v) const {
+        (*ptr) << fmt::format("{}={}", *key, v);
+    }
+    void operator()(const int32_t &v) const {}
+    void operator()(const double &v) const {}
+    void operator()(const bool &v) const {}
+    void operator()(const Time &v) const {}
+    void operator()(const Binary &v) const {}
+
+  private:
+    NetlistBuilder::LineBuilder *ptr;
+    const std::string *key;
+};
+
+void SpiceBuilder::write_instance_helper(const std::string &name,
+                                         const Instance &inst,
+                                         const SchCellViewInfo &info) {
+    LineBuilder b(ncol, cnt_char, break_before);
+
+    // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
+    // write instance name
+    b << name;
+
+    // write instance connections
+    auto tmp_range = boost::join(info.in_terms, info.out_terms);
+    for (auto const &term : boost::join(tmp_range, info.io_terms)) {
+        auto term_iter = inst.connections.find(term);
+        if (term_iter == inst.connections.end()) {
+            throw std::invalid_argument(
+                fmt::format("Cannot find net {} in cellview {}__{}", term,
+                            inst.lib_name, inst.cell_name));
+        }
+        b << term_iter->second;
+    }
+
+    // write instance cell name
+    b << inst.cell_name;
+
+    // get default parameter values
+    ParamMap par_map(info.props);
+    // update with instance parameters
+    for (auto const &pair : inst.params) {
+        par_map[pair.first] = pair.second;
+    }
+    // write instance parameters
+    for (auto const &pair : par_map) {
+        boost::apply_visitor(write_param_visitor(&b, &(pair.first)),
+                             pair.second);
+    }
+
+    out_file << b;
+}
+
+std::unique_ptr<NetlistBuilder>
+make_netlist_builder(const char *fname, const std::string &format) {
+    if (format == "spice") {
+        return std::make_unique<SpiceBuilder>(fname);
+    } else {
+        throw std::invalid_argument(
+            fmt::format("Unrecognized netlist format: {}", format));
+    }
+}
 
 } // namespace cbag

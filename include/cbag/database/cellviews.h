@@ -23,6 +23,18 @@ struct Instance;
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
 using inst_iter_t = std::map<std::string, Instance>::iterator;
 
+/** A simple struct representing netlist information of a cellview.
+ */
+struct SchCellViewInfo {
+    SchCellViewInfo() = default;
+
+    SchCellViewInfo(size_t num_in, size_t num_out, size_t num_inout)
+        : in_terms(num_in), out_terms(num_out), io_terms(num_inout) {}
+
+    std::vector<std::string> in_terms, out_terms, io_terms;
+    ParamMap props;
+};
+
 /** A schematic or symbol cell view
  *
  */
@@ -62,19 +74,14 @@ struct SchCellView {
                    const std::vector<std::string> &name_list, coord_t dx,
                    coord_t dy, const std::vector<conn_list_t> &conns_list);
 
+    SchCellViewInfo get_info() const;
+
     std::string lib_name, cell_name, view_name;
     std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
     std::vector<Shape> shapes;
     std::map<std::string, Instance> instances;
     ParamMap props;
     ParamMap app_defs;
-};
-
-struct SchCellViewInfo {
-    SchCellViewInfo() = default;
-
-    std::vector<std::string> in_terms, out_terms, io_terms;
-    ParamMap props;
 };
 
 // netlist map typedefs and functions

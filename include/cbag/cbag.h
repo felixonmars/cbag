@@ -8,6 +8,9 @@
 #ifndef CBAG_CBAG_H
 #define CBAG_CBAG_H
 
+#include <string>
+#include <vector>
+
 #include <cbag/database/cellviews.h>
 #include <cbag/database/datatypes.h>
 #include <cbag/database/figures.h>
@@ -19,6 +22,11 @@ namespace cbag {
 void init_logging();
 
 void to_file(const SchCellView &cv, const char *fname);
+
+void write_netlist(const std::vector<SchCellView> &cv_list,
+                   const std::vector<std::string> &name_list,
+                   const char *cell_map, const char *format, bool flat,
+                   const char *fname);
 
 } // namespace cbag
 #endif // CBAG_CBAG_H

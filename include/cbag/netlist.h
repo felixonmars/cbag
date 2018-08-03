@@ -10,6 +10,7 @@
 
 #include <fstream>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -35,6 +36,8 @@ struct SchCellView;
 struct SchCellViewInfo;
 struct PinFigure;
 using term_t = std::map<std::string, PinFigure>;
+using lib_map_t = std::unordered_map<std::string, SchCellViewInfo>;
+using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
 // netlister base class
 
@@ -66,12 +69,18 @@ class NetlistBuilder {
 
     explicit NetlistBuilder(const char *fname);
 
+    void init();
+
     void build();
 
-    void add_cellview(const std::string &name, const SchCellView &cv);
+    void add_cellview(const std::string &name, const SchCellView &cv,
+                      const netlist_map_t &cell_map);
 
   protected:
     std::ofstream out_file;
+
+    void write_instance(const std::string &name, const Instance &inst,
+                        const netlist_map_t &cell_map);
 
   private:
     virtual void write_header() = 0;
@@ -85,13 +94,14 @@ class NetlistBuilder {
 
     virtual void write_cv_end(const std::string &name) = 0;
 
-    virtual void write_instance(const std::string &name,
-                                const Instance &inst) = 0;
+    virtual void write_instance_helper(const std::string &name,
+                                       const Instance &inst,
+                                       const SchCellViewInfo &info) = 0;
 };
 
 // Spice netlister
 
-class SpiceBuilder : NetlistBuilder {
+class SpiceBuilder : public NetlistBuilder {
   public:
     explicit SpiceBuilder(const char *fname);
 
@@ -106,12 +116,17 @@ class SpiceBuilder : NetlistBuilder {
 
     void write_cv_end(const std::string &name) override;
 
-    void write_instance(const std::string &name, const Instance &inst) override;
+    void write_instance_helper(const std::string &name, const Instance &inst,
+                               const SchCellViewInfo &info) override;
 
     static const size_t ncol = 80;
     static const char cnt_char = '+';
     static const bool break_before = false;
 };
+
+std::unique_ptr<NetlistBuilder> make_netlist_builder(const char *fname,
+                                                     const std::string &format);
+
 } // namespace cbag
 
 #endif // CBAG_NETLIST_H
