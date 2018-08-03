@@ -42,145 +42,160 @@ message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
-        $ENV{OA_INCLUDE_DIR}
-        ${Boost_INCLUDE_DIRS}
-        ${YAML_CPP_INCLUDE_DIR}
-        )
+  $ENV{OA_INCLUDE_DIR}
+  ${Boost_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
+  )
 
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAG
-        ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
-        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_shapes.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/figures.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/netlist.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
-        )
+  ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
+  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_shapes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/netlist.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
+  )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
 target_link_libraries(cbag
-        PUBLIC
-        # for primitives YAML serialization
-        oaBase
-        oaCommon
-        oaPlugIn
-        PRIVATE
-        # for primitives YAML serialization
-        yaml-cpp
-        fmt-header-only
-        # for Spirit X3 error code
-        boost_system
-        m
-        ${CMAKE_DL_LIBS}
-        )
+  PUBLIC
+  # for primitives YAML serialization
+  oaBase
+  oaCommon
+  oaPlugIn
+  PRIVATE
+  # for primitives YAML serialization
+  yaml-cpp
+  fmt-header-only
+  # for Spirit X3 error code
+  boost_system
+  m
+  ${CMAKE_DL_LIBS}
+  )
 
 set(SRC_FILES_LIB_CBAGOA
-        ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
-        ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp
-        ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
-        )
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp
+  ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
+  )
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies
 target_link_libraries(cbagoa
-        PUBLIC
-        cbag
-        boost_filesystem
-        boost_system
-        yaml-cpp
-        PRIVATE
-        oaDM
-        oaDMFileSysBase
-        oaTech
-        oaDesign
-        fmt-header-only
-        m
-        ${CMAKE_DL_LIBS}
-        )
+  PUBLIC
+  cbag
+  boost_filesystem
+  boost_system
+  yaml-cpp
+  PRIVATE
+  oaDM
+  oaDMFileSysBase
+  oaTech
+  oaDesign
+  fmt-header-only
+  m
+  ${CMAKE_DL_LIBS}
+  )
 
 set(SRC_FILES_OA
-        ${CMAKE_SOURCE_DIR}/test/test_oa.cpp
-        )
+  ${CMAKE_SOURCE_DIR}/test/test_oa.cpp
+  )
 add_executable(test_oa ${SRC_FILES_OA})
 
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_oa PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
-        )
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
 
 # shared library dependencies
 target_link_libraries(test_oa
-        cbagoa
-        )
+  cbagoa
+  )
 
 add_executable(test_spirit
-        ${CMAKE_SOURCE_DIR}/test/test_spirit.cpp
-        )
+  ${CMAKE_SOURCE_DIR}/test/test_spirit.cpp
+  )
 
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_spirit PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
-        )
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
 
 target_link_libraries(test_spirit
-        cbag
-        yaml-cpp
-        boost_system
-        )
-
+  cbag
+  yaml-cpp
+  boost_system
+  )
 
 add_executable(read_prop
-        ${CMAKE_SOURCE_DIR}/test/read_prop.cpp
-        )
+  ${CMAKE_SOURCE_DIR}/test/read_prop.cpp
+  )
 
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(read_prop PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
-        )
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
 
 # shared library dependencies
 target_link_libraries(read_prop
-        oaCommon
-        oaBase
-        oaPlugIn
-        oaDM
-        oaDMFileSysBase
-        oaTech
-        oaDesign
-        ${CMAKE_DL_LIBS}
-        )
+  oaCommon
+  oaBase
+  oaPlugIn
+  oaDM
+  oaDMFileSysBase
+  oaTech
+  oaDesign
+  ${CMAKE_DL_LIBS}
+  )
 
 add_executable(test_yaml
-        ${CMAKE_SOURCE_DIR}/test/test_yaml.cpp
-        )
+  ${CMAKE_SOURCE_DIR}/test/test_yaml.cpp
+  )
 
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
 set_target_properties(test_yaml PROPERTIES
-        INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
-        )
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
 
 # shared library dependencies
 target_link_libraries(test_yaml
-        fmt-header-only
-        yaml-cpp
-        )
+  fmt-header-only
+  yaml-cpp
+  )
 
+add_executable(netmap_sample
+  ${CMAKE_SOURCE_DIR}/test/netmap_sample.cpp
+  )
 
-install(TARGETS test_oa test_spirit cbag cbagoa read_prop test_yaml
-        RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
-        LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib)
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(netmap_sample PROPERTIES
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
+
+# shared library dependencies
+target_link_libraries(netmap_sample
+  cbag
+  yaml-cpp
+  )
+
+install(TARGETS test_oa test_spirit cbag cbagoa read_prop test_yaml netmap_sample
+  RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
+  LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
+  )
