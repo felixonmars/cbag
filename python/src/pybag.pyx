@@ -360,10 +360,11 @@ cdef class PySchCellView:
         cdef vector[string] cname_list
         cdef vector[vector[pair[string, string]]] conns_list
         cdef char* cname = pyname
-        cname_list.resize(num_inst)
+        cname_list.reserve(num_inst)
         conns_list.resize(num_inst)
         for idx, (nn, term) in enumerate(zip(name_list, term_list)):
-            cname_list[idx] = nn.encode(self.encoding)
+            cname_list.push_back(nn.encode(self.encoding))
+
             conns_list[idx].resize(len(term))
             for idx2, (key, val) in enumerate(term.items()):
                 conns_list[idx][idx2].first = key.encode(self.encoding)
@@ -383,7 +384,7 @@ cdef class PySchCellView:
             inst.set_master(orig_inst.master)
 
 
-def implement_netlist(content_list, cell_map, fmt, flat, encoding, fname):
+def implement_netlist(content_list, cell_map, fmt, fname, encoding='utf-8', flat=True):
     cdef vector[SchCellView *] cv_list
     cdef vector[string] name_list
 
