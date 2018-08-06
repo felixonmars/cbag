@@ -192,6 +192,7 @@ set_target_properties(netmap_sample PROPERTIES
 target_link_libraries(netmap_sample
   cbag
   yaml-cpp
+  boost_system
   )
 
 install(TARGETS test_oa test_spirit cbag cbagoa read_prop test_yaml netmap_sample

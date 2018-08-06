@@ -34,7 +34,6 @@ setup(
                                     ],
                                     extra_compile_args=[
                                         "-std=c++17",
-                                        "-Wno-unknown-pragmas",
                                         "-Wno-delete-non-virtual-dtor",
                                     ],
                                     extra_link_args=[

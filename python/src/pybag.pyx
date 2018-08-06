@@ -166,7 +166,8 @@ cdef class DesignInstance:
                 self.set_param(key, val)
 
     def implement_design(self, lib_name, top_cell_name='', prefix='', suffix='',
-                         debug=False, rename_dict=None, lib_path='', output='schematic'):
+                         debug=False, rename_dict=None, lib_path='', output='schematic',
+                         **kwargs):
         if not top_cell_name:
             top_cell_name = None
 
@@ -175,7 +176,8 @@ cdef class DesignInstance:
         self._db.cell_prefix = prefix
         self._db.cell_suffix = suffix
         self._db.instantiate_masters([self._master], [top_cell_name], lib_name=lib_name,
-                                     debug=debug, rename_dict=rename_dict, output=output)
+                                     debug=debug, rename_dict=rename_dict, output=output,
+                                     **kwargs)
 
 
 cdef class PySchInstance(DesignInstance):
