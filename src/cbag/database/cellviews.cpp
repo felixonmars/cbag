@@ -183,8 +183,9 @@ std::vector<inst_iter_t> SchCellView::array_instance(
     return ans;
 }
 
-SchCellViewInfo SchCellView::get_info() const {
-    SchCellViewInfo ans(in_terms.size(), out_terms.size(), io_terms.size());
+SchCellViewInfo SchCellView::get_info(const std::string &name) const {
+    SchCellViewInfo ans(name, in_terms.size(), out_terms.size(),
+                        io_terms.size());
 
     for (auto const &pair : in_terms) {
         ans.in_terms.push_back(pair.first);

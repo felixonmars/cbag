@@ -28,9 +28,12 @@ using inst_iter_t = std::map<std::string, Instance>::iterator;
 struct SchCellViewInfo {
     SchCellViewInfo() = default;
 
-    SchCellViewInfo(size_t num_in, size_t num_out, size_t num_inout)
-        : in_terms(num_in), out_terms(num_out), io_terms(num_inout) {}
+    SchCellViewInfo(std::string name, size_t num_in, size_t num_out,
+                    size_t num_inout)
+        : cell_name(std::move(name)), in_terms(num_in), out_terms(num_out),
+          io_terms(num_inout) {}
 
+    std::string cell_name;
     std::vector<std::string> in_terms, out_terms, io_terms;
     ParamMap props;
 };
@@ -74,7 +77,7 @@ struct SchCellView {
                    const std::vector<std::string> &name_list, coord_t dx,
                    coord_t dy, const std::vector<conn_list_t> &conns_list);
 
-    SchCellViewInfo get_info() const;
+    SchCellViewInfo get_info(const std::string &cell_name) const;
 
     std::string lib_name, cell_name, view_name;
     std::map<std::string, PinFigure> in_terms, out_terms, io_terms;

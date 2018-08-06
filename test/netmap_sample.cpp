@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     cbag::lib_map_t lib_map;
     cbag::netlist_map_t net_map;
 
+    info.cell_name = "nlvt";
     info.io_terms.push_back("D");
     info.io_terms.push_back("G");
     info.io_terms.push_back("B");
@@ -15,7 +16,7 @@ int main(int argc, char *argv[]) {
     info.props.emplace("l", std::string("16n"));
     info.props.emplace("nf", std::string("2"));
 
-    lib_map.emplace("nch", info);
+    lib_map.emplace("nlvt", info);
     net_map.emplace("cds_ff_mpt", lib_map);
 
     YAML::Emitter emitter;
