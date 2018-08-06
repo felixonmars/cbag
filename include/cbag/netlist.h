@@ -73,7 +73,7 @@ class NetlistBuilder {
 
     void build();
 
-    void add_cellview(const std::string &name, const SchCellView &cv,
+    void add_cellview(const std::string &name, SchCellView *cv,
                       const netlist_map_t &cell_map);
 
   protected:

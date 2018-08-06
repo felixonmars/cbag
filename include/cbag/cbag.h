@@ -23,7 +23,7 @@ void init_logging();
 
 void to_file(const SchCellView &cv, const char *fname);
 
-void write_netlist(const std::vector<SchCellView> &cv_list,
+void write_netlist(const std::vector<SchCellView *> &cv_list,
                    const std::vector<std::string> &name_list,
                    const char *cell_map, const char *format, bool flat,
                    const char *fname);

@@ -101,11 +101,10 @@ void NetlistBuilder::build() {
     out_file.close();
 }
 
-void NetlistBuilder::add_cellview(const std::string &name,
-                                  const SchCellView &cv,
+void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
                                   const netlist_map_t &cell_map) {
-    write_cv_header(name, cv.in_terms, cv.out_terms, cv.io_terms);
-    for (auto const &p : cv.instances) {
+    write_cv_header(name, cv->in_terms, cv->out_terms, cv->io_terms);
+    for (auto const &p : cv->instances) {
         write_instance(p.first, p.second, cell_map);
     }
     write_cv_end(name);
@@ -165,7 +164,8 @@ void SpiceBuilder::write_cv_end(const std::string &name) {
 // Boost visitor for recording parameter values
 class write_param_visitor : public boost::static_visitor<> {
   public:
-    write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key)
+    write_param_visitor(NetlistBuilder::LineBuilder *ptr,
+                        const std::string *key)
         : ptr(ptr), key(key) {}
 
     // only support writing string values

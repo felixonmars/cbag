@@ -19,10 +19,10 @@ ctypedef map[string, Instance].iterator inst_iter_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
-    
+
     cdef cppclass PinFigure:
         pass
-    
+
     cdef cppclass Instance:
         string lib_name
         string cell_name
@@ -41,7 +41,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
         void update_connection(const string& inst_name, const char* term,
                                const char* net) except +
-        
+
     cdef cppclass SchCellView:
         string lib_name
         string cell_name
@@ -80,6 +80,10 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
                                            int dx, int dy,
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
+    cdef void write_netlist(const vector[SchCellView *]& cv_list, const vector[string]& name_list,
+                            const char* cell_map, const char* format, cbool flat,
+                            const char* fname) except +
+
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass OADatabase:
@@ -97,6 +101,7 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                         const char* new_root_path,
                                                         const unordered_map[string, string]& lib_map,
                                                         const unordered_set[string]& exclude_libs) except +
+
 
 # initialize logging
 init_logging()
@@ -246,8 +251,8 @@ cdef class PySchInstance(DesignInstance):
 
     def get_master_lib_name(self, impl_lib):
         return self.gen_lib_name if self.is_primitive else impl_lib
-    
-    
+
+
 cdef class PySchCellView:
     cdef unique_ptr[SchCellView] cv_ptr
     cdef unicode encoding
@@ -377,7 +382,31 @@ cdef class PySchCellView:
             inst.ptr = results[idx]
             inst.set_master(orig_inst.master)
 
-    
+
+def implement_netlist(content_list, cell_map, fmt, flat, encoding, fname):
+    cdef vector[SchCellView *] cv_list
+    cdef vector[string] name_list
+
+    cell_map = cell_map.encode(encoding)
+    fmt = fmt.encode(encoding)
+    fname = fname.encode(encoding)
+
+    cdef char* cell_map_str = cell_map
+    cdef char* fmt_str = fmt
+    cdef char* fname_str = fname
+
+    num = len(content_list)
+    cv_list.reserve(num)
+    name_list.reserve(num)
+    for name, cv in content_list:
+        name_list.push_back(name.encode(encoding))
+        _add_py_cv(cv_list, cv)
+
+    write_netlist(cv_list, name_list, cell_map_str, fmt_str, flat, fname_str)
+
+cdef _add_py_cv(vector[SchCellView *]& cv_list, PySchCellView pycv):
+    cv_list.push_back(pycv.cv_ptr.get())
+
 cdef class PyOADatabase:
     cdef unique_ptr[OADatabase] db_ptr
     cdef unicode encoding
