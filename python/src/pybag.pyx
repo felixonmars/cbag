@@ -126,6 +126,10 @@ cdef class DesignInstance:
     def master(self):
         return self._master
 
+    @master.setter
+    def master(self, new_master):
+        self._master = new_master
+
     @property
     def gen_lib_name(self):
         return self._lib_name
@@ -133,9 +137,6 @@ cdef class DesignInstance:
     @property
     def gen_cell_name(self):
         return self._cell_name
-
-    def set_master(self, new_master):
-        self._master = new_master
 
     def set_param(self, key, val):
         raise Exception('Cannot set parameters on a DesignInstance; '
@@ -383,7 +384,7 @@ cdef class PySchCellView:
         for idx, nn in enumerate(name_list):
             inst = inst_dict[nn] = PySchInstance(db, self.encoding, is_static)
             inst.ptr = results[idx]
-            inst.set_master(orig_inst.master)
+            inst.master = orig_inst.master
 
 
 def implement_netlist(content_list, cell_map, fmt, fname, encoding='utf-8', flat=True):
