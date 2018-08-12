@@ -99,11 +99,11 @@ class NetlistBuilder {
                                        const SchCellViewInfo &info) = 0;
 };
 
-// Spice netlister
+// CDL netlister
 
-class SpiceBuilder : public NetlistBuilder {
+class CDLBuilder : public NetlistBuilder {
   public:
-    explicit SpiceBuilder(const char *fname);
+    explicit CDLBuilder(const char *fname);
 
   private:
     void write_header() override;

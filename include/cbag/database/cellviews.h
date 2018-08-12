@@ -26,16 +26,18 @@ using inst_iter_t = std::map<std::string, Instance>::iterator;
 /** A simple struct representing netlist information of a cellview.
  */
 struct SchCellViewInfo {
-    SchCellViewInfo() = default;
+    SchCellViewInfo()
+            : cell_name(), in_terms(), out_terms(), io_terms(), props(), is_prim(false) {}
 
     SchCellViewInfo(std::string name, size_t num_in, size_t num_out,
-                    size_t num_inout)
+                    size_t num_inout, bool is_prim)
         : cell_name(std::move(name)), in_terms(num_in), out_terms(num_out),
-          io_terms(num_inout) {}
+          io_terms(num_inout), props(), is_prim(is_prim) {}
 
     std::string cell_name;
     std::vector<std::string> in_terms, out_terms, io_terms;
     ParamMap props;
+    bool is_prim;
 };
 
 /** A schematic or symbol cell view

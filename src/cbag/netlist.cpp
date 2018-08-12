@@ -128,21 +128,21 @@ void NetlistBuilder::write_instance(const std::string &name,
     write_instance_helper(name, inst, cellmap_iter->second);
 }
 
-SpiceBuilder::SpiceBuilder(const char *fname) : NetlistBuilder(fname) {
+CDLBuilder::CDLBuilder(const char *fname) : NetlistBuilder(fname) {
     write_header();
 }
 
-void SpiceBuilder::write_header() {
+void CDLBuilder::write_header() {
     out_file << ".PARAM" << std::endl;
     out_file << std::endl;
 }
 
-void SpiceBuilder::write_end() {}
+void CDLBuilder::write_end() {}
 
-void SpiceBuilder::write_cv_header(const std::string &name,
-                                   const term_t &in_terms,
-                                   const term_t &out_terms,
-                                   const term_t &io_terms) {
+void CDLBuilder::write_cv_header(const std::string &name,
+                                 const term_t &in_terms,
+                                 const term_t &out_terms,
+                                 const term_t &io_terms) {
     LineBuilder b(ncol, cnt_char, break_before);
     b << ".SUBCKT";
     b << name;
@@ -157,7 +157,7 @@ void SpiceBuilder::write_cv_header(const std::string &name,
     out_file << b;
 }
 
-void SpiceBuilder::write_cv_end(const std::string &name) {
+void CDLBuilder::write_cv_end(const std::string &name) {
     out_file << ".ENDS" << std::endl;
 }
 
@@ -183,9 +183,9 @@ class write_param_visitor : public boost::static_visitor<> {
     const std::string *key;
 };
 
-void SpiceBuilder::write_instance_helper(const std::string &name,
-                                         const Instance &inst,
-                                         const SchCellViewInfo &info) {
+void CDLBuilder::write_instance_helper(const std::string &name,
+                                       const Instance &inst,
+                                       const SchCellViewInfo &info) {
     LineBuilder b(ncol, cnt_char, break_before);
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
@@ -224,8 +224,8 @@ void SpiceBuilder::write_instance_helper(const std::string &name,
 
 std::unique_ptr<NetlistBuilder>
 make_netlist_builder(const char *fname, const std::string &format) {
-    if (format == "spice") {
-        return std::make_unique<SpiceBuilder>(fname);
+    if (format == "cdl") {
+        return std::make_unique<CDLBuilder>(fname);
     } else {
         throw std::invalid_argument(
             fmt::format("Unrecognized netlist format: {}", format));
