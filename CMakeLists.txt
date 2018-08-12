@@ -7,7 +7,12 @@ project(cbag)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions -g -Wall -Wno-delete-non-virtual-dtor")
+add_compile_options(-fexceptions)
+add_compile_options(-g)
+add_compile_options(-Wall)
+add_compile_options(-Wno-delete-non-virtual-dtor)
+# add_compile_options(-Wno-logical-op-parentheses)
+# add_compile_options(-Wno-new-returns-null)
 # set optimzation level for release
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # generate compilation commands file for emacs

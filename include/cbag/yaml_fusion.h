@@ -17,23 +17,27 @@
 #include <boost/mpl/range_c.hpp>
 #include <boost/mpl/size.hpp>
 
+// boost::fusion
+#include <boost/fusion/adapted.hpp>
+#include <boost/fusion/include/adapted.hpp>
+
 // boost::fusion::extension::struct_member_name
-#include <boost/fusion/adapted/struct/detail/extension.hpp>
+//#include <boost/fusion/adapted/struct/detail/extension.hpp>
 
 // boost::fusion::result_of::value_at
-#include <boost/fusion/include/value_at.hpp>
-#include <boost/fusion/sequence/intrinsic/value_at.hpp>
+//#include <boost/fusion/include/value_at.hpp>
+//#include <boost/fusion/sequence/intrinsic/value_at.hpp>
 
 // boost::fusion::result_of::size
-#include <boost/fusion/include/size.hpp>
-#include <boost/fusion/sequence/intrinsic/size.hpp>
+//#include <boost/fusion/include/size.hpp>
+//#include <boost/fusion/sequence/intrinsic/size.hpp>
 
 // BOOST_TYPEOF
-#include <boost/typeof/typeof.hpp>
+//#include <boost/typeof/typeof.hpp>
 
 // boost::fusion::at
-#include <boost/fusion/include/at.hpp>
-#include <boost/fusion/sequence/intrinsic/at.hpp>
+//#include <boost/fusion/include/at.hpp>
+//#include <boost/fusion/sequence/intrinsic/at.hpp>
 
 // boost::fusion::for_each
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
@@ -167,7 +171,7 @@ template <typename T> struct extractor {
         // Try to load the value from the file
         try {
             // Extract this field from the yaml node
-            member = mSubroot[field_name].as<FieldType>();
+            member = mSubroot[field_name].template as<FieldType>();
 
             // This item number helps us find issues when loading incomplete
             // yaml files
