@@ -4,7 +4,6 @@
 
 # emacs related files
 TAGS
-compile_commands.json
 
 # CMake related files
 build
