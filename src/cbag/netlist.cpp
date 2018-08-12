@@ -205,6 +205,9 @@ void CDLBuilder::write_instance_helper(const std::string &name,
     }
 
     // write instance cell name
+    if (!info.is_prim) {
+        b << "/";
+    }
     b << inst.cell_name;
 
     // get default parameter values
