@@ -377,8 +377,8 @@ cdef class PySchCellView:
         cdef vector[inst_iter_t] results
         results = deref(self.cv_ptr).array_instance(cname, cname_list, dx, dy, conns_list)
         
-        # populate instance dictionary
-        orig_inst = inst_dict[name]
+        # populate instance dictionary, remove original instance
+        orig_inst = inst_dict.pop(name)
         db = orig_inst.database
         is_static = orig_inst.static
         for idx, nn in enumerate(name_list):

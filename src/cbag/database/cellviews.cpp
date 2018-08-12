@@ -180,6 +180,9 @@ std::vector<inst_iter_t> SchCellView::array_instance(
         ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx,
                                  conns_list[idx]);
     }
+
+    // remove original instance
+    remove_instance(old_name);
     return ans;
 }
 
