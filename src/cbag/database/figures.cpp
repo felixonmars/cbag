@@ -27,7 +27,7 @@ void Instance::set_bool_param(const char *name, bool value) {
 }
 
 void Instance::set_string_param(const char *name, const char *value) {
-    params[name] = value;
+    params[name] = std::string(value);
 }
 
 void Instance::update_connection(const std::string &inst_name, const char *term,

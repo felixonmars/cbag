@@ -180,11 +180,21 @@ class write_param_visitor : public boost::static_visitor<> {
     void operator()(const std::string &v) const {
         (*ptr) << fmt::format("{}={}", *key, v);
     }
-    void operator()(const int32_t &v) const {}
-    void operator()(const double &v) const {}
-    void operator()(const bool &v) const {}
-    void operator()(const Time &v) const {}
-    void operator()(const Binary &v) const {}
+    void operator()(const int32_t &v) const {
+        LOG(WARNING) << "integer parameter, do nothing.";
+    }
+    void operator()(const double &v) const {
+        LOG(WARNING) << "double parameter, do nothing.";
+    }
+    void operator()(const bool &v) const {
+        LOG(WARNING) << "bool parameter, do nothing.";
+    }
+    void operator()(const Time &v) const {
+        LOG(WARNING) << "time parameter, do nothing.";
+    }
+    void operator()(const Binary &v) const {
+        LOG(WARNING) << "binary parameter, do nothing.";
+    }
 
   private:
     NetlistBuilder::LineBuilder *ptr;

@@ -243,14 +243,16 @@ cdef class PySchInstance(DesignInstance):
         deref(self.ptr).second.connections.clear()
 
     def set_param(self, key, val):
+        pykey = key.encode(self.encoding)
         if isinstance(val, str):
-            deref(self.ptr).second.set_string_param(key.encode(self.encoding), val.encode(self.encoding))
+            pyval = val.encode(self.encoding)
+            deref(self.ptr).second.set_string_param(pykey, pyval)
         elif isinstance(val, numbers.Integral):
-            deref(self.ptr).second.set_int_param(key.encode(self.encoding), val)
+            deref(self.ptr).second.set_int_param(pykey, val)
         elif isinstance(val, numbers.Real):
-            deref(self.ptr).second.set_double_param(key.encode(self.encoding), val)
+            deref(self.ptr).second.set_double_param(pykey, val)
         elif isinstance(val, bool):
-            deref(self.ptr).second.set_bool_param(key.encode(self.encoding), val)
+            deref(self.ptr).second.set_bool_param(pykey, val)
         else:
             raise ValueError('Unsupported value for key {}: {}'.format(key, val))
 
