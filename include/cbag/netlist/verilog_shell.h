@@ -5,17 +5,17 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_NETLIST_CDL_H
-#define CBAG_NETLIST_CDL_H
+#ifndef CBAG_NETLIST_VERILOG_SHELL_H
+#define CBAG_NETLIST_VERILOG_SHELL_H
 
 #include <cbag/netlist/netlist.h>
 
 
 namespace cbag {
 
-class CDLBuilder : public NetlistBuilder {
+class VerilogShellBuilder : public NetlistBuilder {
   public:
-    explicit CDLBuilder(const char *fname) : NetlistBuilder(fname) {}
+    explicit VerilogShellBuilder(const char *fname) : NetlistBuilder(fname) {}
 
   private:
     void write_header(const std::vector<std::string> &inc_list) override;
@@ -31,12 +31,12 @@ class CDLBuilder : public NetlistBuilder {
     void write_instance_helper(const std::string &name, const Instance &inst,
                                const SchCellViewInfo &info) override;
 
-    static const size_t ncol = 80;
-    static const char cnt_char = '+';
-    static const bool break_before = false;
-    static const int tab_size = 0;
+    static const size_t ncol = 120;
+    static const char cnt_char = '\0';
+    static const bool break_before = true;
+    static const int tab_size = 4;
 };
 
 } // namespace cbag
 
-#endif // CBAG_NETLIST_CDL_H
+#endif // CBAG_NETLIST_VERILOG_SHELL_H

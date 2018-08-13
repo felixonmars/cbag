@@ -37,9 +37,8 @@ class NetlistBuilder {
      */
     class LineBuilder {
       public:
-        LineBuilder(size_t ncol, char cnt_char, bool break_before)
-            : tokens(), ncol(ncol), cnt_char(cnt_char),
-              break_before(break_before) {}
+        LineBuilder(size_t ncol, char cnt_char, bool break_before,
+                    int tab_size);
 
         friend LineBuilder &operator<<(LineBuilder &builder,
                                        const std::string &token);
@@ -55,6 +54,7 @@ class NetlistBuilder {
         size_t ncol;
         char cnt_char;
         bool break_before;
+        int tab_size;
     };
 
     explicit NetlistBuilder(const char *fname);

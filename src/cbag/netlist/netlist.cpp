@@ -14,6 +14,11 @@
 
 namespace cbag {
 
+NetlistBuilder::LineBuilder::LineBuilder(size_t ncol, char cnt_char,
+                                         bool break_before, int tab_size)
+    : tokens(), ncol(ncol), cnt_char(cnt_char), break_before(break_before),
+      tab_size(tab_size) {}
+
 NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
                                         const std::string &token) {
     builder.tokens.push_back(token);
@@ -29,6 +34,7 @@ NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
 std::ofstream &operator<<(std::ofstream &stream,
                           const NetlistBuilder::LineBuilder &b) {
     size_t num_tokens = b.tokens.size();
+    int tab_size = b.tab_size;
     if (num_tokens == 0) {
         return stream;
     }
@@ -42,9 +48,21 @@ std::ofstream &operator<<(std::ofstream &stream,
             cur_col += n + 1;
         } else {
             // line break
-            if (b.break_before) {
-                stream << ' ' << b.cnt_char << std::endl << b.tokens[idx];
-                cur_col = n;
+            if (b.cnt_char == '\0') {
+                // no line break character
+                stream << std::endl;
+                for (int cnt = 0; cnt < tab_size; ++cnt) {
+                    stream << ' ';
+                }
+                stream << b.tokens[idx];
+                cur_col = n + tab_size;
+            } else if (b.break_before) {
+                stream << ' ' << b.cnt_char << std::endl;
+                for (int cnt = 0; cnt < tab_size; ++cnt) {
+                    stream << ' ';
+                }
+                stream << b.tokens[idx];
+                cur_col = n + tab_size;
             } else {
                 stream << std::endl << b.cnt_char << ' ' << b.tokens[idx];
                 cur_col = n + 2;

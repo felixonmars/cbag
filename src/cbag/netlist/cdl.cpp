@@ -31,7 +31,7 @@ void CDLBuilder::write_cv_header(const std::string &name,
                                  const term_t &in_terms,
                                  const term_t &out_terms,
                                  const term_t &io_terms) {
-    LineBuilder b(ncol, cnt_char, break_before);
+    LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << ".SUBCKT";
     b << name;
     auto tmp_range = boost::join(in_terms, out_terms);
@@ -52,7 +52,7 @@ void CDLBuilder::write_cv_end(const std::string &name) {
 void CDLBuilder::write_instance_helper(const std::string &name,
                                        const Instance &inst,
                                        const SchCellViewInfo &info) {
-    LineBuilder b(ncol, cnt_char, break_before);
+    LineBuilder b(ncol, cnt_char, break_before, tab_size);
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
     // write instance name

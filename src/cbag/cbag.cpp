@@ -14,6 +14,7 @@
 
 #include <cbag/database/yaml_cellviews.h>
 #include <cbag/netlist/cdl.h>
+#include <cbag/netlist/verilog_shell.h>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -33,6 +34,8 @@ std::unique_ptr<NetlistBuilder>
 make_netlist_builder(const char *fname, const std::string &format) {
     if (format == "cdl") {
         return std::make_unique<CDLBuilder>(fname);
+    } else if (format == "verilog_shell") {
+        return std::make_unique<VerilogShellBuilder>(fname);
     } else {
         throw std::invalid_argument(
             fmt::format("Unrecognized netlist format: {}", format));
