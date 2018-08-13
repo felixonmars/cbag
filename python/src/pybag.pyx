@@ -139,6 +139,10 @@ cdef class DesignInstance:
     def gen_cell_name(self):
         return self._cell_name
 
+    @property
+    def master_cell_name(self):
+        return self.gen_cell_name if self.master is None else self.master.cell_name
+
     def set_param(self, key, val):
         raise Exception('Cannot set parameters on a DesignInstance; '
                         'instance of primitive maters are not allowed.')
@@ -164,6 +168,7 @@ cdef class DesignInstance:
                                            design_fun=design_fun)
 
         if self._master.is_primitive():
+            # update parameters
             for key, val in self._master.get_schematic_parameters().items():
                 self.set_param(key, val)
 
@@ -221,12 +226,13 @@ cdef class PySchInstance(DesignInstance):
         return self.master is not None and self.master.should_delete_instance()
     
     @property
-    def master_cell_name(self):
-        return self.gen_cell_name if self.master is None else self.master.cell_name
-
-    @property
     def master_key(self):
         return self.master.key
+
+    def _update_master(self, design_fun, args, kwargs):
+        super(PySchInstance, self)._update_master(design_fun, args, kwargs)
+        # update instance cell name after master is updated
+        deref(self.ptr).second.cell_name = self.master_cell_name.encode(self.encoding)
 
     def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
         self.master = None
@@ -275,6 +281,10 @@ cdef class PySchCellView:
     @property
     def cell_name(self):
         return deref(self.cv_ptr).cell_name.decode(self.encoding)
+
+    @cell_name.setter
+    def cell_name(self, new_name):
+        deref(self.cv_ptr).cell_name = new_name.encode(self.encoding)
 
     @property
     def view_name(self):
