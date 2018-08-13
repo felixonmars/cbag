@@ -13,6 +13,15 @@
 #include <cbag/spirit/parsers.h>
 
 namespace cbag {
+
+SchCellViewInfo::SchCellViewInfo(std::string name, size_t num_in,
+                                 size_t num_out, size_t num_inout, bool is_prim)
+        : cell_name(name), is_prim(is_prim) {
+    in_terms.reserve(num_in);
+    out_terms.reserve(num_out);
+    io_terms.reserve(num_inout);
+}
+
 SchCellView::SchCellView(const std::string &yaml_fname) {
     YAML::Node n = YAML::LoadFile(yaml_fname);
     (*this) = n.as<SchCellView>();

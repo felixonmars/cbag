@@ -5,10 +5,11 @@
  *  \date   2018/07/10
  */
 
-#include <fmt/format.h>
-
 #include <boost/range/join.hpp>
 #include <boost/variant.hpp>
+
+#include <easylogging++.h>
+#include <fmt/format.h>
 
 #include <cbag/database/cellviews.h>
 #include <cbag/database/figures.h>
@@ -110,6 +111,7 @@ void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
         write_instance(p.first, p.second, cell_map);
     }
     write_cv_end(name);
+    out_file << std::endl;
 }
 
 void NetlistBuilder::write_instance(const std::string &name,
@@ -117,8 +119,9 @@ void NetlistBuilder::write_instance(const std::string &name,
                                     const netlist_map_t &cell_map) {
     auto libmap_iter = cell_map.find(inst.lib_name);
     if (libmap_iter == cell_map.end()) {
-        throw std::invalid_argument(fmt::format(
-            "Cannot find library {} in netlist map.", inst.lib_name));
+        throw std::invalid_argument(
+            fmt::format("Cannot find library {} in netlist map for cell {}.",
+                        inst.lib_name, inst.cell_name));
     }
     auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
     if (cellmap_iter == libmap_iter->second.end()) {
@@ -127,11 +130,14 @@ void NetlistBuilder::write_instance(const std::string &name,
                         inst.lib_name, inst.cell_name));
     }
 
-    write_instance_helper(name, inst, cellmap_iter->second);
+    // Only write instance if the name is not empty
+    if (!cellmap_iter->second.cell_name.empty()) {
+        write_instance_helper(name, inst, cellmap_iter->second);
+    }
 }
 
 void CDLBuilder::write_header(const std::vector<std::string> &inc_list) {
-    for(auto const &fname : inc_list) {
+    for (auto const &fname : inc_list) {
         out_file << ".INCLUDE " << fname << std::endl;
     }
     out_file << std::endl;
