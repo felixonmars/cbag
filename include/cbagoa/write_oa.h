@@ -12,29 +12,23 @@
 
 #include <cbag/cbag.h>
 
-
-namespace bsa = cbag::spirit::ast;
-
 namespace cbagoa {
 
-    class OAWriter {
-    public:
+class OAWriter {
+  public:
+    explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)){};
 
-        explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
+    // Write method for schematic/symbol cell view
 
-        // Write method for schematic/symbol cell view
+    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn);
 
-        void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn);
+  private:
+    void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
+                             const std::map<std::string, cbag::PinFigure> &map,
+                             oa::oaTermTypeEnum term_type);
 
-    private:
+    const oa::oaCdbaNS ns;
+};
+} // namespace cbagoa
 
-        void
-        create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                            const std::map<std::string, cbag::PinFigure> &map,
-                            oa::oaTermTypeEnum term_type);
-
-        const oa::oaCdbaNS ns;
-    };
-}
-
-#endif //CBAGOA_WRITE_OA_H
+#endif // CBAGOA_WRITE_OA_H

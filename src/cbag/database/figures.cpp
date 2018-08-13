@@ -9,6 +9,7 @@
 
 #include <cbag/cbag.h>
 #include <cbag/database/figures.h>
+#include <cbag/netlist/name_convert.h>
 
 namespace cbag {
 

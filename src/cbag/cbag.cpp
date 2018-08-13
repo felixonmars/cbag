@@ -13,7 +13,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/database/yaml_cellviews.h>
-#include <cbag/netlist.h>
+#include <cbag/netlist/cdl.h>
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -27,6 +27,16 @@ void to_file(const SchCellView &cv, const char *fname) {
     emitter << node;
     outfile << emitter.c_str() << std::endl;
     outfile.close();
+}
+
+std::unique_ptr<NetlistBuilder>
+make_netlist_builder(const char *fname, const std::string &format) {
+    if (format == "cdl") {
+        return std::make_unique<CDLBuilder>(fname);
+    } else {
+        throw std::invalid_argument(
+            fmt::format("Unrecognized netlist format: {}", format));
+    }
 }
 
 void write_netlist(const std::vector<SchCellView *> &cv_list,

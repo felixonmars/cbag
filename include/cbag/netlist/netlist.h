@@ -5,8 +5,8 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_NETLIST_H
-#define CBAG_NETLIST_H
+#ifndef CBAG_NETLIST_NETLIST_H
+#define CBAG_NETLIST_NETLIST_H
 
 #include <fstream>
 #include <map>
@@ -15,19 +15,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include <cbag/spirit/ast.h>
+#include <cbag/netlist/name_convert.h>
 
 namespace cbag {
-
-// string <-> name conversion methods
-
-spirit::ast::name_unit parse_cdba_name_unit(const std::string &source);
-
-spirit::ast::name parse_cdba_name(const std::string &source);
-
-spirit::ast::name parse_cdba_name(const char *source);
-
-std::string to_string_cdba(const spirit::ast::name_bit &bit);
 
 // forward declarations and type defs
 
@@ -99,34 +89,23 @@ class NetlistBuilder {
                                        const SchCellViewInfo &info) = 0;
 };
 
-// CDL netlister
-
-class CDLBuilder : public NetlistBuilder {
+class write_param_visitor : public boost::static_visitor<> {
   public:
-    explicit CDLBuilder(const char *fname) : NetlistBuilder(fname) {}
+    write_param_visitor(NetlistBuilder::LineBuilder *ptr,
+                        const std::string *key);
+
+    void operator()(const std::string &v) const;
+    void operator()(const int32_t &v) const;
+    void operator()(const double &v) const;
+    void operator()(const bool &v) const;
+    void operator()(const Time &v) const;
+    void operator()(const Binary &v) const;
 
   private:
-    void write_header(const std::vector<std::string> &inc_list) override;
-
-    void write_end() override;
-
-    void write_cv_header(const std::string &name, const term_t &in_terms,
-                         const term_t &out_terms,
-                         const term_t &io_terms) override;
-
-    void write_cv_end(const std::string &name) override;
-
-    void write_instance_helper(const std::string &name, const Instance &inst,
-                               const SchCellViewInfo &info) override;
-
-    static const size_t ncol = 80;
-    static const char cnt_char = '+';
-    static const bool break_before = false;
+    NetlistBuilder::LineBuilder *ptr;
+    const std::string *key;
 };
-
-std::unique_ptr<NetlistBuilder> make_netlist_builder(const char *fname,
-                                                     const std::string &format);
 
 } // namespace cbag
 
-#endif // CBAG_NETLIST_H
+#endif // CBAG_NETLIST_NETLIST_H
