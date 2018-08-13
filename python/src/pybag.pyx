@@ -12,6 +12,7 @@ from libcpp.vector cimport vector
 from libcpp.unordered_map cimport unordered_map
 from libcpp.unordered_set cimport unordered_set
 
+import os
 import numbers
 
 
@@ -81,8 +82,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
     cdef void write_netlist(const vector[SchCellView *]& cv_list, const vector[string]& name_list,
-                            const char* cell_map, const char* format, cbool flat,
-                            const char* fname) except +
+                            const char* cell_map, const vector[string]& inc_list, const char* fmt,
+                            cbool flat, const char* fname) except +
 
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
@@ -387,9 +388,9 @@ cdef class PySchCellView:
             inst.master = orig_inst.master
 
 
-def implement_netlist(content_list, cell_map, fmt, fname, encoding='utf-8', flat=True):
+def implement_netlist(content_list, cell_map, inc_list, fmt, fname, encoding='utf-8', flat=True):
     cdef vector[SchCellView *] cv_list
-    cdef vector[string] name_list
+    cdef vector[string] name_list, cinc_list
 
     cell_map = cell_map.encode(encoding)
     fmt = fmt.encode(encoding)
@@ -399,14 +400,21 @@ def implement_netlist(content_list, cell_map, fmt, fname, encoding='utf-8', flat
     cdef char* fmt_str = fmt
     cdef char* fname_str = fname
 
-    num = len(content_list)
+    cdef int num = len(content_list)
     cv_list.reserve(num)
     name_list.reserve(num)
     for name, cv in content_list:
         name_list.push_back(name.encode(encoding))
         _add_py_cv(cv_list, cv)
 
-    write_netlist(cv_list, name_list, cell_map_str, fmt_str, flat, fname_str)
+    cdef int ninc = len(inc_list)
+    cinc_list.reserve(ninc)
+    for fname in inc_list:
+        if not os.path.isfile(fname):
+            raise ValueError('Cannot find netlist include file: {}'.format(fname))
+        cinc_list.push_back(fname.encode(encoding))
+
+    write_netlist(cv_list, name_list, cell_map_str, cinc_list, fmt_str, flat, fname_str)
 
 cdef _add_py_cv(vector[SchCellView *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())

@@ -94,7 +94,9 @@ std::ofstream &operator<<(std::ofstream &stream,
 NetlistBuilder::NetlistBuilder(const char *fname)
     : out_file(fname, std::ios_base::out) {}
 
-void NetlistBuilder::init() { write_header(); }
+void NetlistBuilder::init(const std::vector<std::string> &inc_list) {
+    write_header(inc_list);
+}
 
 void NetlistBuilder::build() {
     write_end();
@@ -128,11 +130,11 @@ void NetlistBuilder::write_instance(const std::string &name,
     write_instance_helper(name, inst, cellmap_iter->second);
 }
 
-CDLBuilder::CDLBuilder(const char *fname) : NetlistBuilder(fname) {
-    write_header();
-}
-
-void CDLBuilder::write_header() {
+void CDLBuilder::write_header(const std::vector<std::string> &inc_list) {
+    for(auto const &fname : inc_list) {
+        out_file << ".INCLUDE " << fname << std::endl;
+    }
+    out_file << std::endl;
     out_file << ".PARAM" << std::endl;
     out_file << std::endl;
 }

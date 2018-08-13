@@ -69,7 +69,7 @@ class NetlistBuilder {
 
     explicit NetlistBuilder(const char *fname);
 
-    void init();
+    void init(const std::vector<std::string> &inc_list);
 
     void build();
 
@@ -83,7 +83,7 @@ class NetlistBuilder {
                         const netlist_map_t &cell_map);
 
   private:
-    virtual void write_header() = 0;
+    virtual void write_header(const std::vector<std::string> &inc_list) = 0;
 
     virtual void write_end() = 0;
 
@@ -103,10 +103,10 @@ class NetlistBuilder {
 
 class CDLBuilder : public NetlistBuilder {
   public:
-    explicit CDLBuilder(const char *fname);
+    explicit CDLBuilder(const char *fname) : NetlistBuilder(fname) {}
 
   private:
-    void write_header() override;
+    void write_header(const std::vector<std::string> &inc_list) override;
 
     void write_end() override;
 
