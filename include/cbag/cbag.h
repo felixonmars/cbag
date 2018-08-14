@@ -27,7 +27,7 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
                    const std::vector<std::string> &name_list,
                    const char *cell_map,
                    const std::vector<std::string> &inc_list, const char *format,
-                   bool flat, const char *fname);
+                   bool flat, bool shell, const char *fname);
 
 } // namespace cbag
 #endif // CBAG_CBAG_H

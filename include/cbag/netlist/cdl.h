@@ -10,7 +10,6 @@
 
 #include <cbag/netlist/netlist.h>
 
-
 namespace cbag {
 
 class CDLBuilder : public NetlistBuilder {
@@ -18,7 +17,8 @@ class CDLBuilder : public NetlistBuilder {
     explicit CDLBuilder(const char *fname) : NetlistBuilder(fname) {}
 
   private:
-    void write_header(const std::vector<std::string> &inc_list) override;
+    void write_header(const std::vector<std::string> &inc_list,
+                      bool shell) override;
 
     void write_end() override;
 

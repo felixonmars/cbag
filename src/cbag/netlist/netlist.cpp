@@ -76,8 +76,8 @@ std::ofstream &operator<<(std::ofstream &stream,
 NetlistBuilder::NetlistBuilder(const char *fname)
     : out_file(fname, std::ios_base::out) {}
 
-void NetlistBuilder::init(const std::vector<std::string> &inc_list) {
-    write_header(inc_list);
+void NetlistBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
+    write_header(inc_list, shell);
 }
 
 void NetlistBuilder::build() {
@@ -86,10 +86,12 @@ void NetlistBuilder::build() {
 }
 
 void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
-                                  const netlist_map_t &cell_map) {
+                                  const netlist_map_t &cell_map, bool shell) {
     write_cv_header(name, cv->in_terms, cv->out_terms, cv->io_terms);
-    for (auto const &p : cv->instances) {
-        write_instance(p.first, p.second, cell_map);
+    if (!shell) {
+        for (auto const &p : cv->instances) {
+            write_instance(p.first, p.second, cell_map);
+        }
     }
     write_cv_end(name);
     out_file << std::endl;

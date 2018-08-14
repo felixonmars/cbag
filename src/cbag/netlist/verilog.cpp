@@ -12,19 +12,21 @@
 
 #include <cbag/database/cellviews.h>
 #include <cbag/database/figures.h>
-#include <cbag/netlist/verilog_shell.h>
+#include <cbag/netlist/verilog.h>
 
 namespace cbag {
 
-void VerilogShellBuilder::write_header(const std::vector<std::string> &inc_list) {
+void VerilogBuilder::write_header(const std::vector<std::string> &inc_list,
+                                  bool shell) {
+    // TODO: Add actual implementation
 }
 
-void VerilogShellBuilder::write_end() {}
+void VerilogBuilder::write_end() {}
 
-void VerilogShellBuilder::write_cv_header(const std::string &name,
-                                 const term_t &in_terms,
-                                 const term_t &out_terms,
-                                 const term_t &io_terms) {
+void VerilogBuilder::write_cv_header(const std::string &name,
+                                     const term_t &in_terms,
+                                     const term_t &out_terms,
+                                     const term_t &io_terms) {
     // write module declaration
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
@@ -63,14 +65,14 @@ void VerilogShellBuilder::write_cv_header(const std::string &name,
     }
 }
 
-void VerilogShellBuilder::write_cv_end(const std::string &name) {
+void VerilogBuilder::write_cv_end(const std::string &name) {
     out_file << "endmodule" << std::endl;
 }
 
-void VerilogShellBuilder::write_instance_helper(const std::string &name,
-                                       const Instance &inst,
-                                       const SchCellViewInfo &info) {
-    // Verilog shell has no instance
+void VerilogBuilder::write_instance_helper(const std::string &name,
+                                           const Instance &inst,
+                                           const SchCellViewInfo &info) {
+    // TODO: add actual implementation
 }
 
 } // namespace cbag

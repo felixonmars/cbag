@@ -16,13 +16,16 @@
 
 namespace cbag {
 
-void CDLBuilder::write_header(const std::vector<std::string> &inc_list) {
-    for (auto const &fname : inc_list) {
-        out_file << ".INCLUDE " << fname << std::endl;
+void CDLBuilder::write_header(const std::vector<std::string> &inc_list,
+                              bool shell) {
+    if (!shell) {
+        for (auto const &fname : inc_list) {
+            out_file << ".INCLUDE " << fname << std::endl;
+        }
+        out_file << std::endl;
+        out_file << ".PARAM" << std::endl;
+        out_file << std::endl;
     }
-    out_file << std::endl;
-    out_file << ".PARAM" << std::endl;
-    out_file << std::endl;
 }
 
 void CDLBuilder::write_end() {}

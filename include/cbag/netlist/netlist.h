@@ -59,12 +59,12 @@ class NetlistBuilder {
 
     explicit NetlistBuilder(const char *fname);
 
-    void init(const std::vector<std::string> &inc_list);
+    void init(const std::vector<std::string> &inc_list, bool shell);
 
     void build();
 
     void add_cellview(const std::string &name, SchCellView *cv,
-                      const netlist_map_t &cell_map);
+                      const netlist_map_t &cell_map, bool shell);
 
   protected:
     std::ofstream out_file;
@@ -73,7 +73,7 @@ class NetlistBuilder {
                         const netlist_map_t &cell_map);
 
   private:
-    virtual void write_header(const std::vector<std::string> &inc_list) = 0;
+    virtual void write_header(const std::vector<std::string> &inc_list, bool shell) = 0;
 
     virtual void write_end() = 0;
 

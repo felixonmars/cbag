@@ -5,20 +5,19 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_NETLIST_VERILOG_SHELL_H
-#define CBAG_NETLIST_VERILOG_SHELL_H
+#ifndef CBAG_NETLIST_VERILOG_H
+#define CBAG_NETLIST_VERILOG_H
 
 #include <cbag/netlist/netlist.h>
 
-
 namespace cbag {
 
-class VerilogShellBuilder : public NetlistBuilder {
+class VerilogBuilder : public NetlistBuilder {
   public:
-    explicit VerilogShellBuilder(const char *fname) : NetlistBuilder(fname) {}
+    explicit VerilogBuilder(const char *fname) : NetlistBuilder(fname) {}
 
   private:
-    void write_header(const std::vector<std::string> &inc_list) override;
+    void write_header(const std::vector<std::string> &inc_list, bool shell) override;
 
     void write_end() override;
 
@@ -39,4 +38,4 @@ class VerilogShellBuilder : public NetlistBuilder {
 
 } // namespace cbag
 
-#endif // CBAG_NETLIST_VERILOG_SHELL_H
+#endif // CBAG_NETLIST_VERILOG_H

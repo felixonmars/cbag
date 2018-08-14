@@ -69,7 +69,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/verilog_shell.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
   )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
