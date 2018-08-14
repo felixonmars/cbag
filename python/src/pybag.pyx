@@ -83,7 +83,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
     cdef void write_netlist(const vector[SchCellView *]& cv_list, const vector[string]& name_list,
                             const char* cell_map, const vector[string]& inc_list, const char* fmt,
-                            cbool flat, const char* fname) except +
+                            cbool flat, cbool shell, const char* fname) except +
 
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
@@ -400,7 +400,8 @@ cdef class PySchCellView:
             inst.master = orig_inst.master
 
 
-def implement_netlist(content_list, cell_map, inc_list, fmt, fname, encoding='utf-8', flat=True):
+def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
+                      encoding='utf-8', flat=True, shell=False):
     cdef vector[SchCellView *] cv_list
     cdef vector[string] name_list, cinc_list
 
@@ -426,7 +427,7 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname, encoding='ut
             raise ValueError('Cannot find netlist include file: {}'.format(fname))
         cinc_list.push_back(fname.encode(encoding))
 
-    write_netlist(cv_list, name_list, cell_map_str, cinc_list, fmt_str, flat, fname_str)
+    write_netlist(cv_list, name_list, cell_map_str, cinc_list, fmt_str, flat, shell, fname_str)
 
 cdef _add_py_cv(vector[SchCellView *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())
