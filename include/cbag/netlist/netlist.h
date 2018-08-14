@@ -15,6 +15,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/variant.hpp>
+
 #include <cbag/netlist/name_convert.h>
 
 namespace cbag {
@@ -59,7 +61,7 @@ class NetlistBuilder {
 
     explicit NetlistBuilder(const char *fname);
 
-    void init(const std::vector<std::string> &inc_list, bool shell);
+    virtual void init(const std::vector<std::string> &inc_list, bool shell) = 0;
 
     void build();
 
@@ -73,8 +75,6 @@ class NetlistBuilder {
                         const netlist_map_t &cell_map);
 
   private:
-    virtual void write_header(const std::vector<std::string> &inc_list, bool shell) = 0;
-
     virtual void write_end() = 0;
 
     virtual void write_cv_header(const std::string &name,
@@ -88,6 +88,10 @@ class NetlistBuilder {
                                        const Instance &inst,
                                        const SchCellViewInfo &info) = 0;
 };
+
+// forward declaration
+struct Time;
+struct Binary;
 
 class write_param_visitor : public boost::static_visitor<> {
   public:

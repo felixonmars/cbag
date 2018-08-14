@@ -16,9 +16,9 @@ class VerilogBuilder : public NetlistBuilder {
   public:
     explicit VerilogBuilder(const char *fname) : NetlistBuilder(fname) {}
 
-  private:
-    void write_header(const std::vector<std::string> &inc_list, bool shell) override;
+    void init(const std::vector<std::string> &inc_list, bool shell) override;
 
+  private:
     void write_end() override;
 
     void write_cv_header(const std::string &name, const term_t &in_terms,

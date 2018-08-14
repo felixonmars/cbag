@@ -16,8 +16,8 @@
 
 namespace cbag {
 
-void VerilogBuilder::write_header(const std::vector<std::string> &inc_list,
-                                  bool shell) {
+void VerilogBuilder::init(const std::vector<std::string> &inc_list,
+                          bool shell) {
     // TODO: Add actual implementation
 }
 

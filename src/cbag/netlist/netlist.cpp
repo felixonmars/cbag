@@ -9,6 +9,7 @@
 #include <fmt/format.h>
 
 #include <cbag/database/cellviews.h>
+#include <cbag/database/datatypes.h>
 #include <cbag/database/figures.h>
 #include <cbag/netlist/netlist.h>
 
@@ -75,10 +76,6 @@ std::ofstream &operator<<(std::ofstream &stream,
 
 NetlistBuilder::NetlistBuilder(const char *fname)
     : out_file(fname, std::ios_base::out) {}
-
-void NetlistBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
-    write_header(inc_list, shell);
-}
 
 void NetlistBuilder::build() {
     write_end();

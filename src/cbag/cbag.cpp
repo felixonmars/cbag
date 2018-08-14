@@ -34,7 +34,7 @@ std::unique_ptr<NetlistBuilder>
 make_netlist_builder(const char *fname, const std::string &format) {
     if (format == "cdl") {
         return std::make_unique<CDLBuilder>(fname);
-    } else if (format == "verilog_shell") {
+    } else if (format == "verilog") {
         return std::make_unique<VerilogBuilder>(fname);
     } else {
         throw std::invalid_argument(
