@@ -63,6 +63,7 @@ void VerilogBuilder::write_cv_header(const std::string &name,
     for (auto const &pair : io_terms) {
         out_file << "    inout " << pair.first << ";" << std::endl;
     }
+    out_file << std::endl;
 }
 
 void VerilogBuilder::write_cv_end(const std::string &name) {
