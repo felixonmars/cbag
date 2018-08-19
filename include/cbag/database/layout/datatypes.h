@@ -32,9 +32,9 @@ using point_vector_t = std::vector<point_t>;
 
 class Polygon {
   public:
-    typedef coord_t coordinate_type;
-    typedef point_vector_t::const_iterator iterator_type;
-    typedef point_t point_type;
+    using coordinate_type = coord_t;
+    using iterator_type = point_vector_t::const_iterator;
+    using point_type = point_t;
 
     inline Polygon() : data() {}
 
@@ -139,8 +139,8 @@ class PointIterator : public std::iterator<std::forward_iterator_tag, point_t> {
 
 class Polygon90 : public Polygon45 {
   public:
-    typedef CompactIterator compact_iterator_type;
-    typedef PointIterator iterator_type;
+    using compact_iterator_type = CompactIterator;
+    using iterator_type = PointIterator;
 
     inline Polygon90() : Polygon45() {}
 
@@ -179,7 +179,7 @@ class Polygon90 : public Polygon45 {
 
 class Rect : public Polygon90 {
   public:
-    typedef bp::interval_data<coordinate_type> interval_type;
+    using interval_type = bp::interval_data<coordinate_type>;
 
     inline Rect() : Polygon90() {
         // default to 0 area rectangle at origin
@@ -226,71 +226,123 @@ using RectSet = std::vector<Rect>;
  * It is different than boost::range::join because this class acts as a view,
  * meaning that it reflects any changes to the underlying containers.
  *
- * The underlying containers must define value_type and const_iterator tags.
- * Also, the value_type of the second container must derived from the
- * value_type of the first container.  The iterator returns value_type of
- * the first container.
+ * The requirements of the uderlying contains are:
+ * 1. Define value_type and const_iterator tags.
+ * 2. the const_iterator must be random access iterator.
+ * 3. the value_type of the second container must derived from the
+ *    value_type of the first container.
+ * 4. the first container cannot be null (the second container can)
+ *
+ * The iterator returns value_type of the first container.
  */
 template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_base_of<typename ltype::value_type,
-                                                    typename rtype::value_type>::value> * = nullptr>
-class JoinedRange {
+          typename std::enable_if_t<
+              std::is_same_v<
+                  typename std::iterator_traits<typename ltype::const_iterator>::iterator_category,
+                  std::random_access_iterator_tag> &&
+              std::is_same_v<
+                  typename std::iterator_traits<typename rtype::const_iterator>::iterator_category,
+                  std::random_access_iterator_tag> &&
+              std::is_base_of<typename ltype::value_type, typename rtype::value_type>::value> * =
+              nullptr>
+class JoinedRARange {
   public:
-    class JoinedIterator
-        : public std::iterator<std::forward_iterator_tag, typename ltype::value_type> {
+    class JoinedRAIterator
+        : public std::iterator<std::random_access_iterator_tag, typename ltype::value_type> {
       public:
-        inline JoinedIterator(typename ltype::const_iterator liter,
-                              typename ltype::const_iterator lend,
-                              typename rtype::const_iterator riter, bool on_right)
-            : liter(std::move(liter)), lend(std::move(lend)), riter(std::move(riter)),
-              on_right(on_right) {}
+        using difference_type = typename std::iterator<std::random_access_iterator_tag,
+                                                       typename ltype::value_type>::difference_type;
 
-        inline const typename ltype::value_type &operator*() {
-            if (on_right) {
-                return *riter;
-            }
-            return *liter;
-        }
+        inline JoinedRAIterator() = default;
 
-        inline JoinedIterator &operator++() {
-            if (on_right) {
-                ++riter;
-            } else {
-                ++liter;
-                on_right = (liter == lend);
-            }
+        inline JoinedRAIterator(typename ltype::const_iterator lstart,
+                                typename ltype::const_iterator rstart, std::size_t idx,
+                                std::size_t lsize)
+            : idx(idx), lsize(lsize), lstart(std::move(lstart)), rstart(std::move(rstart)) {}
+
+        inline JoinedRAIterator *operator+=(difference_type rhs) {
+            idx += rhs;
             return *this;
         }
-
-        inline bool operator==(const JoinedIterator &rhs) const {
-            return on_right == rhs.on_right && liter == rhs.liter && lend == rhs.lend &&
-                   riter == rhs.riter;
+        inline JoinedRAIterator *operator-=(difference_type rhs) {
+            idx -= rhs;
+            return *this;
         }
-
-        inline bool operator!=(const JoinedIterator &rhs) const {
-            return on_right != rhs.on_right || liter != rhs.liter || lend != rhs.lend ||
-                   riter != rhs.riter;
+        inline const typename ltype::value_type &operator*() const {
+            return (idx < lsize) ? lstart[idx] : rstart[idx - lsize];
         }
+        inline const typename ltype::value_type *operator->() const {
+            return (idx < lsize) ? lstart + idx : rstart + (idx - lsize);
+        }
+        inline const typename ltype::value_type &operator[](difference_type rhs) const {
+            std::size_t tmp = idx + rhs;
+            return (tmp < lsize) ? lstart[tmp] : rstart[tmp - lsize];
+        }
+        inline JoinedRAIterator &operator++() {
+            ++idx;
+            return *this;
+        }
+        inline JoinedRAIterator &operator--() {
+            --idx;
+            return *this;
+        }
+        inline JoinedRAIterator operator++(int) {
+            JoinedRAIterator tmp(lstart, rstart, idx, lsize);
+            ++idx;
+            return tmp;
+        }
+        inline JoinedRAIterator operator--(int) {
+            JoinedRAIterator tmp(lstart, rstart, idx, lsize);
+            --idx;
+            return tmp;
+        }
+        inline difference_type operator-(const JoinedRAIterator &rhs) const {
+            return idx - rhs.idx;
+        }
+        inline JoinedRAIterator operator+(difference_type rhs) const {
+            return {lstart, rstart, idx + rhs, lsize};
+        }
+        inline JoinedRAIterator operator-(difference_type rhs) const {
+            return {lstart, rstart, idx - rhs, lsize};
+        }
+        friend inline JoinedRAIterator operator+(difference_type lhs, const JoinedRAIterator &rhs) {
+            return {rhs.lstart, rhs.rstart, rhs.idx + lhs, rhs.lsize};
+        }
+        friend inline JoinedRAIterator operator-(difference_type lhs, const JoinedRAIterator &rhs) {
+            return {rhs.lstart, rhs.rstart, rhs.idx - lhs, rhs.lsize};
+        }
+        inline bool operator==(const JoinedRAIterator &rhs) const {
+            return idx == rhs.idx && lsize == rhs.lsize && lstart == rhs.lstart &&
+                   rstart == rhs.rstart;
+        }
+        inline bool operator!=(const JoinedRAIterator &rhs) const { return !((*this) == rhs); }
+        inline bool operator>(const JoinedRAIterator &rhs) const { return idx > rhs.idx; }
+        inline bool operator<(const JoinedRAIterator &rhs) const { return idx < rhs.idx; }
+        inline bool operator>=(const JoinedRAIterator &rhs) const { return !((*this) < rhs.idx); }
+        inline bool operator<=(const JoinedRAIterator &rhs) const { return !((*this) > rhs.idx); }
 
       private:
-        typename ltype::const_iterator liter, lend;
-        typename rtype::const_iterator riter;
-        bool on_right;
+        std::size_t idx;
+        const std::size_t lsize;
+        const typename ltype::const_iterator lstart;
+        const typename rtype::const_iterator rstart;
     };
 
-    typedef JoinedIterator iterator;
-    typedef JoinedIterator const_iterator;
-    typedef typename JoinedIterator::value_type value_type;
+    using iterator = JoinedRAIterator;
+    using const_iterator = iterator;
+    using value_type = typename JoinedRAIterator::value_type;
 
-    inline JoinedRange(const ltype *lval, const rtype *rval) : lval(lval), rval(rval) {}
+    inline JoinedRARange(const ltype *lval, const rtype *rval) : lval(lval), rval(rval) {}
+    inline JoinedRARange(const ltype &lval, const rtype &rval) : lval(&lval), rval(&rval) {}
 
     inline const_iterator begin() const {
-        return const_iterator(lval->begin(), lval->end(), rval->begin(), false);
+        return const_iterator(lval->begin(), rval->begin(), 0, lval->size());
     }
     inline const_iterator end() const {
-        auto tmp = lval->end();
-        return const_iterator(tmp, tmp, rval->end(), true);
+        std::size_t tmp = lval->size();
+        return const_iterator(lval->begin(), rval->begin(), tmp + rval->size(), tmp);
     }
+    inline std::size_t size() const { return lval->size() + rval->size(); }
 
   private:
     const ltype *lval;
@@ -301,45 +353,33 @@ class JoinedRange {
 // various union views declarations
 // -----------------------------------------------------------------------------
 
-template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_base_of<typename ltype::value_type,
-                                                    typename rtype::value_type>::value> * = nullptr>
-class UnionView {
+/** UnionView is just JoinedRARange with some extra boost polygon specific tags
+ */
+template <typename ltype, typename rtype> class UnionView : JoinedRARange<ltype, rtype> {
   public:
-    typedef coord_t coordinate_type;
-    typedef typename JoinedRange<ltype, rtype>::const_iterator iterator_type;
-
-    inline UnionView(const ltype &lval, const rtype &rval) : my_range(&lval, &rval) {}
-
-    inline iterator_type begin() const { return my_range.begin(); }
-    inline iterator_type end() const { return my_range.end(); }
-
-  private:
-    JoinedRange<ltype, rtype> my_range;
+    using coordinate_type = coord_t;
+    using iterator_type = typename JoinedRARange<ltype, rtype>::const_iterator;
 };
 
 template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_same<typename ltype::value_type, Polygon>::value &&
-                                    std::is_base_of<typename ltype::value_type,
-                                                    typename rtype::value_type>::value> * = nullptr>
+          typename std::enable_if_t<std::is_same_v<typename ltype::value_type, Polygon>> * =
+              nullptr>
 class PolygonSetUnionView : public UnionView<ltype, rtype> {
-    typedef PolygonSetUnionView<ltype, rtype> operator_arg_type;
+    using operator_arg_type = PolygonSetUnionView<ltype, rtype>;
 };
 
 template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_same<typename ltype::value_type, Polygon45>::value &&
-                                    std::is_base_of<typename ltype::value_type,
-                                                    typename rtype::value_type>::value> * = nullptr>
+          typename std::enable_if_t<std::is_same_v<typename ltype::value_type, Polygon45>> * =
+              nullptr>
 class Polygon45SetUnionView : public UnionView<ltype, rtype> {
-    typedef Polygon45SetUnionView<ltype, rtype> operator_arg_type;
+    using operator_arg_type = Polygon45SetUnionView<ltype, rtype>;
 };
 
 template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_base_of<Polygon90, typename ltype::value_type>::value &&
-                                    std::is_base_of<typename ltype::value_type,
-                                                    typename rtype::value_type>::value> * = nullptr>
+          typename std::enable_if_t<std::is_base_of<Polygon90, typename ltype::value_type>::value>
+              * = nullptr>
 class Polygon90SetUnionView : public UnionView<ltype, rtype> {
-    typedef Polygon90SetUnionView<ltype, rtype> operator_arg_type;
+    using operator_arg_type = Polygon90SetUnionView<ltype, rtype>;
 };
 
 } // namespace layout
@@ -352,27 +392,27 @@ namespace polygon {
 // geometry concept declarations
 // -----------------------------------------------------------------------------
 
-template <> struct geometry_concept<cbag::layout::Polygon> { typedef polygon_concept type; };
+template <> struct geometry_concept<cbag::layout::Polygon> { using type = polygon_concept; };
 
-template <> struct geometry_concept<cbag::layout::Polygon45> { typedef polygon_45_concept type; };
+template <> struct geometry_concept<cbag::layout::Polygon45> { using type = polygon_45_concept; };
 
-template <> struct geometry_concept<cbag::layout::Polygon90> { typedef polygon_90_concept type; };
+template <> struct geometry_concept<cbag::layout::Polygon90> { using type = polygon_90_concept; };
 
-template <> struct geometry_concept<cbag::layout::Rect> { typedef rectangle_concept type; };
+template <> struct geometry_concept<cbag::layout::Rect> { using type = rectangle_concept; };
 
 template <typename ltype, typename rtype>
 struct geometry_concept<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
-    typedef polygon_set_concept type;
+    using type = polygon_set_concept;
 };
 
 template <typename ltype, typename rtype>
 struct geometry_concept<cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
-    typedef polygon_45_set_concept type;
+    using type = polygon_45_set_concept;
 };
 
 template <typename ltype, typename rtype>
 struct geometry_concept<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
-    typedef polygon_90_set_concept type;
+    using type = polygon_90_set_concept;
 };
 
 // -----------------------------------------------------------------------------
@@ -383,11 +423,11 @@ struct geometry_concept<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
 
 template <typename ltype, typename rtype>
 struct polygon_set_traits<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
-    typedef
-        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::coordinate_type coordinate_type;
-    typedef typename cbag::layout::PolygonSetUnionView<ltype, rtype>::iterator_type iterator_type;
-    typedef typename cbag::layout::PolygonSetUnionView<ltype, rtype>::operator_arg_type
-        operator_arg_type;
+    using coordinate_type =
+        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::coordinate_type;
+    using iterator_type = typename cbag::layout::PolygonSetUnionView<ltype, rtype>::iterator_type;
+    using operator_arg_type =
+        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
@@ -398,11 +438,11 @@ struct polygon_set_traits<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
 
 template <typename ltype, typename rtype>
 struct polygon_45_set_traits<cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
-    typedef
-        typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::coordinate_type coordinate_type;
-    typedef typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::iterator_type iterator_type;
-    typedef typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::operator_arg_type
-        operator_arg_type;
+    using coordinate_type =
+        typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::coordinate_type;
+    using iterator_type = typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::iterator_type;
+    using operator_arg_type =
+        typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
@@ -413,11 +453,11 @@ struct polygon_45_set_traits<cbag::layout::Polygon45SetUnionView<ltype, rtype>> 
 
 template <typename ltype, typename rtype>
 struct polygon_90_set_traits<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
-    typedef
-        typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::coordinate_type coordinate_type;
-    typedef typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::iterator_type iterator_type;
-    typedef typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::operator_arg_type
-        operator_arg_type;
+    using coordinate_type =
+        typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::coordinate_type;
+    using iterator_type = typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::iterator_type;
+    using operator_arg_type =
+        typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
