@@ -21,20 +21,17 @@ template <class T> void read_prop(T *dsn_ptr) {
             break;
         }
         case oa::oacIntPropType: {
-            std::cout << "  value: "
-                      << static_cast<oa::oaIntProp *>(prop_ptr)->getValue()
+            std::cout << "  value: " << static_cast<oa::oaIntProp *>(prop_ptr)->getValue()
                       << std::endl;
             break;
         }
         case oa::oacDoublePropType: {
-            std::cout << "  value: "
-                      << static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()
+            std::cout << "  value: " << static_cast<oa::oaDoubleProp *>(prop_ptr)->getValue()
                       << std::endl;
             break;
         }
         case oa::oacTimePropType: {
-            std::cout << "  value: "
-                      << static_cast<oa::oaTimeProp *>(prop_ptr)->getValue()
+            std::cout << "  value: " << static_cast<oa::oaTimeProp *>(prop_ptr)->getValue()
                       << std::endl;
             break;
         }
@@ -45,8 +42,7 @@ template <class T> void read_prop(T *dsn_ptr) {
             app_ptr->getValue(data);
             app_ptr->getAppType(app_str);
             std::cout << "  value: "
-                      << std::string(data.getElements(),
-                                     data.getElements() + data.getNumElements())
+                      << std::string(data.getElements(), data.getElements() + data.getNumElements())
                       << std::endl;
             break;
         }
@@ -66,14 +62,11 @@ template <class T> void read_prop(T *dsn_ptr) {
         std::cout << "  type: " << app_type.getName() << std::endl;
         switch (app_type) {
         case oa::oacIntAppDefType:
-            std::cout
-                << "  value: "
-                << (static_cast<oa::oaIntAppDef<T> *>(appdef_ptr))->get(dsn_ptr)
-                << std::endl;
+            std::cout << "  value: "
+                      << (static_cast<oa::oaIntAppDef<T> *>(appdef_ptr))->get(dsn_ptr) << std::endl;
             break;
         case oa::oacStringAppDefType:
-            (static_cast<oa::oaStringAppDef<T> *>(appdef_ptr))
-                ->get(dsn_ptr, app_str);
+            (static_cast<oa::oaStringAppDef<T> *>(appdef_ptr))->get(dsn_ptr, app_str);
             std::cout << "  value: " << app_str << std::endl;
             break;
         default:
@@ -97,8 +90,7 @@ int main(int argc, char *argv[]) {
         std::string lib_name("schtest");
         std::string view_name("schematic");
 
-        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber,
-                     oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         oa::oaLibDefList::openLibs(lib_file.c_str());
 
@@ -115,27 +107,21 @@ int main(int argc, char *argv[]) {
         oa::oaScalarName cell_oa(ns, cell_name.c_str());
         oa::oaScalarName view_oa(ns, view_name.c_str());
 
-        oa::oaDesign *dsn_ptr =
-            oa::oaDesign::open(lib_oa, cell_oa, view_oa, 'r');
+        oa::oaDesign *dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, 'r');
 
         std::cout << "Design:" << std::endl;
         std::cout << "create time: " << dsn_ptr->getCreateTime() << std::endl;
-        std::cout << "Last save time: " << dsn_ptr->getLastSavedTime()
-                  << std::endl;
+        std::cout << "Last save time: " << dsn_ptr->getLastSavedTime() << std::endl;
         std::cout << "Cp ID: " << dsn_ptr->getCpID() << std::endl;
         std::cout << "undo enabled: " << dsn_ptr->isUndoEnabled() << std::endl;
-        std::cout << "num undo cp recs: " << dsn_ptr->getNumUndoCpRecs()
-                  << std::endl;
-        std::cout << "timestamp enabled: " << dsn_ptr->areTimeStampsEnabled()
-                  << std::endl;
+        std::cout << "num undo cp recs: " << dsn_ptr->getNumUndoCpRecs() << std::endl;
+        std::cout << "timestamp enabled: " << dsn_ptr->areTimeStampsEnabled() << std::endl;
 
         for (unsigned int i = 0; i <= 80; i++) {
             auto e = static_cast<oa::oaDesignDataTypeEnum>(i);
-            std::cout << "Type: " << oa::oaDesignDataType(e).getName()
-                      << std::endl;
+            std::cout << "Type: " << oa::oaDesignDataType(e).getName() << std::endl;
             try {
-                std::cout << "timestamp: " << dsn_ptr->getTimeStamp(e)
-                          << std::endl;
+                std::cout << "timestamp: " << dsn_ptr->getTimeStamp(e) << std::endl;
             } catch (...) {
                 std::cout << "timestamp: none" << std::endl;
             }
@@ -151,11 +137,9 @@ int main(int argc, char *argv[]) {
             oa::oaType objdef_type = objdef_ptr->getType();
             std::cout << "AppObjDef " << tmp_str << std::endl;
             std::cout << "  has_prop: " << objdef_ptr->hasProp() << std::endl;
-            std::cout << "  has_AppDef: " << objdef_ptr->hasAppDef()
-                      << std::endl;
+            std::cout << "  has_AppDef: " << objdef_ptr->hasAppDef() << std::endl;
             std::cout << "  type: " << objdef_type.getName() << std::endl;
-            std::cout << "  timestamp: " << objdef_ptr->getTimeStamp(dsn_ptr)
-                      << std::endl;
+            std::cout << "  timestamp: " << objdef_ptr->getTimeStamp(dsn_ptr) << std::endl;
         }
 
         std::cout << "Block:" << std::endl;
@@ -184,7 +168,6 @@ int main(int argc, char *argv[]) {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Error: " + msg_std);
     } catch (oa::oaDesignError &ex) {
-        throw std::runtime_error("OA Design Error: " +
-                                 std::string(ex.getMsg()));
+        throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
     }
 }

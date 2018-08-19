@@ -34,8 +34,8 @@ auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:*, "));
  *  name_unit has the form of <*N>base<a:b:c>.  The multiplier and index range
  * are optional. the multiplier cannot be 0.
  */
-auto const name_unit_def = name_unit_type{} =
-    -("<*" > (x3::uint32[check_zero]) > ">") > name_string >> -(range);
+auto const name_unit_def = name_unit_type{} = -("<*" > (x3::uint32[check_zero]) > ">") >
+                                              name_string >> -(range);
 
 BOOST_SPIRIT_DEFINE(name_unit);
 

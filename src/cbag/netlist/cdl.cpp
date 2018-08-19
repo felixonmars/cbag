@@ -29,10 +29,8 @@ void CDLBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
 
 void CDLBuilder::write_end() {}
 
-void CDLBuilder::write_cv_header(const std::string &name,
-                                 const term_t &in_terms,
-                                 const term_t &out_terms,
-                                 const term_t &io_terms) {
+void CDLBuilder::write_cv_header(const std::string &name, const term_t &in_terms,
+                                 const term_t &out_terms, const term_t &io_terms) {
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << ".SUBCKT";
     b << name;
@@ -47,12 +45,9 @@ void CDLBuilder::write_cv_header(const std::string &name,
     out_file << b;
 }
 
-void CDLBuilder::write_cv_end(const std::string &name) {
-    out_file << ".ENDS" << std::endl;
-}
+void CDLBuilder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
 
-void CDLBuilder::write_instance_helper(const std::string &name,
-                                       const Instance &inst,
+void CDLBuilder::write_instance_helper(const std::string &name, const Instance &inst,
                                        const SchCellViewInfo &info) {
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
 
@@ -65,9 +60,8 @@ void CDLBuilder::write_instance_helper(const std::string &name,
     for (auto const &term : boost::join(tmp_range, info.io_terms)) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
-            throw std::invalid_argument(
-                fmt::format("Cannot find net {} in cellview {}__{}", term,
-                            inst.lib_name, inst.cell_name));
+            throw std::invalid_argument(fmt::format("Cannot find net {} in cellview {}__{}", term,
+                                                    inst.lib_name, inst.cell_name));
         }
         b << term_iter->second;
     }
@@ -86,8 +80,7 @@ void CDLBuilder::write_instance_helper(const std::string &name,
     }
     // write instance parameters
     for (auto const &pair : par_map) {
-        boost::apply_visitor(write_param_visitor(&b, &(pair.first)),
-                             pair.second);
+        boost::apply_visitor(write_param_visitor(&b, &(pair.first)), pair.second);
     }
 
     out_file << b;

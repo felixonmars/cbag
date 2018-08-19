@@ -63,8 +63,7 @@ constexpr TermAttrType tatNumBits = TermAttrType::oacNumBitsTermAttrType;
 using TextDispFormat = oa::oaTextDisplayFormatEnum;
 constexpr TextDispFormat tdfName = TextDispFormat::oacNameTextDisplayFormat;
 constexpr TextDispFormat tdfValue = TextDispFormat::oacValueTextDisplayFormat;
-constexpr TextDispFormat tdfNameValue =
-    TextDispFormat::oacNameValueTextDisplayFormat;
+constexpr TextDispFormat tdfNameValue = TextDispFormat::oacNameValueTextDisplayFormat;
 
 using SigType = oa::oaSigTypeEnum;
 constexpr SigType stSignal = SigType::oacSignalSigType;

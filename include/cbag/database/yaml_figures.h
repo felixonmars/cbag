@@ -16,11 +16,9 @@
 
 namespace YAML {
 template <> struct convert<boost::variant<cbag::Rect, cbag::SchPinObject>> {
-    static Node
-    encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+    static Node encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
 
-    static bool decode(const Node &node,
-                       boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+    static bool decode(const Node &node, boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
 };
 } // namespace YAML
 

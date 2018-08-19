@@ -40,8 +40,7 @@ range_type const range = "range";
  *  c cannot be 0.
  */
 auto const range_def = range_type{} = '<' > (x3::uint32[init_range]) >>
-                                      -(':' > x3::uint32 >>
-                                        -(':' > (x3::uint32[check_zero]))) >
+                                      -(':' > x3::uint32 >> -(':' > (x3::uint32[check_zero]))) >
                                       '>';
 
 BOOST_SPIRIT_DEFINE(range);

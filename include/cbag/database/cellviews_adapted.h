@@ -14,11 +14,9 @@
 
 #include <cbag/database/cellviews.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView, lib_name, cell_name, view_name,
-                          in_terms, out_terms, io_terms, shapes, instances,
-                          props, app_defs)
+BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView, lib_name, cell_name, view_name, in_terms, out_terms,
+                          io_terms, shapes, instances, props, app_defs)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellViewInfo, cell_name, in_terms, out_terms,
-                          io_terms, props)
+BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellViewInfo, cell_name, in_terms, out_terms, io_terms, props)
 
 #endif // CBAG_DATABASE_CELLVIEWS_ADAPTED_H

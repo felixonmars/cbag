@@ -26,12 +26,10 @@ using inst_iter_t = std::map<std::string, Instance>::iterator;
 /** A simple struct representing netlist information of a cellview.
  */
 struct SchCellViewInfo {
-    SchCellViewInfo()
-        : cell_name(), in_terms(), out_terms(), io_terms(), props(),
-          is_prim(false) {}
+    SchCellViewInfo() : cell_name(), in_terms(), out_terms(), io_terms(), props(), is_prim(false) {}
 
-    SchCellViewInfo(std::string name, size_t num_in, size_t num_out,
-                    size_t num_inout, bool is_prim);
+    SchCellViewInfo(std::string name, size_t num_in, size_t num_out, size_t num_inout,
+                    bool is_prim);
 
     std::string cell_name;
     std::vector<std::string> in_terms, out_terms, io_terms;
@@ -69,13 +67,12 @@ struct SchCellView {
 
     bool remove_instance(const char *name);
 
-    inst_iter_t copy_instance(const char *old_name, const std::string &new_name,
-                              coord_t dx, coord_t dy, const conn_list_t &conns);
+    inst_iter_t copy_instance(const char *old_name, const std::string &new_name, coord_t dx,
+                              coord_t dy, const conn_list_t &conns);
 
-    std::vector<inst_iter_t>
-    array_instance(const char *old_name,
-                   const std::vector<std::string> &name_list, coord_t dx,
-                   coord_t dy, const std::vector<conn_list_t> &conns_list);
+    std::vector<inst_iter_t> array_instance(const char *old_name,
+                                            const std::vector<std::string> &name_list, coord_t dx,
+                                            coord_t dy, const std::vector<conn_list_t> &conns_list);
 
     SchCellViewInfo get_info(const std::string &cell_name) const;
 
@@ -100,9 +97,7 @@ struct LayCellView {
     LayCellView() = default;
 
     std::string lib_name, cell_name, view_name;
-
 };
-
 
 } // namespace cbag
 

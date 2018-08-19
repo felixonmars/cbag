@@ -14,8 +14,7 @@ int read_oa() {
 
     cbagoa::OADatabase db(lib_file);
 
-    cbag::SchCellView sch_master =
-        db.read_sch_cellview(lib_name, cell_name, view_name);
+    cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
 
     cbag::to_file(sch_master, "inv_sch.yaml");
 

@@ -15,10 +15,9 @@
 
 namespace cbag {
 
-NetlistBuilder::LineBuilder::LineBuilder(size_t ncol, char cnt_char,
-                                         bool break_before, int tab_size)
-    : tokens(), ncol(ncol), cnt_char(cnt_char), break_before(break_before),
-      tab_size(tab_size) {}
+NetlistBuilder::LineBuilder::LineBuilder(size_t ncol, char cnt_char, bool break_before,
+                                         int tab_size)
+    : tokens(), ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
 
 NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
                                         const std::string &token) {
@@ -26,14 +25,12 @@ NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
     return builder;
 }
 
-NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
-                                        std::string &&token) {
+NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder, std::string &&token) {
     builder.tokens.push_back(token);
     return builder;
 }
 
-std::ofstream &operator<<(std::ofstream &stream,
-                          const NetlistBuilder::LineBuilder &b) {
+std::ofstream &operator<<(std::ofstream &stream, const NetlistBuilder::LineBuilder &b) {
     size_t num_tokens = b.tokens.size();
     int tab_size = b.tab_size;
     if (num_tokens == 0) {
@@ -74,8 +71,7 @@ std::ofstream &operator<<(std::ofstream &stream,
     return stream;
 }
 
-NetlistBuilder::NetlistBuilder(const char *fname)
-    : out_file(fname, std::ios_base::out) {}
+NetlistBuilder::NetlistBuilder(const char *fname) : out_file(fname, std::ios_base::out) {}
 
 void NetlistBuilder::build() {
     write_end();
@@ -94,20 +90,17 @@ void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
     out_file << std::endl;
 }
 
-void NetlistBuilder::write_instance(const std::string &name,
-                                    const Instance &inst,
+void NetlistBuilder::write_instance(const std::string &name, const Instance &inst,
                                     const netlist_map_t &cell_map) {
     auto libmap_iter = cell_map.find(inst.lib_name);
     if (libmap_iter == cell_map.end()) {
-        throw std::invalid_argument(
-            fmt::format("Cannot find library {} in netlist map for cell {}.",
-                        inst.lib_name, inst.cell_name));
+        throw std::invalid_argument(fmt::format(
+            "Cannot find library {} in netlist map for cell {}.", inst.lib_name, inst.cell_name));
     }
     auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
     if (cellmap_iter == libmap_iter->second.end()) {
         throw std::invalid_argument(
-            fmt::format("Cannot find cell {}__{} in netlist map.",
-                        inst.lib_name, inst.cell_name));
+            fmt::format("Cannot find cell {}__{} in netlist map.", inst.lib_name, inst.cell_name));
     }
 
     // Only write instance if the name is not empty
@@ -116,8 +109,7 @@ void NetlistBuilder::write_instance(const std::string &name,
     }
 }
 
-write_param_visitor::write_param_visitor(NetlistBuilder::LineBuilder *ptr,
-                                         const std::string *key)
+write_param_visitor::write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key)
     : ptr(ptr), key(key) {}
 
 void write_param_visitor::operator()(const std::string &v) const {

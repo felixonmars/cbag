@@ -12,63 +12,61 @@
 
 #include <cbag/cbag.h>
 
-
 namespace cbagoa {
 
-    class OAReader {
-    public:
+class OAReader {
+  public:
+    explicit OAReader(oa::oaCdbaNS ns) : ns(std::move(ns)){};
 
-        explicit OAReader(oa::oaCdbaNS ns) : ns(std::move(ns)) {};
+    // Read method for properties
 
-        // Read method for properties
+    std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p);
 
-        std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p);
+    std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);
 
-        std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);
+    // Read methods for shapes
 
-        // Read methods for shapes
+    cbag::Rect read_rect(oa::oaRect *p, std::string &&net);
 
-        cbag::Rect read_rect(oa::oaRect *p, std::string &&net);
+    cbag::Poly read_poly(oa::oaPolygon *p, std::string &&net);
 
-        cbag::Poly read_poly(oa::oaPolygon *p, std::string &&net);
+    cbag::Arc read_arc(oa::oaArc *p, std::string &&net);
 
-        cbag::Arc read_arc(oa::oaArc *p, std::string &&net);
+    cbag::Donut read_donut(oa::oaDonut *p, std::string &&net);
 
-        cbag::Donut read_donut(oa::oaDonut *p, std::string &&net);
+    cbag::Ellipse read_ellipse(oa::oaEllipse *p, std::string &&net);
 
-        cbag::Ellipse read_ellipse(oa::oaEllipse *p, std::string &&net);
+    cbag::Line read_line(oa::oaLine *p, std::string &&net);
 
-        cbag::Line read_line(oa::oaLine *p, std::string &&net);
+    cbag::Path read_path(oa::oaPath *p, std::string &&net);
 
-        cbag::Path read_path(oa::oaPath *p, std::string &&net);
+    cbag::Text read_text(oa::oaText *p, std::string &&net);
 
-        cbag::Text read_text(oa::oaText *p, std::string &&net);
+    cbag::EvalText read_eval_text(oa::oaEvalText *p, std::string &&net);
 
-        cbag::EvalText read_eval_text(oa::oaEvalText *p, std::string &&net);
+    cbag::Shape read_shape(oa::oaShape *p);
 
-        cbag::Shape read_shape(oa::oaShape *p);
+    // Read method for references
 
-        // Read method for references
+    cbag::Instance read_instance(oa::oaInst *p);
 
-        cbag::Instance read_instance(oa::oaInst *p);
+    std::pair<std::string, cbag::Instance> read_instance_pair(oa::oaInst *p);
 
-        std::pair<std::string, cbag::Instance> read_instance_pair(oa::oaInst *p);
+    // Read method for pin figures
 
-        // Read method for pin figures
+    cbag::PinFigure read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p);
 
-        cbag::PinFigure read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p);
+    // Read method for terminals
 
-        // Read method for terminals
+    std::pair<std::string, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
 
-        std::pair<std::string, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
+    // Read method for schematic/symbol cell view
 
-        // Read method for schematic/symbol cell view
+    cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
 
-        cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
+  private:
+    const oa::oaCdbaNS ns;
+};
+} // namespace cbagoa
 
-    private:
-        const oa::oaCdbaNS ns;
-    };
-}
-
-#endif //CBAGOA_READ_OA_H
+#endif // CBAGOA_READ_OA_H

@@ -74,8 +74,7 @@ template <typename S> struct sequence {
     typedef typename boost::fusion::result_of::size<S>::type size;
 
     // Get a range representing the size of the structure
-    typedef boost::mpl::range_c<unsigned int, 0, boost::mpl::size<S>::value>
-        indices;
+    typedef boost::mpl::range_c<unsigned int, 0, boost::mpl::size<S>::value> indices;
 };
 
 template <typename S, typename N> struct element_at {
@@ -90,8 +89,7 @@ template <typename S, typename N> struct element_at {
 
     // Member name of the element at this index
     static inline std::string name() {
-        return boost::fusion::extension::struct_member_name<S,
-                                                            N::value>::call();
+        return boost::fusion::extension::struct_member_name<S, N::value>::call();
     }
 
     // Type name of the element at this index
@@ -100,17 +98,14 @@ template <typename S, typename N> struct element_at {
     }
 
     // Access the element
-    static inline typename boost::fusion::result_of::at<S const, N>::type
-    get(S const &s) {
+    static inline typename boost::fusion::result_of::at<S const, N>::type get(S const &s) {
         return boost::fusion::at<N>(s);
     }
 };
 
 template <typename T> struct type {
     // Return the string name of the type
-    static inline std::string name() {
-        return boost::units::detail::demangle(typeid(T).name());
-    }
+    static inline std::string name() { return boost::units::detail::demangle(typeid(T).name()); }
 };
 
 template <typename T> struct inserter {
@@ -120,8 +115,7 @@ template <typename T> struct inserter {
 
     template <typename Zip> void operator()(Zip const &zip) const {
         typedef typename boost::remove_const<typename boost::remove_reference<
-            typename boost::fusion::result_of::at_c<Zip, 0>::type>::type>::type
-            Index;
+            typename boost::fusion::result_of::at_c<Zip, 0>::type>::type>::type Index;
 
         // Get the field name as a string using reflection
         std::string field_name = element_at<Type, Index>::name();
@@ -147,8 +141,7 @@ template <typename T> struct extractor {
 
     template <typename Zip> void operator()(Zip const &zip) const {
         typedef typename boost::remove_const<typename boost::remove_reference<
-            typename boost::fusion::result_of::at_c<Zip, 0>::type>::type>::type
-            Index;
+            typename boost::fusion::result_of::at_c<Zip, 0>::type>::type>::type Index;
 
         // Get the field name as a string using reflection
         std::string field_name = element_at<Type, Index>::name();
@@ -198,8 +191,7 @@ template <typename Base> std::string to_yaml(const Base &v) {
 }
 
 // Load yaml into this object
-template <typename Base>
-bool from_yaml(std::string const &yaml_string, Base &obj) {
+template <typename Base> bool from_yaml(std::string const &yaml_string, Base &obj) {
     YAML::Node n;
     try {
         n = YAML::Load(yaml_string);
@@ -215,10 +207,10 @@ namespace YAML {
 template <typename T> struct convert {
     // This function will only be available if the template parameter is a boost
     // fusion sequence
-    static Node encode(
-        T const &rhs,
-        typename boost::enable_if<
-            typename boost::fusion::traits::is_sequence<T>::type>::type * = 0) {
+    static Node
+    encode(T const &rhs,
+           typename boost::enable_if<typename boost::fusion::traits::is_sequence<T>::type>::type * =
+               0) {
         // For each item in T
         // Call inserter recursively
         // Every sequence is made up of primitives at some level
@@ -240,10 +232,10 @@ template <typename T> struct convert {
 
     // This function will only be available if the template parameter is a boost
     // fusion sequence
-    static bool decode(
-        Node const &node, T &rhs,
-        typename boost::enable_if<
-            typename boost::fusion::traits::is_sequence<T>::type>::type * = 0) {
+    static bool
+    decode(Node const &node, T &rhs,
+           typename boost::enable_if<typename boost::fusion::traits::is_sequence<T>::type>::type * =
+               0) {
         // For each item in T
         // Call extractor recursively
         // Every sequence is made up of primitives at some level
@@ -260,8 +252,7 @@ template <typename T> struct convert {
         // Extract each member of the structure
         try {
             // An exception is thrown if any item in the loop cannot be read
-            boost::fusion::for_each(boost::fusion::zip(indices(), rhs),
-                                    extractor);
+            boost::fusion::for_each(boost::fusion::zip(indices(), rhs), extractor);
         }
         // Catch all exceptions and prevent them from propagating
         catch (...) {

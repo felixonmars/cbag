@@ -16,17 +16,14 @@
 
 namespace cbag {
 
-void VerilogBuilder::init(const std::vector<std::string> &inc_list,
-                          bool shell) {
+void VerilogBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
     // TODO: Add actual implementation
 }
 
 void VerilogBuilder::write_end() {}
 
-void VerilogBuilder::write_cv_header(const std::string &name,
-                                     const term_t &in_terms,
-                                     const term_t &out_terms,
-                                     const term_t &io_terms) {
+void VerilogBuilder::write_cv_header(const std::string &name, const term_t &in_terms,
+                                     const term_t &out_terms, const term_t &io_terms) {
     // write module declaration
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
@@ -66,12 +63,9 @@ void VerilogBuilder::write_cv_header(const std::string &name,
     out_file << std::endl;
 }
 
-void VerilogBuilder::write_cv_end(const std::string &name) {
-    out_file << "endmodule" << std::endl;
-}
+void VerilogBuilder::write_cv_end(const std::string &name) { out_file << "endmodule" << std::endl; }
 
-void VerilogBuilder::write_instance_helper(const std::string &name,
-                                           const Instance &inst,
+void VerilogBuilder::write_instance_helper(const std::string &name, const Instance &inst,
                                            const SchCellViewInfo &info) {
     // TODO: add actual implementation
 }

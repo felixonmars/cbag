@@ -46,10 +46,9 @@ bool convert<cbag::value_t>::decode(const Node &node, cbag::value_t &rhs) {
             rhs = node[1].as<cbag::Binary>();
             return true;
         default:
-            LOG(WARNING)
-                << "cbag::value_t YAML decode: unexpected which value: "
-                << value << ".  Node:\n"
-                << node;
+            LOG(WARNING) << "cbag::value_t YAML decode: unexpected which value: " << value
+                         << ".  Node:\n"
+                         << node;
             return false;
         }
     } catch (...) {

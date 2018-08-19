@@ -30,8 +30,8 @@ struct Five {
 
 BOOST_FUSION_ADAPT_STRUCT(One, (int, two)(double, three)(bool, four))
 
-BOOST_FUSION_ADAPT_STRUCT(Five, (Five::Map_t, six)(Five::Vector_t, seven)(
-                                    std::string, eight)(Five::Matrix_t, nine))
+BOOST_FUSION_ADAPT_STRUCT(Five, (Five::Map_t, six)(Five::Vector_t,
+                                                   seven)(std::string, eight)(Five::Matrix_t, nine))
 
 int main(int argc, char *argv[]) {
     Five v;

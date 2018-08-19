@@ -99,8 +99,7 @@ struct name_unit : x3::position_tagged {
 struct name : x3::position_tagged {
     class const_iterator {
       public:
-        const_iterator(const name *ptr, unsigned long unit_index,
-                       uint32_t bit_index);
+        const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index);
 
         const_iterator &operator++();
 

@@ -50,8 +50,7 @@ class OADatabase {
      */
     explicit OADatabase(const char *lib_def_file);
 
-    explicit OADatabase(const std::string &lib_def_file)
-        : OADatabase(lib_def_file.c_str()) {}
+    explicit OADatabase(const std::string &lib_def_file) : OADatabase(lib_def_file.c_str()) {}
 
     ~OADatabase();
 
@@ -75,64 +74,54 @@ class OADatabase {
      * @param lib_path directory to create the library at.
      * @param tech_lib the technology library name.
      */
-    void create_lib(const char *library, const char *lib_path,
-                    const char *tech_lib);
+    void create_lib(const char *library, const char *lib_path, const char *tech_lib);
 
     void create_lib(const std::string &library, const std::string &lib_path,
                     const std::string &tech_lib) {
         create_lib(library.c_str(), lib_path.c_str(), tech_lib.c_str());
     }
 
-    cbag::SchCellView read_sch_cellview(const char *lib_name,
-                                        const char *cell_name,
+    cbag::SchCellView read_sch_cellview(const char *lib_name, const char *cell_name,
                                         const char *view_name);
 
-    cbag::SchCellView read_sch_cellview(const std::string &lib_name,
-                                        const std::string &cell_name,
+    cbag::SchCellView read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                                         const std::string &view_name);
 
-    std::vector<cell_key_t> read_sch_recursive(
-        const char *lib_name, const char *cell_name, const char *view_name,
-        const char *new_root_path,
-        const std::unordered_map<std::string, std::string> &lib_map,
-        const std::unordered_set<std::string> &exclude_libs);
+    std::vector<cell_key_t>
+    read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
+                       const char *new_root_path,
+                       const std::unordered_map<std::string, std::string> &lib_map,
+                       const std::unordered_set<std::string> &exclude_libs);
 
-    std::vector<cell_key_t> read_sch_recursive(
-        const std::string &lib_name, const std::string &cell_name,
-        const std::string &view_name, const std::string &new_root_path,
-        const std::unordered_map<std::string, std::string> &lib_map,
-        const std::unordered_set<std::string> &exclude_libs) {
-        return read_sch_recursive(lib_name.c_str(), cell_name.c_str(),
-                                  view_name.c_str(), new_root_path.c_str(),
-                                  lib_map, exclude_libs);
+    std::vector<cell_key_t>
+    read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
+                       const std::string &view_name, const std::string &new_root_path,
+                       const std::unordered_map<std::string, std::string> &lib_map,
+                       const std::unordered_set<std::string> &exclude_libs) {
+        return read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
+                                  new_root_path.c_str(), lib_map, exclude_libs);
     }
 
-    void write_sch_cellview(const char *lib_name, const char *cell_name,
-                            const char *view_name, bool is_sch,
-                            const cbag::SchCellView &cv);
+    void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
+                            bool is_sch, const cbag::SchCellView &cv);
 
-    void write_sch_cellview(const std::string &lib_name,
-                            const std::string &cell_name,
+    void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                             const std::string &view_name, bool is_sch,
                             const cbag::SchCellView &cv) {
-        write_sch_cellview(lib_name.c_str(), cell_name.c_str(),
-                           view_name.c_str(), is_sch, cv);
+        write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv);
     }
 
   private:
     oa::oaTech *read_tech(const char *library);
 
-    oa::oaDesign *open_design(const char *lib_name, const char *cell_name,
-                              const char *view_name, char mode = 'r',
-                              bool is_sch = true);
+    oa::oaDesign *open_design(const char *lib_name, const char *cell_name, const char *view_name,
+                              char mode = 'r', bool is_sch = true);
 
-    void
-    read_sch_helper(std::pair<std::string, std::string> &key,
-                    const char *view_name, const char *new_root_path,
-                    const std::unordered_map<std::string, std::string> &lib_map,
-                    const std::unordered_set<std::string> &exclude_libs,
-                    cell_set_t &exclude_cells,
-                    std::vector<cell_key_t> &cell_list);
+    void read_sch_helper(std::pair<std::string, std::string> &key, const char *view_name,
+                         const char *new_root_path,
+                         const std::unordered_map<std::string, std::string> &lib_map,
+                         const std::unordered_set<std::string> &exclude_libs,
+                         cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
     void read_prim_instance(const char *fname, const cbag::Instance &inst);
 

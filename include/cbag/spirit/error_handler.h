@@ -35,11 +35,9 @@ struct error_handler_base {
 };
 
 template <typename Iterator, typename Exception, typename Context>
-inline err_res
-error_handler_base::on_error(Iterator &first, Iterator const &last,
-                             Exception const &x, Context const &context) {
-    std::string message =
-        "Error while parsing index: " + std::to_string(x.where() - first);
+inline err_res error_handler_base::on_error(Iterator &first, Iterator const &last,
+                                            Exception const &x, Context const &context) {
+    std::string message = "Error while parsing index: " + std::to_string(x.where() - first);
     auto &error_handler = x3::get<error_handler_tag>(context).get();
     error_handler(x.where(), message);
     return x3::error_handler_result::fail;

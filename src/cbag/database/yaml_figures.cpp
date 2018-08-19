@@ -38,15 +38,13 @@ bool convert<boost::variant<cbag::Rect, cbag::SchPinObject>>::decode(
             rhs = node[1].as<cbag::SchPinObject>();
             return true;
         default:
-            LOG(WARNING)
-                << "cbag::PinFigureObj YAML decode: unexpected which value: "
-                << value << ".  Node:\n"
-                << node;
+            LOG(WARNING) << "cbag::PinFigureObj YAML decode: unexpected which value: " << value
+                         << ".  Node:\n"
+                         << node;
             return false;
         }
     } catch (...) {
-        LOG(WARNING) << "cbag::PinFigureObj YAML decode exception.  Node:\n"
-                     << node;
+        LOG(WARNING) << "cbag::PinFigureObj YAML decode exception.  Node:\n" << node;
         return false;
     }
 }

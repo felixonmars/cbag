@@ -13,4 +13,4 @@
 #include <cbag/cbag.h>
 #include <cbagoa/database.h>
 
-#endif //CBAGOA_CBAGOA_H
+#endif // CBAGOA_CBAGOA_H

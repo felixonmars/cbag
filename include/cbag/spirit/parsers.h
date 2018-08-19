@@ -33,8 +33,7 @@ void parse(const char *source, unsigned long length, R const &rule, A &ast) {
         x3::with<spirit::parser::error_handler_tag>(err_ref)[rule];
 
     // Go forth and parse!
-    if (x3::parse(iter_start, iter_end, parser, ast) &&
-        iter_start != iter_end) {
+    if (x3::parse(iter_start, iter_end, parser, ast) && iter_start != iter_end) {
         throw std::invalid_argument(out.str());
     }
 }

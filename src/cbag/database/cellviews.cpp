@@ -14,9 +14,9 @@
 
 namespace cbag {
 
-SchCellViewInfo::SchCellViewInfo(std::string name, size_t num_in,
-                                 size_t num_out, size_t num_inout, bool is_prim)
-        : cell_name(name), is_prim(is_prim) {
+SchCellViewInfo::SchCellViewInfo(std::string name, size_t num_in, size_t num_out, size_t num_inout,
+                                 bool is_prim)
+    : cell_name(name), is_prim(is_prim) {
     in_terms.reserve(num_in);
     out_terms.reserve(num_out);
     io_terms.reserve(num_inout);
@@ -29,30 +29,20 @@ SchCellView::SchCellView(const std::string &yaml_fname) {
 
 void SchCellView::clear_params() { props.clear(); }
 
-void SchCellView::set_int_param(const char *name, int value) {
-    props[name] = value;
-}
+void SchCellView::set_int_param(const char *name, int value) { props[name] = value; }
 
-void SchCellView::set_double_param(const char *name, double value) {
-    props[name] = value;
-}
+void SchCellView::set_double_param(const char *name, double value) { props[name] = value; }
 
-void SchCellView::set_bool_param(const char *name, bool value) {
-    props[name] = value;
-}
+void SchCellView::set_bool_param(const char *name, bool value) { props[name] = value; }
 
-void SchCellView::set_string_param(const char *name, const char *value) {
-    props[name] = value;
-}
+void SchCellView::set_string_param(const char *name, const char *value) { props[name] = value; }
 
 void SchCellView::rename_pin(const char *old_name, const char *new_name) {
     // check the new pin name does not exist already
     std::string nkey(new_name);
-    if (in_terms.find(nkey) != in_terms.end() ||
-        out_terms.find(nkey) != out_terms.end() ||
+    if (in_terms.find(nkey) != in_terms.end() || out_terms.find(nkey) != out_terms.end() ||
         io_terms.find(nkey) != io_terms.end()) {
-        throw std::invalid_argument(
-            fmt::format("Terminal {} already exists.", nkey));
+        throw std::invalid_argument(fmt::format("Terminal {} already exists.", nkey));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
@@ -86,11 +76,9 @@ void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
     parse(new_name, key.size(), spirit::name(), ast);
 
     // check the pin name does not exist already
-    if (in_terms.find(key) != in_terms.end() ||
-        out_terms.find(key) != out_terms.end() ||
+    if (in_terms.find(key) != in_terms.end() || out_terms.find(key) != out_terms.end() ||
         io_terms.find(key) != io_terms.end()) {
-        throw std::invalid_argument(
-            fmt::format("Terminal {} already exists.", key));
+        throw std::invalid_argument(fmt::format("Terminal {} already exists.", key));
     }
 
     // get the map to insert
@@ -106,28 +94,24 @@ void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
         ptr = &io_terms;
         break;
     default:
-        throw std::invalid_argument(
-            fmt::format("Bad terminal type: {}", term_type));
+        throw std::invalid_argument(fmt::format("Bad terminal type: {}", term_type));
     }
 
     // insert into map
     // TODO: calculate new pin figure correctly
-    ptr->emplace(std::move(key),
-                 PinFigure(Rect(0, 0, "", 0, 0, 10, 10), stSignal));
+    ptr->emplace(std::move(key), PinFigure(Rect(0, 0, "", 0, 0, 10, 10), stSignal));
 }
 
 bool SchCellView::remove_pin(const char *name) {
     std::string key(name);
-    return in_terms.erase(key) > 0 || out_terms.erase(key) > 0 ||
-           io_terms.erase(key) > 0;
+    return in_terms.erase(key) > 0 || out_terms.erase(key) > 0 || io_terms.erase(key) > 0;
 }
 
 void SchCellView::rename_instance(const char *old_name, const char *new_name) {
     // check the new name does not exist
     std::string nkey(new_name);
     if (instances.find(nkey) != instances.end()) {
-        throw std::invalid_argument(
-            fmt::format("Instance {} already exists.", nkey));
+        throw std::invalid_argument(fmt::format("Instance {} already exists.", nkey));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit ast;
@@ -149,9 +133,8 @@ bool SchCellView::remove_instance(const char *name) {
     return instances.erase(key) > 0;
 }
 
-inst_iter_t SchCellView::copy_instance(const char *old_name,
-                                       const std::string &new_name, coord_t dx,
-                                       coord_t dy, const conn_list_t &conns) {
+inst_iter_t SchCellView::copy_instance(const char *old_name, const std::string &new_name,
+                                       coord_t dx, coord_t dy, const conn_list_t &conns) {
     // find the instance to copy
     std::string key(old_name);
     std::map<std::string, Instance>::const_iterator iter = instances.find(key);
@@ -179,15 +162,15 @@ inst_iter_t SchCellView::copy_instance(const char *old_name,
     return emp_iter.first;
 }
 
-std::vector<inst_iter_t> SchCellView::array_instance(
-    const char *old_name, const std::vector<std::string> &name_list, coord_t dx,
-    coord_t dy, const std::vector<conn_list_t> &conns_list) {
+std::vector<inst_iter_t> SchCellView::array_instance(const char *old_name,
+                                                     const std::vector<std::string> &name_list,
+                                                     coord_t dx, coord_t dy,
+                                                     const std::vector<conn_list_t> &conns_list) {
     size_t num = name_list.size();
     std::vector<inst_iter_t> ans(num);
     auto num_inst = static_cast<coord_t>(num);
     for (coord_t idx = 0; idx < num_inst; ++idx) {
-        ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx,
-                                 conns_list[idx]);
+        ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx, conns_list[idx]);
     }
 
     // remove original instance
@@ -196,8 +179,7 @@ std::vector<inst_iter_t> SchCellView::array_instance(
 }
 
 SchCellViewInfo SchCellView::get_info(const std::string &name) const {
-    SchCellViewInfo ans(name, in_terms.size(), out_terms.size(),
-                        io_terms.size(), false);
+    SchCellViewInfo ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
 
     for (auto const &pair : in_terms) {
         ans.in_terms.push_back(pair.first);

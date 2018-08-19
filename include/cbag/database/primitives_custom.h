@@ -70,17 +70,7 @@ constexpr TextAlign taLR = lowerRight;
 
 /** Font enum
  */
-enum Font {
-    euroStyle,
-    gothic,
-    math,
-    roman,
-    script,
-    stick,
-    fixed,
-    swedish,
-    milSpec
-};
+enum Font { euroStyle, gothic, math, roman, script, stick, fixed, swedish, milSpec };
 constexpr Font fEuro = euroStyle;
 constexpr Font fGoth = gothic;
 constexpr Font fMath = math;
@@ -105,18 +95,7 @@ constexpr TextDispFormat tdfName = TextDispFormat::name;
 constexpr TextDispFormat tdfValue = TextDispFormat::value;
 constexpr TextDispFormat tdfNameValue = TextDispFormat::nameValue;
 
-enum SigType {
-    signal,
-    power,
-    ground,
-    clock,
-    tieOff,
-    tieHi,
-    tieLo,
-    analog,
-    scan,
-    reset
-};
+enum SigType { signal, power, ground, clock, tieOff, tieHi, tieLo, analog, scan, reset };
 constexpr SigType stSignal = SigType::signal;
 constexpr SigType stPower = SigType::power;
 constexpr SigType stGround = SigType::ground;
@@ -160,8 +139,7 @@ class Transform {
   public:
     Transform() : x(0), y(0), oval(oR0) {}
 
-    Transform(coord_t x, coord_t y, Orientation orient = oR0)
-        : x(x), y(y), oval(orient) {}
+    Transform(coord_t x, coord_t y, Orientation orient = oR0) : x(x), y(y), oval(orient) {}
 
     coord_t xOffset() const { return x; }
 
@@ -186,8 +164,7 @@ class BBox {
   public:
     BBox() : xl(0), yl(0), xh(0), yh(0) {}
 
-    BBox(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-        : xl(xl), yl(yl), xh(xh), yh(yh) {}
+    BBox(coord_t xl, coord_t yl, coord_t xh, coord_t yh) : xl(xl), yl(yl), xh(xh), yh(yh) {}
 
     coord_t left() const { return xl; }
 
@@ -212,17 +189,13 @@ class PointArray {
   public:
     explicit PointArray(uint32_t size = 0) : points(size) {}
 
-    uint32_t getNumElements() const {
-        return static_cast<uint32_t>(points.size());
-    }
+    uint32_t getNumElements() const { return static_cast<uint32_t>(points.size()); }
 
     const Point &operator[](uint32_t index) const { return points[index]; }
 
     Point &operator[](uint32_t index) { return points[index]; }
 
-    void setSize(uint32_t new_size, int save_elements = 0) {
-        points.resize(new_size);
-    }
+    void setSize(uint32_t new_size, int save_elements = 0) { points.resize(new_size); }
 
   private:
     std::vector<Point> points;

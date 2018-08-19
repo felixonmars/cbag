@@ -1,6 +1,6 @@
 #include <cbag/database/yaml_cellviews.h>
-#include <yaml-cpp/yaml.h>
 #include <iostream>
+#include <yaml-cpp/yaml.h>
 
 int main(int argc, char *argv[]) {
     cbag::SchCellViewInfo info;

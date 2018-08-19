@@ -31,10 +31,8 @@ struct Instance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    Instance(std::string &&lib, std::string &&cell, std::string &&view,
-             Transform xform)
-        : lib_name(lib), cell_name(cell), view_name(view), xform(xform),
-          connections(), params() {}
+    Instance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
+        : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections(), params() {}
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
@@ -49,8 +47,7 @@ struct Instance {
 
     void set_string_param(const char *name, const char *value);
 
-    void update_connection(const std::string &inst_name, const char *term,
-                           const char *net);
+    void update_connection(const std::string &inst_name, const char *term, const char *net);
 
     std::string lib_name, cell_name, view_name;
     Transform xform;
@@ -87,8 +84,7 @@ struct PinFigure {
 
     PinFigure(Rect &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
 
-    PinFigure(SchPinObject &&obj, SigType sig_type)
-        : obj(obj), sig_type(sig_type) {}
+    PinFigure(SchPinObject &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
 
     boost::variant<Rect, SchPinObject> obj;
     SigType sig_type;

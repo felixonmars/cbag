@@ -20,9 +20,7 @@ Node convert<cbag::Shape>::encode(const cbag::Shape &rhs) {
 
 bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
     if (!node.IsSequence() || node.size() != 2) {
-        LOG(WARNING)
-            << "cbag::shape YAML decode: not a sequence or size != 2.  Node:\n"
-            << node;
+        LOG(WARNING) << "cbag::shape YAML decode: not a sequence or size != 2.  Node:\n" << node;
         return false;
     }
     try {
@@ -56,8 +54,8 @@ bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
             rhs = node[1].as<cbag::EvalText>();
             return true;
         default:
-            LOG(WARNING) << "cbag::Shape YAML decode: unexpected which value: "
-                         << value << ".  Node:\n"
+            LOG(WARNING) << "cbag::Shape YAML decode: unexpected which value: " << value
+                         << ".  Node:\n"
                          << node;
             return false;
         }

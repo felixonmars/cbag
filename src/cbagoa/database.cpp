@@ -38,34 +38,28 @@ void handle_oa_exceptions() {
         std::string msg_std(ex.getMsg());
         throw std::runtime_error("OA Error: " + msg_std);
     } catch (oa::oaDesignError &ex) {
-        throw std::runtime_error("OA Design Error: " +
-                                 std::string(ex.getMsg()));
+        throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
     }
 }
 
-oa::oaBoolean
-LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
-                               oa::oaLibDefListWarningTypeEnum type) {
+oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
+                                             oa::oaLibDefListWarningTypeEnum type) {
     throw std::runtime_error("OA Error: " + std::string(msg));
 }
 
-OADatabase::OADatabase(const char *lib_def_file)
-    : lib_def_file(lib_def_file), lib_def_obs(1) {
+OADatabase::OADatabase(const char *lib_def_file) : lib_def_file(lib_def_file), lib_def_obs(1) {
     try {
 
         el::Configurations logging_conf;
-        logging_conf.setGlobally(el::ConfigurationType::ToStandardOutput,
-                                 "false");
+        logging_conf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
         logging_conf.setGlobally(el::ConfigurationType::Filename, "cbagoa.log");
-        logging_conf.setGlobally(el::ConfigurationType::MaxLogFileSize,
-                                 "16777216");
+        logging_conf.setGlobally(el::ConfigurationType::MaxLogFileSize, "16777216");
         el::Loggers::reconfigureLogger("default", logging_conf);
 
         reader = std::make_unique<OAReader>(ns_cdba);
         writer = std::make_unique<OAWriter>(ns_cdba);
 
-        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber,
-                     oacDataModelRevNumber);
+        oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         LOG(INFO) << "Creating new OADatabase with file: " << lib_def_file;
         oa::oaLibDefList::openLibs(lib_def_file);
@@ -76,8 +70,7 @@ OADatabase::OADatabase(const char *lib_def_file)
 
 OADatabase::~OADatabase() {
     try {
-        LOG(INFO) << "Closing all OA libraries from definition file: "
-                  << lib_def_file;
+        LOG(INFO) << "Closing all OA libraries from definition file: " << lib_def_file;
         oa::oaIter<oa::oaLib> lib_iter(oa::oaLib::getOpenLibs());
         oa::oaLib *lib_ptr;
         while ((lib_ptr = lib_iter.getNext()) != nullptr) {
@@ -96,8 +89,7 @@ std::vector<std::string> OADatabase::get_cells_in_library(const char *library) {
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
-            throw std::invalid_argument(
-                fmt::format("Cannot find library {}", library));
+            throw std::invalid_argument(fmt::format("Cannot find library {}", library));
         }
         oa::oaIter<oa::oaCell> cell_iter(lib_ptr->getCells());
         oa::oaCell *cell_ptr;
@@ -118,8 +110,7 @@ std::string OADatabase::get_lib_path(const char *library) {
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
-            throw std::invalid_argument(
-                fmt::format("Cannot find library {}", library));
+            throw std::invalid_argument(fmt::format("Cannot find library {}", library));
         }
         oa::oaString tmp_str;
         lib_ptr->getFullPath(tmp_str);
@@ -131,8 +122,7 @@ std::string OADatabase::get_lib_path(const char *library) {
     return "";
 }
 
-void OADatabase::create_lib(const char *library, const char *lib_path,
-                            const char *tech_lib) {
+void OADatabase::create_lib(const char *library, const char *lib_path, const char *tech_lib) {
     try {
         LOG(INFO) << "Creating OA library " << library;
 
@@ -141,8 +131,8 @@ void OADatabase::create_lib(const char *library, const char *lib_path,
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            LOG(INFO) << "Creating library " << library << " at path "
-                      << lib_path << ", with tech lib" << tech_lib;
+            LOG(INFO) << "Creating library " << library << " at path " << lib_path
+                      << ", with tech lib" << tech_lib;
             oa::oaScalarName oa_tech_lib(ns, tech_lib);
             lib_ptr = oa::oaLib::create(lib_name_oa, lib_path);
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
@@ -161,14 +151,11 @@ void OADatabase::create_lib(const char *library, const char *lib_path,
     }
 }
 
-cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name,
-                                                const char *cell_name,
+cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name, const char *cell_name,
                                                 const char *view_name) {
     try {
-        oa::oaDesign *dsn_ptr =
-            open_design(lib_name, cell_name, view_name, 'r');
-        LOG(INFO) << fmt::format("Reading cellview {}__{}({})", lib_name,
-                                 cell_name, view_name);
+        oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'r');
+        LOG(INFO) << fmt::format("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
         cbag::SchCellView ans = reader->read_sch_cellview(dsn_ptr);
         dsn_ptr->close();
         return ans;
@@ -181,20 +168,18 @@ cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name,
 cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
                                                 const std::string &cell_name,
                                                 const std::string &view_name) {
-    return read_sch_cellview(lib_name.c_str(), cell_name.c_str(),
-                             view_name.c_str());
+    return read_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str());
 }
 
-std::vector<cell_key_t> OADatabase::read_sch_recursive(
-    const char *lib_name, const char *cell_name, const char *view_name,
-    const char *new_root_path,
-    const std::unordered_map<std::string, std::string> &lib_map,
-    const std::unordered_set<std::string> &exclude_libs) {
+std::vector<cell_key_t>
+OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
+                               const char *new_root_path,
+                               const std::unordered_map<std::string, std::string> &lib_map,
+                               const std::unordered_set<std::string> &exclude_libs) {
     std::pair<std::string, std::string> key(lib_name, cell_name);
     cell_set_t exclude_cells;
     std::vector<cell_key_t> ans;
-    read_sch_helper(key, view_name, new_root_path, lib_map, exclude_libs,
-                    exclude_cells, ans);
+    read_sch_helper(key, view_name, new_root_path, lib_map, exclude_libs, exclude_cells, ans);
     return ans;
 }
 
@@ -202,10 +187,8 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
                                     const char *view_name, bool is_sch,
                                     const cbag::SchCellView &cv) {
     try {
-        oa::oaDesign *dsn_ptr =
-            open_design(lib_name, cell_name, view_name, 'w', is_sch);
-        LOG(INFO) << fmt::format("Writing cellview {}__{}({})", lib_name,
-                                 cell_name, view_name);
+        oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
+        LOG(INFO) << fmt::format("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
         writer->write_sch_cellview(cv, dsn_ptr);
         dsn_ptr->close();
     } catch (...) {
@@ -220,8 +203,7 @@ oa::oaTech *OADatabase::read_tech(const char *library) {
     if (tech_ptr == nullptr) {
         // opened tech not found, attempt to open
         if (!oa::oaTech::exists(lib_name_oa)) {
-            throw std::runtime_error(
-                fmt::format("Cannot find technology library: {}", library));
+            throw std::runtime_error(fmt::format("Cannot find technology library: {}", library));
         } else {
             tech_ptr = oa::oaTech::open(lib_name_oa, 'r');
             if (tech_ptr == nullptr) {
@@ -233,41 +215,36 @@ oa::oaTech *OADatabase::read_tech(const char *library) {
     return tech_ptr;
 }
 
-oa::oaDesign *OADatabase::open_design(const char *lib_name,
-                                      const char *cell_name,
-                                      const char *view_name, char mode,
-                                      bool is_sch) {
+oa::oaDesign *OADatabase::open_design(const char *lib_name, const char *cell_name,
+                                      const char *view_name, char mode, bool is_sch) {
     oa::oaScalarName lib_oa(ns, lib_name);
     oa::oaScalarName cell_oa(ns, cell_name);
     oa::oaScalarName view_oa(ns, view_name);
 
-    LOG(INFO) << fmt::format("Opening design {}__{}({}) with mode {}", lib_name,
-                             cell_name, view_name, mode);
+    LOG(INFO) << fmt::format("Opening design {}__{}({}) with mode {}", lib_name, cell_name,
+                             view_name, mode);
     oa::oaDesign *dsn_ptr = nullptr;
     if (mode == 'r') {
         dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, mode);
     } else {
-        oa::oaViewType *view_type = oa::oaViewType::get(
-            (is_sch) ? oa::oacSchematic : oa::oacSchematicSymbol);
+        oa::oaViewType *view_type =
+            oa::oaViewType::get((is_sch) ? oa::oacSchematic : oa::oacSchematicSymbol);
         dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, view_type, mode);
     }
     if (dsn_ptr == nullptr) {
-        throw std::invalid_argument(
-            fmt::format("Cannot open cell: {}__{}({}) with mode {}", lib_name,
-                        cell_name, view_name, mode));
+        throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({}) with mode {}",
+                                                lib_name, cell_name, view_name, mode));
     }
     return dsn_ptr;
 }
 
-void OADatabase::read_sch_helper(
-    std::pair<std::string, std::string> &key, const char *view_name,
-    const char *new_root_path,
-    const std::unordered_map<std::string, std::string> &lib_map,
-    const std::unordered_set<std::string> &exclude_libs,
-    cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list) {
+void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const char *view_name,
+                                 const char *new_root_path,
+                                 const std::unordered_map<std::string, std::string> &lib_map,
+                                 const std::unordered_set<std::string> &exclude_libs,
+                                 cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list) {
     // parse schematic
-    cbag::SchCellView ans =
-        read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
+    cbag::SchCellView ans = read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
 
     // find root_path
     std::unordered_map<std::string, std::string>::const_iterator map_iter;
@@ -294,14 +271,13 @@ void OADatabase::read_sch_helper(
     // recurse
     auto exc_lib_end = exclude_libs.end();
     for (const auto &pair : ans.instances) {
-        std::pair<std::string, std::string> ikey(pair.second.lib_name,
-                                                 pair.second.cell_name);
+        std::pair<std::string, std::string> ikey(pair.second.lib_name, pair.second.cell_name);
         if (exclude_cells.find(ikey) == exclude_cells.end()) {
             // did not see this schematic master before
             if (exclude_libs.find(pair.second.lib_name) == exc_lib_end) {
                 // non-primitive master, parse normally
-                read_sch_helper(ikey, view_name, new_root_path, lib_map,
-                                exclude_libs, exclude_cells, cell_list);
+                read_sch_helper(ikey, view_name, new_root_path, lib_map, exclude_libs,
+                                exclude_cells, cell_list);
             } else {
                 // primitive master, read terminal information
                 // first, figure out root path for this instance
@@ -320,7 +296,6 @@ void OADatabase::read_sch_helper(
     }
 }
 
-void OADatabase::read_prim_instance(const char *fname,
-                                    const cbag::Instance &inst) {}
+void OADatabase::read_prim_instance(const char *fname, const cbag::Instance &inst) {}
 
 } // namespace cbagoa

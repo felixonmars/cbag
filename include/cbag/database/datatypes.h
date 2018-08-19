@@ -43,8 +43,7 @@ struct Binary {
 
 /** Type definition for a parameter value type.
  */
-typedef boost::variant<int32_t, double, bool, std::string, Time, Binary>
-    value_t;
+typedef boost::variant<int32_t, double, bool, std::string, Time, Binary> value_t;
 
 /** Type definition for a parameter dictonary.
  */

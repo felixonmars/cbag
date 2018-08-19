@@ -35,8 +35,7 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         return {std::move(key), static_cast<oa::oaDoubleProp *>(p)->getValue()};
     }
     case oa::oacTimePropType: {
-        return {std::move(key),
-                cbag::Time(static_cast<oa::oaTimeProp *>(p)->getValue())};
+        return {std::move(key), cbag::Time(static_cast<oa::oaTimeProp *>(p)->getValue())};
     }
     case oa::oacAppPropType: {
         oa::oaByteArray data;
@@ -44,32 +43,27 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(p);
         app_ptr->getValue(data);
         app_ptr->getAppType(app_str);
-        return {std::move(key), cbag::Binary(app_str, data.getElements(),
-                                             data.getNumElements())};
+        return {std::move(key), cbag::Binary(app_str, data.getElements(), data.getNumElements())};
     }
     case oa::oacBooleanPropType: {
-        return {
-            std::move(key),
-            static_cast<bool>(static_cast<oa::oaBooleanProp *>(p)->getValue())};
+        return {std::move(key), static_cast<bool>(static_cast<oa::oaBooleanProp *>(p)->getValue())};
     }
     default: {
-        throw std::invalid_argument(fmt::format(
-            "Unsupported OA property {} with type: {}, see developer.", key,
-            p->getType().getName()));
+        throw std::invalid_argument(
+            fmt::format("Unsupported OA property {} with type: {}, see developer.", key,
+                        p->getType().getName()));
     }
     }
 }
 
-std::pair<std::string, cbag::value_t> OAReader::read_app_def(oa::oaDesign *dsn,
-                                                             oa::oaAppDef *p) {
+std::pair<std::string, cbag::value_t> OAReader::read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
     oa::oaString tmp_str;
     p->getName(tmp_str);
     std::string key(tmp_str);
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
     switch (p->getType()) {
     case oa::oacIntAppDefType: {
-        return {std::move(key),
-                (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn)};
+        return {std::move(key), (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn)};
     }
     case oa::oacStringAppDefType: {
         (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, tmp_str);
@@ -77,8 +71,7 @@ std::pair<std::string, cbag::value_t> OAReader::read_app_def(oa::oaDesign *dsn,
     }
     default: {
         throw std::invalid_argument(fmt::format(
-            "Unsupported OA AppDef {} with type: {}, see developer.", key,
-            p->getType().getName()));
+            "Unsupported OA AppDef {} with type: {}, see developer.", key, p->getType().getName()));
     }
     }
 }
@@ -92,22 +85,19 @@ cbag::Rect OAReader::read_rect(oa::oaRect *p, std::string &&net) {
 }
 
 cbag::Poly OAReader::read_poly(oa::oaPolygon *p, std::string &&net) {
-    cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), net,
-                   p->getNumPoints());
+    cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
 cbag::Arc OAReader::read_arc(oa::oaArc *p, std::string &&net) {
-    cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(),
-                  p->getStopAngle());
+    cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(), p->getStopAngle());
     p->getEllipseBBox(ans.bbox);
     return ans;
 }
 
 cbag::Donut OAReader::read_donut(oa::oaDonut *p, std::string &&net) {
-    cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(),
-                    p->getHoleRadius());
+    cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(), p->getHoleRadius());
     p->getCenter(ans.center);
     return ans;
 }
@@ -119,16 +109,14 @@ cbag::Ellipse OAReader::read_ellipse(oa::oaEllipse *p, std::string &&net) {
 }
 
 cbag::Line OAReader::read_line(oa::oaLine *p, std::string &&net) {
-    cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), net,
-                   p->getNumPoints());
+    cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
 cbag::Path OAReader::read_path(oa::oaPath *p, std::string &&net) {
-    cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(),
-                   p->getNumPoints(), p->getStyle(), p->getBeginExt(),
-                   p->getEndExt());
+    cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
+                   p->getStyle(), p->getBeginExt(), p->getEndExt());
     p->getPoints(ans.points);
     return ans;
 }
@@ -139,9 +127,8 @@ cbag::Text OAReader::read_text(oa::oaText *p, std::string &&net) {
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
-                   p->getAlignment(), p->getOrient(), p->getFont(),
-                   p->getHeight(), overbar, visible, drafting);
+    cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text), p->getAlignment(),
+                   p->getOrient(), p->getFont(), p->getHeight(), overbar, visible, drafting);
     p->getOrigin(ans.origin);
     return ans;
 }
@@ -153,10 +140,9 @@ cbag::EvalText OAReader::read_eval_text(oa::oaEvalText *p, std::string &&net) {
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), net,
-                       std::string(text), p->getAlignment(), p->getOrient(),
-                       p->getFont(), p->getHeight(), overbar, visible, drafting,
-                       std::string(eval));
+    cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
+                       p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(), overbar,
+                       visible, drafting, std::string(eval));
     p->getOrigin(ans.origin);
     return ans;
 }
@@ -221,8 +207,7 @@ cbag::Shape OAReader::read_shape(oa::oaShape *p) {
         return read_eval_text(static_cast<oa::oaEvalText *>(p), std::move(net));
     default: {
         throw std::invalid_argument(
-            fmt::format("Unsupported OA shape type: {}, see developer.",
-                        p->getType().getName()));
+            fmt::format("Unsupported OA shape type: {}, see developer.", p->getType().getName()));
     }
     }
 }
@@ -262,17 +247,14 @@ cbag::Instance OAReader::read_instance(oa::oaInst *p) {
         // get terminal and net names
         iterm_ptr->getTermName(ns, term_name_oa);
         iterm_ptr->getNet()->getName(ns, net_name_oa);
-        LOG(INFO) << "Terminal " << term_name_oa << " connected to net "
-                  << net_name_oa;
-        inst.connections.emplace(std::string(term_name_oa),
-                                 std::string(net_name_oa));
+        LOG(INFO) << "Terminal " << term_name_oa << " connected to net " << net_name_oa;
+        inst.connections.emplace(std::string(term_name_oa), std::string(net_name_oa));
     }
 
     return inst;
 }
 
-std::pair<std::string, cbag::Instance>
-OAReader::read_instance_pair(oa::oaInst *p) {
+std::pair<std::string, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
     LOG(INFO) << "Reading instance " << inst_name_oa;
@@ -289,12 +271,10 @@ cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
         oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
         auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext());
         if (disp_ptr == nullptr) {
-            throw std::invalid_argument(
-                fmt::format("Terminal has no attr display."));
+            throw std::invalid_argument(fmt::format("Terminal has no attr display."));
         }
         if (disp_iter.getNext() != nullptr) {
-            throw std::invalid_argument(
-                fmt::format("Terminal has more than one attr display."));
+            throw std::invalid_argument(fmt::format("Terminal has more than one attr display."));
         }
 
         bool overbar = (disp_ptr->hasOverbar() != 0);
@@ -306,13 +286,11 @@ cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
             disp_ptr->getNet()->getName(ns, net_name);
             net = std::string(net_name);
         }
-        cbag::TermAttr attr(
-            oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue())
-                .getValue(),
-            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net,
-            disp_ptr->getAlignment(), disp_ptr->getOrient(),
-            disp_ptr->getFont(), disp_ptr->getHeight(), disp_ptr->getFormat(),
-            overbar, visible, drafting);
+        cbag::TermAttr attr(oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
+                            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net,
+                            disp_ptr->getAlignment(), disp_ptr->getOrient(), disp_ptr->getFont(),
+                            disp_ptr->getHeight(), disp_ptr->getFormat(), overbar, visible,
+                            drafting);
         disp_ptr->getOrigin(attr.origin);
 
         return {cbag::SchPinObject(std::move(inst), std::move(attr)), sig};
@@ -326,16 +304,14 @@ cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
         }
         return {read_rect(r, std::move(net)), sig};
     } else {
-        throw std::invalid_argument(
-            fmt::format("Unsupported OA pin figure type: {}, see developer.",
-                        p->getType().getName()));
+        throw std::invalid_argument(fmt::format(
+            "Unsupported OA pin figure type: {}, see developer.", p->getType().getName()));
     }
 }
 
 // Read method for terminals
 
-std::pair<std::string, cbag::PinFigure>
-OAReader::read_terminal_single(oa::oaTerm *term) {
+std::pair<std::string, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTerm *term) {
     // parse terminal name
     oa::oaString term_name_oa;
     term->getName(ns, term_name_oa);
@@ -344,8 +320,7 @@ OAReader::read_terminal_single(oa::oaTerm *term) {
     oa::oaIter<oa::oaPin> pin_iter(term->getPins());
     oa::oaPin *pin_ptr = pin_iter.getNext();
     if (pin_ptr == nullptr) {
-        throw std::invalid_argument(
-            fmt::format("Terminal {} has no pins.", term_name_oa));
+        throw std::invalid_argument(fmt::format("Terminal {} has no pins.", term_name_oa));
     }
     if (pin_iter.getNext() != nullptr) {
         throw std::invalid_argument(
@@ -356,12 +331,11 @@ OAReader::read_terminal_single(oa::oaTerm *term) {
     oa::oaIter<oa::oaPinFig> fig_iter(pin_ptr->getFigs());
     oa::oaPinFig *fig_ptr = fig_iter.getNext();
     if (fig_ptr == nullptr) {
-        throw std::invalid_argument(
-            fmt::format("Terminal {} has no figures.", term_name_oa));
+        throw std::invalid_argument(fmt::format("Terminal {} has no figures.", term_name_oa));
     }
     if (fig_iter.getNext() != nullptr) {
-        throw std::invalid_argument(fmt::format(
-            "Terminal {} has more than one figures.", term_name_oa));
+        throw std::invalid_argument(
+            fmt::format("Terminal {} has more than one figures.", term_name_oa));
     }
 
     return {std::string(term_name_oa), read_pin_figure(term, fig_ptr)};
@@ -397,9 +371,8 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
             ans.io_terms.insert(read_terminal_single(term_ptr));
             break;
         default:
-            throw std::invalid_argument(
-                fmt::format("Terminal {} has invalid type: {}", tmp,
-                            term_ptr->getTermType().getName()));
+            throw std::invalid_argument(fmt::format("Terminal {} has invalid type: {}", tmp,
+                                                    term_ptr->getTermType().getName()));
         }
     }
 
@@ -444,9 +417,8 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
     }
 
     LOG(INFO) << "Reading design groups";
-    oa::oaIter<oa::oaGroup> grp_iter(
-        p->getGroups(oacGroupIterBlockDomain | oacGroupIterModDomain |
-                     oacGroupIterNoDomain | oacGroupIterOccDomain));
+    oa::oaIter<oa::oaGroup> grp_iter(p->getGroups(oacGroupIterBlockDomain | oacGroupIterModDomain |
+                                                  oacGroupIterNoDomain | oacGroupIterOccDomain));
     oa::oaGroup *grp_ptr;
     while ((grp_ptr = grp_iter.getNext()) != nullptr) {
         oa::oaString grp_str;
@@ -460,8 +432,7 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
         oa::oaIter<oa::oaGroupMember> mem_iter(grp_ptr->getMembers());
         oa::oaGroupMember *mem_ptr;
         while ((mem_ptr = mem_iter.getNext()) != nullptr) {
-            LOG(INFO) << "group object type: "
-                      << mem_ptr->getObject()->getType().getName();
+            LOG(INFO) << "group object type: " << mem_ptr->getObject()->getType().getName();
         }
     }
 

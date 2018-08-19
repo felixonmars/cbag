@@ -39,17 +39,13 @@ class NetlistBuilder {
      */
     class LineBuilder {
       public:
-        LineBuilder(size_t ncol, char cnt_char, bool break_before,
-                    int tab_size);
+        LineBuilder(size_t ncol, char cnt_char, bool break_before, int tab_size);
 
-        friend LineBuilder &operator<<(LineBuilder &builder,
-                                       const std::string &token);
+        friend LineBuilder &operator<<(LineBuilder &builder, const std::string &token);
 
-        friend LineBuilder &operator<<(LineBuilder &builder,
-                                       std::string &&token);
+        friend LineBuilder &operator<<(LineBuilder &builder, std::string &&token);
 
-        friend std::ofstream &operator<<(std::ofstream &stream,
-                                         const LineBuilder &b);
+        friend std::ofstream &operator<<(std::ofstream &stream, const LineBuilder &b);
 
       private:
         std::vector<std::string> tokens;
@@ -65,8 +61,8 @@ class NetlistBuilder {
 
     void build();
 
-    void add_cellview(const std::string &name, SchCellView *cv,
-                      const netlist_map_t &cell_map, bool shell);
+    void add_cellview(const std::string &name, SchCellView *cv, const netlist_map_t &cell_map,
+                      bool shell);
 
   protected:
     std::ofstream out_file;
@@ -77,15 +73,12 @@ class NetlistBuilder {
   private:
     virtual void write_end() = 0;
 
-    virtual void write_cv_header(const std::string &name,
-                                 const term_t &in_terms,
-                                 const term_t &out_terms,
-                                 const term_t &io_terms) = 0;
+    virtual void write_cv_header(const std::string &name, const term_t &in_terms,
+                                 const term_t &out_terms, const term_t &io_terms) = 0;
 
     virtual void write_cv_end(const std::string &name) = 0;
 
-    virtual void write_instance_helper(const std::string &name,
-                                       const Instance &inst,
+    virtual void write_instance_helper(const std::string &name, const Instance &inst,
                                        const SchCellViewInfo &info) = 0;
 };
 
@@ -95,8 +88,7 @@ struct Binary;
 
 class write_param_visitor : public boost::static_visitor<> {
   public:
-    write_param_visitor(NetlistBuilder::LineBuilder *ptr,
-                        const std::string *key);
+    write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key);
 
     void operator()(const std::string &v) const;
     void operator()(const int32_t &v) const;

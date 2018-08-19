@@ -20,9 +20,7 @@ class to_yaml_visitor : public boost::static_visitor<> {
   public:
     explicit to_yaml_visitor(YAML::Node *ptr) : ptr(ptr) {}
 
-    template <typename T> void operator()(T &operand) const {
-        ptr->push_back(operand);
-    }
+    template <typename T> void operator()(T &operand) const { ptr->push_back(operand); }
 
   private:
     YAML::Node *ptr;

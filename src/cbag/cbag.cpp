@@ -30,23 +30,20 @@ void to_file(const SchCellView &cv, const char *fname) {
     outfile.close();
 }
 
-std::unique_ptr<NetlistBuilder>
-make_netlist_builder(const char *fname, const std::string &format) {
+std::unique_ptr<NetlistBuilder> make_netlist_builder(const char *fname, const std::string &format) {
     if (format == "cdl") {
         return std::make_unique<CDLBuilder>(fname);
     } else if (format == "verilog") {
         return std::make_unique<VerilogBuilder>(fname);
     } else {
-        throw std::invalid_argument(
-            fmt::format("Unrecognized netlist format: {}", format));
+        throw std::invalid_argument(fmt::format("Unrecognized netlist format: {}", format));
     }
 }
 
 void write_netlist(const std::vector<SchCellView *> &cv_list,
-                   const std::vector<std::string> &name_list,
-                   const char *cell_map,
-                   const std::vector<std::string> &inc_list, const char *format,
-                   bool flat, bool shell, const char *fname) {
+                   const std::vector<std::string> &name_list, const char *cell_map,
+                   const std::vector<std::string> &inc_list, const char *format, bool flat,
+                   bool shell, const char *fname) {
     LOG(INFO) << "Writing netlist file: " << fname;
     LOG(INFO) << "Parsing netlist cell map: " << cell_map;
     YAML::Node n = YAML::LoadFile(std::string(cell_map));
@@ -74,9 +71,8 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
                                     cv_list[idx]->get_info(name_list[idx]));
                 netlist_map.emplace(cv_list[idx]->lib_name, new_lib_map);
             } else {
-                lib_map_iter->second.emplace(
-                    cv_list[idx]->cell_name,
-                    cv_list[idx]->get_info(name_list[idx]));
+                lib_map_iter->second.emplace(cv_list[idx]->cell_name,
+                                             cv_list[idx]->get_info(name_list[idx]));
             }
         } else if (idx == num - 1) {
             // add this cellview to netlist
