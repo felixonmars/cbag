@@ -99,7 +99,8 @@ class CompactIterator
 
 class PointIterator : public std::iterator<std::forward_iterator_tag, point_t> {
   public:
-    inline PointIterator(const point_vector_t *ptr, std::size_t idx, bool between)
+    inline PointIterator(const point_vector_t *ptr, std::size_t idx,
+                         bool between)
         : ptr(ptr), idx(idx), between(between) {}
 
     inline point_t operator*() const {
@@ -218,12 +219,158 @@ class Rect : public Polygon90 {
     }
 };
 
+// -----------------------------------------------------------------------------
+// polygon sets typedefs
+// -----------------------------------------------------------------------------
+
+using PolygonSet = std::vector<Polygon>;
+using Polygon45Set = std::vector<Polygon45>;
+using Polygon90Set = std::vector<Polygon90>;
+using RectSet = std::vector<Rect>;
+
+// -----------------------------------------------------------------------------
+// JoinedRange declaration
+// -----------------------------------------------------------------------------
+
+/** A view of the concatenation of two containers.
+ *
+ * This class allows you to iterate over the concatenation of two containers.
+ * It is different than boost::range::join because this class acts as a view,
+ * meaning that it reflects any changes to the underlying containers.
+ *
+ * The underlying containers must define value_type and const_iterator tags.
+ * Also, the value_type of the second container must derived from the
+ * value_type of the first container.  The iterator returns value_type of
+ * the first container.
+ */
+template <typename ltype, typename rtype,
+          typename std::enable_if_t<std::is_base_of<
+              typename ltype::value_type, typename rtype::value_type>::value>
+              * = nullptr>
+class JoinedRange {
+  public:
+    class JoinedIterator : public std::iterator<std::forward_iterator_tag,
+                                                typename ltype::value_type> {
+      public:
+        inline JoinedIterator(const JoinedRange<ltype, rtype> &parent,
+                              typename ltype::const_iterator liter,
+                              typename rtype::const_iterator riter,
+                              bool on_right)
+            : parent(parent), liter(std::move(liter)), riter(std::move(riter)),
+              on_right(on_right) {}
+
+        inline const typename ltype::value_type &operator*() {
+            if (on_right) {
+                return *riter;
+            }
+            return *liter;
+        }
+
+        inline JoinedIterator &operator++() {
+            if (on_right) {
+                ++riter;
+            } else {
+                ++liter;
+                on_right = (liter == parent.lval->end());
+            }
+            return *this;
+        }
+
+        inline bool operator==(const JoinedIterator &rhs) const {
+            return on_right == rhs.on_right && liter == rhs.liter &&
+                   riter == rhs.riter;
+        }
+
+        inline bool operator!=(const JoinedIterator &rhs) const {
+            return on_right != rhs.on_right || liter != rhs.liter ||
+                   riter != rhs.riter;
+        }
+
+      private:
+        const JoinedRange<ltype, rtype> &parent;
+        typename ltype::const_iterator liter;
+        typename rtype::const_iterator riter;
+        bool on_right;
+    };
+
+    typedef JoinedIterator iterator;
+    typedef JoinedIterator const_iterator;
+    typedef typename JoinedIterator::value_type value_type;
+
+    inline JoinedRange(const ltype *lval, const rtype *rval)
+        : lval(lval), rval(rval) {}
+
+    inline const_iterator begin() const {
+        return const_iterator(*this, lval->begin(), rval->begin(), false);
+    }
+    inline const_iterator end() const {
+        return const_iterator(*this, lval->end(), rval->end(), true);
+    }
+
+  private:
+    const ltype *lval;
+    const rtype *rval;
+};
+
+// -----------------------------------------------------------------------------
+// various union views declarations
+// -----------------------------------------------------------------------------
+
+template <typename ltype, typename rtype,
+          typename std::enable_if_t<std::is_base_of<
+              typename ltype::value_type, typename rtype::value_type>::value>
+              * = nullptr>
+class UnionView {
+  public:
+    typedef coord_t coordinate_type;
+    typedef typename JoinedRange<ltype, rtype>::const_iterator iterator_type;
+
+    inline UnionView(const ltype &lval, const rtype &rval)
+        : my_range(&lval, &rval) {}
+
+    inline iterator_type begin() const { return my_range.begin(); }
+    inline iterator_type end() const { return my_range.end(); }
+
+  private:
+    JoinedRange<ltype, rtype> my_range;
+};
+
+template <typename ltype, typename rtype,
+          typename std::enable_if_t<
+              std::is_same<typename ltype::value_type, Polygon>::value &&
+              std::is_base_of<typename ltype::value_type,
+                              typename rtype::value_type>::value> * = nullptr>
+class PolygonSetUnionView : public UnionView<ltype, rtype> {
+    typedef PolygonSetUnionView<ltype, rtype> operator_arg_type;
+};
+
+template <typename ltype, typename rtype,
+          typename std::enable_if_t<
+              std::is_same<typename ltype::value_type, Polygon45>::value &&
+              std::is_base_of<typename ltype::value_type,
+                              typename rtype::value_type>::value> * = nullptr>
+class Polygon45SetUnionView : public UnionView<ltype, rtype> {
+    typedef Polygon45SetUnionView<ltype, rtype> operator_arg_type;
+};
+
+template <typename ltype, typename rtype,
+          typename std::enable_if_t<
+              std::is_base_of<Polygon90, typename ltype::value_type>::value &&
+              std::is_base_of<typename ltype::value_type,
+                              typename rtype::value_type>::value> * = nullptr>
+class Polygon90SetUnionView : public UnionView<ltype, rtype> {
+    typedef Polygon90SetUnionView<ltype, rtype> operator_arg_type;
+};
+
 } // namespace layout
 } // namespace cbag
-
-// boost polygon trait definitions
 namespace boost {
 namespace polygon {
+
+// -----------------------------------------------------------------------------
+// geometry concept declarations
+// -----------------------------------------------------------------------------
+
 template <> struct geometry_concept<cbag::layout::Polygon> {
     typedef polygon_concept type;
 };
@@ -238,6 +385,90 @@ template <> struct geometry_concept<cbag::layout::Polygon90> {
 
 template <> struct geometry_concept<cbag::layout::Rect> {
     typedef rectangle_concept type;
+};
+
+template <typename ltype, typename rtype>
+struct geometry_concept<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
+    typedef polygon_set_concept type;
+};
+
+template <typename ltype, typename rtype>
+struct geometry_concept<cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
+    typedef polygon_45_set_concept type;
+};
+
+template <typename ltype, typename rtype>
+struct geometry_concept<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
+    typedef polygon_90_set_concept type;
+};
+
+// -----------------------------------------------------------------------------
+// traits declarations
+// we do not have to define traits for polygon classes, because they conform
+// with the default behavior.
+// -----------------------------------------------------------------------------
+
+template <typename ltype, typename rtype>
+struct polygon_set_traits<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
+    typedef typename cbag::layout::PolygonSetUnionView<
+        ltype, rtype>::coordinate_type coordinate_type;
+    typedef
+        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::iterator_type
+            iterator_type;
+    typedef typename cbag::layout::PolygonSetUnionView<
+        ltype, rtype>::operator_arg_type operator_arg_type;
+
+    static inline iterator_type begin(const operator_arg_type &set) {
+        return set.begin();
+    }
+    static inline iterator_type end(const operator_arg_type &set) {
+        return set.end();
+    }
+
+    static inline bool clean(const operator_arg_type &set) { return false; }
+    static inline bool sorted(const operator_arg_type &set) { return false; }
+};
+
+template <typename ltype, typename rtype>
+struct polygon_45_set_traits<
+    cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
+    typedef typename cbag::layout::Polygon45SetUnionView<
+        ltype, rtype>::coordinate_type coordinate_type;
+    typedef typename cbag::layout::Polygon45SetUnionView<
+        ltype, rtype>::iterator_type iterator_type;
+    typedef typename cbag::layout::Polygon45SetUnionView<
+        ltype, rtype>::operator_arg_type operator_arg_type;
+
+    static inline iterator_type begin(const operator_arg_type &set) {
+        return set.begin();
+    }
+    static inline iterator_type end(const operator_arg_type &set) {
+        return set.end();
+    }
+
+    static inline bool clean(const operator_arg_type &set) { return false; }
+    static inline bool sorted(const operator_arg_type &set) { return false; }
+};
+
+template <typename ltype, typename rtype>
+struct polygon_90_set_traits<
+    cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
+    typedef typename cbag::layout::Polygon90SetUnionView<
+        ltype, rtype>::coordinate_type coordinate_type;
+    typedef typename cbag::layout::Polygon90SetUnionView<
+        ltype, rtype>::iterator_type iterator_type;
+    typedef typename cbag::layout::Polygon90SetUnionView<
+        ltype, rtype>::operator_arg_type operator_arg_type;
+
+    static inline iterator_type begin(const operator_arg_type &set) {
+        return set.begin();
+    }
+    static inline iterator_type end(const operator_arg_type &set) {
+        return set.end();
+    }
+
+    static inline bool clean(const operator_arg_type &set) { return false; }
+    static inline bool sorted(const operator_arg_type &set) { return false; }
 };
 
 } // namespace polygon
