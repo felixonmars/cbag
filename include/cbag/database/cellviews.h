@@ -40,7 +40,6 @@ struct SchCellViewInfo {
 };
 
 /** A schematic or symbol cell view
- *
  */
 struct SchCellView {
     SchCellView() = default;
@@ -94,6 +93,16 @@ using lib_map_t = std::unordered_map<std::string, SchCellViewInfo>;
 using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
 netlist_map_t load_netlist_map(const char *fname);
+
+/** A layout cell view
+ */
+struct LayCellView {
+    LayCellView() = default;
+
+    std::string lib_name, cell_name, view_name;
+
+};
+
 
 } // namespace cbag
 

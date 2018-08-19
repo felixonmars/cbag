@@ -194,6 +194,9 @@ def RecursiveCompilationInfoSearchDown(cur_dir, exclude_dir, db):
     Find any source file with compilation info in current directory.  Recurse in all subdirectories
     if none found.  Skip exclude_dir if it is a subdirectory of the current directory.
     """
+    if not os.path.isdir(cur_dir):
+        return None
+
     _, sub_dirs, files = next(os.walk(cur_dir))
 
     # check files in current directory

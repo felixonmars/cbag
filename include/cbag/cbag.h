@@ -17,6 +17,7 @@
 #include <cbag/database/primitives.h>
 #include <cbag/database/shapes.h>
 #include <cbag/netlist/name_convert.h>
+#include <cbag/database/layout/datatypes.h>
 
 namespace cbag {
 void init_logging();
