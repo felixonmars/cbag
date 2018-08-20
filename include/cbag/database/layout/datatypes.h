@@ -37,6 +37,8 @@ class Polygon {
     using point_type = point_t;
 
     inline Polygon() : data() {}
+    explicit inline Polygon(std::size_t n) : data() { data.reserve(n); }
+    explicit inline Polygon(point_vector_t data) : data(std::move(data)) {}
 
     inline iterator_type begin() const { return data.begin(); }
     inline iterator_type end() const { return data.end(); }
@@ -54,6 +56,8 @@ class Polygon {
 class Polygon45 : public Polygon {
   public:
     inline Polygon45() : Polygon() {}
+    explicit inline Polygon45(std::size_t n) : Polygon(n) {}
+    explicit inline Polygon45(point_vector_t data) : Polygon(std::move(data)) {}
 };
 
 // -----------------------------------------------------------------------------
@@ -143,6 +147,8 @@ class Polygon90 : public Polygon45 {
     using iterator_type = PointIterator;
 
     inline Polygon90() : Polygon45() {}
+    explicit inline Polygon90(std::size_t n) : Polygon45(n) {}
+    explicit inline Polygon90(point_vector_t data) : Polygon45(std::move(data)) {}
 
     inline compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
     inline compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }
@@ -181,15 +187,13 @@ class Rect : public Polygon90 {
   public:
     using interval_type = bp::interval_data<coordinate_type>;
 
-    inline Rect() : Polygon90() {
-        // default to 0 area rectangle at origin
-        data.reserve(2);
-        data.emplace_back(0, 0);
-        data.emplace_back(0, 0);
-    }
+    // defaults to 0 area rectangle at origin
+    inline Rect() : Polygon90({point_t(0, 0), point_t(0, 0)}) {}
+    inline Rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
+        : Polygon90({point_t(xl, yl), point_t(xh, yh)}) {}
 
-    template <typename T1, typename T2> inline Rect(const T1 &hrange, const T2 &vrange) {
-        data.resize(2);
+    template <typename T1, typename T2>
+    inline Rect(const T1 &hrange, const T2 &vrange) : Polygon90({point_t(0, 0), point_t(0, 0)}) {
         set(bp::HORIZONTAL, hrange);
         set(bp::VERTICAL, vrange);
     }

@@ -14,7 +14,14 @@ namespace layout {
 
 using UnionViewVariant = std::variant<RectView, Poly90View, Poly45View, PolyView>;
 
-template <typename T> class PolyRef {};
+template <typename T> class PolyRef {
+  public:
+    inline PolyRef(std::vector<T> *vec, std::size_t idx) : vec(vec), idx(idx) {}
+
+  private:
+    std::vector<T> *vec;
+    std::size_t idx;
+};
 
 /** A class representing layout geometries on the same layer.
  */
@@ -24,6 +31,8 @@ class Geometry {
         : rect_set(), poly90_set(), poly45_set(), poly_set(), mode(mode), view(make_union_view()) {}
 
     inline const UnionViewVariant &get_view() { return view; }
+
+    PolyRef<Rect> add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
 
   private:
     UnionViewVariant make_union_view();
