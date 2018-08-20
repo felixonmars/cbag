@@ -67,6 +67,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/database/figures.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/database/layout/geometries.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/cdl.cpp

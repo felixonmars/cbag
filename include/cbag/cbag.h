@@ -14,7 +14,6 @@
 #include <cbag/database/cellviews.h>
 #include <cbag/database/datatypes.h>
 #include <cbag/database/figures.h>
-#include <cbag/database/layout/datatypes.h>
 #include <cbag/database/primitives.h>
 #include <cbag/database/shapes.h>
 #include <cbag/netlist/name_convert.h>
