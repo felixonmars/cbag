@@ -8,15 +8,13 @@
 #ifndef CBAG_DATABASE_YAML_DATATYPES_H
 #define CBAG_DATABASE_YAML_DATATYPES_H
 
-#include <boost/variant.hpp>
-
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/database/datatypes_adapted.h>
 #include <cbag/yaml_fusion.h>
 
 namespace cbag {
-class to_yaml_visitor : public boost::static_visitor<> {
+class to_yaml_visitor {
   public:
     explicit to_yaml_visitor(YAML::Node *ptr) : ptr(ptr) {}
 

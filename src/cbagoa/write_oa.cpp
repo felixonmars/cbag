@@ -7,8 +7,7 @@
 
 #include <ctime>
 #include <utility>
-
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -19,7 +18,7 @@
 
 namespace cbagoa {
 
-class make_pin_fig_visitor : public boost::static_visitor<> {
+class make_pin_fig_visitor {
   public:
     make_pin_fig_visitor(const oa::oaCdbaNS *ns, oa::oaBlock *block, oa::oaPin *pin,
                          oa::oaTerm *term, int *cnt)
@@ -54,7 +53,7 @@ class make_pin_fig_visitor : public boost::static_visitor<> {
     int *cnt;
 };
 
-class make_shape_visitor : public boost::static_visitor<> {
+class make_shape_visitor {
   public:
     explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS *ns)
         : block(block), ns(ns) {}
@@ -127,7 +126,7 @@ class make_shape_visitor : public boost::static_visitor<> {
     const oa::oaCdbaNS *ns;
 };
 
-class make_prop_visitor : public boost::static_visitor<> {
+class make_prop_visitor {
   public:
     explicit make_prop_visitor(oa::oaObject *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
@@ -156,7 +155,7 @@ class make_prop_visitor : public boost::static_visitor<> {
     oa::oaString name;
 };
 
-class make_app_def_visitor : public boost::static_visitor<> {
+class make_app_def_visitor {
   public:
     explicit make_app_def_visitor(oa::oaDesign *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
@@ -213,8 +212,7 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
         oa::oaPin *pin = oa::oaPin::create(term);
 
         LOG(DEBUG) << "Creating terminal shape";
-        boost::apply_visitor(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt),
-                             pair.second.obj);
+        std::visit(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt), pair.second.obj);
     }
 }
 
@@ -232,7 +230,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     LOG(INFO) << "Writing shapes";
     make_shape_visitor shape_visitor(block, &ns);
     for (auto const &shape : cv.shapes) {
-        boost::apply_visitor(shape_visitor, shape);
+        std::visit(shape_visitor, shape);
     }
 
     LOG(INFO) << "Writing instances";
@@ -266,7 +264,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         oa::oaInstTerm::create(ptr, conn_data);
 
         for (auto const &prop_pair : pair.second.params) {
-            boost::apply_visitor(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
+            std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
         }
     }
 
@@ -274,13 +272,13 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
         if (prop_pair.first != "lastSchematicExtraction") {
-            boost::apply_visitor(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
+            std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
         }
     }
 
     LOG(INFO) << "Writing AppDefs";
     for (auto const &prop_pair : cv.app_defs) {
-        boost::apply_visitor(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
+        std::visit(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
     }
 
     // save, then update extraction timestamp

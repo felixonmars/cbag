@@ -7,7 +7,7 @@
 #ifndef CBAG_DATABASE_FIGURES_H
 #define CBAG_DATABASE_FIGURES_H
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <cbag/database/datatypes.h>
 #include <cbag/database/primitives.h>
@@ -86,7 +86,7 @@ struct PinFigure {
 
     PinFigure(SchPinObject &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
 
-    boost::variant<Rect, SchPinObject> obj;
+    std::variant<Rect, SchPinObject> obj;
     SigType sig_type;
 };
 } // namespace cbag

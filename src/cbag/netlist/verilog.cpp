@@ -6,7 +6,6 @@
  */
 
 #include <boost/range/join.hpp>
-#include <boost/variant.hpp>
 
 #include <fmt/format.h>
 

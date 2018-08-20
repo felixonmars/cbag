@@ -12,8 +12,8 @@
 namespace YAML {
 Node convert<cbag::value_t>::encode(const cbag::value_t &rhs) {
     Node root;
-    root.push_back(rhs.which());
-    boost::apply_visitor(cbag::to_yaml_visitor(&root), rhs);
+    root.push_back(rhs.index());
+    std::visit(cbag::to_yaml_visitor(&root), rhs);
     return root;
 }
 

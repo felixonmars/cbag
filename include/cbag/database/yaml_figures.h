@@ -15,10 +15,10 @@
 #include <cbag/yaml_fusion.h>
 
 namespace YAML {
-template <> struct convert<boost::variant<cbag::Rect, cbag::SchPinObject>> {
-    static Node encode(const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+template <> struct convert<std::variant<cbag::Rect, cbag::SchPinObject>> {
+    static Node encode(const std::variant<cbag::Rect, cbag::SchPinObject> &rhs);
 
-    static bool decode(const Node &node, boost::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+    static bool decode(const Node &node, std::variant<cbag::Rect, cbag::SchPinObject> &rhs);
 };
 } // namespace YAML
 

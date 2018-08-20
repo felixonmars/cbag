@@ -15,8 +15,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/variant.hpp>
-
 #include <cbag/netlist/name_convert.h>
 
 namespace cbag {
@@ -86,7 +84,7 @@ class NetlistBuilder {
 struct Time;
 struct Binary;
 
-class write_param_visitor : public boost::static_visitor<> {
+class write_param_visitor {
   public:
     write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key);
 

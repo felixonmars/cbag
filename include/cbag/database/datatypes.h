@@ -9,14 +9,16 @@
 #define CBAG_DATABASE_COMMON_H
 
 #include <cstdint>
-
-#include <boost/variant.hpp>
+#include <ctime>
+#include <string>
+#include <map>
+#include <variant>
 
 namespace cbag {
 /** A custom struct representing time data.
  *
  *  This struct is used to distinguish time from int, long, or double, so that
- * boost::variant will not be confused.
+ *  std::variant will not be confused.
  */
 struct Time {
     Time() = default;
@@ -29,7 +31,7 @@ struct Time {
 /** A custom struct representing binary data.
  *
  *  This struct is used to distinguish binary from string, so that
- * boost::variant will not be confused.
+ *  std::variant will not be confused.
  */
 struct Binary {
     Binary() = default;
@@ -43,7 +45,7 @@ struct Binary {
 
 /** Type definition for a parameter value type.
  */
-typedef boost::variant<int32_t, double, bool, std::string, Time, Binary> value_t;
+typedef std::variant<int32_t, double, bool, std::string, Time, Binary> value_t;
 
 /** Type definition for a parameter dictonary.
  */

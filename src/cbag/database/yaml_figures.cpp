@@ -12,16 +12,16 @@
 #include <cbag/database/yaml_figures.h>
 
 namespace YAML {
-Node convert<boost::variant<cbag::Rect, cbag::SchPinObject>>::encode(
-    const boost::variant<cbag::Rect, cbag::SchPinObject> &rhs) {
+Node convert<std::variant<cbag::Rect, cbag::SchPinObject>>::encode(
+    const std::variant<cbag::Rect, cbag::SchPinObject> &rhs) {
     Node root;
-    root.push_back(rhs.which());
-    boost::apply_visitor(cbag::to_yaml_visitor(&root), rhs);
+    root.push_back(rhs.index());
+    std::visit(cbag::to_yaml_visitor(&root), rhs);
     return root;
 }
 
-bool convert<boost::variant<cbag::Rect, cbag::SchPinObject>>::decode(
-    const Node &node, boost::variant<cbag::Rect, cbag::SchPinObject> &rhs) {
+bool convert<std::variant<cbag::Rect, cbag::SchPinObject>>::decode(
+    const Node &node, std::variant<cbag::Rect, cbag::SchPinObject> &rhs) {
     if (!node.IsSequence() || node.size() != 2) {
         LOG(WARNING) << "cbag::PinFigureObj YAML decode: not a sequence or "
                         "size != 2.  Node:\n"

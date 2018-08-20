@@ -5,8 +5,9 @@
  *  \date   2018/07/10
  */
 
+#include <variant>
+
 #include <boost/range/join.hpp>
-#include <boost/variant.hpp>
 
 #include <fmt/format.h>
 
@@ -80,7 +81,7 @@ void CDLBuilder::write_instance_helper(const std::string &name, const Instance &
     }
     // write instance parameters
     for (auto const &pair : par_map) {
-        boost::apply_visitor(write_param_visitor(&b, &(pair.first)), pair.second);
+        std::visit(write_param_visitor(&b, &(pair.first)), pair.second);
     }
 
     out_file << b;

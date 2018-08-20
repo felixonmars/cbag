@@ -7,7 +7,7 @@
 #ifndef CBAG_DATABASE_SHAPES_H
 #define CBAG_DATABASE_SHAPES_H
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <cbag/database/primitives.h>
 
@@ -172,7 +172,7 @@ struct TermAttr : TextBase {
     TextDispFormat format;
 };
 
-using Shape = boost::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, Text, EvalText>;
+using Shape = std::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, Text, EvalText>;
 } // namespace cbag
 
 #endif // CBAG_DATABASE_SHAPES_H
