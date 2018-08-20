@@ -16,10 +16,5 @@ UnionViewVariant Geometry::make_union_view() {
     }
 }
 
-PolyRef<Rect> Geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
-    rect_set.emplace_back(xl, yl, xh, yh);
-    return {&rect_set, rect_set.size() - 1};
-}
-
 } // namespace layout
 } // namespace cbag

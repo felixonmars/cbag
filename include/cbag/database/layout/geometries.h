@@ -32,7 +32,25 @@ class Geometry {
 
     inline const UnionViewVariant &get_view() { return view; }
 
-    PolyRef<Rect> add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
+    inline PolyRef<Rect> add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
+        rect_set.emplace_back(xl, yl, xh, yh);
+        return {&rect_set, rect_set.size() - 1};
+    }
+
+    inline PolyRef<Polygon90> add_poly90(point_vector_t &&data) {
+        poly90_set.emplace_back(std::move(data));
+        return {&poly90_set, poly90_set.size() - 1};
+    }
+
+    inline PolyRef<Polygon45> add_poly45(point_vector_t &&data) {
+        poly45_set.emplace_back(std::move(data));
+        return {&poly45_set, poly45_set.size() - 1};
+    }
+
+    inline PolyRef<Polygon> add_poly(point_vector_t &&data) {
+        poly_set.emplace_back(std::move(data));
+        return {&poly_set, poly_set.size() - 1};
+    }
 
   private:
     UnionViewVariant make_union_view();
