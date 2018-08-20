@@ -5,8 +5,8 @@
 int read_oa() {
     std::string lib_file("cds.lib");
     std::string lib_path(".");
-    std::string tech_lib("cds_ff_mpt");
-    std::string lib_name("schtest");
+    std::string tech_lib("tsmcN16");
+    std::string lib_name("AAAFOO_TEST_STRONGARM");
     std::string cell_name("inv");
     std::string cell_name2("inv2");
     std::string view_name("schematic");

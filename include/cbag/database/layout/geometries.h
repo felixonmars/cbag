@@ -18,6 +18,8 @@ template <typename T> class PolyRef {
   public:
     inline PolyRef(std::vector<T> *vec, std::size_t idx) : vec(vec), idx(idx) {}
 
+    inline T &value() { return (*vec)[idx]; }
+
   private:
     std::vector<T> *vec;
     std::size_t idx;

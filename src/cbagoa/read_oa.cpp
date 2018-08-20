@@ -183,6 +183,9 @@ cbag::Shape OAReader::read_shape(oa::oaShape *p) {
         oa::oaString net_name;
         p->getNet()->getName(ns, net_name);
         net = std::string(net_name);
+        LOG(INFO) << "Shape associated with net: " << net;
+    } else {
+        LOG(INFO) << "Shape has no net";
     }
 
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
@@ -386,7 +389,7 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
         if (include_shape(shape_ptr)) {
             ans.shapes.push_back(read_shape(shape_ptr));
         } else {
-            LOG(INFO) << "Skipping";
+            LOG(INFO) << "Skipping this shape";
         }
     }
 

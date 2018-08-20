@@ -227,11 +227,14 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     LOG(INFO) << "Writing inout terminals";
     create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
+    // TODO: add shape support
+    /*
     LOG(INFO) << "Writing shapes";
     make_shape_visitor shape_visitor(block, &ns);
     for (auto const &shape : cv.shapes) {
         std::visit(shape_visitor, shape);
     }
+    */
 
     LOG(INFO) << "Writing instances";
     oa::oaScalarName lib, cell, view, name;
@@ -249,7 +252,6 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         } else {
             ptr = oa::oaScalarInst::create(block, lib, cell, view, name, pair.second.xform);
         }
-        oa::oaNetTermNameArray conn_data(static_cast<oa::oaUInt4>(pair.second.connections.size()));
         for (auto const &term_net_pair : pair.second.connections) {
             LOG(INFO) << "Connecting inst " << pair.first << " terminal " << term_net_pair.first
                       << " to " << term_net_pair.second;
@@ -259,9 +261,34 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
             if (term_net == nullptr || term_net->isImplicit()) {
                 term_net = oa::oaNet::create(block, net_name);
             }
-            conn_data.append(term_net, term_name);
+            oa::oaInstTerm *inst_term = oa::oaInstTerm::create(term_net, ptr, term_name);
+            oa::oaTerm *term = inst_term->getTerm();
+            oa::oaIter<oa::oaPin> pin_iter(term->getPins());
+            oa::oaPin *pin = pin_iter.getNext();
+            oa::oaIter<oa::oaPinFig> pin_fig_iter(pin->getFigs());
+            oa::oaPinFig *pin_fig = pin_fig_iter.getNext();
+            oa::oaBox pin_box;
+            oa::oaPoint pts[2];
+            pin_fig->getBBox(pin_box);
+            pin_box.transform(pair.second.xform);
+            pin_box.getCenter(pts[0]);
+            oa::oaCoord x = pts[0].x();
+            oa::oaCoord y = pts[0].y();
+
+            LOG(INFO) << "inst " << pair.first << " pin " << term_net_pair.first << " location: ("
+                      << x << ", " << y << ")";
+
+            // create stub connection
+            pts[1] = {x + 2 * sch_stub_len2, y + 2 * sch_stub_len2};
+            oa::oaPointArray pt_arr(pts, 2);
+            oa::oaLine *line = oa::oaLine::create(block, sch_conn_layer, sch_conn_purpose, pt_arr);
+            line->addToNet(term_net);
+            oa::oaPoint mid(x + sch_stub_len2, y + sch_stub_len2);
+            oa::oaText *text = oa::oaText::create(
+                block, sch_conn_layer, sch_net_purpose, term_net_pair.second.c_str(), mid,
+                sch_net_align, sch_net_orient, sch_net_font, sch_net_height);
+            text->addToNet(term_net);
         }
-        oa::oaInstTerm::create(ptr, conn_data);
 
         for (auto const &prop_pair : pair.second.params) {
             std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);

@@ -14,6 +14,16 @@
 
 namespace cbagoa {
 
+// TODO: find ways to not hard code these values
+constexpr oa::oaLayerNum sch_conn_layer = 228;
+constexpr oa::oaPurposeNum sch_conn_purpose = 4294967295;
+constexpr oa::oaPurposeNum sch_net_purpose = 237;
+constexpr oa::oaCoord sch_stub_len2 = 5;
+constexpr oa::oaTextAlignEnum sch_net_align = oa::oacCenterCenterTextAlign;
+constexpr oa::oaOrientEnum sch_net_orient = oa::oacR0;
+constexpr oa::oaFontEnum sch_net_font = oa::oacStickFont;
+constexpr oa::oaDist sch_net_height = 10;
+
 class OAWriter {
   public:
     explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)){};
