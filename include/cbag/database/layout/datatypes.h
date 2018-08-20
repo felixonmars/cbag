@@ -8,7 +8,6 @@
 #define CBAG_DATABASE_LAYOUT_DATATYPES_H
 
 #include <iterator>
-#include <memory>
 #include <vector>
 
 #include <boost/polygon/polygon.hpp>
@@ -258,7 +257,7 @@ class JoinedRARange {
         inline JoinedRAIterator() = default;
 
         inline JoinedRAIterator(typename ltype::const_iterator lstart,
-                                typename ltype::const_iterator rstart, std::size_t idx,
+                                typename rtype::const_iterator rstart, std::size_t idx,
                                 std::size_t lsize)
             : idx(idx), lsize(lsize), lstart(std::move(lstart)), rstart(std::move(rstart)) {}
 
@@ -335,8 +334,7 @@ class JoinedRARange {
     using const_iterator = iterator;
     using value_type = typename JoinedRAIterator::value_type;
 
-    inline JoinedRARange(std::shared_ptr<ltype> lval, std::shared_ptr<rtype> rval)
-        : lval(std::move(lval)), rval(std::move(rval)) {}
+    inline JoinedRARange(const ltype &lval, const rtype &rval) : lval(&lval), rval(&rval) {}
 
     inline const_iterator begin() const {
         return const_iterator(lval->begin(), rval->begin(), 0, lval->size());
@@ -348,73 +346,69 @@ class JoinedRARange {
     inline std::size_t size() const { return lval->size() + rval->size(); }
 
   private:
-    const std::shared_ptr<ltype> lval;
-    const std::shared_ptr<rtype> rval;
+    const ltype *lval;
+    const rtype *rval;
 };
 
 // -----------------------------------------------------------------------------
 // various set views/union views declarations
 // -----------------------------------------------------------------------------
 
-class RectSetView {
+class RectView {
   public:
     using value_type = Rect;
     using const_iterator = RectSet::const_iterator;
     using coordinate_type = coord_t;
-    using iterator_type = const_iterator;
-    using operator_arg_type = RectSetView;
+    using operator_arg_type = RectView;
 
-    inline RectSetView() = default;
+    inline RectView() = default;
 
-    inline explicit RectSetView(std::shared_ptr<RectSet> ptr) : ptr(std::move(ptr)) {}
+    inline explicit RectView(const RectSet &val) : ptr(&val) {}
 
-    inline iterator_type begin() const { return ptr->begin(); }
+    inline const_iterator begin() const { return ptr->begin(); }
 
-    inline iterator_type end() const { return ptr->end(); }
+    inline const_iterator end() const { return ptr->end(); }
 
     inline std::size_t size() const { return ptr->size(); }
 
   private:
-    std::shared_ptr<RectSet> ptr;
+    const RectSet *ptr;
 };
 
-template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_same_v<typename ltype::value_type, Polygon>> * =
-              nullptr>
-class PolygonSetUnionView : public JoinedRARange<ltype, rtype> {
+class Poly90View : public JoinedRARange<Polygon90Set, RectSet> {
   public:
     using coordinate_type = coord_t;
-    using iterator_type = typename JoinedRARange<ltype, rtype>::const_iterator;
-    using operator_arg_type = PolygonSetUnionView<ltype, rtype>;
+    using operator_arg_type = Poly90View;
 
-    inline PolygonSetUnionView(std::shared_ptr<ltype> lval, std::shared_ptr<rtype> rval)
-        : JoinedRARange<ltype, rtype>(std::move(lval), std::move(rval)) {}
+    inline Poly90View(const Polygon90Set &lval, const RectSet &rval)
+        : JoinedRARange<Polygon90Set, RectSet>(lval, rval) {}
 };
 
-template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_same_v<typename ltype::value_type, Polygon45>> * =
-              nullptr>
-class Polygon45SetUnionView : public JoinedRARange<ltype, rtype> {
+class Poly45View : public JoinedRARange<Polygon45Set, Poly90View> {
   public:
     using coordinate_type = coord_t;
-    using iterator_type = typename JoinedRARange<ltype, rtype>::const_iterator;
-    using operator_arg_type = Polygon45SetUnionView<ltype, rtype>;
+    using operator_arg_type = Poly45View;
 
-    inline Polygon45SetUnionView(std::shared_ptr<ltype> lval, std::shared_ptr<rtype> rval)
-        : JoinedRARange<ltype, rtype>(std::move(lval), std::move(rval)) {}
+    inline Poly45View(const Polygon45Set &val0, const Polygon90Set &val1, const RectSet &val2)
+        : JoinedRARange<Polygon45Set, Poly90View>(val0, view_90), view_90(val1, val2) {}
+
+  private:
+    Poly90View view_90;
 };
 
-template <typename ltype, typename rtype,
-          typename std::enable_if_t<std::is_base_of<Polygon90, typename ltype::value_type>::value>
-              * = nullptr>
-class Polygon90SetUnionView : public JoinedRARange<ltype, rtype> {
+class PolyView : public JoinedRARange<JoinedRARange<PolygonSet, Polygon45Set>, Poly90View> {
   public:
     using coordinate_type = coord_t;
-    using iterator_type = typename JoinedRARange<ltype, rtype>::const_iterator;
-    using operator_arg_type = Polygon90SetUnionView<ltype, rtype>;
+    using operator_arg_type = PolyView;
 
-    inline Polygon90SetUnionView(std::shared_ptr<ltype> lval, std::shared_ptr<rtype> rval)
-        : JoinedRARange<ltype, rtype>(std::move(lval), std::move(rval)) {}
+    inline PolyView(const PolygonSet &val0, const Polygon45Set &val1, const Polygon90Set &val2,
+                    const RectSet &val3)
+        : JoinedRARange<JoinedRARange<PolygonSet, Polygon45Set>, Poly90View>(view_no_90, view_90),
+          view_no_90(val0, val1), view_90(val2, val3) {}
+
+  private:
+    JoinedRARange<PolygonSet, Polygon45Set> view_no_90;
+    Poly90View view_90;
 };
 
 } // namespace layout
@@ -435,22 +429,17 @@ template <> struct geometry_concept<cbag::layout::Polygon90> { using type = poly
 
 template <> struct geometry_concept<cbag::layout::Rect> { using type = rectangle_concept; };
 
-template <typename ltype, typename rtype>
-struct geometry_concept<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
-    using type = polygon_set_concept;
-};
+template <> struct geometry_concept<cbag::layout::PolyView> { using type = polygon_set_concept; };
 
-template <typename ltype, typename rtype>
-struct geometry_concept<cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
+template <> struct geometry_concept<cbag::layout::Poly45View> {
     using type = polygon_45_set_concept;
 };
 
-template <typename ltype, typename rtype>
-struct geometry_concept<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
+template <> struct geometry_concept<cbag::layout::Poly90View> {
     using type = polygon_90_set_concept;
 };
 
-template <> struct geometry_concept<cbag::layout::RectSetView> {
+template <> struct geometry_concept<cbag::layout::RectView> {
     using type = polygon_90_set_concept;
 };
 
@@ -460,13 +449,10 @@ template <> struct geometry_concept<cbag::layout::RectSetView> {
 // with the default behavior.
 // -----------------------------------------------------------------------------
 
-template <typename ltype, typename rtype>
-struct polygon_set_traits<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
-    using coordinate_type =
-        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::coordinate_type;
-    using iterator_type = typename cbag::layout::PolygonSetUnionView<ltype, rtype>::iterator_type;
-    using operator_arg_type =
-        typename cbag::layout::PolygonSetUnionView<ltype, rtype>::operator_arg_type;
+template <> struct polygon_set_traits<cbag::layout::PolyView> {
+    using coordinate_type = typename cbag::layout::PolyView::coordinate_type;
+    using iterator_type = typename cbag::layout::PolyView::const_iterator;
+    using operator_arg_type = typename cbag::layout::PolyView::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
@@ -475,13 +461,10 @@ struct polygon_set_traits<cbag::layout::PolygonSetUnionView<ltype, rtype>> {
     static inline bool sorted(const operator_arg_type &set) { return false; }
 };
 
-template <typename ltype, typename rtype>
-struct polygon_45_set_traits<cbag::layout::Polygon45SetUnionView<ltype, rtype>> {
-    using coordinate_type =
-        typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::coordinate_type;
-    using iterator_type = typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::iterator_type;
-    using operator_arg_type =
-        typename cbag::layout::Polygon45SetUnionView<ltype, rtype>::operator_arg_type;
+template <> struct polygon_45_set_traits<cbag::layout::Poly45View> {
+    using coordinate_type = typename cbag::layout::Poly45View::coordinate_type;
+    using iterator_type = typename cbag::layout::Poly45View::const_iterator;
+    using operator_arg_type = typename cbag::layout::Poly45View::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
@@ -490,13 +473,10 @@ struct polygon_45_set_traits<cbag::layout::Polygon45SetUnionView<ltype, rtype>> 
     static inline bool sorted(const operator_arg_type &set) { return false; }
 };
 
-template <typename ltype, typename rtype>
-struct polygon_90_set_traits<cbag::layout::Polygon90SetUnionView<ltype, rtype>> {
-    using coordinate_type =
-        typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::coordinate_type;
-    using iterator_type = typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::iterator_type;
-    using operator_arg_type =
-        typename cbag::layout::Polygon90SetUnionView<ltype, rtype>::operator_arg_type;
+template <> struct polygon_90_set_traits<cbag::layout::Poly90View> {
+    using coordinate_type = typename cbag::layout::Poly90View::coordinate_type;
+    using iterator_type = typename cbag::layout::Poly90View::const_iterator;
+    using operator_arg_type = typename cbag::layout::Poly90View::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
@@ -505,10 +485,10 @@ struct polygon_90_set_traits<cbag::layout::Polygon90SetUnionView<ltype, rtype>> 
     static inline bool sorted(const operator_arg_type &set) { return false; }
 };
 
-template <> struct polygon_90_set_traits<cbag::layout::RectSetView> {
-    using coordinate_type = typename cbag::layout::RectSetView::coordinate_type;
-    using iterator_type = typename cbag::layout::RectSetView::iterator_type;
-    using operator_arg_type = typename cbag::layout::RectSetView::operator_arg_type;
+template <> struct polygon_90_set_traits<cbag::layout::RectView> {
+    using coordinate_type = typename cbag::layout::RectView::coordinate_type;
+    using iterator_type = typename cbag::layout::RectView::const_iterator;
+    using operator_arg_type = typename cbag::layout::RectView::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
