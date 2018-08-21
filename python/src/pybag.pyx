@@ -52,7 +52,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         map[string, PinFigure] out_terms
         map[string, PinFigure] io_terms
 
-        SchCellView(const string& yaml_fname) except +
+        SchCellView(const char* yaml_fname, const char* sym_view) except +
 
         void clear_params() except +
 
@@ -269,8 +269,10 @@ cdef class PySchCellView:
     cdef unique_ptr[SchCellView] cv_ptr
     cdef unicode encoding
 
-    def __init__(self, unicode yaml_fname, unicode encoding):
-        self.cv_ptr.reset(new SchCellView(yaml_fname.encode(encoding)))
+    def __init__(self, unicode yaml_fname, unicode sym_view, unicode encoding):
+        py_fname = yaml_fname.encode(encoding)
+        py_sym_view = sym_view.encode(encoding)
+        self.cv_ptr.reset(new SchCellView(py_fname, py_sym_view))
         self.encoding = encoding
 
     def __dealloc__(self):

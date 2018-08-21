@@ -9,6 +9,7 @@
 #define CBAG_DATABASE_CELLVIEWS_H
 
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 #include <cbag/database/datatypes.h>
@@ -26,10 +27,16 @@ using inst_iter_t = std::map<std::string, Instance>::iterator;
 /** A simple struct representing netlist information of a cellview.
  */
 struct SchCellViewInfo {
-    SchCellViewInfo() : cell_name(), in_terms(), out_terms(), io_terms(), props(), is_prim(false) {}
+    inline SchCellViewInfo()
+        : cell_name(), in_terms(), out_terms(), io_terms(), props(), is_prim(false) {}
 
-    SchCellViewInfo(std::string name, size_t num_in, size_t num_out, size_t num_inout,
-                    bool is_prim);
+    inline SchCellViewInfo(std::string name, size_t num_in, size_t num_out, size_t num_inout,
+                           bool is_prim)
+        : cell_name(name), is_prim(is_prim) {
+        in_terms.reserve(num_in);
+        out_terms.reserve(num_out);
+        io_terms.reserve(num_inout);
+    }
 
     std::string cell_name;
     std::vector<std::string> in_terms, out_terms, io_terms;
@@ -42,7 +49,7 @@ struct SchCellViewInfo {
 struct SchCellView {
     SchCellView() = default;
 
-    explicit SchCellView(const std::string &yaml_fname);
+    explicit SchCellView(const char *yaml_fname, const char *sym_view = nullptr);
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
@@ -82,6 +89,7 @@ struct SchCellView {
     std::map<std::string, Instance> instances;
     ParamMap props;
     ParamMap app_defs;
+    std::unique_ptr<SchCellView> sym_ptr;
 };
 
 // netlist map typedefs and functions

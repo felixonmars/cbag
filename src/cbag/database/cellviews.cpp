@@ -5,6 +5,8 @@
  *  \date   2018/07/18
  */
 
+#include <boost/filesystem.hpp>
+
 #include <fmt/format.h>
 
 #include <cbag/database/yaml_cellviews.h>
@@ -12,19 +14,22 @@
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
 
+namespace fs = boost::filesystem;
+
 namespace cbag {
 
-SchCellViewInfo::SchCellViewInfo(std::string name, size_t num_in, size_t num_out, size_t num_inout,
-                                 bool is_prim)
-    : cell_name(name), is_prim(is_prim) {
-    in_terms.reserve(num_in);
-    out_terms.reserve(num_out);
-    io_terms.reserve(num_inout);
-}
-
-SchCellView::SchCellView(const std::string &yaml_fname) {
-    YAML::Node n = YAML::LoadFile(yaml_fname);
+SchCellView::SchCellView(const char *yaml_fname, const char *sym_view) {
+    fs::path yaml_path(yaml_fname);
+    YAML::Node n = YAML::LoadFile(yaml_path.string());
     (*this) = n.as<SchCellView>();
+    if (sym_view != nullptr) {
+        // load symbol cellview
+        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
+        if (fs::exists(yaml_path)) {
+            YAML::Node s = YAML::LoadFile(yaml_path.string());
+            sym_ptr = std::make_unique<SchCellView>(s.as<SchCellView>());
+        }
+    }
 }
 
 void SchCellView::clear_params() { props.clear(); }
@@ -67,6 +72,11 @@ void SchCellView::rename_pin(const char *old_name, const char *new_name) {
         nh.key() = std::string(new_name);
         in_terms.insert(std::move(nh));
     }
+
+    // rename the corresponding symbol pin
+    if (sym_ptr != nullptr) {
+        sym_ptr->rename_pin(old_name, new_name);
+    }
 }
 
 void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
@@ -80,7 +90,7 @@ void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
         io_terms.find(key) != io_terms.end()) {
         throw std::invalid_argument(fmt::format("Terminal {} already exists.", key));
     }
-
+    /*
     // get the map to insert
     std::map<std::string, PinFigure> *ptr = nullptr;
     switch (term_type) {
@@ -98,13 +108,21 @@ void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
     }
 
     // insert into map
-    // TODO: calculate new pin figure correctly
     ptr->emplace(std::move(key), PinFigure(Rect(0, 0, "", 0, 0, 10, 10), stSignal));
+    */
+
+    // TODO: add implementation
+    throw std::runtime_error("add_pin functionality not implemented yet.  See developer.");
 }
 
 bool SchCellView::remove_pin(const char *name) {
     std::string key(name);
-    return in_terms.erase(key) > 0 || out_terms.erase(key) > 0 || io_terms.erase(key) > 0;
+    bool success = in_terms.erase(key) > 0 || out_terms.erase(key) > 0 || io_terms.erase(key) > 0;
+    // remove symbol pin
+    if (success && sym_ptr != nullptr) {
+        sym_ptr->remove_pin(name);
+    }
+    return success;
 }
 
 void SchCellView::rename_instance(const char *old_name, const char *new_name) {

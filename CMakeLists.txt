@@ -5,6 +5,7 @@ project(cbag)
 # Boost Spirit X3 requires C++14
 # __has_include directive requires C++17
 # std::variant requires C++17
+# map::extract (use of node handles) requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
@@ -79,6 +80,8 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
+  # for yaml file path manipulations
+  boost_filesystem
   # for primitives YAML serialization
   oaBase
   oaCommon
