@@ -112,8 +112,8 @@ class OADatabase {
         write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv);
     }
 
-    void implement_schematics(const char *lib_name, const std::vector<std::string> &name_list,
-                              const std::vector<cbag::SchCellView *> &cv_list);
+    bool implement_schematic(const char *lib_name, const char *cell_name, const char *sch_view,
+                             const char *sym_view, const cbag::SchCellView &cv);
 
   private:
     oa::oaTech *read_tech(const char *library);

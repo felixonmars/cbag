@@ -103,6 +103,9 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                         const unordered_map[string, string]& lib_map,
                                                         const unordered_set[string]& exclude_libs) except +
 
+        cbool implement_schematic(const char* lib_name, const char* cell_name, const char* sch_view,
+                                  const char* sym_view, const SchCellView& cv) except +
+
 
 # initialize logging
 init_logging()
@@ -462,17 +465,17 @@ cdef class PyOADatabase:
         cdef string ans = deref(self.db_ptr).get_lib_path(clib)
         return ans.decode(self.encoding)
 
-    def create_lib(self, unicode library, unicode lib_path, unicode tech_lib):
-        pylib = library.encode(self.encoding)
-        pypath = lib_path.encode(self.encoding)
-        pytech = tech_lib.encode(self.encoding)
-        cdef char* clib = pylib
-        cdef char* cpath = pypath
-        cdef char* ctech = pytech
+    def create_lib(self, library, lib_path, tech_lib):
+        library = library.encode(self.encoding)
+        lib_path = lib_path.encode(self.encoding)
+        tech_lib = tech_lib.encode(self.encoding)
+        cdef char* clib = library
+        cdef char* cpath = lib_path
+        cdef char* ctech = tech_lib
         deref(self.db_ptr).create_lib(clib, cpath, ctech);
 
-    def read_sch_recursive(self, unicode lib_name, unicode cell_name, unicode view_name,
-                           unicode new_root_path, lib_map, exclude_libs):
+    def read_sch_recursive(self, lib_name, cell_name, view_name,
+                           new_root_path, lib_map, exclude_libs):
         lib_name = lib_name.encode(self.encoding)
         cell_name = cell_name.encode(self.encoding)
         view_name = view_name.encode(self.encoding)
@@ -494,19 +497,9 @@ cdef class PyOADatabase:
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
                 for p in ans]
 
-    def implement_schematics(self, lib_name, content_list):
+    def implement_schematic(self, unicode lib_name, unicode cell_name, PySchCellView cv,
+                            bytes sch_view=b'schematic', bytes sym_view=b'symbol'):
         lib_name = lib_name.encode(self.encoding)
+        cell_name = cell_name.encode(self.encoding)
 
-        cdef vector[SchCellView *] cv_list
-        cdef vector[string] name_list
-
-        cdef char* clib = lib_name
-        cdef int num = len(content_list)
-
-        cv_list.reserve(num)
-        name_list.reserve(num)
-        for name, cv in content_list:
-            name_list.push_back(name.encode(encoding))
-            _add_py_cv(cv_list, cv)
-
-        deref(self.db_ptr).implement_schematics(clib, name_list, cv_list)
+        return deref(self.db_ptr).implement_schematic(lib_name, cell_name, sch_view, sym_view, deref(cv.cv_ptr))

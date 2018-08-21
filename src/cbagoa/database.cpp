@@ -192,9 +192,16 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
     }
 }
 
-void OADatabase::implement_schematics(const char *lib_name,
-                                      const std::vector<std::string> &name_list,
-                                      const std::vector<cbag::SchCellView *> &cv_list) {}
+bool OADatabase::implement_schematic(const char *lib_name, const char *cell_name,
+                                     const char *sch_view, const char *sym_view,
+                                     const cbag::SchCellView &cv) {
+    write_sch_cellview(lib_name, cell_name, sch_view, true, cv);
+    if (cv.sym_ptr != nullptr && sym_view != nullptr) {
+        write_sch_cellview(lib_name, cell_name, sym_view, false, *(cv.sym_ptr));
+        return true;
+    }
+    return false;
+}
 
 oa::oaTech *OADatabase::read_tech(const char *library) {
     // open technology file
