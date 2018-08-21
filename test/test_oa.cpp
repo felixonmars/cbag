@@ -15,25 +15,9 @@ int read_oa() {
     cbagoa::OADatabase db(lib_file);
 
     cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
-
-    cbag::to_file(sch_master, "inv_sch.yaml");
-
-    /*
-    cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name,
-    sym_view_name);
-
-    std::ofstream symfile("inv_sym.xml", std::ios_base::out);
-    xml_out = std::make_unique<boost::archive::xml_oarchive>(symfile);
-    (*xml_out) << boost::serialization::make_nvp("master", sym_master);
-    xml_out.reset();
-    symfile.close();
-    */
-
     db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
-
-    sch_master = db.read_sch_cellview(lib_name, cell_name2, view_name);
-
-    cbag::to_file(sch_master, "inv_sch2.yaml");
+    cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
+    db.write_sch_cellview(lib_name, cell_name2, sym_view_name, false, sym_master);
 
     return 0;
 }

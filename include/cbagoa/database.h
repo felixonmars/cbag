@@ -50,7 +50,8 @@ class OADatabase {
      */
     explicit OADatabase(const char *lib_def_file);
 
-    explicit OADatabase(const std::string &lib_def_file) : OADatabase(lib_def_file.c_str()) {}
+    explicit inline OADatabase(const std::string &lib_def_file)
+        : OADatabase(lib_def_file.c_str()) {}
 
     ~OADatabase();
 
@@ -76,8 +77,8 @@ class OADatabase {
      */
     void create_lib(const char *library, const char *lib_path, const char *tech_lib);
 
-    void create_lib(const std::string &library, const std::string &lib_path,
-                    const std::string &tech_lib) {
+    inline void create_lib(const std::string &library, const std::string &lib_path,
+                           const std::string &tech_lib) {
         create_lib(library.c_str(), lib_path.c_str(), tech_lib.c_str());
     }
 
@@ -93,7 +94,7 @@ class OADatabase {
                        const std::unordered_map<std::string, std::string> &lib_map,
                        const std::unordered_set<std::string> &exclude_libs);
 
-    std::vector<cell_key_t>
+    inline std::vector<cell_key_t>
     read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
                        const std::string &view_name, const std::string &new_root_path,
                        const std::unordered_map<std::string, std::string> &lib_map,
@@ -105,9 +106,9 @@ class OADatabase {
     void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
                             bool is_sch, const cbag::SchCellView &cv);
 
-    void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
-                            const std::string &view_name, bool is_sch,
-                            const cbag::SchCellView &cv) {
+    inline void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                   const std::string &view_name, bool is_sch,
+                                   const cbag::SchCellView &cv) {
         write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv);
     }
 
@@ -123,7 +124,8 @@ class OADatabase {
                          const std::unordered_set<std::string> &exclude_libs,
                          cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
-    void read_prim_instance(const char *fname, const cbag::Instance &inst);
+    cbag::SchCellView cell_to_yaml(const std::string &lib_name, const std::string &cell_name,
+                                   const char *sch_view, const std::string &root_path);
 
     // OA namespace objects
     const oa::oaNativeNS ns;

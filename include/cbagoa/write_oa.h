@@ -30,7 +30,7 @@ class OAWriter {
 
     // Write method for schematic/symbol cell view
 
-    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn);
+    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch);
 
   private:
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,

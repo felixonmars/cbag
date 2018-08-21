@@ -189,7 +189,7 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
         LOG(INFO) << fmt::format("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        writer->write_sch_cellview(cv, dsn_ptr);
+        writer->write_sch_cellview(cv, dsn_ptr, is_sch);
         dsn_ptr->close();
     } catch (...) {
         handle_oa_exceptions();
@@ -243,34 +243,23 @@ void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const
                                  const std::unordered_map<std::string, std::string> &lib_map,
                                  const std::unordered_set<std::string> &exclude_libs,
                                  cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list) {
-    // parse schematic
-    cbag::SchCellView ans = read_sch_cellview(key.first.c_str(), key.second.c_str(), view_name);
-
     // find root_path
     std::unordered_map<std::string, std::string>::const_iterator map_iter;
     map_iter = lib_map.find(key.first);
-    fs::path root_path;
-    if (map_iter != lib_map.cend()) {
-        root_path = fs::path(map_iter->second);
-    } else {
-        root_path = fs::path(new_root_path);
-    }
+    std::string root_path =
+        (map_iter != lib_map.cend()) ? map_iter->second : std::string(new_root_path);
 
-    // create directory if not exist, then compute output filename
-    fs::path cur_path = root_path / key.first / "netlist_info";
-    fs::create_directories(cur_path);
-    cur_path /= fs::path(key.second + ".yaml");
+    // write cellviews to yaml files
+    cbag::SchCellView sch_cv =
+        cell_to_yaml(key.first.c_str(), key.second.c_str(), view_name, root_path);
 
     // update cell_list and exclude_cells
     cell_list.push_back(key);
     exclude_cells.insert(std::move(key));
 
-    // write to file
-    cbag::to_file(ans, cur_path.c_str());
-
     // recurse
     auto exc_lib_end = exclude_libs.end();
-    for (const auto &pair : ans.instances) {
+    for (const auto &pair : sch_cv.instances) {
         std::pair<std::string, std::string> ikey(pair.second.lib_name, pair.second.cell_name);
         if (exclude_cells.find(ikey) == exclude_cells.end()) {
             // did not see this schematic master before
@@ -278,24 +267,49 @@ void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const
                 // non-primitive master, parse normally
                 read_sch_helper(ikey, view_name, new_root_path, lib_map, exclude_libs,
                                 exclude_cells, cell_list);
-            } else {
-                // primitive master, read terminal information
-                // first, figure out root path for this instance
-                map_iter = lib_map.find(ikey.first);
-                if (map_iter != lib_map.cend()) {
-                    root_path = fs::path(map_iter->second);
-                } else {
-                    root_path = fs::path(new_root_path);
-                }
-                cur_path = root_path / ikey.first / "netlist_info";
-                fs::create_directories(cur_path);
-                cur_path /= fs::path(ikey.second + ".yaml");
-                read_prim_instance(cur_path.c_str(), pair.second);
             }
         }
     }
 }
 
-void OADatabase::read_prim_instance(const char *fname, const cbag::Instance &inst) {}
+cbag::SchCellView OADatabase::cell_to_yaml(const std::string &lib_name,
+                                           const std::string &cell_name, const char *sch_view,
+                                           const std::string &root_path) {
+    // create directory if not exist, then compute output filename
+    fs::path root_dir(fs::path(root_path) / lib_name / "netlist_info");
+    fs::create_directories(root_dir);
+
+    // parse schematic
+    cbag::SchCellView sch_cv = read_sch_cellview(lib_name.c_str(), cell_name.c_str(), sch_view);
+
+    // write schematic to file
+    fs::path tmp_path = root_dir / fmt::format("{}.yaml", cell_name);
+    cbag::to_file(sch_cv, tmp_path.c_str());
+
+    // write all symbol views to file
+    // get library read access
+    oa::oaLib *lib_ptr = oa::oaLib::find(oa::oaScalarName(ns_cdba, lib_name.c_str()));
+    if (!lib_ptr->getAccess(oa::oacReadLibAccess, 1)) {
+        throw std::runtime_error(fmt::format("Cannot obtain read access to library: {}", lib_name));
+    }
+    // find all symbol views
+    oa::oaScalarName cell_name_oa(ns_cdba, cell_name.c_str());
+    oa::oaCell *cell_ptr = oa::oaCell::find(lib_ptr, cell_name_oa);
+    oa::oaIter<oa::oaCellView> cv_iter(cell_ptr->getCellViews());
+    oa::oaCellView *cv_ptr;
+    while ((cv_ptr = cv_iter.getNext()) != nullptr) {
+        oa::oaString tmp_name;
+        oa::oaView *view_ptr = cv_ptr->getView();
+        if (view_ptr->getViewType() == oa::oaViewType::get(oa::oacSchematicSymbol)) {
+            view_ptr->getName(ns_cdba, tmp_name);
+            tmp_path = root_dir / fmt::format("{}.{}.yaml", cell_name, (const char *)tmp_name);
+            cbag::to_file(read_sch_cellview(lib_name.c_str(), cell_name.c_str(), tmp_name), tmp_path.c_str());
+        }
+    }
+    // release read access
+    lib_ptr->releaseAccess();
+
+    return sch_cv;
+}
 
 } // namespace cbagoa

@@ -216,7 +216,7 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
     }
 }
 
-void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn) {
+void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch) {
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
     int pin_cnt = 0;
@@ -227,14 +227,14 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     LOG(INFO) << "Writing inout terminals";
     create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
-    // TODO: add shape support
-    /*
-    LOG(INFO) << "Writing shapes";
-    make_shape_visitor shape_visitor(block, &ns);
-    for (auto const &shape : cv.shapes) {
-        std::visit(shape_visitor, shape);
+    // TODO: add shape support for schematic
+    if (!is_sch) {
+        LOG(INFO) << "Writing shapes";
+        make_shape_visitor shape_visitor(block, &ns);
+        for (auto const &shape : cv.shapes) {
+            std::visit(shape_visitor, shape);
+        }
     }
-    */
 
     LOG(INFO) << "Writing instances";
     oa::oaScalarName lib, cell, view, name;
@@ -284,9 +284,9 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
             oa::oaLine *line = oa::oaLine::create(block, sch_conn_layer, sch_conn_purpose, pt_arr);
             line->addToNet(term_net);
             oa::oaPoint mid(x + sch_stub_len2, y + sch_stub_len2);
-            oa::oaText *text = oa::oaText::create(
-                block, sch_conn_layer, sch_net_purpose, term_net_pair.second.c_str(), mid,
-                sch_net_align, sch_net_orient, sch_net_font, sch_net_height);
+            oa::oaText *text = oa::oaText::create(block, sch_conn_layer, sch_net_purpose,
+                                                  term_net_pair.second.c_str(), mid, sch_net_align,
+                                                  sch_net_orient, sch_net_font, sch_net_height);
             text->addToNet(term_net);
         }
 
