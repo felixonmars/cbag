@@ -12,6 +12,7 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+#include "spdlog/details/signal_handler.h"
 #include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -22,13 +23,12 @@
 
 namespace cbag {
 void init_logging() {
+    spdlog::installCrashHandler();
+
     constexpr uint32_t max_log_size = 1024 * 1024 * 10;
     constexpr uint32_t num_log_file = 3;
-    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-        "cbag.log", max_log_size, num_log_file);
-    auto logger = std::make_shared<spdlog::async_logger>(
-        "cbag", rotating_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block);
-    spdlog::register_logger(logger);
+    spdlog::create_async<spdlog::sinks::rotating_file_sink_mt>("cbag", "cbag.log", max_log_size,
+                                                               num_log_file);
 }
 
 void to_file(const SchCellView &cv, const char *fname) {

@@ -3,6 +3,8 @@
 #include <cbagoa/cbagoa.h>
 
 int read_oa() {
+    cbag::init_logging();
+
     std::string lib_file("cds.lib");
     std::string lib_path(".");
     std::string tech_lib("tsmcN16");

@@ -19,6 +19,8 @@ add_compile_options(-Wno-delete-non-virtual-dtor)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # generate compilation commands file for emacs
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# prefer pthreads
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # make sure linker raise errors if shared library has undefined symbols
 # this makes it a lot easier to debug
@@ -43,6 +45,8 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # Include spdlog
 find_package(spdlog CONFIG REQUIRED)
+# Include threads for spdlog
+find_package(Threads REQUIRED)
 
 # include yaml-cpp
 find_package(yaml-cpp)
@@ -94,6 +98,8 @@ target_link_libraries(cbag
   fmt-header-only
   # for Spirit X3 error code
   boost_system
+  # multithreading for spdlog
+  Threads::Threads
   m
   ${CMAKE_DL_LIBS}
   )
