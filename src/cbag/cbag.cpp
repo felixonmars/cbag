@@ -7,19 +7,29 @@
 
 #include <cstring>
 #include <fstream>
+#include <memory>
 
-#include <easylogging++.h>
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
+
+#include <spdlog/async.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/spdlog.h>
 
 #include <cbag/database/yaml_cellviews.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
 
-INITIALIZE_EASYLOGGINGPP
-
 namespace cbag {
-void init_logging() {}
+void init_logging() {
+    constexpr uint32_t max_log_size = 1024 * 1024 * 10;
+    constexpr uint32_t num_log_file = 3;
+    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
+        "cbag.log", max_log_size, num_log_file);
+    auto logger = std::make_shared<spdlog::async_logger>(
+        "cbag", rotating_sink, spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+    spdlog::register_logger(logger);
+}
 
 void to_file(const SchCellView &cv, const char *fname) {
     std::ofstream outfile(fname, std::ios_base::out);
@@ -44,12 +54,13 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
                    const std::vector<std::string> &name_list, const char *cell_map,
                    const std::vector<std::string> &inc_list, const char *format, bool flat,
                    bool shell, const char *fname) {
-    LOG(INFO) << "Writing netlist file: " << fname;
-    LOG(INFO) << "Parsing netlist cell map: " << cell_map;
+    auto logger = spdlog::get("cbag");
+    logger->info("Writing netlist file: {}", fname);
+    logger->info("Parsing netlist cell map: {}", cell_map);
     YAML::Node n = YAML::LoadFile(std::string(cell_map));
     netlist_map_t netlist_map = n.as<netlist_map_t>();
 
-    LOG(INFO) << "Creating netlist builder for netlist format: " << format;
+    logger->info("Creating netlist builder for netlist format: {}", format);
     auto builder_ptr = make_netlist_builder(fname, std::string(format));
     builder_ptr->init(inc_list, shell);
 
@@ -57,15 +68,15 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
     for (size_t idx = 0; idx < num; ++idx) {
         if (!shell) {
             // add this cellview to netlist
-            LOG(INFO) << "Netlisting cellview: " << name_list[idx];
+            logger->info("Netlisting cellview: {}", name_list[idx]);
             builder_ptr->add_cellview(name_list[idx], cv_list[idx], netlist_map, false);
 
             // add this cellview to netlist map
-            LOG(INFO) << "Adding cellview to netlist cell map";
+            logger->info("Adding cellview to netlist cell map");
             auto lib_map_iter = netlist_map.find(cv_list[idx]->lib_name);
             if (lib_map_iter == netlist_map.end()) {
-                LOG(INFO) << "Cannot find library " << cv_list[idx]->lib_name
-                          << ", creating lib cell map";
+                logger->info("Cannot find library {}, creating lib cell map",
+                             cv_list[idx]->lib_name);
                 lib_map_t new_lib_map;
                 new_lib_map.emplace(cv_list[idx]->cell_name,
                                     cv_list[idx]->get_info(name_list[idx]));
@@ -76,7 +87,7 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
             }
         } else if (idx == num - 1) {
             // add this cellview to netlist
-            LOG(INFO) << "Netlisting cellview: " << name_list[idx];
+            logger->info("Netlisting cellview: {}", name_list[idx]);
             builder_ptr->add_cellview(name_list[idx], cv_list[idx], netlist_map, true);
         }
     }

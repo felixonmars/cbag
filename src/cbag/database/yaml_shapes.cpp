@@ -5,7 +5,7 @@
  *  \date   2018/07/12
  */
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include <cbag/database/yaml_datatypes.h>
 #include <cbag/database/yaml_shapes.h>
@@ -19,8 +19,10 @@ Node convert<cbag::Shape>::encode(const cbag::Shape &rhs) {
 }
 
 bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
+    auto logger = spdlog::get("cbag");
     if (!node.IsSequence() || node.size() != 2) {
-        LOG(WARNING) << "cbag::shape YAML decode: not a sequence or size != 2.  Node:\n" << node;
+        logger->warn("cbag::Shape YAML decode: not a sequence or size != 2.  Node:\n{}",
+                     yaml::serialization::node_to_str(node));
         return false;
     }
     try {
@@ -54,13 +56,13 @@ bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
             rhs = node[1].as<cbag::EvalText>();
             return true;
         default:
-            LOG(WARNING) << "cbag::Shape YAML decode: unexpected which value: " << value
-                         << ".  Node:\n"
-                         << node;
+            logger->warn("cbag::Shape YAML decode: unexpected which value: {}.  Node:\n{}", value,
+                         yaml::serialization::node_to_str(node));
             return false;
         }
     } catch (...) {
-        LOG(WARNING) << "cbag::Shape YAML decode exception.  Node:\n" << node;
+        logger->warn("cbag::Shape YAML decode exception.  Node:\n{}",
+                     yaml::serialization::node_to_str(node));
         return false;
     }
 }

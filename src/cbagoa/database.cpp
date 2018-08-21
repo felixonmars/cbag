@@ -12,7 +12,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include <fmt/format.h>
 
@@ -50,18 +50,12 @@ oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oa
 OADatabase::OADatabase(const char *lib_def_file) : lib_def_file(lib_def_file), lib_def_obs(1) {
     try {
 
-        el::Configurations logging_conf;
-        logging_conf.setGlobally(el::ConfigurationType::ToStandardOutput, "false");
-        logging_conf.setGlobally(el::ConfigurationType::Filename, "cbagoa.log");
-        logging_conf.setGlobally(el::ConfigurationType::MaxLogFileSize, "16777216");
-        el::Loggers::reconfigureLogger("default", logging_conf);
-
         reader = std::make_unique<OAReader>(ns_cdba);
         writer = std::make_unique<OAWriter>(ns_cdba);
 
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
-        LOG(INFO) << "Creating new OADatabase with file: " << lib_def_file;
+        spdlog::get("cbag")->info("Creating new OADatabase with file: {}", lib_def_file);
         oa::oaLibDefList::openLibs(lib_def_file);
     } catch (...) {
         handle_oa_exceptions();
@@ -70,7 +64,8 @@ OADatabase::OADatabase(const char *lib_def_file) : lib_def_file(lib_def_file), l
 
 OADatabase::~OADatabase() {
     try {
-        LOG(INFO) << "Closing all OA libraries from definition file: " << lib_def_file;
+        spdlog::get("cbag")->info("Closing all OA libraries from definition file: {}",
+                                  lib_def_file);
         oa::oaIter<oa::oaLib> lib_iter(oa::oaLib::getOpenLibs());
         oa::oaLib *lib_ptr;
         while ((lib_ptr = lib_iter.getNext()) != nullptr) {
@@ -123,16 +118,17 @@ std::string OADatabase::get_lib_path(const char *library) {
 }
 
 void OADatabase::create_lib(const char *library, const char *lib_path, const char *tech_lib) {
+    auto logger = spdlog::get("cbag");
     try {
-        LOG(INFO) << "Creating OA library " << library;
+        logger->info("Creating OA library {}", library);
 
         // open library
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // create new library
-            LOG(INFO) << "Creating library " << library << " at path " << lib_path
-                      << ", with tech lib" << tech_lib;
+            logger->info("Creating library {} at path {}, with tech lib {}", library, lib_path,
+                         tech_lib);
             oa::oaScalarName oa_tech_lib(ns, tech_lib);
             lib_ptr = oa::oaLib::create(lib_name_oa, lib_path);
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
@@ -144,7 +140,7 @@ void OADatabase::create_lib(const char *library, const char *lib_path, const cha
             outfile << "DEFINE " << library << " " << lib_path << std::endl;
             outfile.close();
         } else {
-            LOG(INFO) << "Library already exists, do nothing.";
+            logger->info("Library already exists, do nothing.");
         }
     } catch (...) {
         handle_oa_exceptions();
@@ -155,7 +151,7 @@ cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name, const char
                                                 const char *view_name) {
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'r');
-        LOG(INFO) << fmt::format("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
+        spdlog::get("cbag")->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
         cbag::SchCellView ans = reader->read_sch_cellview(dsn_ptr);
         dsn_ptr->close();
         return ans;
@@ -188,7 +184,7 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
                                     const cbag::SchCellView &cv) {
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
-        LOG(INFO) << fmt::format("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
+        spdlog::get("cbag")->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
         writer->write_sch_cellview(cv, dsn_ptr, is_sch);
         dsn_ptr->close();
     } catch (...) {
@@ -221,8 +217,8 @@ oa::oaDesign *OADatabase::open_design(const char *lib_name, const char *cell_nam
     oa::oaScalarName cell_oa(ns, cell_name);
     oa::oaScalarName view_oa(ns, view_name);
 
-    LOG(INFO) << fmt::format("Opening design {}__{}({}) with mode {}", lib_name, cell_name,
-                             view_name, mode);
+    spdlog::get("cbag")->info("Opening design {}__{}({}) with mode {}", lib_name, cell_name,
+                              view_name, mode);
     oa::oaDesign *dsn_ptr = nullptr;
     if (mode == 'r') {
         dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, mode);
@@ -303,7 +299,8 @@ cbag::SchCellView OADatabase::cell_to_yaml(const std::string &lib_name,
         if (view_ptr->getViewType() == oa::oaViewType::get(oa::oacSchematicSymbol)) {
             view_ptr->getName(ns_cdba, tmp_name);
             tmp_path = root_dir / fmt::format("{}.{}.yaml", cell_name, (const char *)tmp_name);
-            cbag::to_file(read_sch_cellview(lib_name.c_str(), cell_name.c_str(), tmp_name), tmp_path.c_str());
+            cbag::to_file(read_sch_cellview(lib_name.c_str(), cell_name.c_str(), tmp_name),
+                          tmp_path.c_str());
         }
     }
     // release read access

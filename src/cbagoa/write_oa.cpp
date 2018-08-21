@@ -10,9 +10,8 @@
 #include <variant>
 
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include <cbagoa/write_oa.h>
 
@@ -196,47 +195,51 @@ class make_app_def_visitor {
 void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                                    const std::map<std::string, cbag::PinFigure> &map,
                                    oa::oaTermTypeEnum term_type) {
+    auto logger = spdlog::get("cbag");
+
     oa::oaName term_name;
     for (auto const &pair : map) {
         // create terminal, net, and pin
-        LOG(DEBUG) << "Creating terminal: " << pair.first;
+        logger->debug("Creating terminal {}", pair.first);
         term_name.init(ns, pair.first.c_str());
-        LOG(DEBUG) << "Creating terminal net";
+        logger->debug("Creating terminal net");
         oa::oaNet *term_net = oa::oaNet::find(block, term_name);
         if (term_net == nullptr || term_net->isImplicit()) {
             term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
         }
-        LOG(DEBUG) << "Creating terminal";
+        logger->debug("Creating terminal");
         oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
-        LOG(DEBUG) << "Creating terminal pin";
+        logger->debug("Creating terminal pin");
         oa::oaPin *pin = oa::oaPin::create(term);
 
-        LOG(DEBUG) << "Creating terminal shape";
+        logger->debug("Creating terminal shape");
         std::visit(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt), pair.second.obj);
     }
 }
 
 void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch) {
+    auto logger = spdlog::get("cbag");
+
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
     int pin_cnt = 0;
-    LOG(INFO) << "Writing input terminals";
+    logger->info("Writing input terminals");
     create_terminal_pin(block, pin_cnt, cv.in_terms, oa::oacInputTermType);
-    LOG(INFO) << "Writing output terminals";
+    logger->info("Writing output terminals");
     create_terminal_pin(block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
-    LOG(INFO) << "Writing inout terminals";
+    logger->info("Writing inout terminals");
     create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
     // TODO: add shape support for schematic
     if (!is_sch) {
-        LOG(INFO) << "Writing shapes";
+        logger->info("Writing shapes");
         make_shape_visitor shape_visitor(block, &ns);
         for (auto const &shape : cv.shapes) {
             std::visit(shape_visitor, shape);
         }
     }
 
-    LOG(INFO) << "Writing instances";
+    logger->info("Writing instances");
     oa::oaScalarName lib, cell, view, name;
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
@@ -253,8 +256,8 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
             ptr = oa::oaScalarInst::create(block, lib, cell, view, name, pair.second.xform);
         }
         for (auto const &term_net_pair : pair.second.connections) {
-            LOG(INFO) << "Connecting inst " << pair.first << " terminal " << term_net_pair.first
-                      << " to " << term_net_pair.second;
+            logger->info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
+                         term_net_pair.second);
             term_name.init(ns, term_net_pair.first.c_str());
             net_name.init(ns, term_net_pair.second.c_str());
             oa::oaNet *term_net = oa::oaNet::find(block, net_name);
@@ -275,9 +278,6 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
             oa::oaCoord x = pts[0].x();
             oa::oaCoord y = pts[0].y();
 
-            LOG(INFO) << "inst " << pair.first << " pin " << term_net_pair.first << " location: ("
-                      << x << ", " << y << ")";
-
             // create stub connection
             pts[1] = {x + 2 * sch_stub_len2, y + 2 * sch_stub_len2};
             oa::oaPointArray pt_arr(pts, 2);
@@ -295,7 +295,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         }
     }
 
-    LOG(INFO) << "Writing properties";
+    logger->info("Writing properties");
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
         if (prop_pair.first != "lastSchematicExtraction") {
@@ -303,7 +303,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         }
     }
 
-    LOG(INFO) << "Writing AppDefs";
+    logger->info("Writing AppDefs");
     for (auto const &prop_pair : cv.app_defs) {
         std::visit(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
     }
@@ -337,6 +337,6 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime());
 
     dsn->save();
-    LOG(INFO) << "Finish writing schematic/symbol cellview";
+    logger->info("Finish writing schematic/symbol cellview");
 }
 } // namespace cbagoa

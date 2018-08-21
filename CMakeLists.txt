@@ -41,6 +41,9 @@ message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 # Include fmt library
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
+# Include spdlog
+find_package(spdlog CONFIG REQUIRED)
+
 # include yaml-cpp
 find_package(yaml-cpp)
 message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
@@ -57,7 +60,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 link_directories($ENV{OA_LINK_DIR})
 
 set(SRC_FILES_LIB_CBAG
-  ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
@@ -100,7 +102,6 @@ set(SRC_FILES_LIB_CBAGOA
   ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
   ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
   ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp
-  ${CMAKE_SOURCE_DIR}/easyloggingpp/src/easylogging++.cc
   )
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 

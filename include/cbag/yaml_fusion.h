@@ -183,6 +183,12 @@ template <typename T> struct extractor {
     int mItem;
 };
 
+inline std::string node_to_str(const YAML::Node &node) {
+    YAML::Emitter emitter;
+    emitter << node;
+    return emitter.c_str();
+}
+
 template <typename Base> std::string to_yaml(const Base &v) {
     YAML::Emitter emitter;
     YAML::Node root = YAML::convert<Base>::encode(v);

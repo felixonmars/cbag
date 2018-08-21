@@ -6,7 +6,7 @@
  *  \date   2018/07/12
  */
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include <cbag/database/yaml_datatypes.h>
 #include <cbag/database/yaml_figures.h>
@@ -22,10 +22,10 @@ Node convert<std::variant<cbag::Rect, cbag::SchPinObject>>::encode(
 
 bool convert<std::variant<cbag::Rect, cbag::SchPinObject>>::decode(
     const Node &node, std::variant<cbag::Rect, cbag::SchPinObject> &rhs) {
+    auto logger = spdlog::get("cbag");
     if (!node.IsSequence() || node.size() != 2) {
-        LOG(WARNING) << "cbag::PinFigureObj YAML decode: not a sequence or "
-                        "size != 2.  Node:\n"
-                     << node;
+        logger->warn("cbag::PinFigureObj YAML decode: not a sequence or size != 2.  Node:\n{}",
+                     yaml::serialization::node_to_str(node));
         return false;
     }
     try {
@@ -38,13 +38,13 @@ bool convert<std::variant<cbag::Rect, cbag::SchPinObject>>::decode(
             rhs = node[1].as<cbag::SchPinObject>();
             return true;
         default:
-            LOG(WARNING) << "cbag::PinFigureObj YAML decode: unexpected which value: " << value
-                         << ".  Node:\n"
-                         << node;
+            logger->warn("cbag::PinFigureObj YAML decode: unexpected which value: {}.  Node:\n{}",
+                         value, yaml::serialization::node_to_str(node));
             return false;
         }
     } catch (...) {
-        LOG(WARNING) << "cbag::PinFigureObj YAML decode exception.  Node:\n" << node;
+        logger->warn("cbag::PinFigureObj YAML decode exception.  Node:\n{}",
+                     yaml::serialization::node_to_str(node));
         return false;
     }
 }

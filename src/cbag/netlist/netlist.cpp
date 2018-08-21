@@ -5,7 +5,8 @@
  *  \date   2018/07/10
  */
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
+
 #include <fmt/format.h>
 
 #include <cbag/database/cellviews.h>
@@ -116,19 +117,24 @@ void write_param_visitor::operator()(const std::string &v) const {
     (*ptr) << fmt::format("{}={}", *key, v);
 }
 void write_param_visitor::operator()(const int32_t &v) const {
-    LOG(WARNING) << "integer parameter, do nothing.";
+    auto logger = spdlog::get("cbag");
+    logger->warn("integer parameter, do nothing.");
 }
 void write_param_visitor::operator()(const double &v) const {
-    LOG(WARNING) << "double parameter, do nothing.";
+    auto logger = spdlog::get("cbag");
+    logger->warn("double parameter, do nothing.");
 }
 void write_param_visitor::operator()(const bool &v) const {
-    LOG(WARNING) << "bool parameter, do nothing.";
+    auto logger = spdlog::get("cbag");
+    logger->warn("bool parameter, do nothing.");
 }
 void write_param_visitor::operator()(const Time &v) const {
-    LOG(WARNING) << "time parameter, do nothing.";
+    auto logger = spdlog::get("cbag");
+    logger->warn("time parameter, do nothing.");
 }
 void write_param_visitor::operator()(const Binary &v) const {
-    LOG(WARNING) << "binary parameter, do nothing.";
+    auto logger = spdlog::get("cbag");
+    logger->warn("binary parameter, do nothing.");
 }
 
 } // namespace cbag
