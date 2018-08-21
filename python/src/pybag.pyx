@@ -473,14 +473,15 @@ cdef class PyOADatabase:
 
     def read_sch_recursive(self, unicode lib_name, unicode cell_name, unicode view_name,
                            unicode new_root_path, lib_map, exclude_libs):
-        pylib = lib_name.encode(self.encoding)
-        pycell = cell_name.encode(self.encoding)
-        pyview = view_name.encode(self.encoding)
-        pyroot = new_root_path.encode(self.encoding)
-        cdef char* clib = pylib
-        cdef char* ccell = pycell
-        cdef char* cview = pyview
-        cdef char* croot = pyroot
+        lib_name = lib_name.encode(self.encoding)
+        cell_name = cell_name.encode(self.encoding)
+        view_name = view_name.encode(self.encoding)
+        new_root_path = new_root_path.encode(self.encoding)
+
+        cdef char* clib = lib_name
+        cdef char* ccell = cell_name
+        cdef char* cview = view_name
+        cdef char* croot = new_root_path
         cdef unordered_set[string] exc_set
         cdef unordered_map[string, string] cmap
         for v in exclude_libs:
@@ -493,3 +494,19 @@ cdef class PyOADatabase:
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
                 for p in ans]
 
+    def implement_schematics(self, lib_name, content_list):
+        lib_name = lib_name.encode(self.encoding)
+
+        cdef vector[SchCellView *] cv_list
+        cdef vector[string] name_list
+
+        cdef char* clib = lib_name
+        cdef int num = len(content_list)
+
+        cv_list.reserve(num)
+        name_list.reserve(num)
+        for name, cv in content_list:
+            name_list.push_back(name.encode(encoding))
+            _add_py_cv(cv_list, cv)
+
+        deref(self.db_ptr).implement_schematics(clib, name_list, cv_list)

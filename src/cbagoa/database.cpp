@@ -192,6 +192,10 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
     }
 }
 
+void OADatabase::implement_schematics(const char *lib_name,
+                                      const std::vector<std::string> &name_list,
+                                      const std::vector<cbag::SchCellView *> &cv_list) {}
+
 oa::oaTech *OADatabase::read_tech(const char *library) {
     // open technology file
     oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
