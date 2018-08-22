@@ -8,12 +8,18 @@
 #ifndef CBAGOA_WRITE_OA_H
 #define CBAGOA_WRITE_OA_H
 
+#include <memory>
+
 #include <oa/oaDesignDB.h>
 
 #include <cbag/cbag.h>
 
-namespace cbagoa {
+// forward declare structures to reduce dependencies
+namespace spdlog {
+struct logger;
+} // namespace spdlog
 
+namespace cbagoa {
 // TODO: find ways to not hard code these values
 constexpr oa::oaLayerNum sch_conn_layer = 228;
 constexpr oa::oaPurposeNum sch_conn_purpose = 4294967295;
@@ -26,7 +32,8 @@ constexpr oa::oaDist sch_net_height = 10;
 
 class OAWriter {
   public:
-    explicit OAWriter(oa::oaCdbaNS ns) : ns(std::move(ns)){};
+    explicit inline OAWriter(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
+        : ns(std::move(ns)), logger(std::move(logger)){};
 
     // Write method for schematic/symbol cell view
 
@@ -38,6 +45,7 @@ class OAWriter {
                              oa::oaTermTypeEnum term_type);
 
     const oa::oaCdbaNS ns;
+    std::shared_ptr<spdlog::logger> logger;
 };
 } // namespace cbagoa
 

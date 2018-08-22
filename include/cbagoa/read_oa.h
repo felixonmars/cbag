@@ -8,15 +8,23 @@
 #ifndef CBAGOA_READ_OA_H
 #define CBAGOA_READ_OA_H
 
+#include <memory>
+
 #include <oa/oaDesignDB.h>
 
 #include <cbag/cbag.h>
+
+// forward declare structures to reduce dependencies
+namespace spdlog {
+struct logger;
+}
 
 namespace cbagoa {
 
 class OAReader {
   public:
-    explicit OAReader(oa::oaCdbaNS ns) : ns(std::move(ns)){};
+    explicit inline OAReader(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
+        : ns(std::move(ns)), logger(std::move(logger)){};
 
     // Read method for properties
 
@@ -65,7 +73,14 @@ class OAReader {
     cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
 
   private:
+    void print_prop(oa::oaProp *p);
+
+    void print_group(oa::oaGroup *p);
+
+    void print_dm_data(oa::oaDMData *data);
+
     const oa::oaCdbaNS ns;
+    std::shared_ptr<spdlog::logger> logger;
 };
 } // namespace cbagoa
 

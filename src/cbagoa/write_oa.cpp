@@ -195,8 +195,6 @@ class make_app_def_visitor {
 void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                                    const std::map<std::string, cbag::PinFigure> &map,
                                    oa::oaTermTypeEnum term_type) {
-    auto logger = spdlog::get("cbag");
-
     oa::oaName term_name;
     for (auto const &pair : map) {
         // create terminal, net, and pin
@@ -218,8 +216,6 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
 }
 
 void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch) {
-    auto logger = spdlog::get("cbag");
-
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
     int pin_cnt = 0;

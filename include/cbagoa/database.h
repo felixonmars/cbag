@@ -18,8 +18,12 @@
 
 #include <oa/oaDesignDB.h>
 
-namespace cbag {
 // forward declare structures to reduce dependencies
+namespace spdlog {
+struct logger;
+} // namespace spdlog
+
+namespace cbag {
 struct SchCellView;
 struct Instance;
 } // namespace cbag
@@ -138,6 +142,7 @@ class OADatabase {
     const LibDefObserver lib_def_obs;
     std::unique_ptr<OAReader> reader;
     std::unique_ptr<OAWriter> writer;
+    std::shared_ptr<spdlog::logger> logger;
 };
 } // namespace cbagoa
 
