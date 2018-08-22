@@ -15,6 +15,62 @@
 
 namespace cbagoa {
 
+void print_prop(oa::oaProp *p) {
+    auto logger = spdlog::get("cbag");
+
+    oa::oaString name;
+    oa::oaString val;
+    p->getName(name);
+    p->getValue(val);
+    logger->info("Property name = {}, value = {}, type = {}", (const char *)name, (const char *)val,
+                 (const char *)p->getType().getName());
+    if (val == "oaHierProp") {
+        logger->info("Hierarchical properties:");
+        oa::oaIter<oa::oaProp> prop_iter(p->getProps());
+        oa::oaProp *prop_ptr;
+        while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+            print_prop(prop_ptr);
+        }
+    }
+}
+
+void print_group(oa::oaGroup *p) {
+    auto logger = spdlog::get("cbag");
+
+    oa::oaString grp_str;
+    p->getName(grp_str);
+    logger->info("group name: {}, domain: {}", (const char *)grp_str,
+                 (const char *)p->getGroupDomain().getName());
+    logger->info("group has prop: {}, has appdef: {}", p->hasProp(), p->hasAppDef());
+    p->getDef()->getName(grp_str);
+    logger->info("group def name: {}", (const char *)grp_str);
+    oa::oaIter<oa::oaGroupMember> mem_iter(p->getMembers());
+    oa::oaGroupMember *mem_ptr;
+    while ((mem_ptr = mem_iter.getNext()) != nullptr) {
+        logger->info("group object type: {}",
+                     (const char *)mem_ptr->getObject()->getType().getName());
+    }
+}
+
+void print_dm_data(oa::oaDMData *data) {
+    auto logger = spdlog::get("cbag");
+    logger->info("Has app def: {}", data->hasAppDef());
+    logger->info("Reading properties");
+    oa::oaIter<oa::oaProp> prop_iter(data->getProps());
+    oa::oaProp *prop_ptr;
+    while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+        print_prop(prop_ptr);
+    }
+    logger->info("Properties end");
+    logger->info("Reading groups");
+    oa::oaIter<oa::oaGroup> grp_iter(data->getGroups());
+    oa::oaGroup *grp_ptr;
+    while ((grp_ptr = grp_iter.getNext()) != nullptr) {
+        print_group(grp_ptr);
+    }
+    logger->info("Groups end");
+}
+
 // Read method for properties
 
 std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
@@ -434,23 +490,29 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
                                                   oacGroupIterNoDomain | oacGroupIterOccDomain));
     oa::oaGroup *grp_ptr;
     while ((grp_ptr = grp_iter.getNext()) != nullptr) {
-        oa::oaString grp_str;
-        grp_ptr->getName(grp_str);
-        logger->info("group name: {}, domain: {}", (const char *)grp_str,
-                     (const char *)grp_ptr->getGroupDomain().getName());
-        logger->info("group has prop: {}, has appdef: {}", grp_ptr->hasProp(),
-                     grp_ptr->hasAppDef());
-        grp_ptr->getDef()->getName(grp_str);
-        logger->info("group def name: {}", (const char *)grp_str);
-        oa::oaIter<oa::oaGroupMember> mem_iter(grp_ptr->getMembers());
-        oa::oaGroupMember *mem_ptr;
-        while ((mem_ptr = mem_iter.getNext()) != nullptr) {
-            logger->info("group object type: {}",
-                         (const char *)mem_ptr->getObject()->getType().getName());
-        }
+        print_group(grp_ptr);
+    }
+    logger->info("Groups end");
+
+    logger->info("Reading cell DM data");
+    oa::oaScalarName lib_name;
+    oa::oaScalarName cell_name;
+    p->getLibName(lib_name);
+    p->getCellName(cell_name);
+    oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'r');
+    print_dm_data(data);
+
+    logger->info("Reading cellview DM data");
+    oa::oaScalarName view_name;
+    p->getViewName(view_name);
+    if (oa::oaCellViewDMData::exists(lib_name, cell_name, view_name)) {
+        oa::oaCellViewDMData *cv_data =
+            oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'r');
+        print_dm_data(cv_data);
     }
 
     logger->info("Finish reading schematic/symbol cellview");
     return ans;
 }
+
 } // namespace cbagoa
