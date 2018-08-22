@@ -9,6 +9,8 @@
 #include <utility>
 #include <variant>
 
+#include <boost/range/join.hpp>
+
 #include <fmt/format.h>
 
 #include <spdlog/spdlog.h>
@@ -304,35 +306,111 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         std::visit(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
     }
 
-    // save, then update extraction timestamp
+    // save
     dsn->save();
 
-    /*
-    oa::oaDesignDataTypeEnum etypes[] = {oa::oacPropDataType,
-    oa::oacNetDataType, oa::oacLayerHeaderDataType, oa::oacShapeDataType,
+    // write cellview data
+    if (is_sch) {
+        write_sch_cell_data(cv, dsn);
+    }
+
+    // update extraction timestamp
+
+    oa::oaDesignDataTypeEnum etypes[] = {oa::oacPropDataType, oa::oacNetDataType,
+                                         oa::oacLayerHeaderDataType, oa::oacShapeDataType,
                                          oa::oacTDLinkDataType};
 
     uint32_t timestamp = 0;
     for (auto e : etypes) {
-        timestamp = std::max(static_cast<uint32_t>(dsn->getTimeStamp(e)),
-    timestamp);
+        timestamp = std::max(static_cast<uint32_t>(dsn->getTimeStamp(e)), timestamp);
     }
 
     auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
-    (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+    if (pptr != nullptr) {
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+    }
     pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
-    (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+    if (pptr != nullptr) {
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+    }
     auto ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbLastSavedCounter");
-    ptr->set(dsn, timestamp);
+    if (ptr != nullptr) {
+        ptr->set(dsn, timestamp);
+    }
     ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbvCvTimeStamp");
-    ptr->set(dsn, timestamp);
+    if (ptr != nullptr) {
+        ptr->set(dsn, timestamp);
+    }
     for (auto e : etypes) {
         dsn->getTimeStamp(e).set(timestamp);
     }
-    */
+
     oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime());
 
     dsn->save();
     logger->info("Finish writing schematic/symbol cellview");
 }
+
+void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn) {
+    oa::oaScalarName lib_name;
+    oa::oaScalarName cell_name;
+    oa::oaScalarName view_name;
+    dsn->getLibName(lib_name);
+    dsn->getCellName(cell_name);
+    dsn->getViewName(view_name);
+
+    // build term order
+    std::stringstream term_order;
+    auto tmp1 = boost::join(cv.in_terms, cv.out_terms);
+    auto tmp2 = boost::join(tmp1, cv.io_terms);
+    auto cursor = tmp2.begin();
+    auto stop = tmp2.end();
+    term_order << '(';
+    if (cursor != stop) {
+        term_order << '"' << (*cursor).first << '"';
+        ++cursor;
+    }
+    for (; cursor != stop; ++cursor) {
+        term_order << " \"" << (*cursor).first << '"';
+    }
+    term_order << ')';
+
+    // build dependencies
+    std::stringstream dependencies;
+    auto inst_cursor = cv.instances.cbegin();
+    auto inst_stop = cv.instances.cend();
+    dependencies << '(';
+    if (inst_cursor != inst_stop) {
+        dependencies << "(\"" << inst_cursor->second.lib_name << "\" \""
+                     << inst_cursor->second.cell_name << "\" \"" << inst_cursor->second.view_name
+                     << "\")";
+        ++inst_cursor;
+    }
+    for (; inst_cursor != inst_stop; ++inst_cursor) {
+        dependencies << " (\"" << inst_cursor->second.lib_name << "\" \""
+                     << inst_cursor->second.cell_name << "\" \"" << inst_cursor->second.view_name
+                     << "\")";
+    }
+    dependencies << ')';
+
+    // create cell data
+    std::string cdf_data_str = fmt::format(cell_data, term_order.str());
+    oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
+                             cdf_data_str.size());
+    oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
+    oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
+    data->save();
+    data->close();
+
+    // create cellview data
+    std::string cv_cdf_data_str = dependencies.str();
+    oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
+                                cv_cdf_data_str.size());
+    oa::oaCellViewDMData *cv_data = oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
+    oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
+    oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
+    cv_data->save();
+    cv_data->close();
+}
+
 } // namespace cbagoa

@@ -73,6 +73,8 @@ class OAReader {
     cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
 
   private:
+    void print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);
+
     void print_prop(oa::oaProp *p);
 
     void print_group(oa::oaGroup *p);

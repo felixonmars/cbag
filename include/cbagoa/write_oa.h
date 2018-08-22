@@ -30,6 +30,43 @@ constexpr oa::oaOrientEnum sch_net_orient = oa::oacR0;
 constexpr oa::oaFontEnum sch_net_font = oa::oacStickFont;
 constexpr oa::oaDist sch_net_height = 10;
 
+constexpr auto prop_app_type = "ILList";
+constexpr auto cell_data_name = "cdfData";
+constexpr auto sch_data_parent_name = "dependency";
+constexpr auto sch_data_name = "children";
+constexpr auto cell_data = "(promptWidth nil "
+    "fieldHeight nil "
+    "fieldWidth nil "
+    "buttonFieldWidth nil "
+    "formInitProc nil "
+    "doneProc nil "
+    "parameters nil "
+    "propList (modelLabelSet \"\" "
+              "opPointLabelSet \"\" "
+              "paramLabelSet \"\" "
+              "simInfo (nil "
+                        "auLvs (nil "
+                                "namePrefix \"X\" "
+                                "termOrder {0} "
+                                "componentName \"subcircuit\" "
+                                "netlistProcedure ansLvsCompPrim) "
+                        "auCdl (nil "
+                                "namePrefix \"X\" "
+                                "termOrder {0} "
+                                "componentName \"subcircuit\" "
+                                "netlistProcedure ansCdlSubcktCall) "
+                        "spectre (nil "
+                                  "termOrder {0} "
+                                  "componentName \"subcircuit\" "
+                                  "netlistProcedure nil) "
+                        "hspiceD (nil "
+                                  "namePrefix \"X\" "
+                                  "termOrder {0} "
+                                  "componentName \"subcircuit\" "
+                                  "netlistProcedure nil))))";
+
+
+
 class OAWriter {
   public:
     explicit inline OAWriter(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
@@ -43,6 +80,8 @@ class OAWriter {
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                              const std::map<std::string, cbag::PinFigure> &map,
                              oa::oaTermTypeEnum term_type);
+
+    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn);
 
     const oa::oaCdbaNS ns;
     std::shared_ptr<spdlog::logger> logger;

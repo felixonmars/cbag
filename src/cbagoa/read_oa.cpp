@@ -414,15 +414,19 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
     oa::oaIter<oa::oaProp> prop_iter(p->getProps());
     oa::oaProp *prop_ptr;
     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
+        print_prop(prop_ptr);
         ans.props.insert(read_prop(prop_ptr));
     }
+    logger->info("Reading properties end");
 
     logger->info("Reading AppDefs");
     oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
     oa::oaAppDef *appdef_ptr;
     while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
+        print_app_def(p, appdef_ptr);
         ans.app_defs.insert(read_app_def(p, appdef_ptr));
     }
+    logger->info("Reading AppDefs end");
 
     logger->info("Reading design groups");
     oa::oaIter<oa::oaGroup> grp_iter(p->getGroups(oacGroupIterBlockDomain | oacGroupIterModDomain |
@@ -468,8 +472,33 @@ void OAReader::print_prop(oa::oaProp *p) {
         while ((prop_ptr = prop_iter.getNext()) != nullptr) {
             print_prop(prop_ptr);
         }
+    } else if (p->getType().getName() == "AppProp") {
+        static_cast<oa::oaAppProp *>(p)->getAppType(val);
+        logger->info("AppProp type: {}", (const char *)val);
     }
 }
+
+void OAReader::print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
+    oa::oaString tmp_str;
+    p->getName(tmp_str);
+    std::string key(tmp_str);
+    // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
+    switch (p->getType()) {
+    case oa::oacIntAppDefType: {
+        logger->info("AppDef name: {}, AppDef value: {}", key, (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn));
+    }
+    case oa::oacStringAppDefType: {
+        (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, tmp_str);
+        logger->info("AppDef name: {}, AppDef value: {}", key, (const char *)tmp_str);
+    }
+    default: {
+        throw std::invalid_argument(
+            fmt::format("Unsupported OA AppDef {} with type: {}, see developer.", key,
+                        (const char *)p->getType().getName()));
+    }
+    }
+}
+
 
 void OAReader::print_group(oa::oaGroup *p) {
     oa::oaString grp_str;
