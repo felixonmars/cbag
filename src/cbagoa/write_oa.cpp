@@ -220,6 +220,23 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
 void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch) {
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
+    // build term order
+    std::stringstream term_order;
+    auto tmp1 = boost::join(cv.in_terms, cv.out_terms);
+    auto tmp2 = boost::join(tmp1, cv.io_terms);
+    auto cursor = tmp2.begin();
+    auto stop = tmp2.end();
+    term_order << '(';
+    if (cursor != stop) {
+        term_order << '"' << (*cursor).first << '"';
+        ++cursor;
+    }
+    for (; cursor != stop; ++cursor) {
+        term_order << " \"" << (*cursor).first << '"';
+    }
+    term_order << ')';
+    std::string term_order_str = term_order.str();
+
     int pin_cnt = 0;
     logger->info("Writing input terminals");
     create_terminal_pin(block, pin_cnt, cv.in_terms, oa::oacInputTermType);
@@ -296,8 +313,17 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     logger->info("Writing properties");
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
-        if (prop_pair.first != "lastSchematicExtraction") {
-            std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
+        if (prop_pair.first != "lastSchematicExtraction" &&
+            prop_pair.first != "interfaceLastChanged") {
+            if (prop_pair.first == "portOrder") {
+                std::visit(make_prop_visitor(dsn, prop_pair.first),
+                           cbag::value_t(cbag::Binary(
+                               prop_app_type,
+                               reinterpret_cast<const unsigned char *>(term_order_str.c_str()),
+                               term_order_str.size())));
+            } else {
+                std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
+            }
         }
     }
 
@@ -311,7 +337,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
 
     // write cellview data
     if (is_sch) {
-        write_sch_cell_data(cv, dsn);
+        write_sch_cell_data(cv, dsn, term_order_str);
     }
 
     // update extraction timestamp
@@ -325,12 +351,10 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         timestamp = std::max(static_cast<uint32_t>(dsn->getTimeStamp(e)), timestamp);
     }
 
-    auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
-    if (pptr != nullptr) {
+    if (is_sch) {
+        auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
         (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
-    }
-    pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
-    if (pptr != nullptr) {
+        pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
         (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
     }
     auto ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbLastSavedCounter");
@@ -345,35 +369,23 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         dsn->getTimeStamp(e).set(timestamp);
     }
 
-    oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime());
-
+    if (is_sch) {
+        oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime() + 10);
+    } else {
+        oa::oaTimeProp::create(dsn, "interfaceLastChanged", dsn->getLastSavedTime());
+    }
     dsn->save();
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn) {
+void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn,
+                                   const std::string &term_order) {
     oa::oaScalarName lib_name;
     oa::oaScalarName cell_name;
     oa::oaScalarName view_name;
     dsn->getLibName(lib_name);
     dsn->getCellName(cell_name);
     dsn->getViewName(view_name);
-
-    // build term order
-    std::stringstream term_order;
-    auto tmp1 = boost::join(cv.in_terms, cv.out_terms);
-    auto tmp2 = boost::join(tmp1, cv.io_terms);
-    auto cursor = tmp2.begin();
-    auto stop = tmp2.end();
-    term_order << '(';
-    if (cursor != stop) {
-        term_order << '"' << (*cursor).first << '"';
-        ++cursor;
-    }
-    for (; cursor != stop; ++cursor) {
-        term_order << " \"" << (*cursor).first << '"';
-    }
-    term_order << ')';
 
     // build dependencies
     std::stringstream dependencies;
@@ -394,7 +406,7 @@ void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesi
     dependencies << ')';
 
     // create cell data
-    std::string cdf_data_str = fmt::format(cell_data, term_order.str());
+    std::string cdf_data_str = fmt::format(cell_data, term_order);
     oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
                              cdf_data_str.size());
     oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');

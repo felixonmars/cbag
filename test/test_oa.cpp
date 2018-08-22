@@ -21,6 +21,9 @@ int read_oa() {
     cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
     db.write_sch_cellview(lib_name, cell_name2, sym_view_name, false, sym_master);
 
+    db.read_sch_cellview(lib_name, cell_name2, view_name);
+    db.read_sch_cellview(lib_name, cell_name2, sym_view_name);
+
     return 0;
 }
 

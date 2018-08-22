@@ -479,26 +479,28 @@ void OAReader::print_prop(oa::oaProp *p) {
 }
 
 void OAReader::print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
-    oa::oaString tmp_str;
-    p->getName(tmp_str);
-    std::string key(tmp_str);
+    oa::oaString name;
+    p->getName(name);
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
     switch (p->getType()) {
     case oa::oacIntAppDefType: {
-        logger->info("AppDef name: {}, AppDef value: {}", key, (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn));
+        logger->info("AppDef name: {}, AppDef value: {}", (const char *)name,
+                     (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn));
+        break;
     }
     case oa::oacStringAppDefType: {
-        (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, tmp_str);
-        logger->info("AppDef name: {}, AppDef value: {}", key, (const char *)tmp_str);
+        oa::oaString val;
+        (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, val);
+        logger->info("AppDef name: {}, AppDef value: {}", (const char *)name, (const char *)val);
+        break;
     }
     default: {
         throw std::invalid_argument(
-            fmt::format("Unsupported OA AppDef {} with type: {}, see developer.", key,
-                        (const char *)p->getType().getName()));
+            fmt::format("Unsupported OA AppDef {} with type: {}, see developer.",
+                        (const char *)name, (const char *)p->getType().getName()));
     }
     }
 }
-
 
 void OAReader::print_group(oa::oaGroup *p) {
     oa::oaString grp_str;

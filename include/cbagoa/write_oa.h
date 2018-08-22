@@ -35,37 +35,35 @@ constexpr auto cell_data_name = "cdfData";
 constexpr auto sch_data_parent_name = "dependency";
 constexpr auto sch_data_name = "children";
 constexpr auto cell_data = "(promptWidth nil "
-    "fieldHeight nil "
-    "fieldWidth nil "
-    "buttonFieldWidth nil "
-    "formInitProc nil "
-    "doneProc nil "
-    "parameters nil "
-    "propList (modelLabelSet \"\" "
-              "opPointLabelSet \"\" "
-              "paramLabelSet \"\" "
-              "simInfo (nil "
-                        "auLvs (nil "
-                                "namePrefix \"X\" "
-                                "termOrder {0} "
-                                "componentName \"subcircuit\" "
-                                "netlistProcedure ansLvsCompPrim) "
-                        "auCdl (nil "
-                                "namePrefix \"X\" "
-                                "termOrder {0} "
-                                "componentName \"subcircuit\" "
-                                "netlistProcedure ansCdlSubcktCall) "
-                        "spectre (nil "
-                                  "termOrder {0} "
-                                  "componentName \"subcircuit\" "
-                                  "netlistProcedure nil) "
-                        "hspiceD (nil "
-                                  "namePrefix \"X\" "
-                                  "termOrder {0} "
-                                  "componentName \"subcircuit\" "
-                                  "netlistProcedure nil))))";
-
-
+                           "fieldHeight nil "
+                           "fieldWidth nil "
+                           "buttonFieldWidth nil "
+                           "formInitProc nil "
+                           "doneProc nil "
+                           "parameters nil "
+                           "propList (modelLabelSet \"\" "
+                           "opPointLabelSet \"\" "
+                           "paramLabelSet \"\" "
+                           "simInfo (nil "
+                           "auLvs (nil "
+                           "namePrefix \"X\" "
+                           "termOrder {0} "
+                           "componentName \"subcircuit\" "
+                           "netlistProcedure ansLvsCompPrim) "
+                           "auCdl (nil "
+                           "namePrefix \"X\" "
+                           "termOrder {0} "
+                           "componentName \"subcircuit\" "
+                           "netlistProcedure ansCdlSubcktCall) "
+                           "spectre (nil "
+                           "termOrder {0} "
+                           "componentName \"subcircuit\" "
+                           "netlistProcedure nil) "
+                           "hspiceD (nil "
+                           "namePrefix \"X\" "
+                           "termOrder {0} "
+                           "componentName \"subcircuit\" "
+                           "netlistProcedure nil))))";
 
 class OAWriter {
   public:
@@ -81,7 +79,8 @@ class OAWriter {
                              const std::map<std::string, cbag::PinFigure> &map,
                              oa::oaTermTypeEnum term_type);
 
-    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn);
+    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn,
+                             const std::string &term_order);
 
     const oa::oaCdbaNS ns;
     std::shared_ptr<spdlog::logger> logger;
