@@ -20,7 +20,7 @@
 
 // forward declare structures to reduce dependencies
 namespace spdlog {
-struct logger;
+class logger;
 } // namespace spdlog
 
 namespace cbag {
