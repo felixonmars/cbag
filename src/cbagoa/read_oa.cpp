@@ -414,20 +414,19 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
     oa::oaIter<oa::oaProp> prop_iter(p->getProps());
     oa::oaProp *prop_ptr;
     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-        print_prop(prop_ptr);
         ans.props.insert(read_prop(prop_ptr));
     }
-    logger->info("Reading properties end");
+    logger->info("properties end");
 
     logger->info("Reading AppDefs");
     oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
     oa::oaAppDef *appdef_ptr;
     while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
-        print_app_def(p, appdef_ptr);
         ans.app_defs.insert(read_app_def(p, appdef_ptr));
     }
-    logger->info("Reading AppDefs end");
+    logger->info("AppDefs end");
 
+    /*
     logger->info("Reading design groups");
     oa::oaIter<oa::oaGroup> grp_iter(p->getGroups(oacGroupIterBlockDomain | oacGroupIterModDomain |
                                                   oacGroupIterNoDomain | oacGroupIterOccDomain));
@@ -436,7 +435,9 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
         print_group(grp_ptr);
     }
     logger->info("Groups end");
+    */
 
+    /*
     logger->info("Reading cell DM data");
     oa::oaScalarName lib_name;
     oa::oaScalarName cell_name;
@@ -454,27 +455,45 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
         print_dm_data(cv_data);
     }
 
+    logger->info("Reading time stamps");
+    for (unsigned int idx = 0; idx < 81; ++idx) {
+        try {
+            oa::oaDesignDataType data_type(static_cast<oa::oaDesignDataTypeEnum>(idx));
+            logger->info("{} timestamp = {}", (const char *)data_type.getName(),
+                         p->getTimeStamp(data_type));
+        } catch (...) {
+            logger->info("error on idx = {}", idx);
+        }
+    }
+    */
+
     logger->info("Finish reading schematic/symbol cellview");
     return ans;
 }
 
-void OAReader::print_prop(oa::oaProp *p) {
-    oa::oaString name;
-    oa::oaString val;
-    p->getName(name);
-    p->getValue(val);
-    logger->info("Property name = {}, value = {}, type = {}", (const char *)name, (const char *)val,
-                 (const char *)p->getType().getName());
-    if (val == "oaHierProp") {
-        logger->info("Hierarchical properties:");
-        oa::oaIter<oa::oaProp> prop_iter(p->getProps());
-        oa::oaProp *prop_ptr;
-        while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-            print_prop(prop_ptr);
+void OAReader::print_prop(oa::oaObject *obj) {
+    if (obj->hasProp()) {
+        oa::oaIter<oa::oaProp> prop_iter(obj->getProps());
+        oa::oaProp *p;
+        logger->info("Reading properties");
+        while ((p = prop_iter.getNext()) != nullptr) {
+            oa::oaString name;
+            oa::oaString val;
+            p->getName(name);
+            p->getValue(val);
+            logger->info("Property name = {}, value = {}, type = {}", (const char *)name,
+                         (const char *)val, (const char *)p->getType().getName());
+            if (val == "oaHierProp") {
+                logger->info("Hierarchical properties:");
+                print_prop(p);
+            } else if (p->getType().getName() == "AppProp") {
+                static_cast<oa::oaAppProp *>(p)->getAppType(val);
+                logger->info("AppProp type: {}", (const char *)val);
+            }
         }
-    } else if (p->getType().getName() == "AppProp") {
-        static_cast<oa::oaAppProp *>(p)->getAppType(val);
-        logger->info("AppProp type: {}", (const char *)val);
+        logger->info("properties end");
+    } else {
+        logger->info("No properties");
     }
 }
 
@@ -500,6 +519,7 @@ void OAReader::print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
                         (const char *)name, (const char *)p->getType().getName()));
     }
     }
+    print_prop(p);
 }
 
 void OAReader::print_group(oa::oaGroup *p) {
@@ -520,13 +540,7 @@ void OAReader::print_group(oa::oaGroup *p) {
 
 void OAReader::print_dm_data(oa::oaDMData *data) {
     logger->info("Has app def: {}", data->hasAppDef());
-    logger->info("Reading properties");
-    oa::oaIter<oa::oaProp> prop_iter(data->getProps());
-    oa::oaProp *prop_ptr;
-    while ((prop_ptr = prop_iter.getNext()) != nullptr) {
-        print_prop(prop_ptr);
-    }
-    logger->info("Properties end");
+    print_prop(data);
     logger->info("Reading groups");
     oa::oaIter<oa::oaGroup> grp_iter(data->getGroups());
     oa::oaGroup *grp_ptr;
@@ -534,6 +548,25 @@ void OAReader::print_dm_data(oa::oaDMData *data) {
         print_group(grp_ptr);
     }
     logger->info("Groups end");
+
+    logger->info("Reading AppObjects");
+    oa::oaIter<oa::oaAppObjectDef> odef_iter(data->getAppObjectDefs());
+    oa::oaAppObjectDef *odef_ptr;
+    while ((odef_ptr = odef_iter.getNext()) != nullptr) {
+        logger->info("has object def");
+    }
+    logger->info("AppObjects end");
+
+    logger->info("Reading time stamps");
+    for (unsigned int idx = 0; idx < 15; ++idx) {
+        try {
+            oa::oaDMDataType data_type(static_cast<oa::oaDMDataTypeEnum>(idx));
+            logger->info("{} timestamp = {}", (const char *)data_type.getName(),
+                         data->getTimeStamp(data_type));
+        } catch (...) {
+            logger->info("error on idx = {}", idx);
+        }
+    }
 }
 
 } // namespace cbagoa

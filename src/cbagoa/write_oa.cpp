@@ -6,6 +6,8 @@
  */
 
 #include <ctime>
+#include <set>
+#include <tuple>
 #include <utility>
 #include <variant>
 
@@ -313,17 +315,14 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     logger->info("Writing properties");
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
-        if (prop_pair.first != "lastSchematicExtraction" &&
-            prop_pair.first != "interfaceLastChanged") {
-            if (prop_pair.first == "portOrder") {
-                std::visit(make_prop_visitor(dsn, prop_pair.first),
-                           cbag::value_t(cbag::Binary(
-                               prop_app_type,
-                               reinterpret_cast<const unsigned char *>(term_order_str.c_str()),
-                               term_order_str.size())));
-            } else {
-                std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
-            }
+        if (prop_pair.first == "portOrder") {
+            std::visit(
+                make_prop_visitor(dsn, prop_pair.first),
+                cbag::value_t(cbag::Binary(
+                    prop_app_type, reinterpret_cast<const unsigned char *>(term_order_str.c_str()),
+                    term_order_str.size())));
+        } else {
+            std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
         }
     }
 
@@ -335,46 +334,20 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     // save
     dsn->save();
 
-    // write cellview data
     if (is_sch) {
+        // write cellview data
         write_sch_cell_data(cv, dsn, term_order_str);
-    }
 
-    // update extraction timestamp
-
-    oa::oaDesignDataTypeEnum etypes[] = {oa::oacPropDataType, oa::oacNetDataType,
-                                         oa::oacLayerHeaderDataType, oa::oacShapeDataType,
-                                         oa::oacTDLinkDataType};
-
-    uint32_t timestamp = 0;
-    for (auto e : etypes) {
-        timestamp = std::max(static_cast<uint32_t>(dsn->getTimeStamp(e)), timestamp);
-    }
-
-    if (is_sch) {
+        // update extraction timestamp
+        uint32_t num_op = 2;
+        oa::oaTime timestamp = dsn->getTimeStamp(oa::oacDesignDataType);
         auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
-        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp + num_op);
         pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
-        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp);
-    }
-    auto ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbLastSavedCounter");
-    if (ptr != nullptr) {
-        ptr->set(dsn, timestamp);
-    }
-    ptr = oa::oaIntAppDef<oa::oaDesign>::find("_dbvCvTimeStamp");
-    if (ptr != nullptr) {
-        ptr->set(dsn, timestamp);
-    }
-    for (auto e : etypes) {
-        dsn->getTimeStamp(e).set(timestamp);
-    }
-
-    if (is_sch) {
-        oa::oaTimeProp::create(dsn, "lastSchematicExtraction", dsn->getLastSavedTime() + 10);
-    } else {
-        oa::oaTimeProp::create(dsn, "interfaceLastChanged", dsn->getLastSavedTime());
+        (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp + num_op);
     }
     dsn->save();
+
     logger->info("Finish writing schematic/symbol cellview");
 }
 
@@ -387,21 +360,25 @@ void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesi
     dsn->getCellName(cell_name);
     dsn->getViewName(view_name);
 
+    // get dependencies
+    std::set<std::tuple<std::string, std::string, std::string>> dep_set;
+    for (auto const &inst : cv.instances) {
+        dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
+    }
+
     // build dependencies
     std::stringstream dependencies;
-    auto inst_cursor = cv.instances.cbegin();
-    auto inst_stop = cv.instances.cend();
+    auto dep_cursor = dep_set.cbegin();
+    auto dep_end = dep_set.cend();
     dependencies << '(';
-    if (inst_cursor != inst_stop) {
-        dependencies << "(\"" << inst_cursor->second.lib_name << "\" \""
-                     << inst_cursor->second.cell_name << "\" \"" << inst_cursor->second.view_name
-                     << "\")";
-        ++inst_cursor;
+    if (dep_cursor != dep_end) {
+        dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                     << "\" \"" << std::get<2>(*dep_cursor) << "\")";
+        ++dep_cursor;
     }
-    for (; inst_cursor != inst_stop; ++inst_cursor) {
-        dependencies << " (\"" << inst_cursor->second.lib_name << "\" \""
-                     << inst_cursor->second.cell_name << "\" \"" << inst_cursor->second.view_name
-                     << "\")";
+    for (; dep_cursor != dep_end; ++dep_cursor) {
+        dependencies << " (\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                     << "\" \"" << std::get<1>(*dep_cursor) << "\")";
     }
     dependencies << ')';
 

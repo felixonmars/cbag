@@ -75,7 +75,7 @@ class OAReader {
   private:
     void print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);
 
-    void print_prop(oa::oaProp *p);
+    void print_prop(oa::oaObject *obj);
 
     void print_group(oa::oaGroup *p);
 
