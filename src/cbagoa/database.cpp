@@ -87,6 +87,9 @@ std::vector<std::string> OADatabase::get_cells_in_library(const char *library) {
         if (lib_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot find library {}", library));
         }
+        if (!lib_ptr->getAccess(oa::oacReadLibAccess, LIB_ACCESS_TIMEOUT)) {
+            throw std::runtime_error(fmt::format("Cannot obtain read access to library: {}", library));
+        }
         oa::oaIter<oa::oaCell> cell_iter(lib_ptr->getCells());
         oa::oaCell *cell_ptr;
         oa::oaString tmp_str;
@@ -94,6 +97,7 @@ std::vector<std::string> OADatabase::get_cells_in_library(const char *library) {
             cell_ptr->getName(ns, tmp_str);
             ans.emplace_back(tmp_str);
         }
+        lib_ptr->releaseAccess();
     } catch (...) {
         handle_oa_exceptions();
     }
@@ -176,6 +180,19 @@ OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name, cons
     cell_set_t exclude_cells;
     std::vector<cell_key_t> ans;
     read_sch_helper(key, view_name, new_root_path, lib_map, exclude_libs, exclude_cells, ans);
+    return ans;
+}
+
+std::vector<cell_key_t>
+OADatabase::read_library(const char *lib_name, const char *view_name, const char *new_root_path,
+                         const std::unordered_map<std::string, std::string> &lib_map,
+                         const std::unordered_set<std::string> &exclude_libs) {
+    cell_set_t exclude_cells;
+    std::vector<cell_key_t> ans;
+    for (auto const &cell_name : get_cells_in_library(lib_name)) {
+        std::pair<std::string, std::string> key(lib_name, cell_name);
+        read_sch_helper(key, view_name, new_root_path, lib_map, exclude_libs, exclude_cells, ans);
+    }
     return ans;
 }
 
@@ -295,7 +312,7 @@ cbag::SchCellView OADatabase::cell_to_yaml(const std::string &lib_name,
     // write all symbol views to file
     // get library read access
     oa::oaLib *lib_ptr = oa::oaLib::find(oa::oaScalarName(ns_cdba, lib_name.c_str()));
-    if (!lib_ptr->getAccess(oa::oacReadLibAccess, 1)) {
+    if (!lib_ptr->getAccess(oa::oacReadLibAccess, LIB_ACCESS_TIMEOUT)) {
         throw std::runtime_error(fmt::format("Cannot obtain read access to library: {}", lib_name));
     }
     // find all symbol views

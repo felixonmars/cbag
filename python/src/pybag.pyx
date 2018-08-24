@@ -43,6 +43,10 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         void update_connection(const string& inst_name, const char* term,
                                const char* net) except +
 
+        unsigned int width() const
+        
+        unsigned int height() const
+
     cdef cppclass SchCellView:
         string lib_name
         string cell_name
@@ -103,6 +107,11 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                         const unordered_map[string, string]& lib_map,
                                                         const unordered_set[string]& exclude_libs) except +
 
+        vector[pair[string, string]] read_library(const char* lib_anme, const char* view_name,
+                                                  const char* new_root_path,
+                                                  const unordered_map[string, string]& lib_map,
+                                                  const unordered_set[string]& exclude_libs) except +
+        
         cbool implement_schematic(const char* lib_name, const char* cell_name, const char* sch_view,
                                   const char* sym_view, const SchCellView& cv) except +
 
@@ -215,6 +224,14 @@ cdef class PySchInstance(DesignInstance):
     @property
     def name(self):
         return deref(self.ptr).first.decode(self.encoding)
+
+    @property
+    def width(self):
+        return deref(self.ptr).second.width()
+
+    @property
+    def height(self):
+        return deref(self.ptr).second.height()
     
     @property
     def is_primitive(self):
@@ -494,9 +511,27 @@ cdef class PyOADatabase:
 
         cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot,
                                                                                       cmap, exc_set)
-        return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
-                for p in ans]
+        return [(p.first.decode(self.encoding), p.second.decode(self.encoding)) for p in ans]
 
+    def read_library(self, lib_name, view_name, new_root_path, lib_map, exclude_libs):
+        lib_name = lib_name.encode(self.encoding)
+        view_name = view_name.encode(self.encoding)
+        new_root_path = new_root_path.encode(self.encoding)
+
+        cdef char* clib = lib_name
+        cdef char* cview = view_name
+        cdef char* croot = new_root_path
+        cdef unordered_set[string] exc_set
+        cdef unordered_map[string, string] cmap
+        for v in exclude_libs:
+            exc_set.insert(v.encode(self.encoding))
+        for key, val in lib_map.items():
+            cmap[key.encode(self.encoding)] = val.encode(self.encoding)
+
+        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_library(clib, cview, croot, cmap, exc_set)
+        return [(p.first.decode(self.encoding), p.second.decode(self.encoding)) for p in ans]
+
+    
     def implement_schematic(self, lib_name, cell_name, PySchCellView cv,
                             bytes sch_view=b'schematic', bytes sym_view=b'symbol'):
         lib_name = lib_name.encode(self.encoding)

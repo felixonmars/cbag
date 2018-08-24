@@ -10,7 +10,7 @@
 
 #include <cbag/database/figures.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Instance, lib_name, cell_name, view_name, xform, connections,
+BOOST_FUSION_ADAPT_STRUCT(cbag::Instance, lib_name, cell_name, view_name, xform, bbox, connections,
                           params)
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::SchPinObject, inst, attr)

@@ -31,8 +31,9 @@ struct Instance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    Instance(std::string &&lib, std::string &&cell, std::string &&view, Transform xform)
-        : lib_name(lib), cell_name(cell), view_name(view), xform(xform), connections(), params() {}
+    inline Instance(std::string lib, std::string cell, std::string view, Transform xform, BBox bbox)
+        : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
+          xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
@@ -54,8 +55,13 @@ struct Instance {
 
     void resize_nets(uint32_t old_size, uint32_t new_size);
 
+    inline uint32_t width() const { return bbox.getWidth(); }
+
+    inline uint32_t height() const { return bbox.getHeight(); }
+
     std::string lib_name, cell_name, view_name;
     Transform xform;
+    BBox bbox;
     std::map<std::string, std::string> connections;
     ParamMap params;
 };

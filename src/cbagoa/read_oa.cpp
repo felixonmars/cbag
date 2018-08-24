@@ -224,13 +224,15 @@ cbag::Instance OAReader::read_instance(oa::oaInst *p) {
     p->getCellName(ns, inst_cell_oa);
     p->getViewName(ns, inst_view_oa);
 
-    // read transform
+    // read transform and bounding box
     cbag::Transform xform;
     p->getTransform(xform);
+    cbag::BBox bbox;
+    p->getBBox(bbox);
 
     // create instance object
     cbag::Instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                        std::string(inst_view_oa), xform);
+                        std::string(inst_view_oa), xform, bbox);
 
     // read instance parameters
     if (p->hasProp()) {
@@ -352,14 +354,16 @@ std::pair<std::string, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTer
 
 cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
     oa::oaBlock *block = p->getTopBlock();
-    cbag::SchCellView ans;
+    oa::oaString lib_oa;
+    oa::oaString cell_oa;
     oa::oaString tmp;
-    p->getLibName(ns, tmp);
-    ans.lib_name = std::string(tmp);
-    p->getCellName(ns, tmp);
-    ans.cell_name = std::string(tmp);
+    oa::oaBox bbox;
+    p->getLibName(ns, lib_oa);
+    p->getCellName(ns, cell_oa);
     p->getViewName(ns, tmp);
-    ans.view_name = std::string(tmp);
+    block->getBBox(bbox);
+
+    cbag::SchCellView ans(lib_oa, cell_oa, tmp, bbox);
 
     // read terminals
     logger->info("Reading terminals");

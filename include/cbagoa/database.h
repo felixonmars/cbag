@@ -30,6 +30,9 @@ struct Instance;
 
 namespace cbagoa {
 
+// constants
+constexpr uint32_t LIB_ACCESS_TIMEOUT = 1;
+
 // forward declare structures to reduce dependencies
 class OAReader;
 class OAWriter;
@@ -106,6 +109,11 @@ class OADatabase {
         return read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
                                   new_root_path.c_str(), lib_map, exclude_libs);
     }
+
+    std::vector<cell_key_t>
+    read_library(const char *lib_name, const char *view_name, const char *new_root_path,
+                 const std::unordered_map<std::string, std::string> &lib_map,
+                 const std::unordered_set<std::string> &exclude_libs);
 
     void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
                             bool is_sch, const cbag::SchCellView &cv);

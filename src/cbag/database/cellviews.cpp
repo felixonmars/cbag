@@ -161,30 +161,21 @@ bool SchCellView::remove_instance(const char *name) {
     return instances.erase(key) > 0;
 }
 
-inst_iter_t SchCellView::copy_instance(const char *old_name, const std::string &new_name,
-                                       coord_t dx, coord_t dy, const conn_list_t &conns) {
-    // find the instance to copy
-    std::string key(old_name);
-    std::map<std::string, Instance>::const_iterator iter = instances.find(key);
-    if (iter == instances.end()) {
-        throw std::invalid_argument("Cannot find instance: " + key);
-    }
-
+inst_iter_t SchCellView::copy_instance(const Instance &inst, uint32_t old_size,
+                                       const std::string &new_name, coord_t dx, coord_t dy,
+                                       const conn_list_t &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
     parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_ast);
 
     // create new copy
-    auto emp_iter = instances.emplace(new_name, iter->second);
+    auto emp_iter = instances.emplace(new_name, inst);
     if (!emp_iter.second) {
         throw std::invalid_argument(
             fmt::format("Instance {} already exists.", emp_iter.first->first));
     }
 
     // resize nets
-    spirit::ast::name_unit old_ast;
-    parse(old_name, key.size(), spirit::name_unit(), old_ast);
-    uint32_t old_size = old_ast.size();
     uint32_t new_size = new_ast.size();
     if (old_size != new_size) {
         emp_iter.first->second.resize_nets(old_size, new_size);
@@ -204,11 +195,28 @@ std::vector<inst_iter_t> SchCellView::array_instance(const char *old_name,
                                                      const std::vector<std::string> &name_list,
                                                      coord_t dx, coord_t dy,
                                                      const std::vector<conn_list_t> &conns_list) {
+    // find the instance to copy
+    std::string key(old_name);
+    std::map<std::string, Instance>::const_iterator iter = instances.find(key);
+    if (iter == instances.end()) {
+        throw std::invalid_argument("Cannot find instance: " + key);
+    }
+    // get old instance name and size
+    spirit::ast::name_unit old_ast;
+    parse(old_name, key.size(), spirit::name_unit(), old_ast);
+    uint32_t old_size = old_ast.size();
+
+    if (dx == 0 && dy == 0) {
+        // figure out default shift
+        dx = iter->second.bbox.getWidth() + 10;
+    }
+
     size_t num = name_list.size();
     std::vector<inst_iter_t> ans(num);
     auto num_inst = static_cast<coord_t>(num);
     for (coord_t idx = 0; idx < num_inst; ++idx) {
-        ans[idx] = copy_instance(old_name, name_list[idx], dx * idx, dy * idx, conns_list[idx]);
+        ans[idx] = copy_instance(iter->second, old_size, name_list[idx], dx * idx, dy * idx,
+                                 conns_list[idx]);
     }
 
     // remove original instance

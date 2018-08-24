@@ -51,6 +51,10 @@ struct SchCellView {
 
     explicit SchCellView(const char *yaml_fname, const char *sym_view = nullptr);
 
+    inline SchCellView(const char *lib_name, const char *cell_name, const char *view_name,
+                       BBox bbox)
+        : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
+
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
 
@@ -74,8 +78,8 @@ struct SchCellView {
 
     bool remove_instance(const char *name);
 
-    inst_iter_t copy_instance(const char *old_name, const std::string &new_name, coord_t dx,
-                              coord_t dy, const conn_list_t &conns);
+    inst_iter_t copy_instance(const Instance &inst, uint32_t old_size, const std::string &new_name,
+                              coord_t dx, coord_t dy, const conn_list_t &conns);
 
     std::vector<inst_iter_t> array_instance(const char *old_name,
                                             const std::vector<std::string> &name_list, coord_t dx,
@@ -84,6 +88,7 @@ struct SchCellView {
     SchCellViewInfo get_info(const std::string &cell_name) const;
 
     std::string lib_name, cell_name, view_name;
+    BBox bbox;
     std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
     std::vector<Shape> shapes;
     std::map<std::string, Instance> instances;
