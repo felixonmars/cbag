@@ -56,6 +56,12 @@ void Instance::update_connection(const std::string &inst_name, uint32_t inst_siz
     }
 }
 
+void Instance::update_connection(const std::string &inst_name, const char *term, const char *net) {
+    // check number of bits match
+    spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
+    update_connection(inst_name, nu.size(), term, net);
+}
+
 void Instance::resize_nets(uint32_t old_size, uint32_t new_size) {
     std::div_t result = std::div(static_cast<int>(new_size), static_cast<int>(old_size));
     if (result.rem != 0) {

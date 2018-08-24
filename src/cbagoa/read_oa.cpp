@@ -243,7 +243,7 @@ cbag::Instance OAReader::read_instance(oa::oaInst *p) {
 
     // read instance connections
     logger->info("Reading connections");
-    oa::oaIter<oa::oaInstTerm> iterm_iter(p->getInstTerms(oacInstTermIterAll));
+    oa::oaIter<oa::oaInstTerm> iterm_iter(p->getInstTerms(oacInstTermIterNotImplicit));
     oa::oaInstTerm *iterm_ptr;
     oa::oaString term_name_oa, net_name_oa;
     while ((iterm_ptr = iterm_iter.getNext()) != nullptr) {
