@@ -44,7 +44,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
                                const char* net) except +
 
         unsigned int width() const
-        
+
         unsigned int height() const
 
     cdef cppclass SchCellView:
@@ -111,7 +111,7 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                   const char* new_root_path,
                                                   const unordered_map[string, string]& lib_map,
                                                   const unordered_set[string]& exclude_libs) except +
-        
+
         cbool implement_schematic(const char* lib_name, const char* cell_name, const char* sch_view,
                                   const char* sym_view, const SchCellView& cv) except +
 
@@ -531,7 +531,6 @@ cdef class PyOADatabase:
         cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_library(clib, cview, croot, cmap, exc_set)
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding)) for p in ans]
 
-    
     def implement_schematic(self, lib_name, cell_name, PySchCellView cv,
                             bytes sch_view=b'schematic', bytes sym_view=b'symbol'):
         lib_name = lib_name.encode(self.encoding)
