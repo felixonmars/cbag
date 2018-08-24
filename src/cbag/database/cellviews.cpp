@@ -194,7 +194,8 @@ inst_iter_t SchCellView::copy_instance(const char *old_name, const std::string &
     emp_iter.first->second.xform.xOffset() += dx;
     emp_iter.first->second.xform.xOffset() += dy;
     for (auto const &p : conns) {
-        emp_iter.first->second.update_connection(new_name, p.first.c_str(), p.second.c_str());
+        emp_iter.first->second.update_connection(new_name, new_ast.size(), p.first.c_str(),
+                                                 p.second.c_str());
     }
     return emp_iter.first;
 }

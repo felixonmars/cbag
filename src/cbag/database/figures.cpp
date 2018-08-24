@@ -27,15 +27,15 @@ void Instance::set_string_param(const char *name, const char *value) {
     params[name] = std::string(value);
 }
 
-void Instance::update_connection(const std::string &inst_name, const char *term, const char *net) {
+void Instance::update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
+                                 const char *net) {
     // check number of bits match
     std::string term_str(term);
     std::string net_str(net);
-    spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
     spirit::ast::name n_term = parse_cdba_name(term_str);
     spirit::ast::name n_net = parse_cdba_name(net_str);
 
-    uint32_t tot_size = nu.size() * n_term.size();
+    uint32_t tot_size = inst_size * n_term.size();
     uint32_t net_size = n_net.size();
     if (tot_size == net_size) {
         // direct connection

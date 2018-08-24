@@ -47,7 +47,8 @@ struct Instance {
 
     void set_string_param(const char *name, const char *value);
 
-    void update_connection(const std::string &inst_name, const char *term, const char *net);
+    void update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
+                           const char *net);
 
     void resize_nets(uint32_t old_size, uint32_t new_size);
 
