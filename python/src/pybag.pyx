@@ -28,6 +28,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         string lib_name
         string cell_name
         string view_name
+        cbool is_primitive
         map[string, string] connections
 
         void clear_params() except +
@@ -112,8 +113,9 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
                                                   const unordered_map[string, string]& lib_map,
                                                   const unordered_set[string]& exclude_libs) except +
 
-        cbool implement_schematic(const char* lib_name, const char* cell_name, const char* sch_view,
-                                  const char* sym_view, const SchCellView& cv) except +
+        void implement_sch_list(const char* lib_name, const vector[string]& cell_list,
+                                const char* sch_view, const char* sym_view,
+                                const vector[SchCellView *]& cv_list) except +
 
 
 # initialize logging
@@ -249,10 +251,14 @@ cdef class PySchInstance(DesignInstance):
     def master_key(self):
         return self.master.key
 
+    def set_cinst_prim_flag(self):
+        deref(self.ptr).second.is_primitive = self.is_primitive
+
     def _update_master(self, design_fun, args, kwargs):
         super(PySchInstance, self)._update_master(design_fun, args, kwargs)
         # update instance cell name after master is updated
         deref(self.ptr).second.cell_name = self.master_cell_name.encode(self.encoding)
+        deref(self.ptr).second.is_primitive = self.is_primitive
 
     def change_generator(self, gen_lib_name, gen_cell_name, cbool static=False):
         self.master = None
@@ -397,7 +403,6 @@ cdef class PySchCellView:
         pyname = name.encode(self.encoding)
         cdef vector[string] cname_list
         cdef vector[vector[pair[string, string]]] conns_list
-        cdef char* cname = pyname
         cname_list.reserve(num_inst)
         conns_list.resize(num_inst)
         for idx, (nn, term) in enumerate(zip(name_list, term_list)):
@@ -410,7 +415,7 @@ cdef class PySchCellView:
 
         # array instance
         cdef vector[inst_iter_t] results
-        results = deref(self.cv_ptr).array_instance(cname, cname_list, dx, dy, conns_list)
+        results = deref(self.cv_ptr).array_instance(pyname, cname_list, dx, dy, conns_list)
         
         # populate instance dictionary, remove original instance
         orig_inst = inst_dict.pop(name)
@@ -431,10 +436,6 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
     fmt = fmt.encode(encoding)
     fname = fname.encode(encoding)
 
-    cdef char* cell_map_str = cell_map
-    cdef char* fmt_str = fmt
-    cdef char* fname_str = fname
-
     cdef int num = len(content_list)
     cv_list.reserve(num)
     name_list.reserve(num)
@@ -444,12 +445,12 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
 
     cdef int ninc = len(inc_list)
     cinc_list.reserve(ninc)
-    for fname in inc_list:
-        if not os.path.isfile(fname):
-            raise ValueError('Cannot find netlist include file: {}'.format(fname))
-        cinc_list.push_back(fname.encode(encoding))
+    for inc_fname in inc_list:
+        if not os.path.isfile(inc_fname):
+            raise ValueError('Cannot find netlist include file: {}'.format(inc_fname))
+        cinc_list.push_back(inc_fname.encode(encoding))
 
-    write_netlist(cv_list, name_list, cell_map_str, cinc_list, fmt_str, flat, shell, fname_str)
+    write_netlist(cv_list, name_list, cell_map, cinc_list, fmt, flat, shell, fname)
 
 cdef _add_py_cv(vector[SchCellView *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())
@@ -458,10 +459,9 @@ cdef class PyOADatabase:
     cdef unique_ptr[OADatabase] db_ptr
     cdef unicode encoding
 
-    def __init__(self, unicode lib_def_file, unicode encoding):
-        pylib_def_str = lib_def_file.encode(encoding)
-        cdef char* clib_def_str = pylib_def_str
-        self.db_ptr.reset(new OADatabase(clib_def_str))
+    def __init__(self, lib_def_file, unicode encoding):
+        lib_def_file = lib_def_file.encode(encoding)
+        self.db_ptr.reset(new OADatabase(lib_def_file))
         self.encoding = encoding
 
     def __dealloc__(self):
@@ -470,26 +470,21 @@ cdef class PyOADatabase:
     def close(self):
         self.db_ptr.reset()
 
-    def get_cells_in_library(self, unicode library):
-        pylib = library.encode(self.encoding)
-        cdef char* clib = pylib
-        cdef vector[string] ans = deref(self.db_ptr).get_cells_in_library(clib)
+    def get_cells_in_library(self, library):
+        library = library.encode(self.encoding)
+        cdef vector[string] ans = deref(self.db_ptr).get_cells_in_library(library)
         return [v.decode(self.encoding) for v in ans]
 
-    def get_lib_path(self, unicode library):
-        pylib = library.encode(self.encoding)
-        cdef char* clib = pylib
-        cdef string ans = deref(self.db_ptr).get_lib_path(clib)
+    def get_lib_path(self, library):
+        library = library.encode(self.encoding)
+        cdef string ans = deref(self.db_ptr).get_lib_path(library)
         return ans.decode(self.encoding)
 
     def create_lib(self, library, lib_path, tech_lib):
         library = library.encode(self.encoding)
         lib_path = lib_path.encode(self.encoding)
         tech_lib = tech_lib.encode(self.encoding)
-        cdef char* clib = library
-        cdef char* cpath = lib_path
-        cdef char* ctech = tech_lib
-        deref(self.db_ptr).create_lib(clib, cpath, ctech);
+        deref(self.db_ptr).create_lib(library, lib_path, tech_lib);
 
     def read_sch_recursive(self, lib_name, cell_name, view_name,
                            new_root_path, lib_map, exclude_libs):
@@ -498,10 +493,6 @@ cdef class PyOADatabase:
         view_name = view_name.encode(self.encoding)
         new_root_path = new_root_path.encode(self.encoding)
 
-        cdef char* clib = lib_name
-        cdef char* ccell = cell_name
-        cdef char* cview = view_name
-        cdef char* croot = new_root_path
         cdef unordered_set[string] exc_set
         cdef unordered_map[string, string] cmap
         for v in exclude_libs:
@@ -509,7 +500,9 @@ cdef class PyOADatabase:
         for key, val in lib_map.items():
             cmap[key.encode(self.encoding)] = val.encode(self.encoding)
 
-        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(clib, ccell, cview, croot,
+        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_sch_recursive(lib_name, cell_name,
+                                                                                      view_name,
+                                                                                      new_root_path,
                                                                                       cmap, exc_set)
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding)) for p in ans]
 
@@ -518,9 +511,6 @@ cdef class PyOADatabase:
         view_name = view_name.encode(self.encoding)
         new_root_path = new_root_path.encode(self.encoding)
 
-        cdef char* clib = lib_name
-        cdef char* cview = view_name
-        cdef char* croot = new_root_path
         cdef unordered_set[string] exc_set
         cdef unordered_map[string, string] cmap
         for v in exclude_libs:
@@ -528,12 +518,24 @@ cdef class PyOADatabase:
         for key, val in lib_map.items():
             cmap[key.encode(self.encoding)] = val.encode(self.encoding)
 
-        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_library(clib, cview, croot, cmap, exc_set)
+        cdef vector[pair[string, string]] ans = deref(self.db_ptr).read_library(lib_name, view_name,
+                                                                                new_root_path,
+                                                                                cmap, exc_set)
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding)) for p in ans]
 
-    def implement_schematic(self, lib_name, cell_name, PySchCellView cv,
-                            bytes sch_view=b'schematic', bytes sym_view=b'symbol'):
+    def implement_sch_list(self, lib_name, content_list, sch_view='schematic', sym_view='symbol'):
         lib_name = lib_name.encode(self.encoding)
-        cell_name = cell_name.encode(self.encoding)
+        sch_view = sch_view.encode(self.encoding)
+        sym_view = sym_view.encode(self.encoding)
 
-        return deref(self.db_ptr).implement_schematic(lib_name, cell_name, sch_view, sym_view, deref(cv.cv_ptr))
+        cdef vector[string] cell_vec
+        cdef vector[SchCellView *] cv_vec
+        cdef int num = len(content_list)
+
+        cell_vec.reserve(num)
+        cv_vec.reserve(num)
+        for name, cv in content_list:
+            cell_vec.push_back(name.encode(self.encoding))
+            _add_py_cv(cv_vec, cv)
+
+        deref(self.db_ptr).implement_sch_list(lib_name, cell_vec, sch_view, sym_view, cv_vec)

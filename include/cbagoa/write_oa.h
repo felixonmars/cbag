@@ -9,6 +9,7 @@
 #define CBAGOA_WRITE_OA_H
 
 #include <memory>
+#include <unordered_map>
 
 #include <oa/oaDesignDB.h>
 
@@ -65,6 +66,8 @@ constexpr auto cell_data = "(promptWidth nil "
                            "componentName \"subcircuit\" "
                            "netlistProcedure nil))))";
 
+using str_map_t = std::unordered_map<std::string, std::string>;
+
 class OAWriter {
   public:
     explicit inline OAWriter(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
@@ -72,14 +75,16 @@ class OAWriter {
 
     // Write method for schematic/symbol cell view
 
-    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch);
+    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch,
+                            const str_map_t *rename_map = nullptr);
 
   private:
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                              const std::map<std::string, cbag::PinFigure> &map,
                              oa::oaTermTypeEnum term_type);
 
-    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn,
+    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaScalarName &lib_name,
+                             const oa::oaScalarName &cell_name, const oa::oaScalarName &view_name,
                              const std::string &term_order);
 
     const oa::oaCdbaNS ns;

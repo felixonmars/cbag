@@ -219,7 +219,11 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
     }
 }
 
-void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch) {
+void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch,
+                                  const str_map_t *rename_map) {
+    oa::oaScalarName dsn_lib;
+    dsn->getLibName(dsn_lib);
+
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
     // build term order
@@ -262,8 +266,14 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     for (auto const &pair : cv.instances) {
         logger->info("Writing instance {}", pair.first);
         cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
-        lib.init(ns, pair.second.lib_name.c_str());
-        cell.init(ns, pair.second.cell_name.c_str());
+        if (pair.second.is_primitive) {
+            lib.init(ns, pair.second.lib_name.c_str());
+            cell.init(ns, pair.second.cell_name.c_str());
+        } else {
+            lib = dsn_lib;
+            cell.init(ns, rename_map->find(pair.second.cell_name)->second.c_str());
+        }
+
         view.init(ns, pair.second.view_name.c_str());
         name.init(ns, nu.base.c_str());
         oa::oaInst *ptr;
@@ -338,8 +348,13 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     dsn->save();
 
     if (is_sch) {
+        oa::oaScalarName dsn_cell;
+        oa::oaScalarName dsn_view;
+        dsn->getCellName(dsn_cell);
+        dsn->getViewName(dsn_view);
+
         // write cellview data
-        write_sch_cell_data(cv, dsn, term_order_str);
+        write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
 
         // update extraction timestamp
         uint32_t num_op = 2;
@@ -354,14 +369,10 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaDesign *dsn,
+void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaScalarName &lib_name,
+                                   const oa::oaScalarName &cell_name,
+                                   const oa::oaScalarName &view_name,
                                    const std::string &term_order) {
-    oa::oaScalarName lib_name;
-    oa::oaScalarName cell_name;
-    oa::oaScalarName view_name;
-    dsn->getLibName(lib_name);
-    dsn->getCellName(cell_name);
-    dsn->getViewName(view_name);
 
     // get dependencies
     std::set<std::tuple<std::string, std::string, std::string>> dep_set;

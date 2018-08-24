@@ -7,8 +7,6 @@
  */
 
 #include <fstream>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <boost/filesystem.hpp>
 
@@ -88,7 +86,8 @@ std::vector<std::string> OADatabase::get_cells_in_library(const char *library) {
             throw std::invalid_argument(fmt::format("Cannot find library {}", library));
         }
         if (!lib_ptr->getAccess(oa::oacReadLibAccess, LIB_ACCESS_TIMEOUT)) {
-            throw std::runtime_error(fmt::format("Cannot obtain read access to library: {}", library));
+            throw std::runtime_error(
+                fmt::format("Cannot obtain read access to library: {}", library));
         }
         oa::oaIter<oa::oaCell> cell_iter(lib_ptr->getCells());
         oa::oaCell *cell_ptr;
@@ -173,8 +172,7 @@ cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
 
 std::vector<cell_key_t>
 OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
-                               const char *new_root_path,
-                               const std::unordered_map<std::string, std::string> &lib_map,
+                               const char *new_root_path, const str_map_t &lib_map,
                                const std::unordered_set<std::string> &exclude_libs) {
     std::pair<std::string, std::string> key(lib_name, cell_name);
     cell_set_t exclude_cells;
@@ -185,7 +183,7 @@ OADatabase::read_sch_recursive(const char *lib_name, const char *cell_name, cons
 
 std::vector<cell_key_t>
 OADatabase::read_library(const char *lib_name, const char *view_name, const char *new_root_path,
-                         const std::unordered_map<std::string, std::string> &lib_map,
+                         const str_map_t &lib_map,
                          const std::unordered_set<std::string> &exclude_libs) {
     cell_set_t exclude_cells;
     std::vector<cell_key_t> ans;
@@ -197,27 +195,37 @@ OADatabase::read_library(const char *lib_name, const char *view_name, const char
 }
 
 void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
-                                    const char *view_name, bool is_sch,
-                                    const cbag::SchCellView &cv) {
+                                    const char *view_name, bool is_sch, const cbag::SchCellView &cv,
+                                    const str_map_t *rename_map) {
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        writer->write_sch_cellview(cv, dsn_ptr, is_sch);
+        writer->write_sch_cellview(cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
     } catch (...) {
         handle_oa_exceptions();
     }
 }
 
-bool OADatabase::implement_schematic(const char *lib_name, const char *cell_name,
-                                     const char *sch_view, const char *sym_view,
-                                     const cbag::SchCellView &cv) {
-    write_sch_cellview(lib_name, cell_name, sch_view, true, cv);
-    if (cv.sym_ptr != nullptr && sym_view != nullptr) {
-        write_sch_cellview(lib_name, cell_name, sym_view, false, *(cv.sym_ptr));
-        return true;
+void OADatabase::implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
+                                    const char *sch_view, const char *sym_view,
+                                    const std::vector<cbag::SchCellView *> &cv_list) {
+    try {
+        str_map_t rename_map;
+
+        std::size_t num = cell_list.size();
+        for (std::size_t idx = 0; idx < num; ++idx) {
+            const char *cell_name = cell_list[idx].c_str();
+            write_sch_cellview(lib_name, cell_name, sch_view, true, *(cv_list[idx]), &rename_map);
+            if (cv_list[idx]->sym_ptr != nullptr && sym_view != nullptr) {
+                write_sch_cellview(lib_name, cell_name, sym_view, false, *(cv_list[idx]->sym_ptr));
+            }
+            logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
+            rename_map[cv_list[idx]->cell_name] = cell_list[idx];
+        }
+    } catch (...) {
+        handle_oa_exceptions();
     }
-    return false;
 }
 
 oa::oaTech *OADatabase::read_tech(const char *library) {
@@ -262,12 +270,11 @@ oa::oaDesign *OADatabase::open_design(const char *lib_name, const char *cell_nam
 }
 
 void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const char *view_name,
-                                 const char *new_root_path,
-                                 const std::unordered_map<std::string, std::string> &lib_map,
+                                 const char *new_root_path, const str_map_t &lib_map,
                                  const std::unordered_set<std::string> &exclude_libs,
                                  cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list) {
     // find root_path
-    std::unordered_map<std::string, std::string>::const_iterator map_iter;
+    str_map_t::const_iterator map_iter;
     map_iter = lib_map.find(key.first);
     std::string root_path =
         (map_iter != lib_map.cend()) ? map_iter->second : std::string(new_root_path);

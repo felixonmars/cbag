@@ -62,6 +62,7 @@ struct Instance {
     std::string lib_name, cell_name, view_name;
     Transform xform;
     BBox bbox;
+    bool is_primitive;
     std::map<std::string, std::string> connections;
     ParamMap params;
 };
