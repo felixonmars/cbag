@@ -13,7 +13,6 @@
 #include <yaml-cpp/yaml.h>
 
 #include "spdlog/details/signal_handler.h"
-#include <spdlog/async.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
 
@@ -27,8 +26,9 @@ void init_logging() {
 
     constexpr uint32_t max_log_size = 1024 * 1024 * 10;
     constexpr uint32_t num_log_file = 3;
-    spdlog::create_async<spdlog::sinks::rotating_file_sink_mt>("cbag", "cbag.log", max_log_size,
-                                                               num_log_file);
+    spdlog::create<spdlog::sinks::rotating_file_sink_st>("cbag", "cbag.log", max_log_size,
+                                                         num_log_file);
+    spdlog::flush_on(spdlog::level::err);
 }
 
 void to_file(const SchCellView &cv, const char *fname) {

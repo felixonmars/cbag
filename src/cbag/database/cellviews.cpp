@@ -132,8 +132,8 @@ void SchCellView::rename_instance(const char *old_name, const char *new_name) {
         throw std::invalid_argument(fmt::format("Instance {} already exists.", nkey));
     }
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name_unit ast;
-    parse(new_name, nkey.size(), spirit::name_unit(), ast);
+    spirit::ast::name_unit new_ast;
+    parse(new_name, nkey.size(), spirit::name_unit(), new_ast);
 
     // do the swap
     std::string key(old_name);
@@ -141,6 +141,16 @@ void SchCellView::rename_instance(const char *old_name, const char *new_name) {
     if (nh.empty()) {
         throw std::invalid_argument("Cannot find instance: " + key);
     } else {
+        // resize nets
+        spirit::ast::name_unit old_ast;
+        parse(old_name, key.size(), spirit::name_unit(), old_ast);
+        uint32_t old_size = old_ast.size();
+        uint32_t new_size = new_ast.size();
+        if (old_size != new_size) {
+            nh.mapped().resize_nets(old_size, new_size);
+        }
+
+        // update instance name
         nh.key() = std::string(new_name);
         instances.insert(std::move(nh));
     }
@@ -161,8 +171,8 @@ inst_iter_t SchCellView::copy_instance(const char *old_name, const std::string &
     }
 
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name_unit new_nu;
-    parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_nu);
+    spirit::ast::name_unit new_ast;
+    parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_ast);
 
     // create new copy
     auto emp_iter = instances.emplace(new_name, iter->second);
@@ -171,11 +181,20 @@ inst_iter_t SchCellView::copy_instance(const char *old_name, const std::string &
             fmt::format("Instance {} already exists.", emp_iter.first->first));
     }
 
+    // resize nets
+    spirit::ast::name_unit old_ast;
+    parse(old_name, key.size(), spirit::name_unit(), old_ast);
+    uint32_t old_size = old_ast.size();
+    uint32_t new_size = new_ast.size();
+    if (old_size != new_size) {
+        emp_iter.first->second.resize_nets(old_size, new_size);
+    }
+
     // shift and update connections
     emp_iter.first->second.xform.xOffset() += dx;
     emp_iter.first->second.xform.xOffset() += dy;
     for (auto const &p : conns) {
-        emp_iter.first->second.connections[p.first] = p.second;
+        emp_iter.first->second.update_connection(new_name, p.first.c_str(), p.second.c_str());
     }
     return emp_iter.first;
 }

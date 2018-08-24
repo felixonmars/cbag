@@ -46,7 +46,7 @@ add_subdirectory(fmt EXCLUDE_FROM_ALL)
 # Include spdlog
 find_package(spdlog CONFIG REQUIRED)
 # Include threads for spdlog
-find_package(Threads REQUIRED)
+# find_package(Threads REQUIRED)
 
 # include yaml-cpp
 find_package(yaml-cpp)
@@ -99,7 +99,7 @@ target_link_libraries(cbag
   # for Spirit X3 error code
   boost_system
   # multithreading for spdlog
-  Threads::Threads
+  # Threads::Threads
   m
   ${CMAKE_DL_LIBS}
   )

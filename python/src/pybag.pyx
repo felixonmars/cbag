@@ -389,7 +389,7 @@ cdef class PySchCellView:
             conns_list[idx].resize(len(term))
             for idx2, (key, val) in enumerate(term.items()):
                 conns_list[idx][idx2].first = key.encode(self.encoding)
-                conns_list[idx][idx2].second = key.encode(self.encoding)
+                conns_list[idx][idx2].second = val.encode(self.encoding)
 
         # array instance
         cdef vector[inst_iter_t] results
@@ -497,7 +497,7 @@ cdef class PyOADatabase:
         return [(p.first.decode(self.encoding), p.second.decode(self.encoding))
                 for p in ans]
 
-    def implement_schematic(self, unicode lib_name, unicode cell_name, PySchCellView cv,
+    def implement_schematic(self, lib_name, cell_name, PySchCellView cv,
                             bytes sch_view=b'schematic', bytes sym_view=b'symbol'):
         lib_name = lib_name.encode(self.encoding)
         cell_name = cell_name.encode(self.encoding)

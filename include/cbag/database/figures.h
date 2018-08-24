@@ -49,6 +49,8 @@ struct Instance {
 
     void update_connection(const std::string &inst_name, const char *term, const char *net);
 
+    void resize_nets(uint32_t old_size, uint32_t new_size);
+
     std::string lib_name, cell_name, view_name;
     Transform xform;
     std::map<std::string, std::string> connections;

@@ -120,6 +120,8 @@ class OADatabase {
                              const char *sym_view, const cbag::SchCellView &cv);
 
   private:
+    void handle_oa_exceptions();
+
     oa::oaTech *read_tech(const char *library);
 
     oa::oaDesign *open_design(const char *lib_name, const char *cell_name, const char *view_name,

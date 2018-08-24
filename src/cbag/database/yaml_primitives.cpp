@@ -115,9 +115,9 @@ bool convert<cbag::PointArray>::decode(const Node &node, cbag::PointArray &rhs) 
         }
         rhs.setSize(size);
         for (uint32_t i = 0; i < size; i++) {
-
             rhs[i] = pnode[i].as<cbag::Point>();
         }
+        rhs.setNumElements(size);
     } catch (...) {
         logger->warn("cbag::PointArray YAML decode exception.  Node:\n{}",
                      yaml::serialization::node_to_str(node));

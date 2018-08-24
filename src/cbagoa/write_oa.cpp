@@ -202,20 +202,20 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
     oa::oaName term_name;
     for (auto const &pair : map) {
         // create terminal, net, and pin
-        logger->debug("Creating terminal {}", pair.first);
+        logger->info("Creating terminal {}", pair.first);
         term_name.init(ns, pair.first.c_str());
-        logger->debug("Creating terminal net");
+        logger->info("Creating terminal net");
         oa::oaNet *term_net = oa::oaNet::find(block, term_name);
         if (term_net == nullptr || term_net->isImplicit()) {
             term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
         }
-        logger->debug("Creating terminal");
+        logger->info("Creating terminal");
         oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
-        logger->debug("Creating terminal pin");
+        logger->info("Creating terminal pin");
         oa::oaPin *pin = oa::oaPin::create(term);
-
-        logger->debug("Creating terminal shape");
+        logger->info("Creating terminal shape");
         std::visit(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt), pair.second.obj);
+        logger->info("Create terminal done");
     }
 }
 
@@ -260,6 +260,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     oa::oaScalarName lib, cell, view, name;
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
+        logger->info("Writing instance {}", pair.first);
         cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
         lib.init(ns, pair.second.lib_name.c_str());
         cell.init(ns, pair.second.cell_name.c_str());
@@ -307,9 +308,11 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
             text->addToNet(term_net);
         }
 
+        logger->info("Writing instance {} params", pair.first);
         for (auto const &prop_pair : pair.second.params) {
             std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
         }
+        logger->info("Writing instance {} done", pair.first);
     }
 
     logger->info("Writing properties");

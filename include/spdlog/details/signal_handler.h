@@ -36,21 +36,21 @@
 #pragma once
 
 #include <cstdio>
-#include <string>
 #include <map>
+#include <string>
 
-#include <csignal>
-#include <cstring>
-#include <unistd.h>
-#include <execinfo.h>
-#include <cxxabi.h>
-#include <cstdlib>
-#include <sstream>
-#include <iostream>
-#include <thread>
 #include <atomic>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <cxxabi.h>
+#include <execinfo.h>
+#include <iostream>
 #include <map>
 #include <mutex>
+#include <sstream>
+#include <thread>
+#include <unistd.h>
 
 #include <spdlog/details/registry.h>
 
@@ -66,15 +66,12 @@
 #include <ucontext.h>
 #endif
 
-namespace spdlog
-{
+namespace spdlog {
 
 typedef int SignalType;
 
-namespace internal
-{
-inline void restoreSignalHandler(int signal_number)
-{
+namespace internal {
+inline void restoreSignalHandler(int signal_number) {
 #if !(defined(DISABLE_FATAL_SIGNALHANDLING))
     struct sigaction action;
     memset(&action, 0, sizeof(action)); //
@@ -85,22 +82,19 @@ inline void restoreSignalHandler(int signal_number)
 }
 
 /** return whether or any fatal handling is still ongoing
-       *  not used
-       *  only in the case of Windows exceptions (not fatal signals)
-       *  are we interested in changing this from false to true to
-       *  help any other exceptions handler work with 'EXCEPTION_CONTINUE_SEARCH'*/
-inline bool shouldBlockForFatalHandling()
-{
+ *  not used only in the case of Windows exceptions (not fatal signals)
+ *  are we interested in changing this from false to true to
+ *  help any other exceptions handler work with 'EXCEPTION_CONTINUE_SEARCH'
+ */
+inline bool shouldBlockForFatalHandling() {
     return true; // For windows we will after fatal processing change it to false
 }
 
 /** \return signal_name Ref: signum.hpp and \ref installSignalHandler
-      *  or for Windows exception name */
-inline std::string exitReasonName(SignalType fatal_id)
-{
+ *  or for Windows exception name */
+inline std::string exitReasonName(SignalType fatal_id) {
     int signal_number = static_cast<int>(fatal_id);
-    switch (signal_number)
-    {
+    switch (signal_number) {
     case SIGABRT:
         return "SIGABRT";
         break;
@@ -127,45 +121,35 @@ inline std::string exitReasonName(SignalType fatal_id)
 }
 
 /** return calling thread's stackdump*/
-inline std::string stackdump(const char *rawdump = nullptr)
-{
-    if (nullptr != rawdump && !std::string(rawdump).empty())
-    {
+inline std::string stackdump(const char *rawdump = nullptr) {
+    if (nullptr != rawdump && !std::string(rawdump).empty()) {
         return {rawdump};
     }
 
     const size_t max_dump_size = 50;
     void *dump[max_dump_size];
     size_t size = backtrace(dump, max_dump_size);
-    char **messages = backtrace_symbols(dump, static_cast<int>(size)); // overwrite sigaction with caller's address
+    char **messages = backtrace_symbols(
+        dump, static_cast<int>(size)); // overwrite sigaction with caller's address
 
     // dump stack: skip first frame, since that is here
     std::ostringstream oss;
-    for (size_t idx = 1; idx < size && messages != nullptr; ++idx)
-    {
+    for (size_t idx = 1; idx < size && messages != nullptr; ++idx) {
         char *mangled_name = 0, *offset_begin = 0, *offset_end = 0;
         // find parantheses and +address offset surrounding mangled name
-        for (char *p = messages[idx]; *p; ++p)
-        {
-            if (*p == '(')
-            {
+        for (char *p = messages[idx]; *p; ++p) {
+            if (*p == '(') {
                 mangled_name = p;
-            }
-            else if (*p == '+')
-            {
+            } else if (*p == '+') {
                 offset_begin = p;
-            }
-            else if (*p == ')')
-            {
+            } else if (*p == ')') {
                 offset_end = p;
                 break;
             }
         }
 
         // if the line could be processed, attempt to demangle the symbol
-        if (mangled_name && offset_begin && offset_end &&
-            mangled_name < offset_begin)
-        {
+        if (mangled_name && offset_begin && offset_end && mangled_name < offset_begin) {
             *mangled_name++ = '\0';
             *offset_begin++ = '\0';
             *offset_end++ = '\0';
@@ -173,20 +157,17 @@ inline std::string stackdump(const char *rawdump = nullptr)
             int status;
             char *real_name = abi::__cxa_demangle(mangled_name, 0, 0, &status);
             // if demangling is successful, output the demangled function name
-            if (status == 0)
-            {
-                oss << "\n\tstack dump [" << idx << "]  " << messages[idx] << " : " << real_name << "+";
+            if (status == 0) {
+                oss << "\n\tstack dump [" << idx << "]  " << messages[idx] << " : " << real_name
+                    << "+";
                 oss << offset_begin << offset_end << std::endl;
             } // otherwise, output the mangled function name
-            else
-            {
+            else {
                 oss << "\tstack dump [" << idx << "]  " << messages[idx] << mangled_name << "+";
                 oss << offset_begin << offset_end << std::endl;
             }
             free(real_name); // mallocated by abi::__cxa_demangle(...)
-        }
-        else
-        {
+        } else {
             // no demangling done -- just dump the whole line
             oss << "\tstack dump [" << idx << "]  " << messages[idx] << std::endl;
         }
@@ -196,10 +177,9 @@ inline std::string stackdump(const char *rawdump = nullptr)
 }
 
 /** Re-"throw" a fatal signal, previously caught. This will exit the application
-       * This is an internal only function. Do not use it elsewhere. It is triggered
-       * from signalHandler() after flushing messages to file */
-inline void exitWithDefaultSignalHandler(SignalType fatal_signal_id)
-{
+ * This is an internal only function. Do not use it elsewhere. It is triggered
+ * from signalHandler() after flushing messages to file */
+inline void exitWithDefaultSignalHandler(SignalType fatal_signal_id) {
     const int signal_number = static_cast<int>(fatal_signal_id);
     restoreSignalHandler(signal_number);
 
@@ -213,18 +193,13 @@ inline void exitWithDefaultSignalHandler(SignalType fatal_signal_id)
     exit(signal_number);
 }
 
-const static std::map<int, std::string> kSignals = {
-    {SIGABRT, "SIGABRT"},
-    {SIGFPE, "SIGFPE"},
-    {SIGILL, "SIGILL"},
-    {SIGSEGV, "SIGSEGV"},
-    {SIGTERM, "SIGTERM"},
-    {SIGINT, "SIGINT"}};
+const static std::map<int, std::string> kSignals = {{SIGABRT, "SIGABRT"}, {SIGFPE, "SIGFPE"},
+                                                    {SIGILL, "SIGILL"},   {SIGSEGV, "SIGSEGV"},
+                                                    {SIGTERM, "SIGTERM"}, {SIGINT, "SIGINT"}};
 
 static std::map<int, std::string> gSignals = kSignals;
 
-inline bool shouldDoExit()
-{
+inline bool shouldDoExit() {
     static std::atomic<uint64_t> firstExit{0};
     auto const count = firstExit.fetch_add(1, std::memory_order_relaxed);
     return (0 == count);
@@ -232,31 +207,29 @@ inline bool shouldDoExit()
 
 // Dump of stack, then exit.
 // ALL thanks to this thread at StackOverflow. Pretty much borrowed from:
-// Ref: http://stackoverflow.com/questions/77005/how-to-generate-a-stacktrace-when-my-gcc-c-app-crashes
-inline void signalHandler(int signal_number, siginfo_t *info, void *unused_context)
-{
-	// Make compiler happy about unused variables
-	(void)info;
-	(void)unused_context;
+// Ref:
+// http://stackoverflow.com/questions/77005/how-to-generate-a-stacktrace-when-my-gcc-c-app-crashes
+inline void signalHandler(int signal_number, siginfo_t *info, void *unused_context) {
+    // Make compiler happy about unused variables
+    (void)info;
+    (void)unused_context;
 
     // Only one signal will be allowed past this point
-    if (false == shouldDoExit())
-    {
-        while (true)
-        {
+    if (false == shouldDoExit()) {
+        while (true) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
     // No stack dump and message if signal is SIGINT, which is usually raised by user
-    if (signal_number != SIGINT)
-    {
+    if (signal_number != SIGINT) {
         const auto dump = stackdump();
         std::ostringstream fatal_stream;
         const auto fatal_reason = exitReasonName(signal_number);
         fatal_stream << "Received fatal signal: " << fatal_reason;
         fatal_stream << "(" << signal_number << ")\tPID: " << getpid() << std::endl;
-        fatal_stream << "\n***** SIGNAL " << fatal_reason << "(" << signal_number << ")" << std::endl;
+        fatal_stream << "\n***** SIGNAL " << fatal_reason << "(" << signal_number << ")"
+                     << std::endl;
 
         std::string dumpstr(dump.c_str());
         details::registry::instance().apply_all([&](std::shared_ptr<spdlog::logger> l) {
@@ -265,50 +238,42 @@ inline void signalHandler(int signal_number, siginfo_t *info, void *unused_conte
         });
     }
 
-    details::registry::instance().apply_all([&](std::shared_ptr<spdlog::logger> l) { l->flush(); });
-
+    details::registry::instance().flush_all();
     exitWithDefaultSignalHandler(signal_number);
 }
 
 //
 // Installs FATAL signal handler that is enough to handle most fatal events
 //  on *NIX systems
-inline void installSignalHandler()
-{
+inline void installSignalHandler() {
 #if !(defined(DISABLE_FATAL_SIGNALHANDLING))
     struct sigaction action;
     memset(&action, 0, sizeof(action));
     sigemptyset(&action.sa_mask);
     action.sa_sigaction = &signalHandler; // callback to crashHandler for fatal signals
-    // sigaction to use sa_sigaction file. ref: http://www.linuxprogrammingblog.com/code-examples/sigaction
+    // sigaction to use sa_sigaction file. ref:
+    // http://www.linuxprogrammingblog.com/code-examples/sigaction
     action.sa_flags = SA_SIGINFO;
 
     // do it verbose style - install all signal actions
-    for (const auto &sig_pair : gSignals)
-    {
-        if (sigaction(sig_pair.first, &action, nullptr) < 0)
-        {
+    for (const auto &sig_pair : gSignals) {
+        if (sigaction(sig_pair.first, &action, nullptr) < 0) {
             const std::string error = "sigaction - " + sig_pair.second;
             perror(error.c_str());
         }
     }
 #endif
 }
-} // end internal
+} // namespace internal
 
 // PUBLIC API:
 /** Install signal handler that catches FATAL C-runtime or OS signals
      See the wikipedia site for details http://en.wikipedia.org/wiki/SIGFPE
-     See the this site for example usage: http://www.tutorialspoint.com/cplusplus/cpp_signal_handling
-     SIGABRT  ABORT (ANSI), abnormal termination
-     SIGFPE   Floating point exception (ANSI)
-     SIGILL   ILlegal instruction (ANSI)
-     SIGSEGV  Segmentation violation i.e. illegal memory reference
-     SIGTERM  TERMINATION (ANSI)  */
-inline void installCrashHandler()
-{
-    internal::installSignalHandler();
-}
+     See the this site for example usage:
+   http://www.tutorialspoint.com/cplusplus/cpp_signal_handling SIGABRT  ABORT (ANSI), abnormal
+   termination SIGFPE   Floating point exception (ANSI) SIGILL   ILlegal instruction (ANSI) SIGSEGV
+   Segmentation violation i.e. illegal memory reference SIGTERM  TERMINATION (ANSI)  */
+inline void installCrashHandler() { internal::installSignalHandler(); }
 
 /// Overrides the existing signal handling for custom signals
 /// For example: usage of zcmq relies on its own signal handler for SIGTERM
@@ -318,12 +283,10 @@ inline void installCrashHandler()
 /// call example:
 ///  g3::overrideSetupSignals({ {SIGABRT, "SIGABRT"}, {SIGFPE, "SIGFPE"},{SIGILL, "SIGILL"},
 //                          {SIGSEGV, "SIGSEGV"},});
-inline void overrideSetupSignals(const std::map<int, std::string> overrideSignals)
-{
+inline void overrideSetupSignals(const std::map<int, std::string> overrideSignals) {
     static std::mutex signalLock;
     std::lock_guard<std::mutex> guard(signalLock);
-    for (const auto &sig : internal::gSignals)
-    {
+    for (const auto &sig : internal::gSignals) {
         internal::restoreSignalHandler(sig.first);
     }
 
@@ -334,9 +297,6 @@ inline void overrideSetupSignals(const std::map<int, std::string> overrideSignal
 /// Probably only needed for unit testing. Resets the signal handling back to default
 /// which might be needed in case it was previously overridden
 /// The default signals are: SIGABRT, SIGFPE, SIGILL, SIGSEGV, SIGTERM
-inline void restoreSignalHandlerToDefault()
-{
-    overrideSetupSignals(internal::kSignals);
-}
+inline void restoreSignalHandlerToDefault() { overrideSetupSignals(internal::kSignals); }
 
 } // end namespace spdlog

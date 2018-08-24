@@ -25,7 +25,8 @@ namespace fs = boost::filesystem;
 
 namespace cbagoa {
 
-void handle_oa_exceptions() {
+void OADatabase::handle_oa_exceptions() {
+    logger->error("Exception caught, exiting");
     try {
         throw;
     } catch (oa::oaCompatibilityError &ex) {
