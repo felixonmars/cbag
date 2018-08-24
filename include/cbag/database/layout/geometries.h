@@ -1,12 +1,19 @@
 #ifndef CBAG_DATABASE_LAYOUT_GEOMETRIES_H
 #define CBAG_DATABASE_LAYOUT_GEOMETRIES_H
 
+#include <algorithm>
 #include <variant>
 
 #include <cbag/database/layout/datatypes.h>
 
 namespace cbag {
 namespace layout {
+
+// custom unsigned char literal definition
+inline constexpr unsigned char operator "" _uc( unsigned long long arg ) noexcept
+{
+    return static_cast< unsigned char >( arg );
+}
 
 // -----------------------------------------------------------------------------
 // union views variant declaration
@@ -40,16 +47,19 @@ class Geometry {
     }
 
     inline PolyRef<Polygon90> add_poly90(point_vector_t &&data) {
+        mode = std::max(mode, 1_uc);
         poly90_set.emplace_back(std::move(data));
         return {&poly90_set, poly90_set.size() - 1};
     }
 
     inline PolyRef<Polygon45> add_poly45(point_vector_t &&data) {
+        mode = std::max(mode, 2_uc);
         poly45_set.emplace_back(std::move(data));
         return {&poly45_set, poly45_set.size() - 1};
     }
 
     inline PolyRef<Polygon> add_poly(point_vector_t &&data) {
+        mode = std::max(mode, 3_uc);
         poly_set.emplace_back(std::move(data));
         return {&poly_set, poly_set.size() - 1};
     }
@@ -64,6 +74,10 @@ class Geometry {
     uint8_t mode;
     UnionViewVariant view;
 }; // namespace layout
+
+struct LayCellView {
+
+};
 
 } // namespace layout
 } // namespace cbag
