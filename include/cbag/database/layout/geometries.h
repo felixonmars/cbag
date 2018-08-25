@@ -2,6 +2,8 @@
 #define CBAG_DATABASE_LAYOUT_GEOMETRIES_H
 
 #include <algorithm>
+#include <unordered_map>
+#include <utility>
 #include <variant>
 
 #include <cbag/database/layout/datatypes.h>
@@ -9,10 +11,11 @@
 namespace cbag {
 namespace layout {
 
+using layer_t = std::pair<lay_t, purp_t>;
+
 // custom unsigned char literal definition
-inline constexpr unsigned char operator "" _uc( unsigned long long arg ) noexcept
-{
-    return static_cast< unsigned char >( arg );
+inline constexpr unsigned char operator"" _uc(unsigned long long arg) noexcept {
+    return static_cast<unsigned char>(arg);
 }
 
 // -----------------------------------------------------------------------------
@@ -73,10 +76,17 @@ class Geometry {
     PolygonSet poly_set;
     uint8_t mode;
     UnionViewVariant view;
-}; // namespace layout
+};
+
+using geo_map_t = std::unordered_map<layer_t, Geometry>;
+
+struct LayInstance {
+
+};
 
 struct LayCellView {
-
+    std::string tech_name;
+    geo_map_t geo_map;
 };
 
 } // namespace layout
