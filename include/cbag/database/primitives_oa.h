@@ -82,10 +82,16 @@ constexpr TermType trmInput = TermType::oacInputTermType;
 constexpr TermType trmOutput = TermType::oacOutputTermType;
 constexpr TermType trmInout = TermType::oacInputOutputTermType;
 
+using BlockageType = oa::oaBlockageTypeEnum;
+constexpr BlockageType blkRoute = BlockageType::oacRoutingBlockageType;
+constexpr BlockageType blkPlacement = BlockageType::oacPlacementBlockageType;
+
 using Point = oa::oaPoint;
+using Vector = oa::oaVector;
 using Transform = oa::oaTransform;
 using BBox = oa::oaBox;
 using PointArray = oa::oaPointArray;
+using ViaParam = oa::oaViaParam;
 } // namespace cbag
 
 #endif // CBAG_DATABASE_PRIMITIVES_OA_H

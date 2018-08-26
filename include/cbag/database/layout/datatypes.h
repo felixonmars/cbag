@@ -38,7 +38,7 @@ class Polygon {
 
     inline Polygon() : data() {}
     explicit inline Polygon(std::size_t n) : data() { data.reserve(n); }
-    explicit inline Polygon(point_vector_t &&data) : data(std::move(data)) {}
+    explicit inline Polygon(point_vector_t data) : data(std::move(data)) {}
 
     inline iterator_type begin() const { return data.begin(); }
     inline iterator_type end() const { return data.end(); }
@@ -57,7 +57,7 @@ class Polygon45 : public Polygon {
   public:
     inline Polygon45() : Polygon() {}
     explicit inline Polygon45(std::size_t n) : Polygon(n) {}
-    explicit inline Polygon45(point_vector_t &&data) : Polygon(std::move(data)) {}
+    explicit inline Polygon45(point_vector_t data) : Polygon(std::move(data)) {}
 };
 
 // -----------------------------------------------------------------------------
@@ -148,7 +148,7 @@ class Polygon90 : public Polygon45 {
 
     inline Polygon90() : Polygon45() {}
     explicit inline Polygon90(std::size_t n) : Polygon45(n) {}
-    explicit inline Polygon90(point_vector_t &&data) : Polygon45(std::move(data)) {}
+    explicit inline Polygon90(point_vector_t data) : Polygon45(std::move(data)) {}
 
     inline compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
     inline compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }

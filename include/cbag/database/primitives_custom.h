@@ -112,25 +112,44 @@ constexpr TermType trmInput = TermType::input;
 constexpr TermType trmOutput = TermType::output;
 constexpr TermType trmInout = TermType::inout;
 
+enum BlockageType { routing, placement };
+constexpr BlockageType blkRoute = BlockageType::routing;
+constexpr BlockageType blkPlacement = BlockageType::placement;
+
 /** A point
  */
 class Point {
   public:
-    Point() : xv(0), yv(0) {}
+    inline Point() : xv(0), yv(0) {}
 
-    Point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
+    inline Point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
 
-    coord_t x() const { return xv; }
+    inline coord_t x() const { return xv; }
 
-    coord_t y() const { return yv; }
+    inline coord_t y() const { return yv; }
 
-    void set(coord_t x, coord_t y) {
+    inline void set(coord_t x, coord_t y) {
         xv = x;
         yv = y;
     }
 
   private:
     coord_t xv, yv;
+};
+
+/** A vector
+ */
+class Vector {
+  public:
+    inline Vector() : dx(0), dy(0) {}
+    inline Vector(coord_t dx, coord_t dy) : dx(dx), dy(dy) {}
+
+    inline coord_t x() const { return dx; }
+
+    inline coord_t y() const { return dy; }
+
+  private:
+    coord_t dx, dy;
 };
 
 /** Represents locations/orientation of an instance.

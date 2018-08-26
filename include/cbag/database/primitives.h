@@ -16,4 +16,8 @@
 #include <cbag/database/primitives_custom.h>
 #endif
 
+// common primitive types
+
+enum BoundaryType { PR, area, snap };
+
 #endif // CBAG_DATABASE_PRIMITIVES_H
