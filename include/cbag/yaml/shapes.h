@@ -1,16 +1,21 @@
-/** \file shapes_adapted.h
- *  \brief This file adapts shapes into random access data structures.
+/** \file yaml_figures.h
+ *  \brief This file declares YAML serialization methods for shapes.
  *
  *  \author Eric Chang
- *  \date   2018/07/19
+ *  \date   2018/07/12
  */
-#ifndef CBAG_DATABASE_SHAPES_ADAPTED_H
-#define CBAG_DATABASE_SHAPES_ADAPTED_H
+
+#ifndef CBAG_YAML_SHAPES_H
+#define CBAG_YAML_SHAPES_H
 
 #include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
-#include <cbag/database/shapes.h>
+#include <yaml-cpp/yaml.h>
+
+#include <cbag/schematic/shapes.h>
+#include <cbag/yaml/fusion.h>
+#include <cbag/yaml/primitives.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::Rect, layer, purpose, net, bbox)
 
@@ -35,4 +40,12 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::EvalText, layer, purpose, net, origin, alignment
 BOOST_FUSION_ADAPT_STRUCT(cbag::TermAttr, layer, purpose, net, origin, alignment, orient, font,
                           height, overbar, visible, drafting, attr_type, format)
 
-#endif // CBAG_DATABASE_SHAPES_ADAPTED_H
+namespace YAML {
+template <> struct convert<cbag::Shape> {
+    static Node encode(const cbag::Shape &rhs);
+
+    static bool decode(const Node &node, cbag::Shape &rhs);
+};
+} // namespace YAML
+
+#endif // CBAG_YAML_SHAPES_H

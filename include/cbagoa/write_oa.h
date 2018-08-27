@@ -78,6 +78,9 @@ class OAWriter {
     void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch,
                             const str_map_t *rename_map = nullptr);
 
+    void write_lay_cellview(const cbag::LayCellView &cv, oa::oaDesign *dsn,
+                            const str_map_t *rename_map = nullptr);
+
   private:
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
                              const std::map<std::string, cbag::PinFigure> &map,

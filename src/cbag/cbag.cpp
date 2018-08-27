@@ -16,9 +16,9 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
 
-#include <cbag/database/yaml_cellviews.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
+#include <cbag/yaml/cellviews.h>
 
 namespace cbag {
 void init_logging() {

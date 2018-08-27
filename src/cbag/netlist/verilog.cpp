@@ -9,9 +9,9 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/cellviews.h>
-#include <cbag/database/figures.h>
 #include <cbag/netlist/verilog.h>
+#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/figures.h>
 
 namespace cbag {
 
@@ -64,7 +64,7 @@ void VerilogBuilder::write_cv_header(const std::string &name, const term_t &in_t
 
 void VerilogBuilder::write_cv_end(const std::string &name) { out_file << "endmodule" << std::endl; }
 
-void VerilogBuilder::write_instance_helper(const std::string &name, const Instance &inst,
+void VerilogBuilder::write_instance_helper(const std::string &name, const SchInstance &inst,
                                            const SchCellViewInfo &info) {
     // TODO: add actual implementation
 }

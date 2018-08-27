@@ -4,14 +4,23 @@
  *  \author Eric Chang
  *  \date   2018/07/12
  */
-#ifndef CBAG_DATABASE_YAML_CELLVIEWS_H
-#define CBAG_DATABASE_YAML_CELLVIEWS_H
+#ifndef CBAG_YAML_CELLVIEWS_H
+#define CBAG_YAML_CELLVIEWS_H
 
-#include <cbag/yaml_fusion.h>
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 
-#include <cbag/database/cellviews_adapted.h>
-#include <cbag/database/yaml_datatypes.h>
-#include <cbag/database/yaml_figures.h>
+#include <yaml-cpp/yaml.h>
+
+#include <cbag/schematic/cellviews.h>
+#include <cbag/yaml/datatypes.h>
+#include <cbag/yaml/figures.h>
+#include <cbag/yaml/fusion.h>
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView, lib_name, cell_name, view_name, bbox, in_terms,
+                          out_terms, io_terms, shapes, instances, props, app_defs)
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellViewInfo, cell_name, in_terms, out_terms, io_terms, props)
 
 // YAML conversion methods for std::unordered_map
 namespace YAML {
@@ -42,4 +51,4 @@ template <typename K, typename V> struct convert<std::unordered_map<K, V>> {
 
 } // namespace YAML
 
-#endif // CBAG_DATABASE_YAML_CELLVIEWS_H
+#endif // CBAG_YAML_CELLVIEWS_H

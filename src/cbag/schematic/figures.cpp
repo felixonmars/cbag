@@ -9,25 +9,24 @@
 
 #include <fmt/format.h>
 
-#include <cbag/cbag.h>
-#include <cbag/database/figures.h>
 #include <cbag/netlist/name_convert.h>
+#include <cbag/schematic/figures.h>
 
 namespace cbag {
 
-void Instance::clear_params() { params.clear(); }
+void SchInstance::clear_params() { params.clear(); }
 
-void Instance::set_int_param(const char *name, int value) { params[name] = value; }
+void SchInstance::set_int_param(const char *name, int value) { params[name] = value; }
 
-void Instance::set_double_param(const char *name, double value) { params[name] = value; }
+void SchInstance::set_double_param(const char *name, double value) { params[name] = value; }
 
-void Instance::set_bool_param(const char *name, bool value) { params[name] = value; }
+void SchInstance::set_bool_param(const char *name, bool value) { params[name] = value; }
 
-void Instance::set_string_param(const char *name, const char *value) {
+void SchInstance::set_string_param(const char *name, const char *value) {
     params[name] = std::string(value);
 }
 
-void Instance::update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
+void SchInstance::update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
                                  const char *net) {
     // check number of bits match
     std::string term_str(term);
@@ -56,13 +55,13 @@ void Instance::update_connection(const std::string &inst_name, uint32_t inst_siz
     }
 }
 
-void Instance::update_connection(const std::string &inst_name, const char *term, const char *net) {
+void SchInstance::update_connection(const std::string &inst_name, const char *term, const char *net) {
     // check number of bits match
     spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
     update_connection(inst_name, nu.size(), term, net);
 }
 
-void Instance::resize_nets(uint32_t old_size, uint32_t new_size) {
+void SchInstance::resize_nets(uint32_t old_size, uint32_t new_size) {
     std::div_t result = std::div(static_cast<int>(new_size), static_cast<int>(old_size));
     if (result.rem != 0) {
         // new size not multiple of old size, just clear connections

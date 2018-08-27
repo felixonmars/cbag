@@ -11,9 +11,9 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/cellviews.h>
-#include <cbag/database/figures.h>
 #include <cbag/netlist/cdl.h>
+#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/figures.h>
 
 namespace cbag {
 
@@ -48,7 +48,7 @@ void CDLBuilder::write_cv_header(const std::string &name, const term_t &in_terms
 
 void CDLBuilder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
 
-void CDLBuilder::write_instance_helper(const std::string &name, const Instance &inst,
+void CDLBuilder::write_instance_helper(const std::string &name, const SchInstance &inst,
                                        const SchCellViewInfo &info) {
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
 

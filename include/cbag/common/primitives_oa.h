@@ -5,8 +5,8 @@
  *  \date   2018/07/13
  */
 
-#ifndef CBAG_DATABASE_PRIMITIVES_OA_H
-#define CBAG_DATABASE_PRIMITIVES_OA_H
+#ifndef CBAG_COMMON_PRIMITIVES_OA_H
+#define CBAG_COMMON_PRIMITIVES_OA_H
 
 #include <oa/oaDesignDB.h>
 
@@ -94,4 +94,4 @@ using PointArray = oa::oaPointArray;
 using ViaParam = oa::oaViaParam;
 } // namespace cbag
 
-#endif // CBAG_DATABASE_PRIMITIVES_OA_H
+#endif // CBAG_COMMON_PRIMITIVES_OA_H

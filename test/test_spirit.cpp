@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <cbag/yaml_fusion.h>
+#include <cbag/yaml/fusion.h>
 
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/name.h>

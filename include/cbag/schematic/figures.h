@@ -4,14 +4,14 @@
  *  \author Eric Chang
  *  \date   2018/07/10
  */
-#ifndef CBAG_DATABASE_FIGURES_H
-#define CBAG_DATABASE_FIGURES_H
+#ifndef CBAG_SCHEMATIC_FIGURES_H
+#define CBAG_SCHEMATIC_FIGURES_H
 
 #include <variant>
 
-#include <cbag/database/datatypes.h>
-#include <cbag/database/primitives.h>
-#include <cbag/database/shapes.h>
+#include <cbag/common/datatypes.h>
+#include <cbag/common/primitives.h>
+#include <cbag/schematic/shapes.h>
 
 namespace cbag {
 
@@ -19,10 +19,10 @@ namespace cbag {
 
 /** An instance object
  */
-struct Instance {
+struct SchInstance {
     /** Create an empty instance.
      */
-    Instance() = default;
+    SchInstance() = default;
 
     /** Create an instance with empty parameter and terminal mappings.
      *
@@ -31,7 +31,8 @@ struct Instance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    inline Instance(std::string lib, std::string cell, std::string view, Transform xform, BBox bbox)
+    inline SchInstance(std::string lib, std::string cell, std::string view, Transform xform,
+                       BBox bbox)
         : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
           xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
 
@@ -69,7 +70,7 @@ struct Instance {
 
 /** A schematic object that can represent a pin.
  *
- *  In OpenAccess schematics, pins are represented using an Instance and an
+ *  In OpenAccess schematics, pins are represented using an SchInstance and an
  * AttrDisplay. This object encapsulates those two.
  */
 struct SchPinObject {
@@ -84,9 +85,9 @@ struct SchPinObject {
      * @param view the view name.
      * @param xform the instance location.
      */
-    SchPinObject(Instance &&inst, TermAttr &&attr) : inst(inst), attr(attr){};
+    SchPinObject(SchInstance &&inst, TermAttr &&attr) : inst(inst), attr(attr){};
 
-    Instance inst;
+    SchInstance inst;
     TermAttr attr;
 };
 
@@ -103,4 +104,4 @@ struct PinFigure {
 };
 } // namespace cbag
 
-#endif // CBAG_DATABASE_FIGURES_H
+#endif // CBAG_SCHEMATIC_FIGURES_H

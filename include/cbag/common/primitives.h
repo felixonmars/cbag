@@ -5,19 +5,20 @@
  *  \date   2018/07/12
  */
 
-#ifndef CBAG_DATABASE_PRIMITIVES_H
-#define CBAG_DATABASE_PRIMITIVES_H
+#ifndef CBAG_COMMON_PRIMITIVES_H
+#define CBAG_COMMON_PRIMITIVES_H
 
 #if __has_include(<oa/oaDesignDB.h>)
 // use OpenAccess primitive types
-#include <cbag/database/primitives_oa.h>
+#include <cbag/common/primitives_oa.h>
 #else
 // use custom primitive types
-#include <cbag/database/primitives_custom.h>
+#include <cbag/common/primitives_custom.h>
 #endif
 
+namespace cbag {
 // common primitive types
 
 enum BoundaryType { PR, area, snap };
-
-#endif // CBAG_DATABASE_PRIMITIVES_H
+} // namespace cbag
+#endif // CBAG_COMMON_PRIMITIVES_H

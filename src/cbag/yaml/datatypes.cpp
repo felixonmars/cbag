@@ -7,7 +7,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/database/yaml_datatypes.h>
+#include <cbag/yaml/datatypes.h>
 
 namespace YAML {
 Node convert<cbag::value_t>::encode(const cbag::value_t &rhs) {

@@ -9,10 +9,10 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/cellviews.h>
-#include <cbag/database/datatypes.h>
-#include <cbag/database/figures.h>
+#include <cbag/common/datatypes.h>
 #include <cbag/netlist/netlist.h>
+#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/figures.h>
 
 namespace cbag {
 
@@ -91,7 +91,7 @@ void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
     out_file << std::endl;
 }
 
-void NetlistBuilder::write_instance(const std::string &name, const Instance &inst,
+void NetlistBuilder::write_instance(const std::string &name, const SchInstance &inst,
                                     const netlist_map_t &cell_map) {
     auto libmap_iter = cell_map.find(inst.lib_name);
     if (libmap_iter == cell_map.end()) {

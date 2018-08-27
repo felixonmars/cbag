@@ -8,8 +8,8 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/database/yaml_datatypes.h>
-#include <cbag/database/yaml_figures.h>
+#include <cbag/yaml/datatypes.h>
+#include <cbag/yaml/figures.h>
 
 namespace YAML {
 Node convert<std::variant<cbag::Rect, cbag::SchPinObject>>::encode(

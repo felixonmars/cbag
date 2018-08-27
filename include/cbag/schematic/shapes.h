@@ -4,12 +4,12 @@
  *  \author Eric Chang
  *  \date   2018/07/19
  */
-#ifndef CBAG_DATABASE_SHAPES_H
-#define CBAG_DATABASE_SHAPES_H
+#ifndef CBAG_SCHEMATIC_SHAPES_H
+#define CBAG_SCHEMATIC_SHAPES_H
 
 #include <variant>
 
-#include <cbag/database/primitives.h>
+#include <cbag/common/primitives.h>
 
 namespace cbag {
 
@@ -175,4 +175,4 @@ struct TermAttr : TextBase {
 using Shape = std::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, Text, EvalText>;
 } // namespace cbag
 
-#endif // CBAG_DATABASE_SHAPES_H
+#endif // CBAG_SCHEMATIC_SHAPES_H

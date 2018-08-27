@@ -5,24 +5,24 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_DATABASE_CELLVIEWS_H
-#define CBAG_DATABASE_CELLVIEWS_H
+#ifndef CBAG_SCHEMATIC_CELLVIEWS_H
+#define CBAG_SCHEMATIC_CELLVIEWS_H
 
 #include <map>
 #include <memory>
 #include <unordered_map>
 
-#include <cbag/database/datatypes.h>
-#include <cbag/database/primitives.h>
-#include <cbag/database/shapes.h>
+#include <cbag/common/datatypes.h>
+#include <cbag/common/primitives.h>
+#include <cbag/schematic/shapes.h>
 
 namespace cbag {
 
 struct PinFigure;
-struct Instance;
+struct SchInstance;
 
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
-using inst_iter_t = std::map<std::string, Instance>::iterator;
+using inst_iter_t = std::map<std::string, SchInstance>::iterator;
 
 /** A simple struct representing netlist information of a cellview.
  */
@@ -78,7 +78,7 @@ struct SchCellView {
 
     bool remove_instance(const char *name);
 
-    inst_iter_t copy_instance(const Instance &inst, uint32_t old_size, const std::string &new_name,
+    inst_iter_t copy_instance(const SchInstance &inst, uint32_t old_size, const std::string &new_name,
                               coord_t dx, coord_t dy, const conn_list_t &conns);
 
     std::vector<inst_iter_t> array_instance(const char *old_name,
@@ -91,7 +91,7 @@ struct SchCellView {
     BBox bbox;
     std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
     std::vector<Shape> shapes;
-    std::map<std::string, Instance> instances;
+    std::map<std::string, SchInstance> instances;
     ParamMap props;
     ParamMap app_defs;
     std::unique_ptr<SchCellView> sym_ptr;
@@ -114,4 +114,4 @@ struct LayCellView {
 
 } // namespace cbag
 
-#endif // CBAG_DATABASE_CELLVIEWS_H
+#endif // CBAG_SCHEMATIC_CELLVIEWS_H

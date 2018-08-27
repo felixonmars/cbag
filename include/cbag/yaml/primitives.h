@@ -5,12 +5,12 @@
  *  \date   2018/07/12
  */
 
-#ifndef CBAG_DATABASE_YAML_PRIMITIVES_H
-#define CBAG_DATABASE_YAML_PRIMITIVES_H
+#ifndef CBAG_YAML_PRIMITIVES_H
+#define CBAG_YAML_PRIMITIVES_H
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/database/primitives.h>
+#include <cbag/common/primitives.h>
 
 namespace YAML {
 template <> struct convert<cbag::Orientation> {
@@ -206,4 +206,4 @@ template <> struct convert<cbag::PointArray> {
 };
 } // namespace YAML
 
-#endif // CBAG_DATABASE_YAML_PRIMITIVES_H
+#endif // CBAG_YAML_PRIMITIVES_H

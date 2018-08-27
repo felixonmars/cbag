@@ -9,8 +9,8 @@
  *  \date   2018/07/17
  */
 
-#ifndef CBAG_SERIALIZATION_H
-#define CBAG_SERIALIZATION_H
+#ifndef CBAG_YAML_FUSION_H
+#define CBAG_YAML_FUSION_H
 
 #include <string>
 
@@ -269,4 +269,4 @@ template <typename T> struct convert {
     }
 };
 } // namespace YAML
-#endif // CBAG_SERIALIZATION_H
+#endif // CBAG_YAML_FUSION_H

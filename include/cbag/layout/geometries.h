@@ -1,5 +1,5 @@
-#ifndef CBAG_DATABASE_LAYOUT_GEOMETRIES_H
-#define CBAG_DATABASE_LAYOUT_GEOMETRIES_H
+#ifndef CBAG_LAYOUT_GEOMETRIES_H
+#define CBAG_LAYOUT_GEOMETRIES_H
 
 #include <algorithm>
 #include <unordered_map>
@@ -8,7 +8,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include <cbag/database/layout/datatypes.h>
+#include <cbag/layout/datatypes.h>
 
 namespace cbag {
 namespace layout {
@@ -174,4 +174,4 @@ class LayCellView {
 } // namespace layout
 } // namespace cbag
 
-#endif // CBAG_DATABASE_LAYOUT_GEOMETRIES_H
+#endif // CBAG_LAYOUT_GEOMETRIES_H

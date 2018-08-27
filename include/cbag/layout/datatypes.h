@@ -4,15 +4,15 @@
  *  \author Eric Chang
  *  \date   2018/07/19
  */
-#ifndef CBAG_DATABASE_LAYOUT_DATATYPES_H
-#define CBAG_DATABASE_LAYOUT_DATATYPES_H
+#ifndef CBAG_LAYOUT_DATATYPES_H
+#define CBAG_LAYOUT_DATATYPES_H
 
 #include <iterator>
 #include <vector>
 
 #include <boost/polygon/polygon.hpp>
 
-#include <cbag/database/primitives.h>
+#include <cbag/common/primitives.h>
 
 namespace cbag {
 namespace layout {
@@ -504,4 +504,4 @@ template <> struct polygon_90_set_traits<cbag::layout::RectView> {
 } // namespace polygon
 } // namespace boost
 
-#endif // CBAG_DATABASE_LAYOUT_DATATYPES_H
+#endif // CBAG_LAYOUT_DATATYPES_H

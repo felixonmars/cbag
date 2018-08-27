@@ -26,7 +26,7 @@ class CDLBuilder : public NetlistBuilder {
 
     void write_cv_end(const std::string &name) override;
 
-    void write_instance_helper(const std::string &name, const Instance &inst,
+    void write_instance_helper(const std::string &name, const SchInstance &inst,
                                const SchCellViewInfo &info) override;
 
     static const size_t ncol = 80;

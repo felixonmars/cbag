@@ -1,4 +1,4 @@
-#include <cbag/database/layout/geometries.h>
+#include <cbag/layout/geometries.h>
 
 namespace cbag {
 namespace layout {

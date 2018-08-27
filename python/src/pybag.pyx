@@ -16,7 +16,7 @@ import os
 import numbers
 
 
-ctypedef map[string, Instance].iterator inst_iter_t
+ctypedef map[string, SchInstance].iterator inst_iter_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
@@ -24,7 +24,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef cppclass PinFigure:
         pass
 
-    cdef cppclass Instance:
+    cdef cppclass SchInstance:
         string lib_name
         string cell_name
         string view_name
@@ -52,7 +52,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
         string lib_name
         string cell_name
         string view_name
-        map[string, Instance] instances
+        map[string, SchInstance] instances
         map[string, PinFigure] in_terms
         map[string, PinFigure] out_terms
         map[string, PinFigure] io_terms
@@ -202,7 +202,7 @@ cdef class DesignInstance:
 
 
 cdef class PySchInstance(DesignInstance):
-    cdef map[string, Instance].iterator ptr
+    cdef map[string, SchInstance].iterator ptr
     cdef cbool _static
     cdef encoding
 
@@ -340,8 +340,8 @@ cdef class PySchCellView:
 
     def get_instances(self, db):
         result = {}
-        cdef map[string, Instance].iterator biter = deref(self.cv_ptr).instances.begin()
-        cdef map[string, Instance].iterator eiter = deref(self.cv_ptr).instances.end()
+        cdef map[string, SchInstance].iterator biter = deref(self.cv_ptr).instances.begin()
+        cdef map[string, SchInstance].iterator eiter = deref(self.cv_ptr).instances.end()
         while biter != eiter:
             key = deref(biter).first.decode(self.encoding)
             inst = PySchInstance(db, self.encoding,

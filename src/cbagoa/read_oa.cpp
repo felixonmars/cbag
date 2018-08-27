@@ -217,7 +217,7 @@ cbag::Shape OAReader::read_shape(oa::oaShape *p) {
 
 // Read method for references
 
-cbag::Instance OAReader::read_instance(oa::oaInst *p) {
+cbag::SchInstance OAReader::read_instance(oa::oaInst *p) {
     // read cellview name
     oa::oaString inst_lib_oa, inst_cell_oa, inst_view_oa;
     p->getLibName(ns, inst_lib_oa);
@@ -231,8 +231,8 @@ cbag::Instance OAReader::read_instance(oa::oaInst *p) {
     p->getBBox(bbox);
 
     // create instance object
-    cbag::Instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                        std::string(inst_view_oa), xform, bbox);
+    cbag::SchInstance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
+                           std::string(inst_view_oa), xform, bbox);
 
     // read instance parameters
     if (p->hasProp()) {
@@ -260,7 +260,7 @@ cbag::Instance OAReader::read_instance(oa::oaInst *p) {
     return inst;
 }
 
-std::pair<std::string, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *p) {
+std::pair<std::string, cbag::SchInstance> OAReader::read_instance_pair(oa::oaInst *p) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
     logger->info("Reading instance {}", (const char *)inst_name_oa);
@@ -272,7 +272,7 @@ std::pair<std::string, cbag::Instance> OAReader::read_instance_pair(oa::oaInst *
 cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
     cbag::SigType sig = t->getNet()->getSigType();
     if (p->isInst()) {
-        cbag::Instance inst = read_instance(static_cast<oa::oaInst *>(p));
+        cbag::SchInstance inst = read_instance(static_cast<oa::oaInst *>(p));
 
         oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
         auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext());

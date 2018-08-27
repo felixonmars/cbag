@@ -68,13 +68,13 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_primitives.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_datatypes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_shapes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/yaml_figures.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/figures.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/cellviews.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/database/layout/geometries.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/primitives.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellviews.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometries.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/cdl.cpp

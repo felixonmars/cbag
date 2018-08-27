@@ -8,8 +8,8 @@
  *  \date   2018/07/13
  */
 
-#ifndef CBAG_DATABASE_PRIMITIVES_CUSTOM_H
-#define CBAG_DATABASE_PRIMITIVES_CUSTOM_H
+#ifndef CBAG_COMMON_PRIMITIVES_CUSTOM_H
+#define CBAG_COMMON_PRIMITIVES_CUSTOM_H
 
 #include <cstdint>
 #include <vector>
@@ -222,4 +222,4 @@ class PointArray {
 
 } // namespace cbag
 
-#endif // CBAG_DATABASE_PRIMITIVES_CUSTOM_H
+#endif // CBAG_COMMON_PRIMITIVES_CUSTOM_H

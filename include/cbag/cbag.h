@@ -11,12 +11,12 @@
 #include <string>
 #include <vector>
 
-#include <cbag/database/cellviews.h>
-#include <cbag/database/datatypes.h>
-#include <cbag/database/figures.h>
-#include <cbag/database/primitives.h>
-#include <cbag/database/shapes.h>
+#include <cbag/common/datatypes.h>
+#include <cbag/common/primitives.h>
 #include <cbag/netlist/name_convert.h>
+#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/figures.h>
+#include <cbag/schematic/shapes.h>
 
 namespace cbag {
 void init_logging();

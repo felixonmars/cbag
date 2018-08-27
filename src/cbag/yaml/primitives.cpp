@@ -7,8 +7,8 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/database/yaml_primitives.h>
-#include <cbag/yaml_fusion.h>
+#include <cbag/yaml/fusion.h>
+#include <cbag/yaml/primitives.h>
 
 namespace YAML {
 Node convert<cbag::Point>::encode(const cbag::Point &rhs) {

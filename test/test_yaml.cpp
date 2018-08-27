@@ -3,7 +3,7 @@
 
 #include <boost/fusion/adapted.hpp>
 
-#include <cbag/yaml_fusion.h>
+#include <cbag/yaml/fusion.h>
 
 struct One {
     One() : two(0), three(0.0), four(false) {}

@@ -9,10 +9,10 @@
 
 #include <fmt/format.h>
 
-#include <cbag/database/yaml_cellviews.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
+#include <cbag/yaml/cellviews.h>
 
 namespace fs = boost::filesystem;
 
@@ -129,7 +129,7 @@ void SchCellView::rename_instance(const char *old_name, const char *new_name) {
     // check the new name does not exist
     std::string nkey(new_name);
     if (instances.find(nkey) != instances.end()) {
-        throw std::invalid_argument(fmt::format("Instance {} already exists.", nkey));
+        throw std::invalid_argument(fmt::format("SchInstance {} already exists.", nkey));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
@@ -161,7 +161,7 @@ bool SchCellView::remove_instance(const char *name) {
     return instances.erase(key) > 0;
 }
 
-inst_iter_t SchCellView::copy_instance(const Instance &inst, uint32_t old_size,
+inst_iter_t SchCellView::copy_instance(const SchInstance &inst, uint32_t old_size,
                                        const std::string &new_name, coord_t dx, coord_t dy,
                                        const conn_list_t &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
@@ -172,7 +172,7 @@ inst_iter_t SchCellView::copy_instance(const Instance &inst, uint32_t old_size,
     auto emp_iter = instances.emplace(new_name, inst);
     if (!emp_iter.second) {
         throw std::invalid_argument(
-            fmt::format("Instance {} already exists.", emp_iter.first->first));
+            fmt::format("SchInstance {} already exists.", emp_iter.first->first));
     }
 
     // resize nets
@@ -197,7 +197,7 @@ std::vector<inst_iter_t> SchCellView::array_instance(const char *old_name,
                                                      const std::vector<conn_list_t> &conns_list) {
     // find the instance to copy
     std::string key(old_name);
-    std::map<std::string, Instance>::const_iterator iter = instances.find(key);
+    std::map<std::string, SchInstance>::const_iterator iter = instances.find(key);
     if (iter == instances.end()) {
         throw std::invalid_argument("Cannot find instance: " + key);
     }

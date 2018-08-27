@@ -21,7 +21,7 @@ namespace cbag {
 
 // forward declarations and type defs
 
-struct Instance;
+struct SchInstance;
 struct SchCellView;
 struct SchCellViewInfo;
 struct PinFigure;
@@ -65,7 +65,7 @@ class NetlistBuilder {
   protected:
     std::ofstream out_file;
 
-    void write_instance(const std::string &name, const Instance &inst,
+    void write_instance(const std::string &name, const SchInstance &inst,
                         const netlist_map_t &cell_map);
 
   private:
@@ -76,7 +76,7 @@ class NetlistBuilder {
 
     virtual void write_cv_end(const std::string &name) = 0;
 
-    virtual void write_instance_helper(const std::string &name, const Instance &inst,
+    virtual void write_instance_helper(const std::string &name, const SchInstance &inst,
                                        const SchCellViewInfo &info) = 0;
 };
 

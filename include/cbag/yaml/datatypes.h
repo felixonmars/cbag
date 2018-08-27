@@ -5,13 +5,20 @@
  *  \date   2018/07/12
  */
 
-#ifndef CBAG_DATABASE_YAML_DATATYPES_H
-#define CBAG_DATABASE_YAML_DATATYPES_H
+#ifndef CBAG_YAML_DATATYPES_H
+#define CBAG_YAML_DATATYPES_H
+
+#include <boost/fusion/adapted/struct/adapt_struct.hpp>
+#include <boost/fusion/include/adapt_struct.hpp>
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/database/datatypes_adapted.h>
-#include <cbag/yaml_fusion.h>
+#include <cbag/common/datatypes.h>
+#include <cbag/yaml/fusion.h>
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::Time, time_val)
+
+BOOST_FUSION_ADAPT_STRUCT(cbag::Binary, name, bin_val)
 
 namespace cbag {
 class to_yaml_visitor {
@@ -33,4 +40,4 @@ template <> struct convert<cbag::value_t> {
 };
 } // namespace YAML
 
-#endif // CBAG_DATABASE_YAML_DATATYPES_H
+#endif // CBAG_YAML_DATATYPES_H

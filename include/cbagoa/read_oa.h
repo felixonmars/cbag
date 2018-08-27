@@ -56,9 +56,9 @@ class OAReader {
 
     // Read method for references
 
-    cbag::Instance read_instance(oa::oaInst *p);
+    cbag::SchInstance read_instance(oa::oaInst *p);
 
-    std::pair<std::string, cbag::Instance> read_instance_pair(oa::oaInst *p);
+    std::pair<std::string, cbag::SchInstance> read_instance_pair(oa::oaInst *p);
 
     // Read method for pin figures
 

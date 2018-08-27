@@ -5,13 +5,13 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_DATABASE_COMMON_H
-#define CBAG_DATABASE_COMMON_H
+#ifndef CBAG_COMMON_DATATYPES_H
+#define CBAG_COMMON_DATATYPES_H
 
 #include <cstdint>
 #include <ctime>
-#include <string>
 #include <map>
+#include <string>
 #include <variant>
 
 namespace cbag {
@@ -53,4 +53,4 @@ typedef std::map<std::string, value_t> ParamMap;
 
 } // namespace cbag
 
-#endif // CBAG_DATABASE_COMMON_H
+#endif // CBAG_COMMON_DATATYPES_H
