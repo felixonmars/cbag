@@ -52,7 +52,7 @@ bool convert<cbag::Transform>::decode(const Node &node, cbag::Transform &rhs) {
     }
     try {
         rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
-                static_cast<cbag::Orientation>(node[2].as<int>()));
+                node[2].as<cbag::Orientation>());
     } catch (...) {
         logger->warn("cbag::Transform YAML decode exception.  Node:\n{}",
                      yaml::serialization::node_to_str(node));
