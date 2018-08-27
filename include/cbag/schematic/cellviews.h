@@ -52,7 +52,7 @@ struct SchCellView {
     explicit SchCellView(const char *yaml_fname, const char *sym_view = nullptr);
 
     inline SchCellView(const char *lib_name, const char *cell_name, const char *view_name,
-                       BBox bbox)
+                       box_t bbox)
         : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
@@ -89,7 +89,7 @@ struct SchCellView {
     SchCellViewInfo get_info(const std::string &cell_name) const;
 
     std::string lib_name, cell_name, view_name;
-    BBox bbox;
+    box_t bbox;
     std::map<std::string, PinFigure> in_terms, out_terms, io_terms;
     std::vector<Shape> shapes;
     std::map<std::string, SchInstance> instances;

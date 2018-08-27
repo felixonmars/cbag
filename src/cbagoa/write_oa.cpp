@@ -210,7 +210,7 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
         logger->info("Creating terminal net");
         oa::oaNet *term_net = oa::oaNet::find(block, term_name);
         if (term_net == nullptr || term_net->isImplicit()) {
-            term_net = oa::oaNet::create(block, term_name, pair.second.sig_type);
+            term_net = oa::oaNet::create(block, term_name, pair.second.stype);
         }
         logger->info("Creating terminal");
         oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);

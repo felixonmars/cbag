@@ -8,17 +8,23 @@
 #ifndef CBAG_COMMON_PRIMITIVES_H
 #define CBAG_COMMON_PRIMITIVES_H
 
-#if __has_include(<oa/oaDesignDB.h>)
-// use OpenAccess primitive types
-#include <cbag/common/primitives_oa.h>
-#else
-// use custom primitive types
-#include <cbag/common/primitives_custom.h>
-#endif
+#include <cbag/common/typedefs.h>
 
-namespace cbag {
-// common primitive types
+#include <cbag/common/blockage_type.h>
+#include <cbag/common/boundary_type.h>
+#include <cbag/common/font.h>
+#include <cbag/common/orientation.h>
+#include <cbag/common/path_style.h>
+#include <cbag/common/sig_type.h>
+#include <cbag/common/term_attr_type.h>
+#include <cbag/common/term_type.h>
+#include <cbag/common/text_align.h>
+#include <cbag/common/text_disp_format.h>
 
-enum BoundaryType { PR, area, snap };
-} // namespace cbag
+#include <cbag/common/box_t.h>
+#include <cbag/common/point.h>
+#include <cbag/common/point_array.h>
+#include <cbag/common/transform.h>
+#include <cbag/common/vector.h>
+
 #endif // CBAG_COMMON_PRIMITIVES_H

@@ -37,7 +37,7 @@ struct Rect : ShapeBase {
     Rect(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
         : ShapeBase(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
 
-    BBox bbox;
+    box_t bbox;
 };
 
 /** A polygon shape.
@@ -48,7 +48,7 @@ struct Poly : ShapeBase {
     Poly(lay_t lay, purp_t purp, std::string net, uint32_t n)
         : ShapeBase(lay, purp, std::move(net)), points(n) {}
 
-    PointArray points;
+    point_array points;
 };
 
 struct Arc : ShapeBase {
@@ -63,7 +63,7 @@ struct Arc : ShapeBase {
           bbox(xl, yl, xh, yh) {}
 
     double ang_start, ang_stop;
-    BBox bbox;
+    box_t bbox;
 };
 
 struct Donut : ShapeBase {
@@ -75,7 +75,7 @@ struct Donut : ShapeBase {
     Donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r, coord_t x, coord_t y)
         : ShapeBase(lay, purp, std::move(net)), center(x, y), radius(r), hole_radius(hole_r) {}
 
-    Point center;
+    point center;
     dist_t radius, hole_radius;
 };
 
@@ -88,7 +88,7 @@ struct Ellipse : ShapeBase {
     Ellipse(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh, coord_t yh)
         : ShapeBase(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
 
-    BBox bbox;
+    box_t bbox;
 };
 
 struct Line : ShapeBase {
@@ -97,20 +97,20 @@ struct Line : ShapeBase {
     Line(lay_t lay, purp_t purp, std::string net, uint32_t n)
         : ShapeBase(lay, purp, std::move(net)), points(n) {}
 
-    PointArray points;
+    point_array points;
 };
 
 struct Path : ShapeBase {
     Path() : ShapeBase(), width(0), points(), style(psTruncate), begin_ext(0), end_ext(0) {}
 
-    Path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n, PathStyle style,
+    Path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n, path_style style,
          dist_t begin_ext, dist_t end_ext)
         : ShapeBase(lay, purp, std::move(net)), width(width), points(n), style(style),
           begin_ext(begin_ext), end_ext(end_ext) {}
 
     dist_t width;
-    PointArray points;
-    PathStyle style;
+    point_array points;
+    path_style style;
     dist_t begin_ext, end_ext;
 };
 
@@ -121,15 +121,15 @@ struct TextBase : ShapeBase {
         : ShapeBase(), origin(0, 0), alignment(taCC), orient(oR0), font(fRoman), height(0),
           overbar(false), visible(true), drafting(true) {}
 
-    TextBase(lay_t lay, purp_t purp, std::string net, TextAlign align, Orientation orient,
-             Font font, dist_t height, bool overbar, bool visible, bool drafting)
+    TextBase(lay_t lay, purp_t purp, std::string net, text_align align, orientation orient,
+             font_t font, dist_t height, bool overbar, bool visible, bool drafting)
         : ShapeBase(lay, purp, std::move(net)), origin(), alignment(align), orient(orient),
           font(font), height(height), overbar(overbar), visible(visible), drafting(drafting) {}
 
-    Point origin;
-    TextAlign alignment;
-    Orientation orient;
-    Font font;
+    point origin;
+    text_align alignment;
+    orientation orient;
+    font_t font;
     dist_t height;
     bool overbar, visible, drafting;
 };
@@ -137,8 +137,8 @@ struct TextBase : ShapeBase {
 struct Text : TextBase {
     Text() : TextBase(), text() {}
 
-    Text(lay_t lay, purp_t purp, std::string net, std::string text, TextAlign align,
-         Orientation orient, Font font, dist_t height, bool overbar, bool visible, bool drafting)
+    Text(lay_t lay, purp_t purp, std::string net, std::string text, text_align align,
+         orientation orient, font_t font, dist_t height, bool overbar, bool visible, bool drafting)
         : TextBase(lay, purp, std::move(net), align, orient, font, height, overbar, visible,
                    drafting),
           text(std::move(text)) {}
@@ -149,8 +149,8 @@ struct Text : TextBase {
 struct EvalText : Text {
     EvalText() : Text(), evaluator() {}
 
-    EvalText(lay_t lay, purp_t purp, std::string net, std::string text, TextAlign align,
-             Orientation orient, Font font, dist_t height, bool overbar, bool visible,
+    EvalText(lay_t lay, purp_t purp, std::string net, std::string text, text_align align,
+             orientation orient, font_t font, dist_t height, bool overbar, bool visible,
              bool drafting, std::string eval)
         : Text(lay, purp, std::move(net), std::move(text), align, orient, font, height, overbar,
                visible, drafting),
@@ -162,15 +162,15 @@ struct EvalText : Text {
 struct TermAttr : TextBase {
     TermAttr() : TextBase(), attr_type(tatName), format(tdfNameValue) {}
 
-    TermAttr(TermAttrType attr_type, lay_t lay, purp_t purp, std::string net, TextAlign align,
-             Orientation orient, Font font, dist_t height, TextDispFormat format, bool overbar,
+    TermAttr(term_attr_type attr_type, lay_t lay, purp_t purp, std::string net, text_align align,
+             orientation orient, font_t font, dist_t height, text_disp_format format, bool overbar,
              bool visible, bool drafting)
         : TextBase(lay, purp, std::move(net), align, orient, font, height, overbar, visible,
                    drafting),
           attr_type(attr_type), format(format) {}
 
-    TermAttrType attr_type;
-    TextDispFormat format;
+    term_attr_type attr_type;
+    text_disp_format format;
 };
 
 } // namespace cbag

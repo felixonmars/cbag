@@ -22,7 +22,7 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::SchInstance, lib_name, cell_name, view_name, xfo
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::SchPinObject, inst, attr)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::PinFigure, obj, sig_type)
+BOOST_FUSION_ADAPT_STRUCT(cbag::PinFigure, obj, stype)
 
 namespace YAML {
 template <> struct convert<std::variant<cbag::Rect, cbag::SchPinObject>> {

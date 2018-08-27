@@ -31,8 +31,8 @@ struct SchInstance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    inline SchInstance(std::string lib, std::string cell, std::string view, Transform xform,
-                       BBox bbox)
+    inline SchInstance(std::string lib, std::string cell, std::string view, transform xform,
+                       box_t bbox)
         : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
           xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
 
@@ -61,8 +61,8 @@ struct SchInstance {
     inline uint32_t height() const { return bbox.getHeight(); }
 
     std::string lib_name, cell_name, view_name;
-    Transform xform;
-    BBox bbox;
+    transform xform;
+    box_t bbox;
     bool is_primitive;
     std::map<std::string, std::string> connections;
     ParamMap params;
@@ -93,14 +93,14 @@ struct SchPinObject {
 
 // figures
 struct PinFigure {
-    PinFigure() : sig_type(stSignal) {}
+    PinFigure() : stype(stSignal) {}
 
-    PinFigure(Rect &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
+    PinFigure(Rect &&obj, sig_type stype) : obj(obj), stype(stype) {}
 
-    PinFigure(SchPinObject &&obj, SigType sig_type) : obj(obj), sig_type(sig_type) {}
+    PinFigure(SchPinObject &&obj, sig_type stype) : obj(obj), stype(stype) {}
 
     std::variant<Rect, SchPinObject> obj;
-    SigType sig_type;
+    sig_type stype;
 };
 } // namespace cbag
 

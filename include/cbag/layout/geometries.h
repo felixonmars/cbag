@@ -101,22 +101,22 @@ class Via {
     std::string via_id;
     uint32_t num_row, num_col;
     uint32_t cut_w, cut_h;
-    Vector cut_spacing;
-    Vector lay1_enc;
-    Vector lay1_off;
-    Vector lay2_enc;
-    Vector lay2_off;
+    vector cut_spacing;
+    vector lay1_enc;
+    vector lay1_off;
+    vector lay2_enc;
+    vector lay2_off;
     PolyRef<Rect> lay1_ref;
     PolyRef<Rect> lay2_ref;
 };
 
 class Blockage : public Polygon {
   public:
-    explicit inline Blockage(point_vector_t data, BlockageType type)
+    explicit inline Blockage(point_vector_t data, blockage_type type)
         : Polygon(std::move(data)), type(type) {}
 
   private:
-    BlockageType type;
+    blockage_type type;
 };
 
 using block_map_t = std::unordered_map<layer_t, std::vector<Blockage>, boost::hash<layer_t>>;
@@ -135,7 +135,7 @@ class LayCellView;
 
 class LayInstance {
   public:
-    inline LayInstance(std::string lib, std::string cell, std::string view, Transform xform,
+    inline LayInstance(std::string lib, std::string cell, std::string view, transform xform,
                        uint32_t nx = 1, uint32_t ny = 1, coord_t spx = 0, coord_t spy = 0)
         : lib(std::move(lib)), cell(std::move(cell)), view(std::move(view)), xform(xform), nx(nx),
           ny(ny), spx(spx), spy(spy), master(nullptr) {}
@@ -144,7 +144,7 @@ class LayInstance {
     std::string lib;
     std::string cell;
     std::string view;
-    Transform xform;
+    transform xform;
     uint32_t nx;
     uint32_t ny;
     coord_t spx;

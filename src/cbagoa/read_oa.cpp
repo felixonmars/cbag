@@ -226,9 +226,9 @@ cbag::SchInstance OAReader::read_instance(oa::oaInst *p) {
     p->getViewName(ns, inst_view_oa);
 
     // read transform and bounding box
-    cbag::Transform xform;
+    oa::oaTransform xform;
     p->getTransform(xform);
-    cbag::BBox bbox;
+    oa::oaBox bbox;
     p->getBBox(bbox);
 
     // create instance object
@@ -271,7 +271,7 @@ std::pair<std::string, cbag::SchInstance> OAReader::read_instance_pair(oa::oaIns
 // Read method for pin figures
 
 cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
-    cbag::SigType sig = t->getNet()->getSigType();
+    oa::oaSigType sig = t->getNet()->getSigType();
     if (p->isInst()) {
         cbag::SchInstance inst = read_instance(static_cast<oa::oaInst *>(p));
 
