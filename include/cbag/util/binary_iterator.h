@@ -1,0 +1,53 @@
+#ifndef CBAG_UTIL_BINARY_ITERATOR_H
+#define CBAG_UTIL_BINARY_ITERATOR_H
+
+#include <optional>
+#include <type_traits>
+
+namespace cbag {
+namespace util {
+
+template <typename T, typename std::enable_if_t<std::is_integral_v<T>> * = nullptr>
+class binary_iterator {
+  public:
+    inline binary_iterator(T low, T high) : low(low), high(high), current((high + low) / 2) {}
+    inline binary_iterator(T low, std::optional<T> high)
+        : low(low), high(high), current(high ? (*high + low) / 2 : low) {}
+
+    inline bool has_next() const { return !high || low < *high; }
+
+    inline T operator*() const { return current; }
+
+    inline void up() {
+        low = current + 1;
+        if (high) {
+            current = (low + *high) / 2;
+        } else {
+            if (current > 0) {
+                current *= 2;
+            } else {
+                ++current;
+            }
+        }
+    }
+
+    inline void down() {
+        high = current;
+        current = (low + *high) / 2;
+    }
+
+    inline void save() { marker = current; }
+
+    inline std::optional<T> get_save() const { return marker; }
+
+  private:
+    T low;
+    std::optional<T> high;
+    T current;
+    std::optional<T> marker;
+}; // namespace util
+
+} // namespace util
+} // namespace cbag
+
+#endif

@@ -63,7 +63,12 @@ class cellview {
         return iter->second.get_bbox();
     }
 
+    std::string add_instance(instance inst, const char* name = nullptr);
+
   private:
+
+    std::string get_inst_name();
+
     std::string tech;
     geo_map_t geo_map;
     inst_map_t inst_map;

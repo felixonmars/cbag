@@ -7,9 +7,9 @@
 namespace cbag {
 namespace layout {
 
-class Blockage : public polygon {
+class blockage : public polygon {
   public:
-    explicit inline Blockage(point_vector_t data, blockage_type type)
+    explicit inline blockage(point_vector_t data, blockage_type type)
         : polygon(std::move(data)), type(type) {}
 
   private:
