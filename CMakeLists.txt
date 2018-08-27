@@ -118,6 +118,7 @@ target_link_libraries(cbagyaml
   yaml-cpp
   PRIVATE
   boost_system
+  fmt-header-only
   )
 
 
