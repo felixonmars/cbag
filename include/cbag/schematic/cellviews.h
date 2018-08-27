@@ -51,8 +51,6 @@ struct cellview_info {
 struct cellview {
     inline cellview() = default;
 
-    explicit cellview(const char *yaml_fname, const char *sym_view = nullptr);
-
     inline cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox)
         : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
 

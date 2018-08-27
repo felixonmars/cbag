@@ -4,7 +4,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
 from libcpp cimport bool as cbool
-from libcpp.memory cimport unique_ptr
+from libcpp.memory cimport unique_ptr, make_unique
 from libcpp.string cimport string
 from libcpp.map cimport map
 from libcpp.utility cimport pair
@@ -17,12 +17,14 @@ import numbers
 
 
 ctypedef map[string, instance].iterator inst_iter_t
+ctypedef unordered_map[string, cellview_info] lib_map_t
+ctypedef unordered_map[string, lib_map_t] netlist_map_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
 
     cdef void write_netlist(const vector[cellview *]& cv_list, const vector[string]& name_list,
-                            const char* cell_map, const vector[string]& inc_list, const char* fmt,
+                            const vector[string]& inc_list, netlist_map_t& netlist_map, const char* fmt,
                             cbool flat, cbool shell, const char* fname) except +
 
 
@@ -54,6 +56,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch":
 
         unsigned int height() const
 
+    cdef cppclass cellview_info:
+        pass
+        
     cdef cppclass cellview:
         string lib_name
         string cell_name
@@ -63,8 +68,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch":
         map[string, pin_figure] out_terms
         map[string, pin_figure] io_terms
 
-        cellview(const char* yaml_fname, const char* sym_view) except +
-
+        cellview(const cellview& val) except +
+        
         void clear_params() except +
 
         void set_int_param(const char* name, int value) except +
@@ -79,7 +84,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch":
 
         void add_pin(const char* new_name, unsigned int term_type) except +
 
-        cbool remove_pin(const char* name);
+        cbool remove_pin(const char* name) except +
 
         void rename_instance(const char* old_name, const char* new_name) except +
 
@@ -92,6 +97,11 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch":
                                            int dx, int dy,
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
+
+cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag":
+    cdef cellview from_file(const char* yaml_fname, const char* sym_view, cellview& cv) except +
+
+    cdef netlist_map_t read_netlist_map(const char* fname) except +
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass OADatabase:
@@ -297,10 +307,10 @@ cdef class PySchCellView:
     cdef unique_ptr[cellview] cv_ptr
     cdef unicode encoding
 
-    def __init__(self, unicode yaml_fname, unicode sym_view, unicode encoding):
-        py_fname = yaml_fname.encode(encoding)
-        py_sym_view = sym_view.encode(encoding)
-        self.cv_ptr.reset(new cellview(py_fname, py_sym_view))
+    def __init__(self, yaml_fname, sym_view, encoding):
+        yaml_fname = yaml_fname.encode(encoding)
+        sym_view = sym_view.encode(encoding)
+        from_file(yaml_fname, sym_view, deref(self.cv_ptr))
         self.encoding = encoding
 
     def __dealloc__(self):
@@ -326,7 +336,7 @@ cdef class PySchCellView:
         self.cv_ptr.reset()
 
     def clear_params(self):
-        deref(self.cv_ptr).clear_params();
+        deref(self.cv_ptr).clear_params()
         
     def set_param(self, key, val):
         if isinstance(val, str):
@@ -452,7 +462,8 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
             raise ValueError('Cannot find netlist include file: {}'.format(inc_fname))
         cinc_list.push_back(inc_fname.encode(encoding))
 
-    write_netlist(cv_list, name_list, cell_map, cinc_list, fmt, flat, shell, fname)
+    cdef netlist_map_t net_map = read_netlist_map(cell_map)
+    write_netlist(cv_list, name_list, cinc_list, net_map, fmt, flat, shell, fname)
 
 cdef _add_py_cv(vector[cellview *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())
@@ -486,7 +497,7 @@ cdef class PyOADatabase:
         library = library.encode(self.encoding)
         lib_path = lib_path.encode(self.encoding)
         tech_lib = tech_lib.encode(self.encoding)
-        deref(self.db_ptr).create_lib(library, lib_path, tech_lib);
+        deref(self.db_ptr).create_lib(library, lib_path, tech_lib)
 
     def read_sch_recursive(self, lib_name, cell_name, view_name,
                            new_root_path, lib_map, exclude_libs):

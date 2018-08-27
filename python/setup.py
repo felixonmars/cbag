@@ -18,6 +18,7 @@ setup(
                                     ],
                                     libraries=[
                                         'cbag',
+                                        'cbagyaml',
                                         'cbagoa',
                                         'oaCommon',
                                         'oaBase',

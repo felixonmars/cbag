@@ -11,10 +11,11 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/common/primitives.h>
-#include <cbag/yaml/box_t.h>
-#include <cbag/yaml/point.h>
-#include <cbag/yaml/point_array.h>
-#include <cbag/yaml/transform.h>
+
+#include <cbagyaml/box_t.h>
+#include <cbagyaml/point.h>
+#include <cbagyaml/point_array.h>
+#include <cbagyaml/transform.h>
 
 namespace YAML {
 

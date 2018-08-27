@@ -15,6 +15,9 @@
 #include <fmt/format.h>
 
 #include <cbag/cbag.h>
+
+#include <cbagyaml/cbagyaml.h>
+
 #include <cbagoa/database.h>
 #include <cbagoa/read_oa.h>
 #include <cbagoa/write_oa.h>

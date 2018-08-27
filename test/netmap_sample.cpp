@@ -1,5 +1,5 @@
-#include <cbag/yaml/cellviews.h>
 #include <cbag/netlist/netlist.h>
+#include <cbagyaml/cbagyaml.h>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
 

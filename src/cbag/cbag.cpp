@@ -10,7 +10,6 @@
 #include <memory>
 
 #include <fmt/format.h>
-#include <yaml-cpp/yaml.h>
 
 #include "spdlog/details/signal_handler.h"
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -18,9 +17,10 @@
 
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
-#include <cbag/yaml/cellviews.h>
+#include <cbag/schematic/cellviews.h>
 
 namespace cbag {
+
 void init_logging() {
     spdlog::installCrashHandler();
 
@@ -29,15 +29,6 @@ void init_logging() {
     spdlog::create<spdlog::sinks::rotating_file_sink_st>("cbag", "cbag.log", max_log_size,
                                                          num_log_file);
     spdlog::flush_on(spdlog::level::err);
-}
-
-void to_file(const sch::cellview &cv, const char *fname) {
-    std::ofstream outfile(fname, std::ios_base::out);
-    YAML::Node node(cv);
-    YAML::Emitter emitter;
-    emitter << node;
-    outfile << emitter.c_str() << std::endl;
-    outfile.close();
 }
 
 std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
@@ -52,14 +43,11 @@ std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
 }
 
 void write_netlist(const std::vector<sch::cellview *> &cv_list,
-                   const std::vector<std::string> &name_list, const char *cell_map,
-                   const std::vector<std::string> &inc_list, const char *format, bool flat,
-                   bool shell, const char *fname) {
+                   const std::vector<std::string> &name_list,
+                   const std::vector<std::string> &inc_list, netlist_map_t &netlist_map,
+                   const char *format, bool flat, bool shell, const char *fname) {
     auto logger = spdlog::get("cbag");
     logger->info("Writing netlist file: {}", fname);
-    logger->info("Parsing netlist cell map: {}", cell_map);
-    YAML::Node n = YAML::LoadFile(std::string(cell_map));
-    netlist_map_t netlist_map = n.as<netlist_map_t>();
 
     logger->info("Creating netlist builder for netlist format: {}", format);
     auto builder_ptr = make_netlist_builder(fname, std::string(format));

@@ -14,8 +14,9 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/schematic/shapes.h>
-#include <cbag/yaml/fusion.h>
-#include <cbag/yaml/primitives.h>
+
+#include <cbagyaml/fusion.h>
+#include <cbagyaml/primitives.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::rectangle, layer, purpose, net, bbox)
 

@@ -14,7 +14,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/common/datatypes.h>
-#include <cbag/yaml/fusion.h>
+
+#include <cbagyaml/fusion.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::time_struct, time_val)
 

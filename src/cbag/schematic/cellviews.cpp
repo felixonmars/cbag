@@ -5,33 +5,17 @@
  *  \date   2018/07/18
  */
 
-#include <boost/filesystem.hpp>
-
 #include <fmt/format.h>
 
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
-#include <cbag/yaml/cellviews.h>
 
-namespace fs = boost::filesystem;
+#include <cbag/schematic/cellviews.h>
+
 
 namespace cbag {
 namespace sch {
-
-cellview::cellview(const char *yaml_fname, const char *sym_view) {
-    fs::path yaml_path(yaml_fname);
-    YAML::Node n = YAML::LoadFile(yaml_path.string());
-    (*this) = n.as<cellview>();
-    if (sym_view != nullptr) {
-        // load symbol cellview
-        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
-        if (fs::exists(yaml_path)) {
-            YAML::Node s = YAML::LoadFile(yaml_path.string());
-            sym_ptr = std::make_unique<cellview>(s.as<cellview>());
-        }
-    }
-}
 
 void cellview::clear_params() { props.clear(); }
 

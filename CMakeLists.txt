@@ -68,13 +68,6 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/box_t.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/point.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/point_array.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/transform.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/figures.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/instance.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellviews.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometries.cpp
@@ -89,15 +82,12 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  # for yaml file path manipulations
-  boost_filesystem
   # for primitives YAML serialization
   oaBase
   oaCommon
   oaPlugIn
   PRIVATE
   # for primitives YAML serialization
-  yaml-cpp
   fmt-header-only
   # for Spirit X3 error code
   boost_system
@@ -106,6 +96,30 @@ target_link_libraries(cbag
   m
   ${CMAKE_DL_LIBS}
   )
+
+set(SRC_FILES_LIB_CBAGYAML
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/box_t.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/point.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/point_array.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/transform.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/datatypes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/shapes.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagyaml/cbagyaml.cpp
+  )
+add_library(cbagyaml SHARED ${SRC_FILES_LIB_CBAGYAML})
+
+# shared library dependencies
+target_link_libraries(cbagyaml
+  PUBLIC
+  cbag
+  # for yaml file path manipulations
+  boost_filesystem
+  yaml-cpp
+  PRIVATE
+  boost_system
+  )
+
 
 set(SRC_FILES_LIB_CBAGOA
   ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
@@ -118,6 +132,7 @@ add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 target_link_libraries(cbagoa
   PUBLIC
   cbag
+  cbagyaml
   boost_filesystem
   boost_system
   yaml-cpp
@@ -214,11 +229,12 @@ set_target_properties(netmap_sample PROPERTIES
 # shared library dependencies
 target_link_libraries(netmap_sample
   cbag
+  cbagyaml
   yaml-cpp
   boost_system
   )
 
-install(TARGETS test_oa test_spirit cbag cbagoa read_prop test_yaml netmap_sample
+install(TARGETS test_oa test_spirit cbag cbagyaml cbagoa read_prop test_yaml netmap_sample
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
   )

@@ -1,26 +1,10 @@
-/** \file yaml_cellviews.h
- *  \brief This file declares YAML serialization methods for cellviews.
- *
- *  \author Eric Chang
- *  \date   2018/07/12
- */
-#ifndef CBAG_YAML_CELLVIEWS_H
-#define CBAG_YAML_CELLVIEWS_H
 
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
+#ifndef YAML_CPP_UNORDERED_MAP_H
+#define YAML_CPP_UNORDERED_MAP_H
+
+#include <unordered_map>
 
 #include <yaml-cpp/yaml.h>
-
-#include <cbag/schematic/cellviews.h>
-#include <cbag/yaml/datatypes.h>
-#include <cbag/yaml/figures.h>
-#include <cbag/yaml/fusion.h>
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview, lib_name, cell_name, view_name, bbox, in_terms,
-                          out_terms, io_terms, shapes, instances, props, app_defs)
-
-BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview_info, cell_name, in_terms, out_terms, io_terms, props)
 
 // YAML conversion methods for std::unordered_map
 namespace YAML {
@@ -51,4 +35,4 @@ template <typename K, typename V> struct convert<std::unordered_map<K, V>> {
 
 } // namespace YAML
 
-#endif // CBAG_YAML_CELLVIEWS_H
+#endif

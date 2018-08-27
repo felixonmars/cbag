@@ -8,8 +8,8 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/yaml/datatypes.h>
-#include <cbag/yaml/figures.h>
+#include <cbagyaml/datatypes.h>
+#include <cbagyaml/figures.h>
 
 namespace YAML {
 Node convert<cbag::sch::pin_fig_t>::encode(const cbag::sch::pin_fig_t &rhs) {

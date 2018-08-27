@@ -16,8 +16,9 @@
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/pin_object.h>
-#include <cbag/yaml/fusion.h>
-#include <cbag/yaml/shapes.h>
+
+#include <cbagyaml/fusion.h>
+#include <cbagyaml/shapes.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, xform, bbox,
                           connections, params)

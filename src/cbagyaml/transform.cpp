@@ -8,32 +8,32 @@
 #include <spdlog/spdlog.h>
 
 #include <cbag/common/typedefs.h>
-#include <cbag/yaml/fusion.h>
-#include <cbag/yaml/box_t.h>
+
+#include <cbagyaml/primitives.h>
+#include <cbagyaml/fusion.h>
 
 namespace YAML {
 
-Node convert<cbag::box_t>::encode(const cbag::box_t &rhs) {
+Node convert<cbag::transform>::encode(const cbag::transform &rhs) {
     Node root;
-    root.push_back(rhs.left());
-    root.push_back(rhs.bottom());
-    root.push_back(rhs.right());
-    root.push_back(rhs.top());
+    root.push_back(rhs.xOffset());
+    root.push_back(rhs.yOffset());
+    root.push_back(static_cast<int>(rhs.orient()));
     return root;
 }
 
-bool convert<cbag::box_t>::decode(const Node &node, cbag::box_t &rhs) {
+bool convert<cbag::transform>::decode(const Node &node, cbag::transform &rhs) {
     auto logger = spdlog::get("cbag");
-    if (!node.IsSequence() || node.size() != 4) {
-        logger->warn("cbag::box_t YAML decode: not a sequence or size != 4.  Node:\n{}",
+    if (!node.IsSequence() || node.size() != 3) {
+        logger->warn("cbag::transform YAML decode: not a sequence or size != 3.  Node:\n{}",
                      yaml::serialization::node_to_str(node));
         return false;
     }
     try {
         rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
-                node[2].as<cbag::coord_t>(), node[3].as<cbag::coord_t>());
+                node[2].as<cbag::orientation>());
     } catch (...) {
-        logger->warn("cbag::box_t YAML decode exception.  Node:\n{}",
+        logger->warn("cbag::transform YAML decode exception.  Node:\n{}",
                      yaml::serialization::node_to_str(node));
         return false;
     }

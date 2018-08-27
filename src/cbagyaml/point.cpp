@@ -8,8 +8,9 @@
 #include <spdlog/spdlog.h>
 
 #include <cbag/common/typedefs.h>
-#include <cbag/yaml/fusion.h>
-#include <cbag/yaml/point.h>
+
+#include <cbagyaml/fusion.h>
+#include <cbagyaml/point.h>
 
 namespace YAML {
 

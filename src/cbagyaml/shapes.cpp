@@ -7,8 +7,8 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/yaml/datatypes.h>
-#include <cbag/yaml/shapes.h>
+#include <cbagyaml/datatypes.h>
+#include <cbagyaml/shapes.h>
 
 namespace YAML {
 Node convert<cbag::sch::shape_t>::encode(const cbag::sch::shape_t &rhs) {

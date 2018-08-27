@@ -7,9 +7,9 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/yaml/fusion.h>
-#include <cbag/yaml/point.h>
-#include <cbag/yaml/point_array.h>
+#include <cbagyaml/fusion.h>
+#include <cbagyaml/point.h>
+#include <cbagyaml/point_array.h>
 
 namespace YAML {
 
