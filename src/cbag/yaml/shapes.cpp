@@ -11,17 +11,17 @@
 #include <cbag/yaml/shapes.h>
 
 namespace YAML {
-Node convert<cbag::Shape>::encode(const cbag::Shape &rhs) {
+Node convert<cbag::sch::shape_t>::encode(const cbag::sch::shape_t &rhs) {
     Node root;
     root.push_back(rhs.index());
     std::visit(cbag::to_yaml_visitor(&root), rhs);
     return root;
 }
 
-bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
+bool convert<cbag::sch::shape_t>::decode(const Node &node, cbag::sch::shape_t &rhs) {
     auto logger = spdlog::get("cbag");
     if (!node.IsSequence() || node.size() != 2) {
-        logger->warn("cbag::Shape YAML decode: not a sequence or size != 2.  Node:\n{}",
+        logger->warn("cbag::sch::shape_t YAML decode: not a sequence or size != 2.  Node:\n{}",
                      yaml::serialization::node_to_str(node));
         return false;
     }
@@ -29,39 +29,39 @@ bool convert<cbag::Shape>::decode(const Node &node, cbag::Shape &rhs) {
         int value = node[0].as<int>();
         switch (value) {
         case 0:
-            rhs = node[1].as<cbag::Rect>();
+            rhs = node[1].as<cbag::sch::rectangle>();
             return true;
         case 1:
-            rhs = node[1].as<cbag::Poly>();
+            rhs = node[1].as<cbag::sch::polygon>();
             return true;
         case 2:
-            rhs = node[1].as<cbag::Arc>();
+            rhs = node[1].as<cbag::sch::arc>();
             return true;
         case 3:
-            rhs = node[1].as<cbag::Donut>();
+            rhs = node[1].as<cbag::sch::donut>();
             return true;
         case 4:
-            rhs = node[1].as<cbag::Ellipse>();
+            rhs = node[1].as<cbag::sch::ellipse>();
             return true;
         case 5:
-            rhs = node[1].as<cbag::Line>();
+            rhs = node[1].as<cbag::sch::line>();
             return true;
         case 6:
-            rhs = node[1].as<cbag::Path>();
+            rhs = node[1].as<cbag::sch::path>();
             return true;
         case 7:
-            rhs = node[1].as<cbag::Text>();
+            rhs = node[1].as<cbag::sch::text_t>();
             return true;
         case 8:
-            rhs = node[1].as<cbag::EvalText>();
+            rhs = node[1].as<cbag::sch::eval_text>();
             return true;
         default:
-            logger->warn("cbag::Shape YAML decode: unexpected which value: {}.  Node:\n{}", value,
-                         yaml::serialization::node_to_str(node));
+            logger->warn("cbag::sch::shape_t YAML decode: unexpected which value: {}.  Node:\n{}",
+                         value, yaml::serialization::node_to_str(node));
             return false;
         }
     } catch (...) {
-        logger->warn("cbag::Shape YAML decode exception.  Node:\n{}",
+        logger->warn("cbag::sch::shape_t YAML decode exception.  Node:\n{}",
                      yaml::serialization::node_to_str(node));
         return false;
     }

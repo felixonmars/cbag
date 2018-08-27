@@ -4,25 +4,22 @@
  *  \author Eric Chang
  *  \date   2018/07/10
  */
-#ifndef CBAG_SCHEMATIC_FIGURES_H
-#define CBAG_SCHEMATIC_FIGURES_H
+#ifndef CBAG_SCHEMATIC_INSTANCE_H
+#define CBAG_SCHEMATIC_INSTANCE_H
 
-#include <variant>
-
+#include <cbag/common/box_t.h>
 #include <cbag/common/datatypes.h>
-#include <cbag/common/primitives.h>
-#include <cbag/schematic/shapes.h>
+#include <cbag/common/transform.h>
 
 namespace cbag {
-
-// references
+namespace sch {
 
 /** An instance object
  */
-struct SchInstance {
+struct instance {
     /** Create an empty instance.
      */
-    SchInstance() = default;
+    inline instance() = default;
 
     /** Create an instance with empty parameter and terminal mappings.
      *
@@ -31,8 +28,8 @@ struct SchInstance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    inline SchInstance(std::string lib, std::string cell, std::string view, transform xform,
-                       box_t bbox)
+    inline instance(std::string lib, std::string cell, std::string view, transform xform,
+                    box_t bbox)
         : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
           xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
 
@@ -65,43 +62,10 @@ struct SchInstance {
     box_t bbox;
     bool is_primitive;
     std::map<std::string, std::string> connections;
-    ParamMap params;
+    param_map params;
 };
 
-/** A schematic object that can represent a pin.
- *
- *  In OpenAccess schematics, pins are represented using an SchInstance and an
- * AttrDisplay. This object encapsulates those two.
- */
-struct SchPinObject {
-    /** Create an empty instance.
-     */
-    SchPinObject() = default;
-
-    /** Create an instance with empty parameter and terminal mappings.
-     *
-     * @param lib the library name.
-     * @param cell the cell name.
-     * @param view the view name.
-     * @param xform the instance location.
-     */
-    SchPinObject(SchInstance &&inst, TermAttr &&attr) : inst(inst), attr(attr){};
-
-    SchInstance inst;
-    TermAttr attr;
-};
-
-// figures
-struct PinFigure {
-    PinFigure() : stype(stSignal) {}
-
-    PinFigure(Rect &&obj, sig_type stype) : obj(obj), stype(stype) {}
-
-    PinFigure(SchPinObject &&obj, sig_type stype) : obj(obj), stype(stype) {}
-
-    std::variant<Rect, SchPinObject> obj;
-    sig_type stype;
-};
+} // namespace sch
 } // namespace cbag
 
-#endif // CBAG_SCHEMATIC_FIGURES_H
+#endif

@@ -72,7 +72,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/figures.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/figures.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/instance.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellviews.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometries.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp

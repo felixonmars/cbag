@@ -4,17 +4,22 @@
 #include <variant>
 
 namespace cbag {
-struct Rect;
-struct Poly;
-struct Arc;
-struct Donut;
-struct Ellipse;
-struct Line;
-struct Path;
-struct Text;
-struct EvalText;
+namespace sch {
 
-using Shape = std::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, Text, EvalText>;
+struct rectangle;
+struct polygon;
+struct arc;
+struct donut;
+struct ellipse;
+struct line;
+struct path;
+struct text_t;
+struct eval_text;
+
+using shape_t =
+    std::variant<rectangle, polygon, arc, donut, ellipse, line, path, text_t, eval_text>;
+
+} // namespace sch
 } // namespace cbag
 
-#endif // CBAG_SCHEMATIC_SHAPES_FWD_H
+#endif

@@ -16,15 +16,21 @@ import os
 import numbers
 
 
-ctypedef map[string, SchInstance].iterator inst_iter_t
+ctypedef map[string, instance].iterator inst_iter_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag":
     cdef void init_logging()
 
-    cdef cppclass PinFigure:
+    cdef void write_netlist(const vector[cellview *]& cv_list, const vector[string]& name_list,
+                            const char* cell_map, const vector[string]& inc_list, const char* fmt,
+                            cbool flat, cbool shell, const char* fname) except +
+
+
+cdef extern from "cbag/cbag.h" namespace "cbag::sch":
+    cdef cppclass pin_figure:
         pass
 
-    cdef cppclass SchInstance:
+    cdef cppclass instance:
         string lib_name
         string cell_name
         string view_name
@@ -48,16 +54,16 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
 
         unsigned int height() const
 
-    cdef cppclass SchCellView:
+    cdef cppclass cellview:
         string lib_name
         string cell_name
         string view_name
-        map[string, SchInstance] instances
-        map[string, PinFigure] in_terms
-        map[string, PinFigure] out_terms
-        map[string, PinFigure] io_terms
+        map[string, instance] instances
+        map[string, pin_figure] in_terms
+        map[string, pin_figure] out_terms
+        map[string, pin_figure] io_terms
 
-        SchCellView(const char* yaml_fname, const char* sym_view) except +
+        cellview(const char* yaml_fname, const char* sym_view) except +
 
         void clear_params() except +
 
@@ -86,10 +92,6 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
                                            int dx, int dy,
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
-    cdef void write_netlist(const vector[SchCellView *]& cv_list, const vector[string]& name_list,
-                            const char* cell_map, const vector[string]& inc_list, const char* fmt,
-                            cbool flat, cbool shell, const char* fname) except +
-
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
     cdef cppclass OADatabase:
@@ -115,7 +117,7 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
 
         void implement_sch_list(const char* lib_name, const vector[string]& cell_list,
                                 const char* sch_view, const char* sym_view,
-                                const vector[SchCellView *]& cv_list) except +
+                                const vector[cellview *]& cv_list) except +
 
 
 # initialize logging
@@ -202,7 +204,7 @@ cdef class DesignInstance:
 
 
 cdef class PySchInstance(DesignInstance):
-    cdef map[string, SchInstance].iterator ptr
+    cdef map[string, instance].iterator ptr
     cdef cbool _static
     cdef encoding
 
@@ -292,13 +294,13 @@ cdef class PySchInstance(DesignInstance):
 
 
 cdef class PySchCellView:
-    cdef unique_ptr[SchCellView] cv_ptr
+    cdef unique_ptr[cellview] cv_ptr
     cdef unicode encoding
 
     def __init__(self, unicode yaml_fname, unicode sym_view, unicode encoding):
         py_fname = yaml_fname.encode(encoding)
         py_sym_view = sym_view.encode(encoding)
-        self.cv_ptr.reset(new SchCellView(py_fname, py_sym_view))
+        self.cv_ptr.reset(new cellview(py_fname, py_sym_view))
         self.encoding = encoding
 
     def __dealloc__(self):
@@ -340,8 +342,8 @@ cdef class PySchCellView:
 
     def get_instances(self, db):
         result = {}
-        cdef map[string, SchInstance].iterator biter = deref(self.cv_ptr).instances.begin()
-        cdef map[string, SchInstance].iterator eiter = deref(self.cv_ptr).instances.end()
+        cdef map[string, instance].iterator biter = deref(self.cv_ptr).instances.begin()
+        cdef map[string, instance].iterator eiter = deref(self.cv_ptr).instances.end()
         while biter != eiter:
             key = deref(biter).first.decode(self.encoding)
             inst = PySchInstance(db, self.encoding,
@@ -429,7 +431,7 @@ cdef class PySchCellView:
 
 def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
                       encoding='utf-8', flat=True, shell=False):
-    cdef vector[SchCellView *] cv_list
+    cdef vector[cellview *] cv_list
     cdef vector[string] name_list, cinc_list
 
     cell_map = cell_map.encode(encoding)
@@ -452,7 +454,7 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
 
     write_netlist(cv_list, name_list, cell_map, cinc_list, fmt, flat, shell, fname)
 
-cdef _add_py_cv(vector[SchCellView *]& cv_list, PySchCellView pycv):
+cdef _add_py_cv(vector[cellview *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())
 
 cdef class PyOADatabase:
@@ -529,7 +531,7 @@ cdef class PyOADatabase:
         sym_view = sym_view.encode(self.encoding)
 
         cdef vector[string] cell_vec
-        cdef vector[SchCellView *] cv_vec
+        cdef vector[cellview *] cv_vec
         cdef int num = len(content_list)
 
         cell_vec.reserve(num)

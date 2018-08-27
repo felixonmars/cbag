@@ -30,12 +30,12 @@ class make_pin_fig_visitor {
                          oa::oaTerm *term, int *cnt)
         : ns(ns), block(block), pin(pin), term(term), cnt(cnt) {}
 
-    void operator()(const cbag::Rect &operand) const {
+    void operator()(const cbag::sch::rectangle &operand) const {
         oa::oaRect *rect = oa::oaRect::create(block, operand.layer, operand.purpose, operand.bbox);
         rect->addToPin(pin);
     }
 
-    void operator()(const cbag::SchPinObject &obj) const {
+    void operator()(const cbag::sch::pin_object &obj) const {
         oa::oaScalarName lib(*ns, obj.inst.lib_name.c_str());
         oa::oaScalarName cell(*ns, obj.inst.cell_name.c_str());
         oa::oaScalarName view(*ns, obj.inst.view_name.c_str());
@@ -64,52 +64,52 @@ class make_shape_visitor {
     explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS *ns)
         : block(block), ns(ns) {}
 
-    void operator()(const cbag::Rect &v) const {
+    void operator()(const cbag::sch::rectangle &v) const {
         oa::oaShape *p = oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Poly &v) const {
+    void operator()(const cbag::sch::polygon &v) const {
         oa::oaShape *p = oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Arc &v) const {
+    void operator()(const cbag::sch::arc &v) const {
         oa::oaShape *p =
             oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start, v.ang_stop);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Donut &v) const {
+    void operator()(const cbag::sch::donut &v) const {
         oa::oaShape *p =
             oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius, v.hole_radius);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Ellipse &v) const {
+    void operator()(const cbag::sch::ellipse &v) const {
         oa::oaShape *p = oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Line &v) const {
+    void operator()(const cbag::sch::line &v) const {
         oa::oaShape *p = oa::oaLine::create(block, v.layer, v.purpose, v.points);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Path &v) const {
+    void operator()(const cbag::sch::path &v) const {
         oa::oaShape *p = oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points, v.style,
                                             v.begin_ext, v.end_ext);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::Text &v) const {
+    void operator()(const cbag::sch::text_t &v) const {
         oa::oaShape *p =
             oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(), v.origin, v.alignment,
                                v.orient, v.font, v.height, v.overbar, v.visible, v.drafting);
         add_shape_to_net(p, v.net);
     }
 
-    void operator()(const cbag::EvalText &v) const {
+    void operator()(const cbag::sch::eval_text &v) const {
         oa::oaShape *p = oa::oaEvalText::create(
             block, v.layer, v.purpose, v.text.c_str(), v.origin, v.alignment, v.orient, v.font,
             v.height, v.evaluator.c_str(), v.overbar, v.visible, v.drafting);
@@ -147,9 +147,11 @@ class make_prop_visitor {
 
     void operator()(const std::string &v) const { oa::oaStringProp::create(obj, name, v.c_str()); }
 
-    void operator()(const cbag::Time &v) const { oa::oaTimeProp::create(obj, name, v.time_val); }
+    void operator()(const cbag::time_struct &v) const {
+        oa::oaTimeProp::create(obj, name, v.time_val);
+    }
 
-    void operator()(const cbag::Binary &v) const {
+    void operator()(const cbag::binary_t &v) const {
         oa::oaAppProp::create(
             obj, name, v.name.c_str(),
             oa::oaByteArray(reinterpret_cast<const oa::oaByte *>(v.bin_val.data()),
@@ -186,11 +188,11 @@ class make_app_def_visitor {
         ptr->set(obj, v.c_str());
     }
 
-    void operator()(const cbag::Time &v) const {
+    void operator()(const cbag::time_struct &v) const {
         throw std::invalid_argument("time AppDef not supported yet.");
     }
 
-    void operator()(const cbag::Binary &v) const {
+    void operator()(const cbag::binary_t &v) const {
         throw std::invalid_argument("binary AppDef not supported yet.");
     }
 
@@ -200,7 +202,7 @@ class make_app_def_visitor {
 };
 
 void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                                   const std::map<std::string, cbag::PinFigure> &map,
+                                   const std::map<std::string, cbag::sch::pin_figure> &map,
                                    oa::oaTermTypeEnum term_type) {
     oa::oaName term_name;
     for (auto const &pair : map) {
@@ -222,7 +224,7 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
     }
 }
 
-void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch,
+void OAWriter::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                                   const str_map_t *rename_map) {
     oa::oaScalarName dsn_lib;
     dsn->getLibName(dsn_lib);
@@ -334,7 +336,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
         if (prop_pair.first == "portOrder") {
             std::visit(
                 make_prop_visitor(dsn, prop_pair.first),
-                cbag::value_t(cbag::Binary(
+                cbag::value_t(cbag::binary_t(
                     prop_app_type, reinterpret_cast<const unsigned char *>(term_order_str.c_str()),
                     term_order_str.size())));
         } else {
@@ -372,7 +374,7 @@ void OAWriter::write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void OAWriter::write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaScalarName &lib_name,
+void OAWriter::write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
                                    const oa::oaScalarName &cell_name,
                                    const oa::oaScalarName &view_name,
                                    const std::string &term_order) {

@@ -21,13 +21,13 @@ class CDLBuilder : public NetlistBuilder {
   private:
     void write_end() override;
 
-    void write_cv_header(const std::string &name, const term_t &in_terms, const term_t &out_terms,
-                         const term_t &io_terms) override;
+    void write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                         const sch::term_t &out_terms, const sch::term_t &io_terms) override;
 
     void write_cv_end(const std::string &name) override;
 
-    void write_instance_helper(const std::string &name, const SchInstance &inst,
-                               const SchCellViewInfo &info) override;
+    void write_instance_helper(const std::string &name, const sch::instance &inst,
+                               const sch::cellview_info &info) override;
 
     static const size_t ncol = 80;
     static const char cnt_char = '+';

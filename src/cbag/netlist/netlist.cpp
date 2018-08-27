@@ -12,7 +12,7 @@
 #include <cbag/common/datatypes.h>
 #include <cbag/netlist/netlist.h>
 #include <cbag/schematic/cellviews.h>
-#include <cbag/schematic/figures.h>
+#include <cbag/schematic/instance.h>
 
 namespace cbag {
 
@@ -79,8 +79,8 @@ void NetlistBuilder::build() {
     out_file.close();
 }
 
-void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
-                                  const netlist_map_t &cell_map, bool shell) {
+void NetlistBuilder::add_cellview(const std::string &name, sch::cellview *cv,
+                                  const sch::netlist_map_t &cell_map, bool shell) {
     write_cv_header(name, cv->in_terms, cv->out_terms, cv->io_terms);
     if (!shell) {
         for (auto const &p : cv->instances) {
@@ -91,8 +91,8 @@ void NetlistBuilder::add_cellview(const std::string &name, SchCellView *cv,
     out_file << std::endl;
 }
 
-void NetlistBuilder::write_instance(const std::string &name, const SchInstance &inst,
-                                    const netlist_map_t &cell_map) {
+void NetlistBuilder::write_instance(const std::string &name, const sch::instance &inst,
+                                    const sch::netlist_map_t &cell_map) {
     auto libmap_iter = cell_map.find(inst.lib_name);
     if (libmap_iter == cell_map.end()) {
         throw std::invalid_argument(fmt::format(
@@ -128,11 +128,11 @@ void write_param_visitor::operator()(const bool &v) const {
     auto logger = spdlog::get("cbag");
     logger->warn("bool parameter, do nothing.");
 }
-void write_param_visitor::operator()(const Time &v) const {
+void write_param_visitor::operator()(const time_struct &v) const {
     auto logger = spdlog::get("cbag");
     logger->warn("time parameter, do nothing.");
 }
-void write_param_visitor::operator()(const Binary &v) const {
+void write_param_visitor::operator()(const binary_t &v) const {
     auto logger = spdlog::get("cbag");
     logger->warn("binary parameter, do nothing.");
 }

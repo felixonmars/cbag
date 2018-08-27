@@ -13,7 +13,7 @@
 
 #include <cbag/netlist/cdl.h>
 #include <cbag/schematic/cellviews.h>
-#include <cbag/schematic/figures.h>
+#include <cbag/schematic/instance.h>
 
 namespace cbag {
 
@@ -30,8 +30,8 @@ void CDLBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
 
 void CDLBuilder::write_end() {}
 
-void CDLBuilder::write_cv_header(const std::string &name, const term_t &in_terms,
-                                 const term_t &out_terms, const term_t &io_terms) {
+void CDLBuilder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                                 const sch::term_t &out_terms, const sch::term_t &io_terms) {
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << ".SUBCKT";
     b << name;
@@ -48,8 +48,8 @@ void CDLBuilder::write_cv_header(const std::string &name, const term_t &in_terms
 
 void CDLBuilder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
 
-void CDLBuilder::write_instance_helper(const std::string &name, const SchInstance &inst,
-                                       const SchCellViewInfo &info) {
+void CDLBuilder::write_instance_helper(const std::string &name, const sch::instance &inst,
+                                       const sch::cellview_info &info) {
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
@@ -74,7 +74,7 @@ void CDLBuilder::write_instance_helper(const std::string &name, const SchInstanc
     b << inst.cell_name;
 
     // get default parameter values
-    ParamMap par_map(info.props);
+    param_map par_map(info.props);
     // update with instance parameters
     for (auto const &pair : inst.params) {
         par_map[pair.first] = pair.second;

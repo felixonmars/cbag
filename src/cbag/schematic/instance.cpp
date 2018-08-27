@@ -10,23 +10,24 @@
 #include <fmt/format.h>
 
 #include <cbag/netlist/name_convert.h>
-#include <cbag/schematic/figures.h>
+#include <cbag/schematic/instance.h>
 
 namespace cbag {
+namespace sch {
 
-void SchInstance::clear_params() { params.clear(); }
+void instance::clear_params() { params.clear(); }
 
-void SchInstance::set_int_param(const char *name, int value) { params[name] = value; }
+void instance::set_int_param(const char *name, int value) { params[name] = value; }
 
-void SchInstance::set_double_param(const char *name, double value) { params[name] = value; }
+void instance::set_double_param(const char *name, double value) { params[name] = value; }
 
-void SchInstance::set_bool_param(const char *name, bool value) { params[name] = value; }
+void instance::set_bool_param(const char *name, bool value) { params[name] = value; }
 
-void SchInstance::set_string_param(const char *name, const char *value) {
+void instance::set_string_param(const char *name, const char *value) {
     params[name] = std::string(value);
 }
 
-void SchInstance::update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
+void instance::update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
                                  const char *net) {
     // check number of bits match
     std::string term_str(term);
@@ -55,13 +56,13 @@ void SchInstance::update_connection(const std::string &inst_name, uint32_t inst_
     }
 }
 
-void SchInstance::update_connection(const std::string &inst_name, const char *term, const char *net) {
+void instance::update_connection(const std::string &inst_name, const char *term, const char *net) {
     // check number of bits match
     spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
     update_connection(inst_name, nu.size(), term, net);
 }
 
-void SchInstance::resize_nets(uint32_t old_size, uint32_t new_size) {
+void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
     std::div_t result = std::div(static_cast<int>(new_size), static_cast<int>(old_size));
     if (result.rem != 0) {
         // new size not multiple of old size, just clear connections
@@ -80,4 +81,5 @@ void SchInstance::resize_nets(uint32_t old_size, uint32_t new_size) {
     }
 }
 
+} // namespace sch
 } // namespace cbag

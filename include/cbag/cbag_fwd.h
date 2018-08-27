@@ -11,14 +11,14 @@
 #include <string>
 #include <vector>
 
-#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/cellviews_fwd.h>
 
 namespace cbag {
 void init_logging();
 
-void to_file(const SchCellView &cv, const char *fname);
+void to_file(const sch::cellview &cv, const char *fname);
 
-void write_netlist(const std::vector<SchCellView *> &cv_list,
+void write_netlist(const std::vector<sch::cellview *> &cv_list,
                    const std::vector<std::string> &name_list, const char *cell_map,
                    const std::vector<std::string> &inc_list, const char *format, bool flat,
                    bool shell, const char *fname);

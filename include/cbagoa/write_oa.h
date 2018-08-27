@@ -19,9 +19,10 @@ class logger;
 } // namespace spdlog
 
 namespace cbag {
-class SchCellView;
-class LayCellView;
-class PinFigure;
+namespace sch {
+class cellview;
+class pin_figure;
+} // namespace sch
 } // namespace cbag
 
 namespace cbagoa {
@@ -79,18 +80,15 @@ class OAWriter {
 
     // Write method for schematic/symbol cell view
 
-    void write_sch_cellview(const cbag::SchCellView &cv, oa::oaDesign *dsn, bool is_sch,
-                            const str_map_t *rename_map = nullptr);
-
-    void write_lay_cellview(const cbag::LayCellView &cv, oa::oaDesign *dsn,
+    void write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                             const str_map_t *rename_map = nullptr);
 
   private:
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                             const std::map<std::string, cbag::PinFigure> &map,
+                             const std::map<std::string, cbag::sch::pin_figure> &map,
                              oa::oaTermTypeEnum term_type);
 
-    void write_sch_cell_data(const cbag::SchCellView &cv, const oa::oaScalarName &lib_name,
+    void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
                              const oa::oaScalarName &cell_name, const oa::oaScalarName &view_name,
                              const std::string &term_order);
 

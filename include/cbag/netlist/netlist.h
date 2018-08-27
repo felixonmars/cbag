@@ -16,18 +16,9 @@
 #include <vector>
 
 #include <cbag/netlist/name_convert.h>
+#include <cbag/schematic/cellviews_fwd.h>
 
 namespace cbag {
-
-// forward declarations and type defs
-
-struct SchInstance;
-struct SchCellView;
-struct SchCellViewInfo;
-struct PinFigure;
-using term_t = std::map<std::string, PinFigure>;
-using lib_map_t = std::unordered_map<std::string, SchCellViewInfo>;
-using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
 // netlister base class
 
@@ -59,30 +50,30 @@ class NetlistBuilder {
 
     void build();
 
-    void add_cellview(const std::string &name, SchCellView *cv, const netlist_map_t &cell_map,
-                      bool shell);
+    void add_cellview(const std::string &name, sch::cellview *cv,
+                      const sch::netlist_map_t &cell_map, bool shell);
 
   protected:
     std::ofstream out_file;
 
-    void write_instance(const std::string &name, const SchInstance &inst,
-                        const netlist_map_t &cell_map);
+    void write_instance(const std::string &name, const sch::instance &inst,
+                        const sch::netlist_map_t &cell_map);
 
   private:
     virtual void write_end() = 0;
 
-    virtual void write_cv_header(const std::string &name, const term_t &in_terms,
-                                 const term_t &out_terms, const term_t &io_terms) = 0;
+    virtual void write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                                 const sch::term_t &out_terms, const sch::term_t &io_terms) = 0;
 
     virtual void write_cv_end(const std::string &name) = 0;
 
-    virtual void write_instance_helper(const std::string &name, const SchInstance &inst,
-                                       const SchCellViewInfo &info) = 0;
+    virtual void write_instance_helper(const std::string &name, const sch::instance &inst,
+                                       const sch::cellview_info &info) = 0;
 };
 
 // forward declaration
-struct Time;
-struct Binary;
+struct time_struct;
+struct binary_t;
 
 class write_param_visitor {
   public:
@@ -92,8 +83,8 @@ class write_param_visitor {
     void operator()(const int32_t &v) const;
     void operator()(const double &v) const;
     void operator()(const bool &v) const;
-    void operator()(const Time &v) const;
-    void operator()(const Binary &v) const;
+    void operator()(const time_struct &v) const;
+    void operator()(const binary_t &v) const;
 
   private:
     NetlistBuilder::LineBuilder *ptr;

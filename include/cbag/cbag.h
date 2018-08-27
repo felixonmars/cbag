@@ -9,7 +9,6 @@
 #define CBAG_CBAG_H
 
 #include <cbag/cbag_fwd.h>
-#include <cbag/schematic/figures.h>
-#include <cbag/schematic/shapes.h>
+#include <cbag/schematic/cellviews.h>
 
 #endif // CBAG_CBAG_H

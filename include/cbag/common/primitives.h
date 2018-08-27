@@ -12,7 +12,7 @@
 
 #include <cbag/common/blockage_type.h>
 #include <cbag/common/boundary_type.h>
-#include <cbag/common/font.h>
+#include <cbag/common/font_t.h>
 #include <cbag/common/orientation.h>
 #include <cbag/common/path_style.h>
 #include <cbag/common/sig_type.h>

@@ -25,8 +25,10 @@ class logger;
 } // namespace spdlog
 
 namespace cbag {
-struct SchCellView;
-struct Instance;
+namespace sch {
+struct cellview;
+struct instance;
+} // namespace sch
 } // namespace cbag
 
 namespace cbagoa {
@@ -91,11 +93,11 @@ class OADatabase {
         create_lib(library.c_str(), lib_path.c_str(), tech_lib.c_str());
     }
 
-    cbag::SchCellView read_sch_cellview(const char *lib_name, const char *cell_name,
-                                        const char *view_name);
+    cbag::sch::cellview read_sch_cellview(const char *lib_name, const char *cell_name,
+                                          const char *view_name);
 
-    cbag::SchCellView read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
-                                        const std::string &view_name);
+    cbag::sch::cellview read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                          const std::string &view_name);
 
     std::vector<cell_key_t> read_sch_recursive(const char *lib_name, const char *cell_name,
                                                const char *view_name, const char *new_root_path,
@@ -116,12 +118,12 @@ class OADatabase {
                                          const std::unordered_set<std::string> &exclude_libs);
 
     void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
-                            bool is_sch, const cbag::SchCellView &cv,
+                            bool is_sch, const cbag::sch::cellview &cv,
                             const str_map_t *rename_map = nullptr);
 
     inline void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                                    const std::string &view_name, bool is_sch,
-                                   const cbag::SchCellView &cv,
+                                   const cbag::sch::cellview &cv,
                                    const str_map_t *rename_map = nullptr) {
         write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv,
                            rename_map);
@@ -129,7 +131,7 @@ class OADatabase {
 
     void implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
                             const char *sch_view, const char *sym_view,
-                            const std::vector<cbag::SchCellView *> &cv_list);
+                            const std::vector<cbag::sch::cellview *> &cv_list);
 
   private:
     void handle_oa_exceptions();
@@ -144,8 +146,8 @@ class OADatabase {
                          const std::unordered_set<std::string> &exclude_libs,
                          cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list);
 
-    cbag::SchCellView cell_to_yaml(const std::string &lib_name, const std::string &cell_name,
-                                   const char *sch_view, const std::string &root_path);
+    cbag::sch::cellview cell_to_yaml(const std::string &lib_name, const std::string &cell_name,
+                                     const char *sch_view, const std::string &root_path);
 
     // OA namespace objects
     const oa::oaNativeNS ns;

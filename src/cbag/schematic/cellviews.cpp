@@ -17,32 +17,33 @@
 namespace fs = boost::filesystem;
 
 namespace cbag {
+namespace sch {
 
-SchCellView::SchCellView(const char *yaml_fname, const char *sym_view) {
+cellview::cellview(const char *yaml_fname, const char *sym_view) {
     fs::path yaml_path(yaml_fname);
     YAML::Node n = YAML::LoadFile(yaml_path.string());
-    (*this) = n.as<SchCellView>();
+    (*this) = n.as<cellview>();
     if (sym_view != nullptr) {
         // load symbol cellview
         yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
         if (fs::exists(yaml_path)) {
             YAML::Node s = YAML::LoadFile(yaml_path.string());
-            sym_ptr = std::make_unique<SchCellView>(s.as<SchCellView>());
+            sym_ptr = std::make_unique<cellview>(s.as<cellview>());
         }
     }
 }
 
-void SchCellView::clear_params() { props.clear(); }
+void cellview::clear_params() { props.clear(); }
 
-void SchCellView::set_int_param(const char *name, int value) { props[name] = value; }
+void cellview::set_int_param(const char *name, int value) { props[name] = value; }
 
-void SchCellView::set_double_param(const char *name, double value) { props[name] = value; }
+void cellview::set_double_param(const char *name, double value) { props[name] = value; }
 
-void SchCellView::set_bool_param(const char *name, bool value) { props[name] = value; }
+void cellview::set_bool_param(const char *name, bool value) { props[name] = value; }
 
-void SchCellView::set_string_param(const char *name, const char *value) { props[name] = value; }
+void cellview::set_string_param(const char *name, const char *value) { props[name] = value; }
 
-void SchCellView::rename_pin(const char *old_name, const char *new_name) {
+void cellview::rename_pin(const char *old_name, const char *new_name) {
     // check the new pin name does not exist already
     std::string nkey(new_name);
     if (in_terms.find(nkey) != in_terms.end() || out_terms.find(nkey) != out_terms.end() ||
@@ -79,7 +80,7 @@ void SchCellView::rename_pin(const char *old_name, const char *new_name) {
     }
 }
 
-void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
+void cellview::add_pin(const char *new_name, uint32_t term_type) {
     std::string key(new_name);
     // check the pin name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
@@ -115,7 +116,7 @@ void SchCellView::add_pin(const char *new_name, uint32_t term_type) {
     throw std::runtime_error("add_pin functionality not implemented yet.  See developer.");
 }
 
-bool SchCellView::remove_pin(const char *name) {
+bool cellview::remove_pin(const char *name) {
     std::string key(name);
     bool success = in_terms.erase(key) > 0 || out_terms.erase(key) > 0 || io_terms.erase(key) > 0;
     // remove symbol pin
@@ -125,11 +126,11 @@ bool SchCellView::remove_pin(const char *name) {
     return success;
 }
 
-void SchCellView::rename_instance(const char *old_name, const char *new_name) {
+void cellview::rename_instance(const char *old_name, const char *new_name) {
     // check the new name does not exist
     std::string nkey(new_name);
     if (instances.find(nkey) != instances.end()) {
-        throw std::invalid_argument(fmt::format("SchInstance {} already exists.", nkey));
+        throw std::invalid_argument(fmt::format("instance {} already exists.", nkey));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
@@ -156,14 +157,14 @@ void SchCellView::rename_instance(const char *old_name, const char *new_name) {
     }
 }
 
-bool SchCellView::remove_instance(const char *name) {
+bool cellview::remove_instance(const char *name) {
     std::string key(name);
     return instances.erase(key) > 0;
 }
 
-inst_iter_t SchCellView::copy_instance(const SchInstance &inst, uint32_t old_size,
-                                       const std::string &new_name, coord_t dx, coord_t dy,
-                                       const conn_list_t &conns) {
+inst_iter_t cellview::copy_instance(const instance &inst, uint32_t old_size,
+                                    const std::string &new_name, coord_t dx, coord_t dy,
+                                    const conn_list_t &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
     parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_ast);
@@ -172,7 +173,7 @@ inst_iter_t SchCellView::copy_instance(const SchInstance &inst, uint32_t old_siz
     auto emp_iter = instances.emplace(new_name, inst);
     if (!emp_iter.second) {
         throw std::invalid_argument(
-            fmt::format("SchInstance {} already exists.", emp_iter.first->first));
+            fmt::format("instance {} already exists.", emp_iter.first->first));
     }
 
     // resize nets
@@ -191,13 +192,13 @@ inst_iter_t SchCellView::copy_instance(const SchInstance &inst, uint32_t old_siz
     return emp_iter.first;
 }
 
-std::vector<inst_iter_t> SchCellView::array_instance(const char *old_name,
-                                                     const std::vector<std::string> &name_list,
-                                                     coord_t dx, coord_t dy,
-                                                     const std::vector<conn_list_t> &conns_list) {
+std::vector<inst_iter_t> cellview::array_instance(const char *old_name,
+                                                  const std::vector<std::string> &name_list,
+                                                  coord_t dx, coord_t dy,
+                                                  const std::vector<conn_list_t> &conns_list) {
     // find the instance to copy
     std::string key(old_name);
-    std::map<std::string, SchInstance>::const_iterator iter = instances.find(key);
+    std::map<std::string, instance>::const_iterator iter = instances.find(key);
     if (iter == instances.end()) {
         throw std::invalid_argument("Cannot find instance: " + key);
     }
@@ -224,8 +225,8 @@ std::vector<inst_iter_t> SchCellView::array_instance(const char *old_name,
     return ans;
 }
 
-SchCellViewInfo SchCellView::get_info(const std::string &name) const {
-    SchCellViewInfo ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
+cellview_info cellview::get_info(const std::string &name) const {
+    cellview_info ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
 
     for (auto const &pair : in_terms) {
         ans.in_terms.push_back(pair.first);
@@ -247,4 +248,5 @@ netlist_map_t load_netlist_map(const char *fname) {
     return n.as<netlist_map_t>();
 }
 
+} // namespace sch
 } // namespace cbag

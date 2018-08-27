@@ -13,22 +13,24 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/schematic/figures.h>
+#include <cbag/schematic/instance.h>
+#include <cbag/schematic/pin_figure.h>
+#include <cbag/schematic/pin_object.h>
 #include <cbag/yaml/fusion.h>
 #include <cbag/yaml/shapes.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchInstance, lib_name, cell_name, view_name, xform, bbox,
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, xform, bbox,
                           connections, params)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchPinObject, inst, attr)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::pin_object, inst, attr)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::PinFigure, obj, stype)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::pin_figure, obj, stype)
 
 namespace YAML {
-template <> struct convert<std::variant<cbag::Rect, cbag::SchPinObject>> {
-    static Node encode(const std::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+template <> struct convert<cbag::sch::pin_fig_t> {
+    static Node encode(const cbag::sch::pin_fig_t &rhs);
 
-    static bool decode(const Node &node, std::variant<cbag::Rect, cbag::SchPinObject> &rhs);
+    static bool decode(const Node &node, cbag::sch::pin_fig_t &rhs);
 };
 } // namespace YAML
 

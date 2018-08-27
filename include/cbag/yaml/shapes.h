@@ -17,34 +17,35 @@
 #include <cbag/yaml/fusion.h>
 #include <cbag/yaml/primitives.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Rect, layer, purpose, net, bbox)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::rectangle, layer, purpose, net, bbox)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Poly, layer, purpose, net, points)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::polygon, layer, purpose, net, points)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Arc, layer, purpose, net, ang_start, ang_stop, bbox)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::arc, layer, purpose, net, ang_start, ang_stop, bbox)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Donut, layer, purpose, net, center, radius, hole_radius)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::donut, layer, purpose, net, center, radius, hole_radius)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Ellipse, layer, purpose, net, bbox)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::ellipse, layer, purpose, net, bbox)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Line, layer, purpose, net, points)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::line, layer, purpose, net, points)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Path, layer, purpose, net, width, points, style, begin_ext, end_ext)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::path, layer, purpose, net, width, points, style, begin_ext,
+                          end_ext)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Text, layer, purpose, net, origin, alignment, orient, font, height,
-                          overbar, visible, drafting, text)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::text_t, layer, purpose, net, origin, alignment, orient, font,
+                          height, overbar, visible, drafting, text)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::EvalText, layer, purpose, net, origin, alignment, orient, font,
-                          height, overbar, visible, drafting, evaluator)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::eval_text, layer, purpose, net, origin, alignment, orient,
+                          font, height, overbar, visible, drafting, evaluator)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::TermAttr, layer, purpose, net, origin, alignment, orient, font,
-                          height, overbar, visible, drafting, attr_type, format)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::term_attr, layer, purpose, net, origin, alignment, orient,
+                          font, height, overbar, visible, drafting, attr_type, format)
 
 namespace YAML {
-template <> struct convert<cbag::Shape> {
-    static Node encode(const cbag::Shape &rhs);
+template <> struct convert<cbag::sch::shape_t> {
+    static Node encode(const cbag::sch::shape_t &rhs);
 
-    static bool decode(const Node &node, cbag::Shape &rhs);
+    static bool decode(const Node &node, cbag::sch::shape_t &rhs);
 };
 } // namespace YAML
 

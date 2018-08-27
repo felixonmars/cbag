@@ -31,7 +31,7 @@ void init_logging() {
     spdlog::flush_on(spdlog::level::err);
 }
 
-void to_file(const SchCellView &cv, const char *fname) {
+void to_file(const sch::cellview &cv, const char *fname) {
     std::ofstream outfile(fname, std::ios_base::out);
     YAML::Node node(cv);
     YAML::Emitter emitter;
@@ -50,7 +50,7 @@ std::unique_ptr<NetlistBuilder> make_netlist_builder(const char *fname, const st
     }
 }
 
-void write_netlist(const std::vector<SchCellView *> &cv_list,
+void write_netlist(const std::vector<sch::cellview *> &cv_list,
                    const std::vector<std::string> &name_list, const char *cell_map,
                    const std::vector<std::string> &inc_list, const char *format, bool flat,
                    bool shell, const char *fname) {
@@ -58,7 +58,7 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
     logger->info("Writing netlist file: {}", fname);
     logger->info("Parsing netlist cell map: {}", cell_map);
     YAML::Node n = YAML::LoadFile(std::string(cell_map));
-    netlist_map_t netlist_map = n.as<netlist_map_t>();
+    sch::netlist_map_t netlist_map = n.as<sch::netlist_map_t>();
 
     logger->info("Creating netlist builder for netlist format: {}", format);
     auto builder_ptr = make_netlist_builder(fname, std::string(format));
@@ -77,7 +77,7 @@ void write_netlist(const std::vector<SchCellView *> &cv_list,
             if (lib_map_iter == netlist_map.end()) {
                 logger->info("Cannot find library {}, creating lib cell map",
                              cv_list[idx]->lib_name);
-                lib_map_t new_lib_map;
+                sch::lib_map_t new_lib_map;
                 new_lib_map.emplace(cv_list[idx]->cell_name,
                                     cv_list[idx]->get_info(name_list[idx]));
                 netlist_map.emplace(cv_list[idx]->lib_name, new_lib_map);

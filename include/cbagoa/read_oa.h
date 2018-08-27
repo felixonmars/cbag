@@ -21,9 +21,11 @@ class logger;
 }
 
 namespace cbag {
-class SchInstance;
-class PinFigure;
-class SchCellView;
+namespace sch {
+class instance;
+class pin_figure;
+class cellview;
+} // namespace sch
 } // namespace cbag
 
 namespace cbagoa {
@@ -41,43 +43,43 @@ class OAReader {
 
     // Read methods for shapes
 
-    cbag::Rect read_rect(oa::oaRect *p, std::string &&net);
+    cbag::sch::rectangle read_rect(oa::oaRect *p, std::string &&net);
 
-    cbag::Poly read_poly(oa::oaPolygon *p, std::string &&net);
+    cbag::sch::polygon read_poly(oa::oaPolygon *p, std::string &&net);
 
-    cbag::Arc read_arc(oa::oaArc *p, std::string &&net);
+    cbag::sch::arc read_arc(oa::oaArc *p, std::string &&net);
 
-    cbag::Donut read_donut(oa::oaDonut *p, std::string &&net);
+    cbag::sch::donut read_donut(oa::oaDonut *p, std::string &&net);
 
-    cbag::Ellipse read_ellipse(oa::oaEllipse *p, std::string &&net);
+    cbag::sch::ellipse read_ellipse(oa::oaEllipse *p, std::string &&net);
 
-    cbag::Line read_line(oa::oaLine *p, std::string &&net);
+    cbag::sch::line read_line(oa::oaLine *p, std::string &&net);
 
-    cbag::Path read_path(oa::oaPath *p, std::string &&net);
+    cbag::sch::path read_path(oa::oaPath *p, std::string &&net);
 
-    cbag::Text read_text(oa::oaText *p, std::string &&net);
+    cbag::sch::text_t read_text(oa::oaText *p, std::string &&net);
 
-    cbag::EvalText read_eval_text(oa::oaEvalText *p, std::string &&net);
+    cbag::sch::eval_text read_eval_text(oa::oaEvalText *p, std::string &&net);
 
-    cbag::Shape read_shape(oa::oaShape *p);
+    cbag::sch::shape_t read_shape(oa::oaShape *p);
 
     // Read method for references
 
-    cbag::SchInstance read_instance(oa::oaInst *p);
+    cbag::sch::instance read_instance(oa::oaInst *p);
 
-    std::pair<std::string, cbag::SchInstance> read_instance_pair(oa::oaInst *p);
+    std::pair<std::string, cbag::sch::instance> read_instance_pair(oa::oaInst *p);
 
     // Read method for pin figures
 
-    cbag::PinFigure read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p);
+    cbag::sch::pin_figure read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p);
 
     // Read method for terminals
 
-    std::pair<std::string, cbag::PinFigure> read_terminal_single(oa::oaTerm *term);
+    std::pair<std::string, cbag::sch::pin_figure> read_terminal_single(oa::oaTerm *term);
 
     // Read method for schematic/symbol cell view
 
-    cbag::SchCellView read_sch_cellview(oa::oaDesign *design);
+    cbag::sch::cellview read_sch_cellview(oa::oaDesign *design);
 
   private:
     void print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p);

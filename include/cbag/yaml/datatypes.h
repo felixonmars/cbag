@@ -16,9 +16,9 @@
 #include <cbag/common/datatypes.h>
 #include <cbag/yaml/fusion.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Time, time_val)
+BOOST_FUSION_ADAPT_STRUCT(cbag::time_struct, time_val)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::Binary, name, bin_val)
+BOOST_FUSION_ADAPT_STRUCT(cbag::binary_t, name, bin_val)
 
 namespace cbag {
 class to_yaml_visitor {

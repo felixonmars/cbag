@@ -40,10 +40,10 @@ bool convert<cbag::value_t>::decode(const Node &node, cbag::value_t &rhs) {
             rhs = node[1].as<std::string>();
             return true;
         case 4:
-            rhs = node[1].as<cbag::Time>();
+            rhs = node[1].as<cbag::time_struct>();
             return true;
         case 5:
-            rhs = node[1].as<cbag::Binary>();
+            rhs = node[1].as<cbag::binary_t>();
             return true;
         default:
             logger->warn("cbag::value_t YAML decode: unexpected which value: {}.  Node:\n{}", value,

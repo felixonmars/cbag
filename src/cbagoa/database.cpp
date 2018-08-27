@@ -150,12 +150,12 @@ void OADatabase::create_lib(const char *library, const char *lib_path, const cha
     }
 }
 
-cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name, const char *cell_name,
-                                                const char *view_name) {
+cbag::sch::cellview OADatabase::read_sch_cellview(const char *lib_name, const char *cell_name,
+                                                  const char *view_name) {
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'r');
         logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbag::SchCellView ans = reader->read_sch_cellview(dsn_ptr);
+        cbag::sch::cellview ans = reader->read_sch_cellview(dsn_ptr);
         dsn_ptr->close();
         return ans;
     } catch (...) {
@@ -164,9 +164,9 @@ cbag::SchCellView OADatabase::read_sch_cellview(const char *lib_name, const char
     }
 }
 
-cbag::SchCellView OADatabase::read_sch_cellview(const std::string &lib_name,
-                                                const std::string &cell_name,
-                                                const std::string &view_name) {
+cbag::sch::cellview OADatabase::read_sch_cellview(const std::string &lib_name,
+                                                  const std::string &cell_name,
+                                                  const std::string &view_name) {
     return read_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str());
 }
 
@@ -195,8 +195,8 @@ OADatabase::read_library(const char *lib_name, const char *view_name, const char
 }
 
 void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
-                                    const char *view_name, bool is_sch, const cbag::SchCellView &cv,
-                                    const str_map_t *rename_map) {
+                                    const char *view_name, bool is_sch,
+                                    const cbag::sch::cellview &cv, const str_map_t *rename_map) {
     try {
         oa::oaDesign *dsn_ptr = open_design(lib_name, cell_name, view_name, 'w', is_sch);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
@@ -209,7 +209,7 @@ void OADatabase::write_sch_cellview(const char *lib_name, const char *cell_name,
 
 void OADatabase::implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
                                     const char *sch_view, const char *sym_view,
-                                    const std::vector<cbag::SchCellView *> &cv_list) {
+                                    const std::vector<cbag::sch::cellview *> &cv_list) {
     try {
         str_map_t rename_map;
 
@@ -280,7 +280,7 @@ void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const
         (map_iter != lib_map.cend()) ? map_iter->second : std::string(new_root_path);
 
     // write cellviews to yaml files
-    cbag::SchCellView sch_cv =
+    cbag::sch::cellview sch_cv =
         cell_to_yaml(key.first.c_str(), key.second.c_str(), view_name, root_path);
 
     // update cell_list and exclude_cells
@@ -302,15 +302,15 @@ void OADatabase::read_sch_helper(std::pair<std::string, std::string> &key, const
     }
 }
 
-cbag::SchCellView OADatabase::cell_to_yaml(const std::string &lib_name,
-                                           const std::string &cell_name, const char *sch_view,
-                                           const std::string &root_path) {
+cbag::sch::cellview OADatabase::cell_to_yaml(const std::string &lib_name,
+                                             const std::string &cell_name, const char *sch_view,
+                                             const std::string &root_path) {
     // create directory if not exist, then compute output filename
     fs::path root_dir(fs::path(root_path) / lib_name / "netlist_info");
     fs::create_directories(root_dir);
 
     // parse schematic
-    cbag::SchCellView sch_cv = read_sch_cellview(lib_name.c_str(), cell_name.c_str(), sch_view);
+    cbag::sch::cellview sch_cv = read_sch_cellview(lib_name.c_str(), cell_name.c_str(), sch_view);
 
     // write schematic to file
     fs::path tmp_path = root_dir / fmt::format("{}.yaml", cell_name);

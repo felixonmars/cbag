@@ -35,7 +35,7 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         return {std::move(key), static_cast<oa::oaDoubleProp *>(p)->getValue()};
     }
     case oa::oacTimePropType: {
-        return {std::move(key), cbag::Time(static_cast<oa::oaTimeProp *>(p)->getValue())};
+        return {std::move(key), cbag::time_struct(static_cast<oa::oaTimeProp *>(p)->getValue())};
     }
     case oa::oacAppPropType: {
         oa::oaByteArray data;
@@ -43,7 +43,7 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(p);
         app_ptr->getValue(data);
         app_ptr->getAppType(app_str);
-        return {std::move(key), cbag::Binary(app_str, data.getElements(), data.getNumElements())};
+        return {std::move(key), cbag::binary_t(app_str, data.getElements(), data.getNumElements())};
     }
     case oa::oacBooleanPropType: {
         return {std::move(key), static_cast<bool>(static_cast<oa::oaBooleanProp *>(p)->getValue())};
@@ -79,71 +79,74 @@ std::pair<std::string, cbag::value_t> OAReader::read_app_def(oa::oaDesign *dsn, 
 
 // Read methods for shapes
 
-cbag::Rect OAReader::read_rect(oa::oaRect *p, std::string &&net) {
-    cbag::Rect ans(p->getLayerNum(), p->getPurposeNum(), net);
+cbag::sch::rectangle OAReader::read_rect(oa::oaRect *p, std::string &&net) {
+    cbag::sch::rectangle ans(p->getLayerNum(), p->getPurposeNum(), net);
     p->getBBox(ans.bbox);
     return ans;
 }
 
-cbag::Poly OAReader::read_poly(oa::oaPolygon *p, std::string &&net) {
-    cbag::Poly ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
+cbag::sch::polygon OAReader::read_poly(oa::oaPolygon *p, std::string &&net) {
+    cbag::sch::polygon ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::Arc OAReader::read_arc(oa::oaArc *p, std::string &&net) {
-    cbag::Arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(), p->getStopAngle());
+cbag::sch::arc OAReader::read_arc(oa::oaArc *p, std::string &&net) {
+    cbag::sch::arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(),
+                       p->getStopAngle());
     p->getEllipseBBox(ans.bbox);
     return ans;
 }
 
-cbag::Donut OAReader::read_donut(oa::oaDonut *p, std::string &&net) {
-    cbag::Donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(), p->getHoleRadius());
+cbag::sch::donut OAReader::read_donut(oa::oaDonut *p, std::string &&net) {
+    cbag::sch::donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(),
+                         p->getHoleRadius());
     p->getCenter(ans.center);
     return ans;
 }
 
-cbag::Ellipse OAReader::read_ellipse(oa::oaEllipse *p, std::string &&net) {
-    cbag::Ellipse ans(p->getLayerNum(), p->getPurposeNum(), net);
+cbag::sch::ellipse OAReader::read_ellipse(oa::oaEllipse *p, std::string &&net) {
+    cbag::sch::ellipse ans(p->getLayerNum(), p->getPurposeNum(), net);
     p->getBBox(ans.bbox);
     return ans;
 }
 
-cbag::Line OAReader::read_line(oa::oaLine *p, std::string &&net) {
-    cbag::Line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
+cbag::sch::line OAReader::read_line(oa::oaLine *p, std::string &&net) {
+    cbag::sch::line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::Path OAReader::read_path(oa::oaPath *p, std::string &&net) {
-    cbag::Path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
-                   p->getStyle(), p->getBeginExt(), p->getEndExt());
+cbag::sch::path OAReader::read_path(oa::oaPath *p, std::string &&net) {
+    cbag::sch::path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
+                        p->getStyle(), p->getBeginExt(), p->getEndExt());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::Text OAReader::read_text(oa::oaText *p, std::string &&net) {
+cbag::sch::text_t OAReader::read_text(oa::oaText *p, std::string &&net) {
     oa::oaString text;
     p->getText(text);
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::Text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text), p->getAlignment(),
-                   p->getOrient(), p->getFont(), p->getHeight(), overbar, visible, drafting);
+    cbag::sch::text_t ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
+                          p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(), overbar,
+                          visible, drafting);
     p->getOrigin(ans.origin);
     return ans;
 }
 
-cbag::EvalText OAReader::read_eval_text(oa::oaEvalText *p, std::string &&net) {
+cbag::sch::eval_text OAReader::read_eval_text(oa::oaEvalText *p, std::string &&net) {
     oa::oaString text, eval;
     p->getText(text);
     p->getEvaluatorName(eval);
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::EvalText ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
-                       p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(), overbar,
-                       visible, drafting, std::string(eval));
+    cbag::sch::eval_text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
+                             p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(),
+                             overbar, visible, drafting, std::string(eval));
     p->getOrigin(ans.origin);
     return ans;
 }
@@ -178,7 +181,7 @@ bool include_shape(oa::oaShape *p) {
     }
 }
 
-cbag::Shape OAReader::read_shape(oa::oaShape *p) {
+cbag::sch::shape_t OAReader::read_shape(oa::oaShape *p) {
     std::string net;
     if (p->hasNet()) {
         oa::oaString net_name;
@@ -218,7 +221,7 @@ cbag::Shape OAReader::read_shape(oa::oaShape *p) {
 
 // Read method for references
 
-cbag::SchInstance OAReader::read_instance(oa::oaInst *p) {
+cbag::sch::instance OAReader::read_instance(oa::oaInst *p) {
     // read cellview name
     oa::oaString inst_lib_oa, inst_cell_oa, inst_view_oa;
     p->getLibName(ns, inst_lib_oa);
@@ -232,8 +235,8 @@ cbag::SchInstance OAReader::read_instance(oa::oaInst *p) {
     p->getBBox(bbox);
 
     // create instance object
-    cbag::SchInstance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                           std::string(inst_view_oa), xform, bbox);
+    cbag::sch::instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
+                             std::string(inst_view_oa), xform, bbox);
 
     // read instance parameters
     if (p->hasProp()) {
@@ -261,7 +264,7 @@ cbag::SchInstance OAReader::read_instance(oa::oaInst *p) {
     return inst;
 }
 
-std::pair<std::string, cbag::SchInstance> OAReader::read_instance_pair(oa::oaInst *p) {
+std::pair<std::string, cbag::sch::instance> OAReader::read_instance_pair(oa::oaInst *p) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
     logger->info("Reading instance {}", (const char *)inst_name_oa);
@@ -270,10 +273,10 @@ std::pair<std::string, cbag::SchInstance> OAReader::read_instance_pair(oa::oaIns
 
 // Read method for pin figures
 
-cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
+cbag::sch::pin_figure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
     oa::oaSigType sig = t->getNet()->getSigType();
     if (p->isInst()) {
-        cbag::SchInstance inst = read_instance(static_cast<oa::oaInst *>(p));
+        cbag::sch::instance inst = read_instance(static_cast<oa::oaInst *>(p));
 
         oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
         auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext());
@@ -293,14 +296,14 @@ cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
             disp_ptr->getNet()->getName(ns, net_name);
             net = std::string(net_name);
         }
-        cbag::TermAttr attr(oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
-                            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net,
-                            disp_ptr->getAlignment(), disp_ptr->getOrient(), disp_ptr->getFont(),
-                            disp_ptr->getHeight(), disp_ptr->getFormat(), overbar, visible,
-                            drafting);
+        cbag::sch::term_attr attr(
+            oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
+            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net, disp_ptr->getAlignment(),
+            disp_ptr->getOrient(), disp_ptr->getFont(), disp_ptr->getHeight(),
+            disp_ptr->getFormat(), overbar, visible, drafting);
         disp_ptr->getOrigin(attr.origin);
 
-        return {cbag::SchPinObject(std::move(inst), std::move(attr)), sig};
+        return {cbag::sch::pin_object(std::move(inst), std::move(attr)), sig};
     } else if (p->getType() == oa::oacRectType) {
         oa::oaRect *r = static_cast<oa::oaRect *>(p);
         std::string net;
@@ -319,7 +322,7 @@ cbag::PinFigure OAReader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
 
 // Read method for terminals
 
-std::pair<std::string, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTerm *term) {
+std::pair<std::string, cbag::sch::pin_figure> OAReader::read_terminal_single(oa::oaTerm *term) {
     // parse terminal name
     oa::oaString term_name_oa;
     term->getName(ns, term_name_oa);
@@ -353,7 +356,7 @@ std::pair<std::string, cbag::PinFigure> OAReader::read_terminal_single(oa::oaTer
 
 // Read method for schematic/symbol cell view
 
-cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
+cbag::sch::cellview OAReader::read_sch_cellview(oa::oaDesign *p) {
     oa::oaBlock *block = p->getTopBlock();
     oa::oaString lib_oa;
     oa::oaString cell_oa;
@@ -364,7 +367,7 @@ cbag::SchCellView OAReader::read_sch_cellview(oa::oaDesign *p) {
     p->getViewName(ns, tmp);
     block->getBBox(bbox);
 
-    cbag::SchCellView ans(lib_oa, cell_oa, tmp, bbox);
+    cbag::sch::cellview ans(lib_oa, cell_oa, tmp, bbox);
 
     // read terminals
     logger->info("Reading terminals");

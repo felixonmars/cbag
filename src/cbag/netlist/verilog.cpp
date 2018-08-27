@@ -11,7 +11,7 @@
 
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellviews.h>
-#include <cbag/schematic/figures.h>
+#include <cbag/schematic/instance.h>
 
 namespace cbag {
 
@@ -21,8 +21,8 @@ void VerilogBuilder::init(const std::vector<std::string> &inc_list, bool shell) 
 
 void VerilogBuilder::write_end() {}
 
-void VerilogBuilder::write_cv_header(const std::string &name, const term_t &in_terms,
-                                     const term_t &out_terms, const term_t &io_terms) {
+void VerilogBuilder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                                     const sch::term_t &out_terms, const sch::term_t &io_terms) {
     // write module declaration
     LineBuilder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
@@ -64,8 +64,8 @@ void VerilogBuilder::write_cv_header(const std::string &name, const term_t &in_t
 
 void VerilogBuilder::write_cv_end(const std::string &name) { out_file << "endmodule" << std::endl; }
 
-void VerilogBuilder::write_instance_helper(const std::string &name, const SchInstance &inst,
-                                           const SchCellViewInfo &info) {
+void VerilogBuilder::write_instance_helper(const std::string &name, const sch::instance &inst,
+                                           const sch::cellview_info &info) {
     // TODO: add actual implementation
 }
 

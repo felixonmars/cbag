@@ -17,10 +17,10 @@
 #include <cbag/yaml/figures.h>
 #include <cbag/yaml/fusion.h>
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellView, lib_name, cell_name, view_name, bbox, in_terms,
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview, lib_name, cell_name, view_name, bbox, in_terms,
                           out_terms, io_terms, shapes, instances, props, app_defs)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::SchCellViewInfo, cell_name, in_terms, out_terms, io_terms, props)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview_info, cell_name, in_terms, out_terms, io_terms, props)
 
 // YAML conversion methods for std::unordered_map
 namespace YAML {

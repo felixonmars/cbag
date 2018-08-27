@@ -16,9 +16,9 @@ int read_oa() {
 
     cbagoa::OADatabase db(lib_file);
 
-    cbag::SchCellView sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
+    cbag::sch::cellview sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
     db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);
-    cbag::SchCellView sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
+    cbag::sch::cellview sym_master = db.read_sch_cellview(lib_name, cell_name, sym_view_name);
     db.write_sch_cellview(lib_name, cell_name2, sym_view_name, false, sym_master);
 
     db.read_sch_cellview(lib_name, cell_name2, view_name);
