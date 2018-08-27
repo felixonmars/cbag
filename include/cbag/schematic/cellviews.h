@@ -14,7 +14,7 @@
 
 #include <cbag/common/datatypes.h>
 #include <cbag/common/primitives.h>
-#include <cbag/schematic/shapes.h>
+#include <cbag/schematic/shapes_fwd.h>
 
 namespace cbag {
 
@@ -78,8 +78,9 @@ struct SchCellView {
 
     bool remove_instance(const char *name);
 
-    inst_iter_t copy_instance(const SchInstance &inst, uint32_t old_size, const std::string &new_name,
-                              coord_t dx, coord_t dy, const conn_list_t &conns);
+    inst_iter_t copy_instance(const SchInstance &inst, uint32_t old_size,
+                              const std::string &new_name, coord_t dx, coord_t dy,
+                              const conn_list_t &conns);
 
     std::vector<inst_iter_t> array_instance(const char *old_name,
                                             const std::vector<std::string> &name_list, coord_t dx,
@@ -103,14 +104,6 @@ using lib_map_t = std::unordered_map<std::string, SchCellViewInfo>;
 using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
 netlist_map_t load_netlist_map(const char *fname);
-
-/** A layout cell view
- */
-struct LayCellView {
-    LayCellView() = default;
-
-    std::string lib_name, cell_name, view_name;
-};
 
 } // namespace cbag
 

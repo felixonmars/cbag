@@ -17,6 +17,9 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cbag/cbag.h>
+#include <cbag/layout/geometries.h>
+#include <cbag/netlist/name_convert.h>
 #include <cbagoa/write_oa.h>
 
 namespace cbagoa {

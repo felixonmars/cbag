@@ -12,12 +12,19 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/cbag.h>
+#include <cbag/common/datatypes.h>
+#include <cbag/schematic/shapes_fwd.h>
 
 // forward declare structures to reduce dependencies
 namespace spdlog {
 class logger;
 }
+
+namespace cbag {
+class SchInstance;
+class PinFigure;
+class SchCellView;
+} // namespace cbag
 
 namespace cbagoa {
 

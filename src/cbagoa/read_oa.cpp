@@ -11,6 +11,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cbag/cbag.h>
 #include <cbagoa/read_oa.h>
 
 namespace cbagoa {

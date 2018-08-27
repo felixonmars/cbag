@@ -10,6 +10,7 @@
 #include <variant>
 
 #include <cbag/common/primitives.h>
+#include <cbag/schematic/shapes_fwd.h>
 
 namespace cbag {
 
@@ -172,7 +173,6 @@ struct TermAttr : TextBase {
     TextDispFormat format;
 };
 
-using Shape = std::variant<Rect, Poly, Arc, Donut, Ellipse, Line, Path, Text, EvalText>;
 } // namespace cbag
 
 #endif // CBAG_SCHEMATIC_SHAPES_H

@@ -13,12 +13,16 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/cbag.h>
-
 // forward declare structures to reduce dependencies
 namespace spdlog {
 class logger;
 } // namespace spdlog
+
+namespace cbag {
+class SchCellView;
+class LayCellView;
+class PinFigure;
+} // namespace cbag
 
 namespace cbagoa {
 // TODO: find ways to not hard code these values

@@ -8,8 +8,6 @@
 #ifndef CBAGOA_CBAGOA_H
 #define CBAGOA_CBAGOA_H
 
-#include <unordered_map>
-
 #include <cbag/cbag.h>
 #include <cbagoa/database.h>
 
