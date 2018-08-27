@@ -13,17 +13,19 @@
 #include <cbag/common/primitives.h>
 
 namespace YAML {
-template <> struct convert<cbag::Orientation> {
-    static Node encode(const cbag::Orientation &rhs) {
+
+template <typename T, typename std::enable_if_t<std::is_enum_v<T>> * = nullptr>
+struct convert_enum {
+    static Node encode(const T &rhs) {
         Node n;
         n = static_cast<int>(rhs);
         return n;
     }
 
-    static bool decode(const Node &node, cbag::Orientation &rhs) {
+    static bool decode(const Node &node, T &rhs) {
         if (node.IsScalar()) {
             try {
-                rhs = static_cast<cbag::Orientation>(node.as<int>());
+                rhs = static_cast<T>(node.as<int>());
                 return true;
             } catch (...) {
                 return false;
@@ -34,152 +36,21 @@ template <> struct convert<cbag::Orientation> {
     }
 };
 
-template <> struct convert<cbag::PathStyle> {
-    static Node encode(const cbag::PathStyle &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
+template <> struct convert<cbag::Orientation> : public convert_enum<cbag::Orientation> {};
 
-    static bool decode(const Node &node, cbag::PathStyle &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::PathStyle>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
+template <> struct convert<cbag::PathStyle> : public convert_enum<cbag::PathStyle> {};
 
-template <> struct convert<cbag::TextAlign> {
-    static Node encode(const cbag::TextAlign &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
+template <> struct convert<cbag::TextAlign> : public convert_enum<cbag::TextAlign> {};
 
-    static bool decode(const Node &node, cbag::TextAlign &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::TextAlign>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
+template <> struct convert<cbag::Font> : public convert_enum<cbag::Font> {};
 
-template <> struct convert<cbag::Font> {
-    static Node encode(const cbag::Font &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
+template <> struct convert<cbag::TermAttrType> : public convert_enum<cbag::TermAttrType> {};
 
-    static bool decode(const Node &node, cbag::Font &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::Font>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
+template <> struct convert<cbag::TextDispFormat> : public convert_enum<cbag::TextDispFormat> {};
 
-template <> struct convert<cbag::TermAttrType> {
-    static Node encode(const cbag::TermAttrType &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
+template <> struct convert<cbag::SigType> : public convert_enum<cbag::SigType> {};
 
-    static bool decode(const Node &node, cbag::TermAttrType &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::TermAttrType>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
-
-template <> struct convert<cbag::TextDispFormat> {
-    static Node encode(const cbag::TextDispFormat &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
-
-    static bool decode(const Node &node, cbag::TextDispFormat &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::TextDispFormat>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
-
-template <> struct convert<cbag::SigType> {
-    static Node encode(const cbag::SigType &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
-
-    static bool decode(const Node &node, cbag::SigType &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::SigType>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
-
-template <> struct convert<cbag::TermType> {
-    static Node encode(const cbag::TermType &rhs) {
-        Node n;
-        n = static_cast<int>(rhs);
-        return n;
-    }
-
-    static bool decode(const Node &node, cbag::TermType &rhs) {
-        if (node.IsScalar()) {
-            try {
-                rhs = static_cast<cbag::TermType>(node.as<int>());
-                return true;
-            } catch (...) {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-};
+template <> struct convert<cbag::TermType> : public convert_enum<cbag::TermType> {};
 
 template <> struct convert<cbag::Point> {
     static Node encode(const cbag::Point &rhs);
