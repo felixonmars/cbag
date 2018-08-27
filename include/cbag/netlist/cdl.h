@@ -12,9 +12,9 @@
 
 namespace cbag {
 
-class CDLBuilder : public NetlistBuilder {
+class CDLBuilder : public netlist_builder {
   public:
-    explicit CDLBuilder(const char *fname) : NetlistBuilder(fname) {}
+    explicit CDLBuilder(const char *fname) : netlist_builder(fname) {}
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 

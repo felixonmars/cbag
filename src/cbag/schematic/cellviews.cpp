@@ -243,10 +243,5 @@ cellview_info cellview::get_info(const std::string &name) const {
     return ans;
 }
 
-netlist_map_t load_netlist_map(const char *fname) {
-    YAML::Node n = YAML::LoadFile(fname);
-    return n.as<netlist_map_t>();
-}
-
 } // namespace sch
 } // namespace cbag

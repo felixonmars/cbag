@@ -11,6 +11,10 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/common/primitives.h>
+#include <cbag/yaml/box_t.h>
+#include <cbag/yaml/point.h>
+#include <cbag/yaml/point_array.h>
+#include <cbag/yaml/transform.h>
 
 namespace YAML {
 
@@ -52,29 +56,6 @@ template <> struct convert<cbag::sig_type> : public convert_enum<cbag::sig_type>
 
 template <> struct convert<cbag::term_type> : public convert_enum<cbag::term_type> {};
 
-template <> struct convert<cbag::point> {
-    static Node encode(const cbag::point &rhs);
-
-    static bool decode(const Node &node, cbag::point &rhs);
-};
-
-template <> struct convert<cbag::transform> {
-    static Node encode(const cbag::transform &rhs);
-
-    static bool decode(const Node &node, cbag::transform &rhs);
-};
-
-template <> struct convert<cbag::box_t> {
-    static Node encode(const cbag::box_t &rhs);
-
-    static bool decode(const Node &node, cbag::box_t &rhs);
-};
-
-template <> struct convert<cbag::point_array> {
-    static Node encode(const cbag::point_array &rhs);
-
-    static bool decode(const Node &node, cbag::point_array &rhs);
-};
 } // namespace YAML
 
 #endif // CBAG_YAML_PRIMITIVES_H

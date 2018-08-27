@@ -1,11 +1,12 @@
 #include <cbag/yaml/cellviews.h>
+#include <cbag/netlist/netlist.h>
 #include <iostream>
 #include <yaml-cpp/yaml.h>
 
 int main(int argc, char *argv[]) {
     cbag::sch::cellview_info info;
-    cbag::sch::lib_map_t lib_map;
-    cbag::sch::netlist_map_t net_map;
+    cbag::lib_map_t lib_map;
+    cbag::netlist_map_t net_map;
 
     info.cell_name = "nlvt";
     info.io_terms.push_back("D");

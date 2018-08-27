@@ -20,21 +20,24 @@
 
 namespace cbag {
 
+using lib_map_t = std::unordered_map<std::string, sch::cellview_info>;
+using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
+
 // netlister base class
 
-class NetlistBuilder {
+class netlist_builder {
   public:
     /** A helper class for writing a line with column limit
      */
-    class LineBuilder {
+    class line_builder {
       public:
-        LineBuilder(size_t ncol, char cnt_char, bool break_before, int tab_size);
+        line_builder(size_t ncol, char cnt_char, bool break_before, int tab_size);
 
-        friend LineBuilder &operator<<(LineBuilder &builder, const std::string &token);
+        friend line_builder &operator<<(line_builder &builder, const std::string &token);
 
-        friend LineBuilder &operator<<(LineBuilder &builder, std::string &&token);
+        friend line_builder &operator<<(line_builder &builder, std::string &&token);
 
-        friend std::ofstream &operator<<(std::ofstream &stream, const LineBuilder &b);
+        friend std::ofstream &operator<<(std::ofstream &stream, const line_builder &b);
 
       private:
         std::vector<std::string> tokens;
@@ -44,20 +47,20 @@ class NetlistBuilder {
         int tab_size;
     };
 
-    explicit NetlistBuilder(const char *fname);
+    explicit netlist_builder(const char *fname);
 
     virtual void init(const std::vector<std::string> &inc_list, bool shell) = 0;
 
     void build();
 
-    void add_cellview(const std::string &name, sch::cellview *cv,
-                      const sch::netlist_map_t &cell_map, bool shell);
+    void add_cellview(const std::string &name, sch::cellview *cv, const netlist_map_t &cell_map,
+                      bool shell);
 
   protected:
     std::ofstream out_file;
 
     void write_instance(const std::string &name, const sch::instance &inst,
-                        const sch::netlist_map_t &cell_map);
+                        const netlist_map_t &cell_map);
 
   private:
     virtual void write_end() = 0;
@@ -77,7 +80,7 @@ struct binary_t;
 
 class write_param_visitor {
   public:
-    write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key);
+    write_param_visitor(netlist_builder::line_builder *ptr, const std::string *key);
 
     void operator()(const std::string &v) const;
     void operator()(const int32_t &v) const;
@@ -87,7 +90,7 @@ class write_param_visitor {
     void operator()(const binary_t &v) const;
 
   private:
-    NetlistBuilder::LineBuilder *ptr;
+    netlist_builder::line_builder *ptr;
     const std::string *key;
 };
 

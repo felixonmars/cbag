@@ -16,22 +16,23 @@
 
 namespace cbag {
 
-NetlistBuilder::LineBuilder::LineBuilder(size_t ncol, char cnt_char, bool break_before,
-                                         int tab_size)
+netlist_builder::line_builder::line_builder(size_t ncol, char cnt_char, bool break_before,
+                                            int tab_size)
     : tokens(), ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
 
-NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder,
-                                        const std::string &token) {
+netlist_builder::line_builder &operator<<(netlist_builder::line_builder &builder,
+                                          const std::string &token) {
     builder.tokens.push_back(token);
     return builder;
 }
 
-NetlistBuilder::LineBuilder &operator<<(NetlistBuilder::LineBuilder &builder, std::string &&token) {
+netlist_builder::line_builder &operator<<(netlist_builder::line_builder &builder,
+                                          std::string &&token) {
     builder.tokens.push_back(token);
     return builder;
 }
 
-std::ofstream &operator<<(std::ofstream &stream, const NetlistBuilder::LineBuilder &b) {
+std::ofstream &operator<<(std::ofstream &stream, const netlist_builder::line_builder &b) {
     size_t num_tokens = b.tokens.size();
     int tab_size = b.tab_size;
     if (num_tokens == 0) {
@@ -72,15 +73,15 @@ std::ofstream &operator<<(std::ofstream &stream, const NetlistBuilder::LineBuild
     return stream;
 }
 
-NetlistBuilder::NetlistBuilder(const char *fname) : out_file(fname, std::ios_base::out) {}
+netlist_builder::netlist_builder(const char *fname) : out_file(fname, std::ios_base::out) {}
 
-void NetlistBuilder::build() {
+void netlist_builder::build() {
     write_end();
     out_file.close();
 }
 
-void NetlistBuilder::add_cellview(const std::string &name, sch::cellview *cv,
-                                  const sch::netlist_map_t &cell_map, bool shell) {
+void netlist_builder::add_cellview(const std::string &name, sch::cellview *cv,
+                                   const netlist_map_t &cell_map, bool shell) {
     write_cv_header(name, cv->in_terms, cv->out_terms, cv->io_terms);
     if (!shell) {
         for (auto const &p : cv->instances) {
@@ -91,8 +92,8 @@ void NetlistBuilder::add_cellview(const std::string &name, sch::cellview *cv,
     out_file << std::endl;
 }
 
-void NetlistBuilder::write_instance(const std::string &name, const sch::instance &inst,
-                                    const sch::netlist_map_t &cell_map) {
+void netlist_builder::write_instance(const std::string &name, const sch::instance &inst,
+                                     const netlist_map_t &cell_map) {
     auto libmap_iter = cell_map.find(inst.lib_name);
     if (libmap_iter == cell_map.end()) {
         throw std::invalid_argument(fmt::format(
@@ -110,7 +111,7 @@ void NetlistBuilder::write_instance(const std::string &name, const sch::instance
     }
 }
 
-write_param_visitor::write_param_visitor(NetlistBuilder::LineBuilder *ptr, const std::string *key)
+write_param_visitor::write_param_visitor(netlist_builder::line_builder *ptr, const std::string *key)
     : ptr(ptr), key(key) {}
 
 void write_param_visitor::operator()(const std::string &v) const {

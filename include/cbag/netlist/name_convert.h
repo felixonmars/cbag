@@ -27,6 +27,7 @@ std::string to_string_cdba(const spirit::ast::name_bit &bit);
 std::string to_string_cdba(const spirit::ast::name_unit &nu);
 
 std::string to_string_cdba(const spirit::ast::name &name);
+
 } // namespace cbag
 
 #endif // CBAG_NETLIST_NAME_CONVERT_H

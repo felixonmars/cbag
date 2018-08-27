@@ -24,7 +24,7 @@ void VerilogBuilder::write_end() {}
 void VerilogBuilder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
                                      const sch::term_t &out_terms, const sch::term_t &io_terms) {
     // write module declaration
-    LineBuilder b(ncol, cnt_char, break_before, tab_size);
+    line_builder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
     b << name;
     b << "(";

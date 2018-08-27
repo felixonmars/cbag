@@ -40,7 +40,8 @@ void to_file(const sch::cellview &cv, const char *fname) {
     outfile.close();
 }
 
-std::unique_ptr<NetlistBuilder> make_netlist_builder(const char *fname, const std::string &format) {
+std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
+                                                      const std::string &format) {
     if (format == "cdl") {
         return std::make_unique<CDLBuilder>(fname);
     } else if (format == "verilog") {
@@ -58,7 +59,7 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
     logger->info("Writing netlist file: {}", fname);
     logger->info("Parsing netlist cell map: {}", cell_map);
     YAML::Node n = YAML::LoadFile(std::string(cell_map));
-    sch::netlist_map_t netlist_map = n.as<sch::netlist_map_t>();
+    netlist_map_t netlist_map = n.as<netlist_map_t>();
 
     logger->info("Creating netlist builder for netlist format: {}", format);
     auto builder_ptr = make_netlist_builder(fname, std::string(format));
@@ -77,7 +78,7 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
             if (lib_map_iter == netlist_map.end()) {
                 logger->info("Cannot find library {}, creating lib cell map",
                              cv_list[idx]->lib_name);
-                sch::lib_map_t new_lib_map;
+                lib_map_t new_lib_map;
                 new_lib_map.emplace(cv_list[idx]->cell_name,
                                     cv_list[idx]->get_info(name_list[idx]));
                 netlist_map.emplace(cv_list[idx]->lib_name, new_lib_map);

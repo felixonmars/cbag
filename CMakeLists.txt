@@ -68,7 +68,10 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/primitives.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/box_t.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/point.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/point_array.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/yaml/transform.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/yaml/figures.cpp

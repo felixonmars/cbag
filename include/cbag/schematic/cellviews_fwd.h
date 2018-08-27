@@ -20,8 +20,6 @@ struct cellview_info;
 struct pin_figure;
 
 using term_t = std::map<std::string, pin_figure>;
-using lib_map_t = std::unordered_map<std::string, cellview_info>;
-using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
 } // namespace sch
 } // namespace cbag

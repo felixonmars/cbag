@@ -98,8 +98,6 @@ struct cellview {
     std::unique_ptr<cellview> sym_ptr;
 };
 
-netlist_map_t load_netlist_map(const char *fname);
-
 } // namespace sch
 } // namespace cbag
 
