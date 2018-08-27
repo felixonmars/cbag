@@ -1,5 +1,5 @@
-#ifndef CBAG_LAYOUT_BOUNDARY_H
-#define CBAG_LAYOUT_BOUNDARY_H
+#ifndef CBAG_LAYOUT_CELLVIEW_H
+#define CBAG_LAYOUT_CELLVIEW_H
 
 #include <algorithm>
 #include <unordered_map>
@@ -50,14 +50,27 @@ class cellview {
     cellview(std::string tech, uint8_t geo_mode = 0)
         : tech(std::move(tech)), inst_name_cnt(0), geo_mode(geo_mode) {}
 
+    inline bool is_empty() const {
+        return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
+               area_block_list.empty() && boundary_list.empty();
+    }
+
+    inline rectangle get_bbox(const layer_t layer) const {
+        auto iter = geo_map.find(layer);
+        if (iter == geo_map.end()) {
+            return {};
+        }
+        return iter->second.get_bbox();
+    }
+
   private:
     std::string tech;
     geo_map_t geo_map;
-    block_map_t lay_block_map;
+    inst_map_t inst_map;
     std::vector<via> via_list;
+    block_map_t lay_block_map;
     std::vector<polygon> area_block_list;
     std::vector<boundary> boundary_list;
-    inst_map_t inst_list;
     uint32_t inst_name_cnt;
     uint8_t geo_mode;
 };

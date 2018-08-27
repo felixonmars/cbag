@@ -45,10 +45,10 @@ template <> struct geometry_concept<cbag::layout::polygon45_view> {
     using type = polygon_45_set_concept;
 };
 
-template <> struct polygon_set_traits<cbag::layout::polygon45_view> {
-    using coordinate_type = typename cbag::layout::polygon45_view::coordinate_type;
-    using iterator_type = typename cbag::layout::polygon45_view::const_iterator;
-    using operator_arg_type = typename cbag::layout::polygon45_view::operator_arg_type;
+template <> struct polygon_45_set_traits<cbag::layout::polygon45_view> {
+    using coordinate_type = cbag::layout::polygon45_view::coordinate_type;
+    using iterator_type = cbag::layout::polygon45_view::const_iterator;
+    using operator_arg_type = cbag::layout::polygon45_view::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }

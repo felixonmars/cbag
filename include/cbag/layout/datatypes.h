@@ -23,6 +23,21 @@ namespace layout {
 
 using union_view = std::variant<rectangle_view, polygon90_view, polygon45_view, polygon_view>;
 
+class extents_visitor {
+  public:
+    inline explicit extents_visitor(rectangle &bbox) : bbox(bbox) {}
+
+    template <typename V> void operator()(const V &view) { bp::extents(bbox, view); }
+
+    rectangle &bbox;
+};
+
+inline rectangle extents(const union_view &view) {
+    rectangle ans;
+    std::visit(extents_visitor(ans), view);
+    return ans;
+}
+
 } // namespace layout
 } // namespace cbag
 

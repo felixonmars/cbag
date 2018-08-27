@@ -18,9 +18,11 @@ class geometry {
     inline explicit geometry(uint8_t mode = 0)
         : rect_set(), poly90_set(), poly45_set(), poly_set(), mode(mode), view(make_union_view()) {}
 
-    inline void set_mode(uint8_t m) { mode = m; }
+    inline const union_view &get_view() const { return view; }
 
-    inline const union_view &get_view() { return view; }
+    inline rectangle get_bbox() const { return extents(view); }
+
+    inline void set_mode(uint8_t m) { mode = m; }
 
     inline polygon_ref<rectangle> add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
         rect_set.emplace_back(xl, yl, xh, yh);

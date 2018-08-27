@@ -50,14 +50,15 @@ template <> struct geometry_concept<cbag::layout::rectangle_view> {
     using type = polygon_90_set_concept;
 };
 
-template <> struct polygon_set_traits<cbag::layout::rectangle_view> {
-    using coordinate_type = typename cbag::layout::rectangle_view::coordinate_type;
-    using iterator_type = typename cbag::layout::rectangle_view::const_iterator;
-    using operator_arg_type = typename cbag::layout::rectangle_view::operator_arg_type;
+template <> struct polygon_90_set_traits<cbag::layout::rectangle_view> {
+    using coordinate_type = cbag::layout::rectangle_view::coordinate_type;
+    using iterator_type = cbag::layout::rectangle_view::const_iterator;
+    using operator_arg_type = cbag::layout::rectangle_view::operator_arg_type;
 
     static inline iterator_type begin(const operator_arg_type &set) { return set.begin(); }
     static inline iterator_type end(const operator_arg_type &set) { return set.end(); }
 
+    static inline orientation_2d orient(const operator_arg_type &set) { return HORIZONTAL; }
     static inline bool clean(const operator_arg_type &set) { return false; }
     static inline bool sorted(const operator_arg_type &set) { return false; }
 };
