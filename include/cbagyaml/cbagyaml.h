@@ -11,7 +11,8 @@
 #include <string>
 #include <vector>
 
-#include <cbag/cbag.h>
+#include <cbag/netlist/netlist.h>
+
 #include <cbagyaml/cellviews.h>
 
 namespace cbag {

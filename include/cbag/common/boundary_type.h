@@ -5,7 +5,7 @@
 namespace cbag {
 // common primitive types
 
-enum BoundaryType { PR, area, snap };
+enum boundary_type { PR, area, snap };
 } // namespace cbag
 
 #endif

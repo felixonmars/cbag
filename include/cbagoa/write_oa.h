@@ -23,6 +23,10 @@ namespace sch {
 class cellview;
 class pin_figure;
 } // namespace sch
+
+namespace layout {
+class cellview;
+} // namespace layout
 } // namespace cbag
 
 namespace cbagoa {
@@ -82,6 +86,9 @@ class OAWriter {
 
     void write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                             const str_map_t *rename_map = nullptr);
+
+    void write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
+                            const str_map_t *rename_map = nullptr) {}
 
   private:
     void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
