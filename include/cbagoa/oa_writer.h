@@ -77,10 +77,13 @@ constexpr auto cell_data = "(promptWidth nil "
 
 using str_map_t = std::unordered_map<std::string, std::string>;
 
-class OAWriter {
+class oa_writer {
+  private:
+    const oa::oaCdbaNS ns;
+    std::shared_ptr<spdlog::logger> logger;
+
   public:
-    explicit inline OAWriter(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-        : ns(std::move(ns)), logger(std::move(logger)){};
+    oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger);
 
     // Write method for schematic/symbol cell view
 
@@ -98,9 +101,6 @@ class OAWriter {
     void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
                              const oa::oaScalarName &cell_name, const oa::oaScalarName &view_name,
                              const std::string &term_order);
-
-    const oa::oaCdbaNS ns;
-    std::shared_ptr<spdlog::logger> logger;
 };
 } // namespace cbagoa
 

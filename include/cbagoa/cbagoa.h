@@ -8,7 +8,6 @@
 #ifndef CBAGOA_CBAGOA_H
 #define CBAGOA_CBAGOA_H
 
-#include <cbag/cbag.h>
-#include <cbagoa/database.h>
+#include <cbagoa/oa_database.h>
 
 #endif // CBAGOA_CBAGOA_H

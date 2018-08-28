@@ -1,5 +1,6 @@
 #include <fstream>
 
+#include <cbag/cbag.h>
 #include <cbagoa/cbagoa.h>
 
 int read_oa() {
@@ -14,7 +15,7 @@ int read_oa() {
     std::string view_name("schematic");
     std::string sym_view_name("symbol");
 
-    cbagoa::OADatabase db(lib_file);
+    cbagoa::oa_database db(lib_file);
 
     cbag::sch::cellview sch_master = db.read_sch_cellview(lib_name, cell_name, view_name);
     db.write_sch_cellview(lib_name, cell_name2, view_name, true, sch_master);

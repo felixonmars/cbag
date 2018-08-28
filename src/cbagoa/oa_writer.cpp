@@ -17,15 +17,15 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/spirit/ast.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/pin_object.h>
 #include <cbag/schematic/shape_t_def.h>
+#include <cbag/spirit/ast.h>
 
-#include <cbagoa/write_oa.h>
+#include <cbagoa/oa_writer.h>
 
 namespace cbagoa {
 
@@ -206,9 +206,12 @@ class make_app_def_visitor {
     oa::oaString name;
 };
 
-void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                                   const std::map<std::string, cbag::sch::pin_figure> &map,
-                                   oa::oaTermTypeEnum term_type) {
+oa_writer::oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
+    : ns(std::move(ns)), logger(std::move(logger)){};
+
+void oa_writer::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
+                                    const std::map<std::string, cbag::sch::pin_figure> &map,
+                                    oa::oaTermTypeEnum term_type) {
     oa::oaName term_name;
     for (auto const &pair : map) {
         // create terminal, net, and pin
@@ -229,8 +232,8 @@ void OAWriter::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
     }
 }
 
-void OAWriter::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
-                                  const str_map_t *rename_map) {
+void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
+                                   const str_map_t *rename_map) {
     oa::oaScalarName dsn_lib;
     dsn->getLibName(dsn_lib);
 
@@ -380,10 +383,10 @@ void OAWriter::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *d
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void OAWriter::write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
-                                   const oa::oaScalarName &cell_name,
-                                   const oa::oaScalarName &view_name,
-                                   const std::string &term_order) {
+void oa_writer::write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
+                                    const oa::oaScalarName &cell_name,
+                                    const oa::oaScalarName &view_name,
+                                    const std::string &term_order) {
 
     // get dependencies
     std::set<std::tuple<std::string, std::string, std::string>> dep_set;

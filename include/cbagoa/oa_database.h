@@ -37,8 +37,8 @@ namespace cbagoa {
 constexpr uint32_t LIB_ACCESS_TIMEOUT = 1;
 
 // forward declare structures to reduce dependencies
-class OAReader;
-class OAWriter;
+class oa_reader;
+class oa_writer;
 
 using cell_key_t = std::pair<std::string, std::string>;
 using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
@@ -53,28 +53,31 @@ class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
                                  oa::oaLibDefListWarningTypeEnum type) override;
 };
 
-class OADatabase {
+class oa_database {
+  private:
+    // OA namespace objects
+    const oa::oaNativeNS ns;
+    const oa::oaCdbaNS ns_cdba;
+
+    const std::string lib_def_file;
+    const LibDefObserver lib_def_obs;
+    std::unique_ptr<oa_reader> reader;
+    std::unique_ptr<oa_writer> writer;
+    std::shared_ptr<spdlog::logger> logger;
+
   public:
     /** Open a OA database corresponding to the given library definition file.
      *
      *  @param lib_def_file the library definition file.
      */
-    explicit OADatabase(const char *lib_def_file);
+    explicit oa_database(const char *lib_def_file);
+    ~oa_database();
+    oa_database(const oa_database &) = delete;
+    oa_database &operator=(const oa_database &) = delete;
+    oa_database(oa_database &&) = delete;
+    oa_database &operator=(oa_database &&) = delete;
 
-    explicit inline OADatabase(const std::string &lib_def_file)
-        : OADatabase(lib_def_file.c_str()) {}
-
-    ~OADatabase();
-
-    // This class is neither copyable nor movable
-
-    OADatabase(const OADatabase &) = delete;
-
-    OADatabase &operator=(const OADatabase &) = delete;
-
-    OADatabase(OADatabase &&) = delete;
-
-    OADatabase &operator=(OADatabase &&) = delete;
+    explicit oa_database(const std::string &lib_def_file);
 
     std::vector<std::string> get_cells_in_library(const char *library);
 
@@ -88,8 +91,8 @@ class OADatabase {
      */
     void create_lib(const char *library, const char *lib_path, const char *tech_lib);
 
-    inline void create_lib(const std::string &library, const std::string &lib_path,
-                           const std::string &tech_lib) {
+    void create_lib(const std::string &library, const std::string &lib_path,
+                    const std::string &tech_lib) {
         create_lib(library.c_str(), lib_path.c_str(), tech_lib.c_str());
     }
 
@@ -104,7 +107,7 @@ class OADatabase {
                                                const str_map_t &lib_map,
                                                const std::unordered_set<std::string> &exclude_libs);
 
-    inline std::vector<cell_key_t>
+    std::vector<cell_key_t>
     read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
                        const std::string &view_name, const std::string &new_root_path,
                        const str_map_t &lib_map,
@@ -121,10 +124,9 @@ class OADatabase {
                             bool is_sch, const cbag::sch::cellview &cv,
                             const str_map_t *rename_map = nullptr);
 
-    inline void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
-                                   const std::string &view_name, bool is_sch,
-                                   const cbag::sch::cellview &cv,
-                                   const str_map_t *rename_map = nullptr) {
+    void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                            const std::string &view_name, bool is_sch,
+                            const cbag::sch::cellview &cv, const str_map_t *rename_map = nullptr) {
         write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv,
                            rename_map);
     }
@@ -148,17 +150,8 @@ class OADatabase {
 
     cbag::sch::cellview cell_to_yaml(const std::string &lib_name, const std::string &cell_name,
                                      const char *sch_view, const std::string &root_path);
-
-    // OA namespace objects
-    const oa::oaNativeNS ns;
-    const oa::oaCdbaNS ns_cdba;
-
-    const std::string lib_def_file;
-    const LibDefObserver lib_def_obs;
-    std::unique_ptr<OAReader> reader;
-    std::unique_ptr<OAWriter> writer;
-    std::shared_ptr<spdlog::logger> logger;
 };
+
 } // namespace cbagoa
 
 #endif // CBAGOA_DATABASE_H

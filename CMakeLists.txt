@@ -152,9 +152,9 @@ target_link_libraries(cbagyaml
 
 
 set(SRC_FILES_LIB_CBAGOA
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/read_oa.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/write_oa.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/database.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_reader.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_writer.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_database.cpp
   )
 add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
 

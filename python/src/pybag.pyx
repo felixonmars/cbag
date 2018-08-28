@@ -109,8 +109,8 @@ cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
     cdef netlist_map_t read_netlist_map(const char* fname) except +
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa" nogil:
-    cdef cppclass OADatabase:
-        OADatabase(const char* lib_def_file) except +
+    cdef cppclass oa_database:
+        oa_database(const char* lib_def_file) except +
 
         vector[string] get_cells_in_library(const char* library) except +
 
@@ -474,12 +474,12 @@ cdef _add_py_cv(vector[cellview *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())
 
 cdef class PyOADatabase:
-    cdef unique_ptr[OADatabase] db_ptr
+    cdef unique_ptr[oa_database] db_ptr
     cdef unicode encoding
 
     def __init__(self, lib_def_file, unicode encoding):
         lib_def_file = lib_def_file.encode(encoding)
-        self.db_ptr.reset(new OADatabase(lib_def_file))
+        self.db_ptr.reset(new oa_database(lib_def_file))
         self.encoding = encoding
 
     def __dealloc__(self):

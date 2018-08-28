@@ -30,10 +30,13 @@ class cellview;
 
 namespace cbagoa {
 
-class OAReader {
+class oa_reader {
+  private:
+    const oa::oaCdbaNS ns;
+    std::shared_ptr<spdlog::logger> logger;
+
   public:
-    explicit inline OAReader(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-        : ns(std::move(ns)), logger(std::move(logger)){};
+    oa_reader(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger);
 
     // Read method for properties
 
@@ -89,10 +92,8 @@ class OAReader {
     void print_group(oa::oaGroup *p);
 
     void print_dm_data(oa::oaDMData *data);
-
-    const oa::oaCdbaNS ns;
-    std::shared_ptr<spdlog::logger> logger;
 };
+
 } // namespace cbagoa
 
 #endif // CBAGOA_READ_OA_H
