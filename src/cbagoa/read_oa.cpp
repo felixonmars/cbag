@@ -35,7 +35,7 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         return {std::move(key), static_cast<oa::oaDoubleProp *>(p)->getValue()};
     }
     case oa::oacTimePropType: {
-        return {std::move(key), cbag::time_struct(static_cast<oa::oaTimeProp *>(p)->getValue())};
+        return {std::move(key), cbag::time_struct{static_cast<oa::oaTimeProp *>(p)->getValue()}};
     }
     case oa::oacAppPropType: {
         oa::oaByteArray data;
@@ -43,7 +43,10 @@ std::pair<std::string, cbag::value_t> OAReader::read_prop(oa::oaProp *p) {
         oa::oaAppProp *app_ptr = static_cast<oa::oaAppProp *>(p);
         app_ptr->getValue(data);
         app_ptr->getAppType(app_str);
-        return {std::move(key), cbag::binary_t(app_str, data.getElements(), data.getNumElements())};
+        const unsigned char *data_ptr = data.getElements();
+        return {std::move(key),
+                cbag::binary_t{(const char *)app_str,
+                               std::string(data_ptr, data_ptr + data.getNumElements())}};
     }
     case oa::oacBooleanPropType: {
         return {std::move(key), static_cast<bool>(static_cast<oa::oaBooleanProp *>(p)->getValue())};

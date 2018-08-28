@@ -13,17 +13,16 @@
 namespace cbag {
 namespace sch {
 
-struct ellipse : shape_base {
-    inline ellipse() : shape_base(), bbox() {}
-
-    inline ellipse(lay_t lay, purp_t purp, std::string net)
-        : shape_base(lay, purp, std::move(net)), bbox() {}
-
-    inline ellipse(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh,
-                   coord_t yh)
-        : shape_base(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
-
+struct ellipse : public shape_base {
+  public:
     box_t bbox;
+
+    ellipse() = default;
+
+    ellipse(lay_t lay, purp_t purp, std::string net);
+
+    ellipse(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh,
+            coord_t yh);
 };
 
 } // namespace sch

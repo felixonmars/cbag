@@ -68,8 +68,20 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/instance.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/arc.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellviews.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/donut.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/ellipse.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/eval_text.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/instance.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/line.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/path.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/polygon.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/rectangle.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/shape_base.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/term_attr.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_base.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/cellview.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp

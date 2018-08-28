@@ -9,16 +9,23 @@ namespace util {
 
 template <typename T, typename std::enable_if_t<std::is_integral_v<T>> * = nullptr>
 class binary_iterator {
+  private:
+    T low;
+    std::optional<T> high;
+    T current;
+    std::optional<T> marker;
+
   public:
-    inline binary_iterator(T low, T high) : low(low), high(high), current((high + low) / 2) {}
-    inline binary_iterator(T low, std::optional<T> high)
+    binary_iterator(T low, T high) : low(low), high(high), current((high + low) / 2) {}
+
+    binary_iterator(T low, std::optional<T> high)
         : low(low), high(high), current(high ? (*high + low) / 2 : low) {}
 
-    inline bool has_next() const { return !high || low < *high; }
+    bool has_next() const { return !high || low < *high; }
 
-    inline T operator*() const { return current; }
+    T operator*() const { return current; }
 
-    inline void up() {
+    void up() {
         low = current + 1;
         if (high) {
             current = (low + *high) / 2;
@@ -31,20 +38,14 @@ class binary_iterator {
         }
     }
 
-    inline void down() {
+    void down() {
         high = current;
         current = (low + *high) / 2;
     }
 
-    inline void save() { marker = current; }
+    void save() { marker = current; }
 
-    inline std::optional<T> get_save() const { return marker; }
-
-  private:
-    T low;
-    std::optional<T> high;
-    T current;
-    std::optional<T> marker;
+    std::optional<T> get_save() const { return marker; }
 }; // namespace util
 
 } // namespace util

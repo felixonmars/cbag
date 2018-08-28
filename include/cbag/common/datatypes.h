@@ -21,10 +21,6 @@ namespace cbag {
  *  std::variant will not be confused.
  */
 struct time_struct {
-    inline time_struct() = default;
-
-    inline explicit time_struct(time_t time_val) : time_val(time_val) {}
-
     time_t time_val;
 };
 
@@ -34,11 +30,6 @@ struct time_struct {
  *  std::variant will not be confused.
  */
 struct binary_t {
-    inline binary_t() = default;
-
-    inline binary_t(const char *name, const unsigned char *data, unsigned int size)
-        : name(name), bin_val(data, data + size) {}
-
     std::string name;
     std::string bin_val;
 };

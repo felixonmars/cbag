@@ -13,18 +13,16 @@
 namespace cbag {
 namespace sch {
 
-struct donut : shape_base {
-    inline donut() : shape_base(), center(0, 0), radius(0), hole_radius(0) {}
-
-    inline donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r)
-        : shape_base(lay, purp, std::move(net)), radius(r), hole_radius(hole_r) {}
-
-    inline donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r, coord_t x,
-                 coord_t y)
-        : shape_base(lay, purp, std::move(net)), center(x, y), radius(r), hole_radius(hole_r) {}
-
+struct donut : public shape_base {
+  public:
     point center;
     dist_t radius, hole_radius;
+
+    donut() = default;
+
+    donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r);
+
+    donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r, coord_t x, coord_t y);
 };
 
 } // namespace sch

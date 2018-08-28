@@ -14,16 +14,15 @@ namespace cbag {
 namespace sch {
 
 struct rectangle : public shape_base {
-    inline rectangle() : shape_base(), bbox() {}
-
-    inline rectangle(lay_t lay, purp_t purp, std::string net)
-        : shape_base(lay, purp, std::move(net)), bbox() {}
-
-    inline rectangle(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh,
-                     coord_t yh)
-        : shape_base(lay, purp, std::move(net)), bbox(xl, yl, xh, yh) {}
-
+  public:
     box_t bbox;
+
+    rectangle() = default;
+
+    rectangle(lay_t lay, purp_t purp, std::string net);
+
+    rectangle(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh,
+              coord_t yh);
 };
 
 } // namespace sch

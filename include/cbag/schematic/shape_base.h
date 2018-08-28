@@ -15,14 +15,14 @@ namespace cbag {
 namespace sch {
 
 struct shape_base {
-    inline shape_base() : layer(0), purpose(0), net() {}
-
-    inline shape_base(lay_t lay, purp_t purp, std::string net)
-        : layer(lay), purpose(purp), net(std::move(net)) {}
-
+  public:
     lay_t layer;
     purp_t purpose;
     std::string net;
+
+    shape_base() = default;
+
+    shape_base(lay_t lay, purp_t purp, std::string net);
 };
 
 } // namespace sch

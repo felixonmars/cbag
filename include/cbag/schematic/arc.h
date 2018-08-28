@@ -13,19 +13,17 @@
 namespace cbag {
 namespace sch {
 
-struct arc : shape_base {
-    inline arc() : shape_base(), ang_start(0), ang_stop(0), bbox() {}
-
-    inline arc(lay_t lay, purp_t purp, std::string net, double start, double stop)
-        : shape_base(lay, purp, std::move(net)), ang_start(start), ang_stop(stop), bbox() {}
-
-    inline arc(lay_t lay, purp_t purp, std::string net, double start, double stop, coord_t xl,
-               coord_t yl, coord_t xh, coord_t yh)
-        : shape_base(lay, purp, std::move(net)), ang_start(start), ang_stop(stop),
-          bbox(xl, yl, xh, yh) {}
-
+struct arc : public shape_base {
+  public:
     double ang_start, ang_stop;
     box_t bbox;
+
+    arc() = default;
+
+    arc(lay_t lay, purp_t purp, std::string net, double start, double stop);
+
+    arc(lay_t lay, purp_t purp, std::string net, double start, double stop, coord_t xl, coord_t yl,
+        coord_t xh, coord_t yh);
 };
 
 } // namespace sch

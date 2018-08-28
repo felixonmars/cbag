@@ -14,18 +14,16 @@
 namespace cbag {
 namespace sch {
 
-struct term_attr : text_base {
-    inline term_attr() : text_base(), attr_type(tatName), format(tdfNameValue) {}
-
-    inline term_attr(term_attr_type attr_type, lay_t lay, purp_t purp, std::string net,
-                     text_align align, orientation orient, font_t font, dist_t height,
-                     text_disp_format format, bool overbar, bool visible, bool drafting)
-        : text_base(lay, purp, std::move(net), align, orient, font, height, overbar, visible,
-                    drafting),
-          attr_type(attr_type), format(format) {}
-
+struct term_attr : public text_base {
+  public:
     term_attr_type attr_type;
     text_disp_format format;
+
+    term_attr();
+
+    term_attr(term_attr_type attr_type, lay_t lay, purp_t purp, std::string net, text_align align,
+              orientation orient, font_t font, dist_t height, text_disp_format format, bool overbar,
+              bool visible, bool drafting);
 };
 
 } // namespace sch

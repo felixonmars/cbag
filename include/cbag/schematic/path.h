@@ -15,18 +15,17 @@
 namespace cbag {
 namespace sch {
 
-struct path : shape_base {
-    inline path() : shape_base(), width(0), points(), style(psTruncate), begin_ext(0), end_ext(0) {}
-
-    inline path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n, path_style style,
-                dist_t begin_ext, dist_t end_ext)
-        : shape_base(lay, purp, std::move(net)), width(width), points(n), style(style),
-          begin_ext(begin_ext), end_ext(end_ext) {}
-
+struct path : public shape_base {
+  public:
     dist_t width;
     point_array points;
     path_style style;
     dist_t begin_ext, end_ext;
+
+    path();
+
+    path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n, path_style style,
+         dist_t begin_ext, dist_t end_ext);
 };
 
 } // namespace sch

@@ -21,19 +21,19 @@ using point_array = oa::oaPointArray;
 namespace cbag {
 
 class point_array {
-  public:
-    inline explicit point_array(uint32_t size = 0) : points(size) {}
+  private:
+    std::vector<point> points;
 
-    inline uint32_t getNumElements() const { return static_cast<uint32_t>(points.size()); }
+  public:
+    explicit point_array(uint32_t size = 0) : points(size) {}
+
+    uint32_t getNumElements() const { return static_cast<uint32_t>(points.size()); }
+
+    void setSize(uint32_t new_size, int save_elements = 0) { points.resize(new_size); }
 
     const point &operator[](uint32_t index) const { return points[index]; }
 
     point &operator[](uint32_t index) { return points[index]; }
-
-    void setSize(uint32_t new_size, int save_elements = 0) { points.resize(new_size); }
-
-  private:
-    std::vector<point> points;
 };
 
 } // namespace cbag

@@ -19,17 +19,17 @@ using vector = oa::oaVector;
 namespace cbag {
 
 class vector {
-  public:
-    inline vector() : dx(0), dy(0) {}
-
-    inline vector(offset_t dx, offset_t dy) : dx(dx), dy(dy) {}
-
-    inline offset_t x() const { return dx; }
-
-    inline offset_t y() const { return dy; }
-
   private:
     offset_t dx, dy;
+
+  public:
+    vector() = default;
+
+    vector(offset_t dx, offset_t dy) : dx(dx), dy(dy) {}
+
+    offset_t x() const { return dx; }
+
+    offset_t y() const { return dy; }
 };
 
 } // namespace cbag

@@ -13,13 +13,13 @@
 namespace cbag {
 namespace sch {
 
-struct line : shape_base {
-    inline line() : shape_base(), points() {}
-
-    inline line(lay_t lay, purp_t purp, std::string net, uint32_t n)
-        : shape_base(lay, purp, std::move(net)), points(n) {}
-
+struct line : public shape_base {
+  public:
     point_array points;
+
+    line() = default;
+
+    line(lay_t lay, purp_t purp, std::string net, uint32_t n);
 };
 
 } // namespace sch

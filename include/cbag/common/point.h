@@ -19,22 +19,22 @@ using point = oa::oaPoint;
 namespace cbag {
 
 class point {
+  private:
+    coord_t xv, yv;
+
   public:
-    inline point() : xv(0), yv(0) {}
+    point() = default;
 
-    inline point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
+    point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
 
-    inline coord_t x() const { return xv; }
+    coord_t x() const { return xv; }
 
-    inline coord_t y() const { return yv; }
+    coord_t y() const { return yv; }
 
-    inline void set(coord_t x, coord_t y) {
+    void set(coord_t x, coord_t y) {
         xv = x;
         yv = y;
     }
-
-  private:
-    coord_t xv, yv;
 };
 
 } // namespace cbag

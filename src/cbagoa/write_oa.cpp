@@ -333,11 +333,12 @@ void OAWriter::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *d
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
         if (prop_pair.first == "portOrder") {
-            std::visit(
-                make_prop_visitor(dsn, prop_pair.first),
-                cbag::value_t(cbag::binary_t(
-                    prop_app_type, reinterpret_cast<const unsigned char *>(term_order_str.c_str()),
-                    term_order_str.size())));
+            const unsigned char *term_order_ptr =
+                reinterpret_cast<const unsigned char *>(term_order_str.c_str());
+            std::visit(make_prop_visitor(dsn, prop_pair.first),
+                       cbag::value_t(cbag::binary_t{
+                           prop_app_type,
+                           std::string(term_order_ptr, term_order_ptr + term_order_str.size())}));
         } else {
             std::visit(make_prop_visitor(dsn, prop_pair.first), prop_pair.second);
         }
