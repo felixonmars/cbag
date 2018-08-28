@@ -10,9 +10,15 @@
 
 #include <string>
 
-#include <cbag/spirit/ast.h>
-
 namespace cbag {
+
+namespace spirit {
+namespace ast {
+struct name_bit;
+struct name_unit;
+struct name;
+} // namespace ast
+} // namespace spirit
 
 // string <-> name conversion methods
 

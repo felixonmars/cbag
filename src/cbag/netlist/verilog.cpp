@@ -16,14 +16,14 @@
 
 namespace cbag {
 
-void VerilogBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
+void verilog_builder::init(const std::vector<std::string> &inc_list, bool shell) {
     // TODO: Add actual implementation
 }
 
-void VerilogBuilder::write_end() {}
+void verilog_builder::write_end() {}
 
-void VerilogBuilder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                                     const sch::term_t &out_terms, const sch::term_t &io_terms) {
+void verilog_builder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                                      const sch::term_t &out_terms, const sch::term_t &io_terms) {
     // write module declaration
     line_builder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
@@ -63,10 +63,12 @@ void VerilogBuilder::write_cv_header(const std::string &name, const sch::term_t 
     out_file << std::endl;
 }
 
-void VerilogBuilder::write_cv_end(const std::string &name) { out_file << "endmodule" << std::endl; }
+void verilog_builder::write_cv_end(const std::string &name) {
+    out_file << "endmodule" << std::endl;
+}
 
-void VerilogBuilder::write_instance_helper(const std::string &name, const sch::instance &inst,
-                                           const sch::cellview_info &info) {
+void verilog_builder::write_instance_helper(const std::string &name, const sch::instance &inst,
+                                            const sch::cellview_info &info) {
     // TODO: add actual implementation
 }
 

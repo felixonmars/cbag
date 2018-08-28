@@ -9,13 +9,9 @@
 #define CBAG_NETLIST_NETLIST_H
 
 #include <fstream>
-#include <map>
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-#include <cbag/netlist/name_convert.h>
 #include <cbag/netlist/netlist_map_t.h>
 #include <cbag/schematic/term_t.h>
 
@@ -33,10 +29,20 @@ struct binary_t;
 // netlister base class
 
 class netlist_builder {
+  protected:
+    std::ofstream out_file;
+
   public:
     /** A helper class for writing a line with column limit
      */
     class line_builder {
+      private:
+        std::vector<std::string> tokens;
+        size_t ncol;
+        char cnt_char;
+        bool break_before;
+        int tab_size;
+
       public:
         line_builder(size_t ncol, char cnt_char, bool break_before, int tab_size);
 
@@ -45,13 +51,6 @@ class netlist_builder {
         friend line_builder &operator<<(line_builder &builder, std::string &&token);
 
         friend std::ofstream &operator<<(std::ofstream &stream, const line_builder &b);
-
-      private:
-        std::vector<std::string> tokens;
-        size_t ncol;
-        char cnt_char;
-        bool break_before;
-        int tab_size;
     };
 
     explicit netlist_builder(const char *fname);
@@ -64,8 +63,6 @@ class netlist_builder {
                       bool shell);
 
   protected:
-    std::ofstream out_file;
-
     void write_instance(const std::string &name, const sch::instance &inst,
                         const netlist_map_t &cell_map);
 
@@ -82,6 +79,10 @@ class netlist_builder {
 };
 
 class write_param_visitor {
+  private:
+    netlist_builder::line_builder *ptr;
+    const std::string *key;
+
   public:
     write_param_visitor(netlist_builder::line_builder *ptr, const std::string *key);
 
@@ -91,10 +92,6 @@ class write_param_visitor {
     void operator()(const bool &v) const;
     void operator()(const time_struct &v) const;
     void operator()(const binary_t &v) const;
-
-  private:
-    netlist_builder::line_builder *ptr;
-    const std::string *key;
 };
 
 } // namespace cbag

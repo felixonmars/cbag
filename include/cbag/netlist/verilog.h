@@ -12,9 +12,9 @@
 
 namespace cbag {
 
-class VerilogBuilder : public netlist_builder {
+class verilog_builder : public netlist_builder {
   public:
-    explicit VerilogBuilder(const char *fname) : netlist_builder(fname) {}
+    explicit verilog_builder(const char *fname) : netlist_builder(fname) {}
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 

@@ -35,9 +35,9 @@ void init_logging() {
 std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
                                                       const std::string &format) {
     if (format == "cdl") {
-        return std::make_unique<CDLBuilder>(fname);
+        return std::make_unique<cdl_builder>(fname);
     } else if (format == "verilog") {
-        return std::make_unique<VerilogBuilder>(fname);
+        return std::make_unique<verilog_builder>(fname);
     } else {
         throw std::invalid_argument(fmt::format("Unrecognized netlist format: {}", format));
     }

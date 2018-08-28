@@ -8,6 +8,7 @@
 #include <fmt/format.h>
 
 #include <cbag/netlist/name_convert.h>
+#include <cbag/spirit/ast.h>
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>

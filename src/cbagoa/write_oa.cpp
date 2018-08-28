@@ -17,6 +17,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cbag/spirit/ast.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>

@@ -11,15 +11,19 @@
 
 #include <fmt/format.h>
 
-#include <cbag/netlist/cdl.h>
+#include <cbag/spirit/ast.h>
+
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 
+#include <cbag/netlist/cdl.h>
+#include <cbag/netlist/name_convert.h>
+
 namespace cbag {
 
-void CDLBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
+void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
     if (!shell) {
         for (auto const &fname : inc_list) {
             out_file << ".INCLUDE " << fname << std::endl;
@@ -30,10 +34,10 @@ void CDLBuilder::init(const std::vector<std::string> &inc_list, bool shell) {
     }
 }
 
-void CDLBuilder::write_end() {}
+void cdl_builder::write_end() {}
 
-void CDLBuilder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                                 const sch::term_t &out_terms, const sch::term_t &io_terms) {
+void cdl_builder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
+                                  const sch::term_t &out_terms, const sch::term_t &io_terms) {
     line_builder b(ncol, cnt_char, break_before, tab_size);
     b << ".SUBCKT";
     b << name;
@@ -48,10 +52,10 @@ void CDLBuilder::write_cv_header(const std::string &name, const sch::term_t &in_
     out_file << b;
 }
 
-void CDLBuilder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
+void cdl_builder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
 
-void CDLBuilder::write_instance_helper(const std::string &name, const sch::instance &inst,
-                                       const sch::cellview_info &info) {
+void cdl_builder::write_instance_helper(const std::string &name, const sch::instance &inst,
+                                        const sch::cellview_info &info) {
     line_builder b(ncol, cnt_char, break_before, tab_size);
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
