@@ -11,7 +11,12 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbag/cbag.h>
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/instance.h>
+#include <cbag/schematic/pin_figure.h>
+#include <cbag/schematic/pin_object.h>
+#include <cbag/schematic/shape_t_def.h>
+
 #include <cbagoa/read_oa.h>
 
 namespace cbagoa {

@@ -14,7 +14,8 @@
 
 #include <yaml-cpp/unordered_map.h>
 
-#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 
 #include <cbagyaml/datatypes.h>
 #include <cbagyaml/figures.h>

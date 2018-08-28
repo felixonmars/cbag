@@ -14,8 +14,8 @@
 
 #include <fmt/format.h>
 
-#include <cbag/cbag.h>
-
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/instance.h>
 #include <cbagyaml/cbagyaml.h>
 
 #include <cbagoa/database.h>

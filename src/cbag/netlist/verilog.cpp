@@ -10,8 +10,9 @@
 #include <fmt/format.h>
 
 #include <cbag/netlist/verilog.h>
-#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
+#include <cbag/schematic/pin_figure.h>
 
 namespace cbag {
 

@@ -11,11 +11,19 @@
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
 
-#include <cbag/schematic/cellviews.h>
-
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
+#include <cbag/schematic/instance.h>
+#include <cbag/schematic/pin_figure.h>
+#include <cbag/schematic/shape_t_def.h>
 
 namespace cbag {
 namespace sch {
+
+cellview::cellview() = default;
+
+cellview::cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox)
+    : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
 
 void cellview::clear_params() { props.clear(); }
 

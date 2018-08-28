@@ -19,9 +19,11 @@ namespace sch {
  * AttrDisplay. This object encapsulates those two.
  */
 struct pin_object {
-    /** Create an empty instance.
-     */
-    inline pin_object() = default;
+  public:
+    instance inst;
+    term_attr attr;
+
+    pin_object();
 
     /** Create an instance with empty parameter and terminal mappings.
      *
@@ -30,10 +32,7 @@ struct pin_object {
      * @param view the view name.
      * @param xform the instance location.
      */
-    inline pin_object(instance &&inst, term_attr &&attr) : inst(inst), attr(attr){};
-
-    instance inst;
-    term_attr attr;
+    pin_object(instance &&inst, term_attr &&attr);
 };
 
 } // namespace sch

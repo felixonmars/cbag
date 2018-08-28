@@ -16,12 +16,19 @@
 #include <vector>
 
 #include <cbag/netlist/name_convert.h>
-#include <cbag/schematic/cellviews_fwd.h>
+#include <cbag/netlist/netlist_map_t.h>
+#include <cbag/schematic/term_t.h>
 
 namespace cbag {
 
-using lib_map_t = std::unordered_map<std::string, sch::cellview_info>;
-using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
+namespace sch {
+struct cellview;
+struct instance;
+} // namespace sch
+
+// forward declaration
+struct time_struct;
+struct binary_t;
 
 // netlister base class
 
@@ -73,10 +80,6 @@ class netlist_builder {
     virtual void write_instance_helper(const std::string &name, const sch::instance &inst,
                                        const sch::cellview_info &info) = 0;
 };
-
-// forward declaration
-struct time_struct;
-struct binary_t;
 
 class write_param_visitor {
   public:

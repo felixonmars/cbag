@@ -17,9 +17,15 @@ namespace sch {
 /** An instance object
  */
 struct instance {
-    /** Create an empty instance.
-     */
-    inline instance() = default;
+  public:
+    std::string lib_name, cell_name, view_name;
+    transform xform;
+    box_t bbox;
+    bool is_primitive;
+    std::map<std::string, std::string> connections;
+    param_map params;
+
+    instance();
 
     /** Create an instance with empty parameter and terminal mappings.
      *
@@ -28,10 +34,7 @@ struct instance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    inline instance(std::string lib, std::string cell, std::string view, transform xform,
-                    box_t bbox)
-        : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
-          xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
+    instance(std::string lib, std::string cell, std::string view, transform xform, box_t bbox);
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
@@ -53,16 +56,9 @@ struct instance {
 
     void resize_nets(uint32_t old_size, uint32_t new_size);
 
-    inline uint32_t width() const { return bbox.getWidth(); }
+    uint32_t width() const { return bbox.getWidth(); }
 
-    inline uint32_t height() const { return bbox.getHeight(); }
-
-    std::string lib_name, cell_name, view_name;
-    transform xform;
-    box_t bbox;
-    bool is_primitive;
-    std::map<std::string, std::string> connections;
-    param_map params;
+    uint32_t height() const { return bbox.getHeight(); }
 };
 
 } // namespace sch

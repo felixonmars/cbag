@@ -1,5 +1,5 @@
-#ifndef CBAG_SCHEMATIC_SHAPES_FWD_H
-#define CBAG_SCHEMATIC_SHAPES_FWD_H
+#ifndef CBAG_SCHEMATIC_SHAPE_T_H
+#define CBAG_SCHEMATIC_SHAPE_T_H
 
 #include <variant>
 

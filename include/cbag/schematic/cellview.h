@@ -5,8 +5,8 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_SCHEMATIC_CELLVIEWS_H
-#define CBAG_SCHEMATIC_CELLVIEWS_H
+#ifndef CBAG_SCHEMATIC_CELLVIEW_H
+#define CBAG_SCHEMATIC_CELLVIEW_H
 
 #include <map>
 #include <memory>
@@ -16,43 +16,35 @@
 #include <cbag/common/box_t.h>
 #include <cbag/common/datatypes.h>
 #include <cbag/common/typedefs.h>
-#include <cbag/schematic/cellviews_fwd.h>
-#include <cbag/schematic/pin_figure.h>
-#include <cbag/schematic/shapes.h>
+#include <cbag/schematic/shape_t.h>
+#include <cbag/schematic/term_t.h>
 
 namespace cbag {
 namespace sch {
 
+struct instance;
+struct cellview;
+struct cellview_info;
+
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
 using inst_iter_t = std::map<std::string, instance>::iterator;
-
-/** A simple struct representing netlist information of a cellview.
- */
-struct cellview_info {
-    inline cellview_info()
-        : cell_name(), in_terms(), out_terms(), io_terms(), props(), is_prim(false) {}
-
-    inline cellview_info(std::string name, size_t num_in, size_t num_out, size_t num_inout,
-                         bool is_prim)
-        : cell_name(name), is_prim(is_prim) {
-        in_terms.reserve(num_in);
-        out_terms.reserve(num_out);
-        io_terms.reserve(num_inout);
-    }
-
-    std::string cell_name;
-    std::vector<std::string> in_terms, out_terms, io_terms;
-    param_map props;
-    bool is_prim;
-};
 
 /** A schematic or symbol cell view
  */
 struct cellview {
-    inline cellview() = default;
+  public:
+    std::string lib_name, cell_name, view_name;
+    box_t bbox;
+    term_t in_terms, out_terms, io_terms;
+    std::vector<shape_t> shapes;
+    std::map<std::string, instance> instances;
+    param_map props;
+    param_map app_defs;
+    std::unique_ptr<cellview> sym_ptr;
 
-    inline cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox)
-        : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
+    cellview();
+
+    cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox);
 
     // methods to manipulate parameters, so Cython doesn't have to worry about
     // variants
@@ -85,15 +77,6 @@ struct cellview {
                                             coord_t dy, const std::vector<conn_list_t> &conns_list);
 
     cellview_info get_info(const std::string &cell_name) const;
-
-    std::string lib_name, cell_name, view_name;
-    box_t bbox;
-    term_t in_terms, out_terms, io_terms;
-    std::vector<shape_t> shapes;
-    std::map<std::string, instance> instances;
-    param_map props;
-    param_map app_defs;
-    std::unique_ptr<cellview> sym_ptr;
 };
 
 } // namespace sch

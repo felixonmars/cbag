@@ -15,6 +15,12 @@
 namespace cbag {
 namespace sch {
 
+instance::instance() = default;
+
+instance::instance(std::string lib, std::string cell, std::string view, transform xform, box_t bbox)
+    : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
+      xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
+
 void instance::clear_params() { params.clear(); }
 
 void instance::set_int_param(const char *name, int value) { params[name] = value; }

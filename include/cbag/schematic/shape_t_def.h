@@ -4,10 +4,10 @@
  *  \author Eric Chang
  *  \date   2018/07/19
  */
-#ifndef CBAG_SCHEMATIC_SHAPES_H
-#define CBAG_SCHEMATIC_SHAPES_H
+#ifndef CBAG_SCHEMATIC_SHAPE_T_DEF_H
+#define CBAG_SCHEMATIC_SHAPE_T_DEF_H
 
-#include <cbag/schematic/shapes_fwd.h>
+#include <cbag/schematic/shape_t.h>
 
 #include <cbag/schematic/arc.h>
 #include <cbag/schematic/donut.h>

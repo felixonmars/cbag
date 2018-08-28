@@ -13,7 +13,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/schematic/shapes.h>
+#include <cbag/schematic/shape_t_def.h>
 
 #include <cbagyaml/fusion.h>
 #include <cbagyaml/primitives.h>

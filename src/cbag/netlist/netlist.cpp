@@ -11,7 +11,8 @@
 
 #include <cbag/common/datatypes.h>
 #include <cbag/netlist/netlist.h>
-#include <cbag/schematic/cellviews.h>
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 
 namespace cbag {

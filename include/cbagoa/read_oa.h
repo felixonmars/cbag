@@ -13,7 +13,7 @@
 #include <oa/oaDesignDB.h>
 
 #include <cbag/common/datatypes.h>
-#include <cbag/schematic/shapes_fwd.h>
+#include <cbag/schematic/shape_t.h>
 
 // forward declare structures to reduce dependencies
 namespace spdlog {
