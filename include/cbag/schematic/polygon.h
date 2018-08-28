@@ -17,7 +17,7 @@ struct polygon : public shape_base {
   public:
     point_array points;
 
-    polygon() = default;
+    polygon();
 
     polygon(lay_t lay, purp_t purp, std::string net, uint32_t n);
 };

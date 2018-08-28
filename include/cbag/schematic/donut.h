@@ -18,7 +18,7 @@ struct donut : public shape_base {
     point center;
     dist_t radius, hole_radius;
 
-    donut() = default;
+    donut();
 
     donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r);
 

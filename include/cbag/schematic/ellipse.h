@@ -17,7 +17,7 @@ struct ellipse : public shape_base {
   public:
     box_t bbox;
 
-    ellipse() = default;
+    ellipse();
 
     ellipse(lay_t lay, purp_t purp, std::string net);
 

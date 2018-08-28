@@ -3,6 +3,8 @@
 namespace cbag {
 namespace sch {
 
+ellipse::ellipse() = default;
+
 ellipse::ellipse(lay_t lay, purp_t purp, std::string net) : shape_base(lay, purp, std::move(net)) {}
 
 ellipse::ellipse(lay_t lay, purp_t purp, std::string net, coord_t xl, coord_t yl, coord_t xh,

@@ -17,7 +17,7 @@ struct rectangle : public shape_base {
   public:
     box_t bbox;
 
-    rectangle() = default;
+    rectangle();
 
     rectangle(lay_t lay, purp_t purp, std::string net);
 

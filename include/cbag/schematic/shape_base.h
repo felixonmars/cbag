@@ -20,7 +20,7 @@ struct shape_base {
     purp_t purpose;
     std::string net;
 
-    shape_base() = default;
+    shape_base();
 
     shape_base(lay_t lay, purp_t purp, std::string net);
 };

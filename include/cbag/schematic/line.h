@@ -17,7 +17,7 @@ struct line : public shape_base {
   public:
     point_array points;
 
-    line() = default;
+    line();
 
     line(lay_t lay, purp_t purp, std::string net, uint32_t n);
 };

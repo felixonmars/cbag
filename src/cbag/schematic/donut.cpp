@@ -3,6 +3,8 @@
 namespace cbag {
 namespace sch {
 
+donut::donut() = default;
+
 donut::donut(lay_t lay, purp_t purp, std::string net, dist_t r, dist_t hole_r)
     : shape_base(lay, purp, std::move(net)), radius(r), hole_radius(hole_r) {}
 

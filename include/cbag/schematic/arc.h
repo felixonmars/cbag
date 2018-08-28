@@ -18,7 +18,7 @@ struct arc : public shape_base {
     double ang_start, ang_stop;
     box_t bbox;
 
-    arc() = default;
+    arc();
 
     arc(lay_t lay, purp_t purp, std::string net, double start, double stop);
 
