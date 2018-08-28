@@ -7,10 +7,11 @@
 #ifndef CBAG_LAYOUT_POLYGON_VIEW_H
 #define CBAG_LAYOUT_POLYGON_VIEW_H
 
+#include <cbag/common/typedefs.h>
 #include <cbag/layout/joined_ra_range.h>
-#include <cbag/layout/polygon.h>
-#include <cbag/layout/polygon45_view.h>
 #include <cbag/layout/polygon90_view.h>
+#include <cbag/layout/polygon_sets.h>
+#include <cbag/layout/rectangle.h>
 
 namespace cbag {
 namespace layout {
@@ -29,14 +30,13 @@ class polygon_view : public joined_ra_range<polygon_view2, polygon90_view> {
     using coordinate_type = coord_t;
     using operator_arg_type = polygon_view;
 
-    inline polygon_view(const polygon_set &val0, const polygon45_set &val1,
-                        const polygon90_set &val2, const rectangle_set &val3)
-        : joined_ra_range<polygon_view2, polygon90_view>(view_no_90, view_90),
-          view_no_90(val0, val1), view_90(val2, val3) {}
-
   private:
     polygon_view2 view_no_90;
     polygon90_view view_90;
+
+  public:
+    polygon_view(const polygon_set &val0, const polygon45_set &val1, const polygon90_set &val2,
+                 const rectangle_set &val3);
 };
 
 } // namespace layout

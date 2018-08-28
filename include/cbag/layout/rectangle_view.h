@@ -7,6 +7,8 @@
 #ifndef CBAG_LAYOUT_RECTANGLE_VIEW_H
 #define CBAG_LAYOUT_RECTANGLE_VIEW_H
 
+#include <cbag/common/typedefs.h>
+#include <cbag/layout/polygon_sets.h>
 #include <cbag/layout/rectangle.h>
 
 namespace cbag {
@@ -26,18 +28,19 @@ class rectangle_view {
     using coordinate_type = coord_t;
     using operator_arg_type = rectangle_view;
 
-    inline rectangle_view() = default;
-
-    inline explicit rectangle_view(const rectangle_set &val) : ptr(&val) {}
-
-    inline const_iterator begin() const { return ptr->begin(); }
-
-    inline const_iterator end() const { return ptr->end(); }
-
-    inline std::size_t size() const { return ptr->size(); }
-
   private:
     const rectangle_set *ptr;
+
+  public:
+    rectangle_view() = default;
+
+    explicit rectangle_view(const rectangle_set &val) : ptr(&val) {}
+
+    const_iterator begin() const { return ptr->begin(); }
+
+    const_iterator end() const { return ptr->end(); }
+
+    std::size_t size() const { return ptr->size(); }
 };
 
 } // namespace layout
