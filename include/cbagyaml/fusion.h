@@ -18,33 +18,12 @@
 #include <boost/mpl/size.hpp>
 
 // boost::fusion
-#include <boost/fusion/adapted.hpp>
 #include <boost/fusion/include/adapted.hpp>
 
-// boost::fusion::extension::struct_member_name
-//#include <boost/fusion/adapted/struct/detail/extension.hpp>
-
-// boost::fusion::result_of::value_at
-//#include <boost/fusion/include/value_at.hpp>
-//#include <boost/fusion/sequence/intrinsic/value_at.hpp>
-
-// boost::fusion::result_of::size
-//#include <boost/fusion/include/size.hpp>
-//#include <boost/fusion/sequence/intrinsic/size.hpp>
-
-// BOOST_TYPEOF
-//#include <boost/typeof/typeof.hpp>
-
-// boost::fusion::at
-//#include <boost/fusion/include/at.hpp>
-//#include <boost/fusion/sequence/intrinsic/at.hpp>
-
 // boost::fusion::for_each
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
 
 // boost::fusion::zip
-#include <boost/fusion/algorithm/transformation/zip.hpp>
 #include <boost/fusion/include/zip.hpp>
 
 // boost::units::detail::demangle
@@ -52,8 +31,8 @@
 
 #include <yaml-cpp/yaml.h>
 
-namespace yaml {
-namespace serialization {
+namespace cbagyaml {
+
 template <typename S> struct sequence {
     // Point to the first element
     typedef boost::mpl::int_<0> begin;
@@ -183,31 +162,7 @@ template <typename T> struct extractor {
     int mItem;
 };
 
-inline std::string node_to_str(const YAML::Node &node) {
-    YAML::Emitter emitter;
-    emitter << node;
-    return emitter.c_str();
-}
-
-template <typename Base> std::string to_yaml(const Base &v) {
-    YAML::Emitter emitter;
-    YAML::Node root = YAML::convert<Base>::encode(v);
-    emitter << root;
-    return emitter.c_str();
-}
-
-// Load yaml into this object
-template <typename Base> bool from_yaml(std::string const &yaml_string, Base &obj) {
-    YAML::Node n;
-    try {
-        n = YAML::Load(yaml_string);
-    } catch (...) {
-        return false;
-    }
-    return YAML::convert<Base>::decode(n, obj);
-}
-} // namespace serialization
-} // namespace yaml
+} // namespace cbagyaml
 
 namespace YAML {
 template <typename T> struct convert {
@@ -222,13 +177,13 @@ template <typename T> struct convert {
         // Every sequence is made up of primitives at some level
 
         // Get a range representing the size of the structure
-        typedef typename yaml::serialization::sequence<T>::indices indices;
+        typedef typename cbagyaml::sequence<T>::indices indices;
 
         // Make a root node to insert into
         YAML::Node root;
 
         // Create an inserter for the root node
-        yaml::serialization::inserter<T> inserter(root);
+        cbagyaml::inserter<T> inserter(root);
 
         // Insert each member of the structure
         boost::fusion::for_each(boost::fusion::zip(indices(), rhs), inserter);
@@ -247,13 +202,13 @@ template <typename T> struct convert {
         // Every sequence is made up of primitives at some level
 
         // Get a range representing the size of the structure
-        typedef typename yaml::serialization::sequence<T>::indices indices;
+        typedef typename cbagyaml::sequence<T>::indices indices;
 
         // Create an extractor for the root node
         // Yaml-cpp requires node to be const&, but the extractor makes
         // non-const calls to it.
         Node &writable_node = const_cast<Node &>(node);
-        yaml::serialization::extractor<T> extractor(writable_node);
+        cbagyaml::extractor<T> extractor(writable_node);
 
         // Extract each member of the structure
         try {

@@ -12,13 +12,11 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <yaml-cpp/unordered_map.h>
+#include "yaml-cpp/unordered_map.h"
 
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 
-#include <cbagyaml/datatypes.h>
-#include <cbagyaml/figures.h>
 #include <cbagyaml/fusion.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview, lib_name, cell_name, view_name, bbox, in_terms,

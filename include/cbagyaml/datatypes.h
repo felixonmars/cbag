@@ -8,7 +8,6 @@
 #ifndef CBAG_YAML_DATATYPES_H
 #define CBAG_YAML_DATATYPES_H
 
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 #include <yaml-cpp/yaml.h>
@@ -20,18 +19,6 @@
 BOOST_FUSION_ADAPT_STRUCT(cbag::time_struct, time_val)
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::binary_t, name, bin_val)
-
-namespace cbag {
-class to_yaml_visitor {
-  public:
-    explicit to_yaml_visitor(YAML::Node *ptr) : ptr(ptr) {}
-
-    template <typename T> void operator()(T &operand) const { ptr->push_back(operand); }
-
-  private:
-    YAML::Node *ptr;
-};
-} // namespace cbag
 
 namespace YAML {
 template <> struct convert<cbag::value_t> {

@@ -7,7 +7,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cbagyaml/fusion.h>
+#include <cbagyaml/common.h>
 #include <cbagyaml/point.h>
 #include <cbagyaml/point_array.h>
 
@@ -27,7 +27,7 @@ bool convert<cbag::point_array>::decode(const Node &node, cbag::point_array &rhs
     auto logger = spdlog::get("cbag");
     if (!node.IsMap()) {
         logger->warn("cbag::point_array YAML decode: not a map.  Node:\n{}",
-                     yaml::serialization::node_to_str(node));
+                     cbagyaml::node_to_str(node));
         return false;
     }
     try {
@@ -35,7 +35,7 @@ bool convert<cbag::point_array>::decode(const Node &node, cbag::point_array &rhs
         Node pnode = node["points"];
         if (!pnode.IsSequence() || pnode.size() != size) {
             logger->warn("cbag::point_array YAML decode: not a sequence or size != {}.  Node:\n{}",
-                         size, yaml::serialization::node_to_str(node));
+                         size, cbagyaml::node_to_str(node));
             return false;
         }
         rhs.setSize(size);
@@ -45,7 +45,7 @@ bool convert<cbag::point_array>::decode(const Node &node, cbag::point_array &rhs
         rhs.setNumElements(size);
     } catch (...) {
         logger->warn("cbag::point_array YAML decode exception.  Node:\n{}",
-                     yaml::serialization::node_to_str(node));
+                     cbagyaml::node_to_str(node));
         return false;
     }
     return true;

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <cbagyaml/common.h>
 #include <cbagyaml/fusion.h>
 
 #include <cbag/spirit/ast_adapted.h>
@@ -24,7 +25,7 @@ int main() {
 
             std::cout << "-------------------------\n";
             std::cout << "Success.  Output: \n";
-            std::cout << yaml::serialization::to_yaml(name_obj) << std::endl;
+            std::cout << cbagyaml::to_yaml(name_obj) << std::endl;
             std::cout << "-------------------------\n";
         } catch (std::invalid_argument &ex) {
             std::cout << "-------------------------\n";

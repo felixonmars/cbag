@@ -3,6 +3,7 @@
 
 #include <boost/fusion/adapted.hpp>
 
+#include <cbagyaml/common.h>
 #include <cbagyaml/fusion.h>
 
 struct One {
@@ -50,7 +51,7 @@ int main(int argc, char *argv[]) {
     v.nine.push_back(temp);
     v.nine.push_back(temp);
 
-    std::cout << yaml::serialization::to_yaml(v) << std::endl;
+    std::cout << cbagyaml::to_yaml(v) << std::endl;
 
     ///////////////////////////////////////////
     std::cout << "==============" << std::endl;
@@ -82,6 +83,6 @@ int main(int argc, char *argv[]) {
        << "    - 7.8       \n"
        << "    - 9.0       \n";
 
-    yaml::serialization::from_yaml(ss.str(), v);
-    std::cout << yaml::serialization::to_yaml(v) << std::endl;
+    cbagyaml::from_yaml(ss.str(), v);
+    std::cout << cbagyaml::to_yaml(v) << std::endl;
 }

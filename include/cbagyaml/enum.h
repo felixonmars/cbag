@@ -5,17 +5,19 @@
  *  \date   2018/07/12
  */
 
-#ifndef CBAG_YAML_PRIMITIVES_H
-#define CBAG_YAML_PRIMITIVES_H
+#ifndef CBAG_YAML_ENUM_H
+#define CBAG_YAML_ENUM_H
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/primitives.h>
-
-#include <cbagyaml/box_t.h>
-#include <cbagyaml/point.h>
-#include <cbagyaml/point_array.h>
-#include <cbagyaml/transform.h>
+#include <cbag/common/font_t.h>
+#include <cbag/common/orientation.h>
+#include <cbag/common/path_style.h>
+#include <cbag/common/sig_type.h>
+#include <cbag/common/term_attr_type.h>
+#include <cbag/common/term_type.h>
+#include <cbag/common/text_align.h>
+#include <cbag/common/text_disp_format.h>
 
 namespace YAML {
 

@@ -9,8 +9,9 @@
 
 #include <cbag/common/typedefs.h>
 
-#include <cbagyaml/primitives.h>
-#include <cbagyaml/fusion.h>
+#include <cbagyaml/common.h>
+#include <cbagyaml/enum.h>
+#include <cbagyaml/transform.h>
 
 namespace YAML {
 
@@ -26,7 +27,7 @@ bool convert<cbag::transform>::decode(const Node &node, cbag::transform &rhs) {
     auto logger = spdlog::get("cbag");
     if (!node.IsSequence() || node.size() != 3) {
         logger->warn("cbag::transform YAML decode: not a sequence or size != 3.  Node:\n{}",
-                     yaml::serialization::node_to_str(node));
+                     cbagyaml::node_to_str(node));
         return false;
     }
     try {
@@ -34,7 +35,7 @@ bool convert<cbag::transform>::decode(const Node &node, cbag::transform &rhs) {
                 node[2].as<cbag::orientation>());
     } catch (...) {
         logger->warn("cbag::transform YAML decode exception.  Node:\n{}",
-                     yaml::serialization::node_to_str(node));
+                     cbagyaml::node_to_str(node));
         return false;
     }
     return true;

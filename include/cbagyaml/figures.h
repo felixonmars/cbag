@@ -8,7 +8,6 @@
 #ifndef CBAG_YAML_FIGURES_H
 #define CBAG_YAML_FIGURES_H
 
-#include <boost/fusion/adapted/struct/adapt_struct.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 
 #include <yaml-cpp/yaml.h>
@@ -18,7 +17,6 @@
 #include <cbag/schematic/pin_object.h>
 
 #include <cbagyaml/fusion.h>
-#include <cbagyaml/shapes.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, xform, bbox,
                           connections, params)

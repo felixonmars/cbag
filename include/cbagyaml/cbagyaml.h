@@ -8,21 +8,15 @@
 #ifndef CBAGYAML_H
 #define CBAGYAML_H
 
-#include <memory>
-#include <string>
-#include <vector>
-
-#include <cbag/netlist/netlist.h>
-
+#include <cbagyaml/box_t.h>
+#include <cbagyaml/cbagyaml_fwd.h>
 #include <cbagyaml/cellviews.h>
+#include <cbagyaml/datatypes.h>
+#include <cbagyaml/enum.h>
+#include <cbagyaml/figures.h>
+#include <cbagyaml/point.h>
+#include <cbagyaml/point_array.h>
+#include <cbagyaml/shapes.h>
+#include <cbagyaml/transform.h>
 
-namespace cbag {
-
-void to_file(const sch::cellview &cv, const char *fname);
-
-std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym_view);
-
-netlist_map_t read_netlist_map(const char *fname);
-
-} // namespace cbag
 #endif
