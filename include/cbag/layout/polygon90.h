@@ -12,79 +12,53 @@
 namespace cbag {
 namespace layout {
 
-class CompactIterator : public std::iterator<std::forward_iterator_tag, coord_t> {
-  public:
-    inline CompactIterator() = default;
-
-    inline CompactIterator(point_vector_t::const_iterator start,
-                           point_vector_t::const_iterator stop, bool second = false)
-        : start(std::move(start)), stop(std::move(stop)), second(second) {}
-
-    inline coord_t operator*() const { return second ? start->y() : start->x(); }
-
-    inline CompactIterator &operator++() {
-        if (second) {
-            ++start;
-            second = false;
-        } else {
-            second = true;
-        }
-        return *this;
-    }
-
-    inline bool operator==(const CompactIterator &rhs) const {
-        return start == rhs.start && stop == rhs.stop && second == rhs.second;
-    }
-
-    inline bool operator!=(const CompactIterator &rhs) const {
-        return start != rhs.start || stop != rhs.stop || second != rhs.second;
-    }
-
+class compact_iterator : public std::iterator<std::forward_iterator_tag, coord_t> {
   private:
     point_vector_t::const_iterator start;
     point_vector_t::const_iterator stop;
     bool second;
+
+  public:
+    compact_iterator();
+
+    compact_iterator(point_vector_t::const_iterator start, point_vector_t::const_iterator stop,
+                     bool second = false);
+
+    coord_t operator*() const { return second ? start->y() : start->x(); }
+
+    compact_iterator &operator++();
+
+    bool operator==(const compact_iterator &rhs) const {
+        return start == rhs.start && stop == rhs.stop && second == rhs.second;
+    }
+
+    bool operator!=(const compact_iterator &rhs) const {
+        return start != rhs.start || stop != rhs.stop || second != rhs.second;
+    }
 };
 
-class PointIterator : public std::iterator<std::forward_iterator_tag, point_t> {
-  public:
-    inline PointIterator() : ptr(nullptr), idx(0), between(false) {}
-
-    inline PointIterator(const point_vector_t *ptr, std::size_t idx, bool between)
-        : ptr(ptr), idx(idx), between(between) {}
-
-    inline point_t operator*() const {
-        if (between) {
-            if (idx == ptr->size() - 1) {
-                return point_t((*ptr)[0].x(), (*ptr)[idx].y());
-            }
-            return point_t((*ptr)[idx + 1].x(), (*ptr)[idx].y());
-        }
-        return (*ptr)[idx];
-    }
-
-    inline PointIterator &operator++() {
-        if (between) {
-            ++idx;
-            between = false;
-        } else {
-            between = true;
-        }
-        return *this;
-    }
-
-    inline bool operator==(const PointIterator &rhs) const {
-        return ptr == rhs.ptr && idx == rhs.idx && between == rhs.between;
-    }
-
-    inline bool operator!=(const PointIterator &rhs) const {
-        return idx != rhs.idx || between != rhs.between || ptr != rhs.ptr;
-    }
-
+class point_iterator : public std::iterator<std::forward_iterator_tag, point_t> {
   private:
     const point_vector_t *ptr;
     std::size_t idx;
     bool between;
+
+  public:
+    point_iterator();
+
+    point_iterator(const point_vector_t *ptr, std::size_t idx, bool between);
+
+    point_t operator*() const;
+
+    point_iterator &operator++();
+
+    bool operator==(const point_iterator &rhs) const {
+        return ptr == rhs.ptr && idx == rhs.idx && between == rhs.between;
+    }
+
+    bool operator!=(const point_iterator &rhs) const {
+        return idx != rhs.idx || between != rhs.between || ptr != rhs.ptr;
+    }
 };
 
 // -----------------------------------------------------------------------------
@@ -95,20 +69,22 @@ class PointIterator : public std::iterator<std::forward_iterator_tag, point_t> {
 
 class polygon90 : public polygon45 {
   public:
-    using compact_iterator_type = CompactIterator;
-    using iterator_type = PointIterator;
+    using compact_iterator_type = compact_iterator;
+    using iterator_type = point_iterator;
 
-    inline polygon90() : polygon45() {}
-    explicit inline polygon90(std::size_t n) : polygon45(n) {}
-    explicit inline polygon90(point_vector_t data) : polygon45(std::move(data)) {}
+    polygon90();
 
-    inline compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
-    inline compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }
-    inline iterator_type begin() const { return {&data, 0, false}; }
-    inline iterator_type end() const { return {&data, data.size(), false}; }
-    inline std::size_t size() const { return 2 * data.size(); }
+    explicit polygon90(std::size_t n);
 
-    template <class iT> inline void set_compact(iT input_begin, iT input_end) {
+    explicit polygon90(point_vector_t data);
+
+    compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
+    compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }
+    iterator_type begin() const { return {&data, 0, false}; }
+    iterator_type end() const { return {&data, data.size(), false}; }
+    std::size_t size() const { return 2 * data.size(); }
+
+    template <class iT> void set_compact(iT input_begin, iT input_end) {
         data.clear();
         while (input_begin != input_end) {
             coord_t tmp = *input_begin;
@@ -118,7 +94,7 @@ class polygon90 : public polygon45 {
         }
     }
 
-    template <class iT> inline void set(iT input_begin, iT input_end) {
+    template <class iT> void set(iT input_begin, iT input_end) {
         data.clear();
         while (input_begin != input_end) {
             data.push_back(*input_begin);
@@ -127,8 +103,6 @@ class polygon90 : public polygon45 {
         }
     }
 };
-
-using polygon90_set = std::vector<polygon90>;
 
 } // namespace layout
 } // namespace cbag

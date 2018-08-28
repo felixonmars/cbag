@@ -1,110 +1,36 @@
 #ifndef CBAG_LAYOUT_CELLVIEW_H
 #define CBAG_LAYOUT_CELLVIEW_H
 
-#include <algorithm>
 #include <unordered_map>
 #include <utility>
-#include <variant>
+#include <vector>
 
 #include <boost/functional/hash.hpp>
 
-#include <cbag/common/transform.h>
-#include <cbag/layout/blockage.h>
-#include <cbag/layout/boundary.h>
+#include <cbag/layout/instance.h>
 #include <cbag/layout/geometry.h>
-#include <cbag/layout/via.h>
+#include <cbag/layout/polygon_ref.h>
+#include <cbag/layout/typedefs.h>
 
 namespace cbag {
 namespace layout {
 
+class polygon;
+class boundary;
+class blockage;
+class via;
+class rectangle;
+class polygon90;
+class polygon45;
+class polygon;
+
+using layer_t = std::pair<lay_t, purp_t>;
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
-
 using block_map_t = std::unordered_map<layer_t, std::vector<blockage>, boost::hash<layer_t>>;
-
-// class forwarding
-class cellview;
-
-class instance {
-  public:
-    inline instance(std::string lib, std::string cell, std::string view, transform xform,
-                    uint32_t nx = 1, uint32_t ny = 1, coord_t spx = 0, coord_t spy = 0)
-        : lib(std::move(lib)), cell(std::move(cell)), view(std::move(view)), xform(xform), nx(nx),
-          ny(ny), spx(spx), spy(spy), master(nullptr) {}
-
-  private:
-    std::string lib;
-    std::string cell;
-    std::string view;
-    transform xform;
-    uint32_t nx;
-    uint32_t ny;
-    coord_t spx;
-    coord_t spy;
-    cellview *master;
-};
-
 using inst_map_t = std::unordered_map<std::string, instance>;
 
 class cellview {
-  public:
-    cellview(std::string tech, uint8_t geo_mode = 0)
-        : tech(std::move(tech)), inst_name_cnt(0), geo_mode(geo_mode) {}
-
-    inline bool is_empty() const {
-        return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
-               area_block_list.empty() && boundary_list.empty();
-    }
-
-    inline rectangle get_bbox(const layer_t layer) const {
-        auto iter = geo_map.find(layer);
-        if (iter == geo_map.end()) {
-            return {};
-        }
-        return iter->second.get_bbox();
-    }
-
-    std::string add_instance(instance inst, const char *name = nullptr);
-
-    inline polygon_ref<rectangle> add_rect(layer_t layer, coord_t xl, coord_t yl, coord_t xh,
-                                           coord_t yh) {
-        auto iter = geo_map.find(layer);
-        if (iter == geo_map.end()) {
-            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
-        }
-        return iter->second.add_rect(xl, yl, xh, yh);
-    }
-
-    inline polygon_ref<polygon90> add_poly90(layer_t layer, point_vector_t data) {
-        auto iter = geo_map.find(layer);
-        if (iter == geo_map.end()) {
-            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
-        }
-        return iter->second.add_poly90(std::move(data));
-    }
-
-    inline polygon_ref<polygon45> add_poly45(layer_t layer, point_vector_t data) {
-        auto iter = geo_map.find(layer);
-        if (iter == geo_map.end()) {
-            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
-        }
-        return iter->second.add_poly45(std::move(data));
-    }
-
-    inline polygon_ref<polygon> add_poly(layer_t layer, point_vector_t data) {
-        auto iter = geo_map.find(layer);
-        if (iter == geo_map.end()) {
-            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
-        }
-        return iter->second.add_poly(std::move(data));
-    }
-
-    inline void add_path_seg(layer_t layer, point_t start, point_t stop) {
-
-    }
-
   private:
-    std::string get_inst_name();
-
     std::string tech;
     geo_map_t geo_map;
     inst_map_t inst_map;
@@ -114,6 +40,34 @@ class cellview {
     std::vector<boundary> boundary_list;
     uint32_t inst_name_cnt;
     uint8_t geo_mode;
+
+  public:
+    explicit cellview(std::string tech, uint8_t geo_mode = 0);
+
+    bool is_empty() const {
+        return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
+               area_block_list.empty() && boundary_list.empty();
+    }
+
+    rectangle get_bbox(const layer_t &layer) const;
+
+    std::string add_instance(instance inst, const char *name = nullptr);
+
+    polygon_ref<rectangle> add_rect(const layer_t &layer, coord_t xl, coord_t yl, coord_t xh,
+                                    coord_t yh);
+
+    polygon_ref<polygon90> add_poly90(const layer_t &layer, point_vector_t data);
+
+    polygon_ref<polygon45> add_poly45(const layer_t &layer, point_vector_t data);
+
+    polygon_ref<polygon> add_poly(const layer_t &layer, point_vector_t data);
+
+    void add_path_seg(const layer_t &layer, point_t start, point_t stop);
+
+  private:
+    std::string get_inst_name();
+
+    geo_map_t::iterator get_geometry(const layer_t &layer);
 };
 
 } // namespace layout

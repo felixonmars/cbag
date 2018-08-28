@@ -85,8 +85,18 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/term_attr.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_base.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/cellview.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/instance.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon45.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon45_view.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon90.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon90_view.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/union_view.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/cdl.cpp

@@ -8,12 +8,11 @@ namespace cbag {
 namespace layout {
 
 class boundary : public polygon {
-  public:
-    explicit inline boundary(point_vector_t data, boundary_type type)
-        : polygon(std::move(data)), type(type) {}
-
   private:
     boundary_type type;
+
+  public:
+    boundary(point_vector_t data, boundary_type type);
 };
 
 } // namespace layout

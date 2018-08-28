@@ -7,7 +7,6 @@
 #ifndef CBAG_LAYOUT_TYPEDEFS_H
 #define CBAG_LAYOUT_TYPEDEFS_H
 
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -22,8 +21,6 @@ namespace bp = boost::polygon;
 
 using point_t = bp::point_data<coord_t>;
 using point_vector_t = std::vector<point_t>;
-
-using layer_t = std::pair<lay_t, purp_t>;
 
 // custom unsigned char literal definition
 inline constexpr unsigned char operator"" _uc(unsigned long long arg) noexcept {

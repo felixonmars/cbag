@@ -8,12 +8,11 @@ namespace cbag {
 namespace layout {
 
 class blockage : public polygon {
-  public:
-    explicit inline blockage(point_vector_t data, blockage_type type)
-        : polygon(std::move(data)), type(type) {}
-
   private:
     blockage_type type;
+
+  public:
+    blockage(point_vector_t data, blockage_type type);
 };
 
 } // namespace layout

@@ -1,7 +1,37 @@
+#include <algorithm>
+
 #include <cbag/layout/geometry.h>
 
 namespace cbag {
 namespace layout {
+
+geometry::geometry(uint8_t mode)
+    : rect_set(), poly90_set(), poly45_set(), poly_set(), mode(mode), view(make_union_view()) {}
+
+rectangle geometry::get_bbox() const { return extents(view); }
+
+polygon_ref<rectangle> geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
+    rect_set.emplace_back(xl, yl, xh, yh);
+    return {&rect_set, rect_set.size() - 1};
+}
+
+polygon_ref<polygon90> geometry::add_poly90(point_vector_t data) {
+    mode = std::max(mode, 1_uc);
+    poly90_set.emplace_back(std::move(data));
+    return {&poly90_set, poly90_set.size() - 1};
+}
+
+polygon_ref<polygon45> geometry::add_poly45(point_vector_t data) {
+    mode = std::max(mode, 2_uc);
+    poly45_set.emplace_back(std::move(data));
+    return {&poly45_set, poly45_set.size() - 1};
+}
+
+polygon_ref<polygon> geometry::add_poly(point_vector_t data) {
+    mode = std::max(mode, 3_uc);
+    poly_set.emplace_back(std::move(data));
+    return {&poly_set, poly_set.size() - 1};
+}
 
 union_view geometry::make_union_view() {
     switch (mode) {

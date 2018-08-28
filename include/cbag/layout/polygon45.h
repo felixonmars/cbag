@@ -14,12 +14,10 @@ namespace layout {
 
 class polygon45 : public polygon {
   public:
-    inline polygon45() : polygon() {}
-    explicit inline polygon45(std::size_t n) : polygon(n) {}
-    explicit inline polygon45(point_vector_t data) : polygon(std::move(data)) {}
+    polygon45();
+    explicit polygon45(std::size_t n);
+    explicit polygon45(point_vector_t data);
 };
-
-using polygon45_set = std::vector<polygon45>;
 
 } // namespace layout
 } // namespace cbag

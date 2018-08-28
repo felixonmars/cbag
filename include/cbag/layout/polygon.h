@@ -18,24 +18,25 @@ class polygon {
     using iterator_type = point_vector_t::const_iterator;
     using point_type = point_t;
 
-    inline polygon() : data() {}
-    explicit inline polygon(std::size_t n) : data() { data.reserve(n); }
-    explicit inline polygon(point_vector_t data) : data(std::move(data)) {}
+  protected:
+    point_vector_t data;
 
-    inline iterator_type begin() const { return data.begin(); }
-    inline iterator_type end() const { return data.end(); }
-    inline std::size_t size() const { return data.size(); }
+  public:
+    polygon();
+
+    explicit polygon(std::size_t n);
+
+    explicit polygon(point_vector_t data);
+
+    iterator_type begin() const { return data.begin(); }
+    iterator_type end() const { return data.end(); }
+    std::size_t size() const { return data.size(); }
 
     template <class iT> inline void set(iT input_begin, iT input_end) {
         data.clear();
         data.insert(data.end(), input_begin, input_end);
     }
-
-  protected:
-    point_vector_t data;
 };
-
-using polygon_set = std::vector<polygon>;
 
 } // namespace layout
 } // namespace cbag

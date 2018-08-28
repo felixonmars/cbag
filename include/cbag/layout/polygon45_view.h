@@ -8,28 +8,18 @@
 #define CBAG_LAYOUT_POLYGON45_VIEW_H
 
 #include <cbag/layout/joined_ra_range.h>
-#include <cbag/layout/polygon45.h>
 #include <cbag/layout/polygon90_view.h>
-#include <cbag/layout/rectangle.h>
+#include <cbag/layout/polygon_sets.h>
 
 namespace cbag {
 namespace layout {
-
-// -----------------------------------------------------------------------------
-// rectangle declaration
-// for rectangle, the first point is the lower left vertex, the second point
-// is the upper right vertex.
-// as the result, rectangle always have exactly 2 points in data.
-// -----------------------------------------------------------------------------
 
 class polygon45_view : public joined_ra_range<polygon45_set, polygon90_view> {
   public:
     using coordinate_type = coord_t;
     using operator_arg_type = polygon45_view;
 
-    inline polygon45_view(const polygon45_set &val0, const polygon90_set &val1,
-                          const rectangle_set &val2)
-        : joined_ra_range<polygon45_set, polygon90_view>(val0, view_90), view_90(val1, val2) {}
+    polygon45_view(const polygon45_set &val0, const polygon90_set &val1, const rectangle_set &val2);
 
   private:
     polygon90_view view_90;

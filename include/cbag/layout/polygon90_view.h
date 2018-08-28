@@ -7,8 +7,11 @@
 #ifndef CBAG_LAYOUT_POLYGON90_VIEW_H
 #define CBAG_LAYOUT_POLYGON90_VIEW_H
 
+#include <boost/polygon/polygon.hpp>
+
+#include <cbag/common/typedefs.h>
 #include <cbag/layout/joined_ra_range.h>
-#include <cbag/layout/polygon90.h>
+#include <cbag/layout/polygon_sets.h>
 #include <cbag/layout/rectangle.h>
 
 namespace cbag {
@@ -26,8 +29,7 @@ class polygon90_view : public joined_ra_range<polygon90_set, rectangle_set> {
     using coordinate_type = coord_t;
     using operator_arg_type = polygon90_view;
 
-    inline polygon90_view(const polygon90_set &lval, const rectangle_set &rval)
-        : joined_ra_range<polygon90_set, rectangle_set>(lval, rval) {}
+    polygon90_view(const polygon90_set &lval, const rectangle_set &rval);
 };
 
 } // namespace layout

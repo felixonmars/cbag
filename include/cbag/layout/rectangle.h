@@ -48,8 +48,6 @@ class rectangle : public polygon90 {
     }
 };
 
-using rectangle_set = std::vector<rectangle>;
-
 } // namespace layout
 } // namespace cbag
 
