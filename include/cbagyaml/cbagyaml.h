@@ -8,6 +8,7 @@
 #ifndef CBAGYAML_H
 #define CBAGYAML_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -19,7 +20,7 @@ namespace cbag {
 
 void to_file(const sch::cellview &cv, const char *fname);
 
-void from_file(const char *yaml_fname, const char *sym_view, sch::cellview &cv);
+std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym_view);
 
 netlist_map_t read_netlist_map(const char *fname);
 

@@ -4,7 +4,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 
 from libcpp cimport bool as cbool
-from libcpp.memory cimport unique_ptr, make_unique
+from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from libcpp.map cimport map
 from libcpp.utility cimport pair
@@ -20,7 +20,12 @@ ctypedef map[string, instance].iterator inst_iter_t
 ctypedef unordered_map[string, cellview_info] lib_map_t
 ctypedef unordered_map[string, lib_map_t] netlist_map_t
 
-cdef extern from "cbag/cbag.h" namespace "cbag":
+
+cdef extern from "<utility>" namespace "std" nogil:
+    cdef unique_ptr[cellview] move(unique_ptr[cellview])
+
+
+cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     cdef void init_logging()
 
     cdef void write_netlist(const vector[cellview *]& cv_list, const vector[string]& name_list,
@@ -28,7 +33,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag":
                             cbool flat, cbool shell, const char* fname) except +
 
 
-cdef extern from "cbag/cbag.h" namespace "cbag::sch":
+cdef extern from "cbag/cbag.h" namespace "cbag::sch" nogil:
     cdef cppclass pin_figure:
         pass
 
@@ -98,12 +103,12 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch":
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
 
-cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag":
-    cdef cellview from_file(const char* yaml_fname, const char* sym_view, cellview& cv) except +
+cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
+    cdef unique_ptr[cellview] from_file(const char* yaml_fname, const char* sym_view) except +
 
     cdef netlist_map_t read_netlist_map(const char* fname) except +
 
-cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa":
+cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa" nogil:
     cdef cppclass OADatabase:
         OADatabase(const char* lib_def_file) except +
 
@@ -310,8 +315,8 @@ cdef class PySchCellView:
     def __init__(self, yaml_fname, sym_view, encoding):
         yaml_fname = yaml_fname.encode(encoding)
         sym_view = sym_view.encode(encoding)
-        from_file(yaml_fname, sym_view, deref(self.cv_ptr))
         self.encoding = encoding
+        self.cv_ptr = move(from_file(yaml_fname, sym_view))
 
     def __dealloc__(self):
         self.cv_ptr.reset()

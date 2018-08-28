@@ -29,18 +29,19 @@ void to_file(const sch::cellview &cv, const char *fname) {
     outfile.close();
 }
 
-void from_file(const char *yaml_fname, const char *sym_view, sch::cellview &cv) {
+std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym_view) {
     fs::path yaml_path(yaml_fname);
     YAML::Node n = YAML::LoadFile(yaml_path.string());
-    YAML::convert<sch::cellview>::decode(n, cv);
+    auto ans = std::make_unique<sch::cellview>(n.as<sch::cellview>());
     if (sym_view != nullptr) {
         // load symbol cellview
         yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
         if (fs::exists(yaml_path)) {
             YAML::Node s = YAML::LoadFile(yaml_path.string());
-            cv.sym_ptr = std::make_unique<sch::cellview>(s.as<sch::cellview>());
+            ans->sym_ptr = std::make_unique<sch::cellview>(s.as<sch::cellview>());
         }
     }
+    return ans;
 }
 
 netlist_map_t read_netlist_map(const char *fname) {

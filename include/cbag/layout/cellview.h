@@ -63,10 +63,46 @@ class cellview {
         return iter->second.get_bbox();
     }
 
-    std::string add_instance(instance inst, const char* name = nullptr);
+    std::string add_instance(instance inst, const char *name = nullptr);
+
+    inline polygon_ref<rectangle> add_rect(layer_t layer, coord_t xl, coord_t yl, coord_t xh,
+                                           coord_t yh) {
+        auto iter = geo_map.find(layer);
+        if (iter == geo_map.end()) {
+            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        }
+        return iter->second.add_rect(xl, yl, xh, yh);
+    }
+
+    inline polygon_ref<polygon90> add_poly90(layer_t layer, point_vector_t data) {
+        auto iter = geo_map.find(layer);
+        if (iter == geo_map.end()) {
+            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        }
+        return iter->second.add_poly90(std::move(data));
+    }
+
+    inline polygon_ref<polygon45> add_poly45(layer_t layer, point_vector_t data) {
+        auto iter = geo_map.find(layer);
+        if (iter == geo_map.end()) {
+            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        }
+        return iter->second.add_poly45(std::move(data));
+    }
+
+    inline polygon_ref<polygon> add_poly(layer_t layer, point_vector_t data) {
+        auto iter = geo_map.find(layer);
+        if (iter == geo_map.end()) {
+            iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        }
+        return iter->second.add_poly(std::move(data));
+    }
+
+    inline void add_path_seg(layer_t layer, point_t start, point_t stop) {
+
+    }
 
   private:
-
     std::string get_inst_name();
 
     std::string tech;

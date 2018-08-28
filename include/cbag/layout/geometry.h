@@ -29,19 +29,19 @@ class geometry {
         return {&rect_set, rect_set.size() - 1};
     }
 
-    inline polygon_ref<polygon90> add_poly90(point_vector_t &&data) {
+    inline polygon_ref<polygon90> add_poly90(point_vector_t data) {
         mode = std::max(mode, 1_uc);
         poly90_set.emplace_back(std::move(data));
         return {&poly90_set, poly90_set.size() - 1};
     }
 
-    inline polygon_ref<polygon45> add_poly45(point_vector_t &&data) {
+    inline polygon_ref<polygon45> add_poly45(point_vector_t data) {
         mode = std::max(mode, 2_uc);
         poly45_set.emplace_back(std::move(data));
         return {&poly45_set, poly45_set.size() - 1};
     }
 
-    inline polygon_ref<polygon> add_poly(point_vector_t &&data) {
+    inline polygon_ref<polygon> add_poly(point_vector_t data) {
         mode = std::max(mode, 3_uc);
         poly_set.emplace_back(std::move(data));
         return {&poly_set, poly_set.size() - 1};
