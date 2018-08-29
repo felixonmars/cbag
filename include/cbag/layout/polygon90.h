@@ -133,7 +133,7 @@ template <> struct polygon_90_traits<cbag::layout::polygon90> {
 };
 
 // specialize traits to override point iterator and winding
-template <> struct polygon_traits_90<cbag::layout::polygon90> {
+template <> struct polygon_traits<cbag::layout::polygon90> {
     using coordinate_type = cbag::layout::polygon90::coordinate_type;
     using iterator_type = cbag::layout::polygon90::iterator_type;
     using point_type = cbag::layout::polygon90::point_type;
