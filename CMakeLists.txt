@@ -99,6 +99,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon_view.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/union_view.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp

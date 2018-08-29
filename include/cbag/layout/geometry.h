@@ -1,6 +1,10 @@
 #ifndef CBAG_LAYOUT_GEOMETRY_H
 #define CBAG_LAYOUT_GEOMETRY_H
 
+#include <string>
+#include <unordered_map>
+
+#include <cbag/common/path_style.h>
 #include <cbag/layout/polygon45_view.h>
 #include <cbag/layout/polygon90_view.h>
 #include <cbag/layout/polygon_ref.h>
@@ -17,6 +21,8 @@ namespace layout {
  */
 class geometry {
   private:
+    static const std::unordered_map<std::string, path_style> style_map;
+
     rectangle_set rect_set;
     polygon90_set poly90_set;
     polygon45_set poly45_set;
@@ -41,12 +47,13 @@ class geometry {
 
     polygon_ref<polygon> add_poly(point_vector_t data);
 
+    static point_vector_t path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+                                         offset_t half_width, const char *style0,
+                                         const char *style1);
+
   private:
     union_view make_union_view();
 };
-
-point_vector_t path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t width,
-                              const char *style0, const char *style1);
 
 } // namespace layout
 } // namespace cbag
