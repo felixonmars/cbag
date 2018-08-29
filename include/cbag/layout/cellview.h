@@ -7,8 +7,8 @@
 
 #include <boost/functional/hash.hpp>
 
-#include <cbag/layout/instance.h>
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/instance.h>
 #include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/typedefs.h>
 
@@ -62,7 +62,8 @@ class cellview {
 
     polygon_ref<polygon> add_poly(const layer_t &layer, point_vector_t data);
 
-    void add_path_seg(const layer_t &layer, point_t start, point_t stop);
+    void add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+                      dist_t width, const char *style0, const char *style1);
 
   private:
     std::string get_inst_name();

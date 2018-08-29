@@ -46,5 +46,17 @@ union_view geometry::make_union_view() {
     }
 }
 
+point_vector_t path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t width,
+                              const char *style0, const char *style1) {
+    if (width == 0) {
+        // zero condition
+        return {};
+    }
+
+    offset_t dx = x1 - x0;
+    offset_t dy = y1 - y0;
+
+}
+
 } // namespace layout
 } // namespace cbag

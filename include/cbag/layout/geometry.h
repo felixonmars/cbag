@@ -45,6 +45,9 @@ class geometry {
     union_view make_union_view();
 };
 
+point_vector_t path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t width,
+                              const char *style0, const char *style1);
+
 } // namespace layout
 } // namespace cbag
 
