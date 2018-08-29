@@ -15,7 +15,7 @@ namespace sch {
 
 struct donut : public shape_base {
   public:
-    point center{};
+    point center;
     dist_t radius = 0;
     dist_t hole_radius = 0;
 

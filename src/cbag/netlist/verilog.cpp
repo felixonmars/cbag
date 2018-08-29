@@ -15,6 +15,7 @@
 #include <cbag/schematic/pin_figure.h>
 
 namespace cbag {
+verilog_builder::verilog_builder(const char *fname) : netlist_builder(fname) {}
 
 void verilog_builder::init(const std::vector<std::string> &inc_list, bool shell) {
     // TODO: Add actual implementation

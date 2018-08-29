@@ -14,15 +14,17 @@ class rectangle;
 class via {
   private:
     std::string via_id;
-    uint32_t num_row, num_col;
-    uint32_t cut_w, cut_h;
+    uint32_t num_row = 1;
+    uint32_t num_col = 1;
+    uint32_t cut_w = 0;
+    uint32_t cut_h = 0;
     vector cut_spacing;
     vector lay1_enc;
     vector lay1_off;
     vector lay2_enc;
     vector lay2_off;
-    polygon_ref<rectangle> lay1_ref{};
-    polygon_ref<rectangle> lay2_ref{};
+    polygon_ref<rectangle> lay1_ref;
+    polygon_ref<rectangle> lay2_ref;
 
   public:
     via(std::string via_id, uint32_t num_row, uint32_t num_col, uint32_t cut_w, uint32_t cut_h,

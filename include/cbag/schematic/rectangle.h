@@ -15,7 +15,7 @@ namespace sch {
 
 struct rectangle : public shape_base {
   public:
-    box_t bbox{};
+    box_t bbox;
 
     rectangle();
 

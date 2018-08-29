@@ -17,7 +17,7 @@ struct arc : public shape_base {
   public:
     double ang_start = 0;
     double ang_stop = 0;
-    box_t bbox{};
+    box_t bbox;
 
     arc();
 

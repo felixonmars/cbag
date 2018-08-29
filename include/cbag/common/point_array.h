@@ -15,14 +15,13 @@ using point_array = oa::oaPointArray;
 #else
 
 #include <vector>
-
 #include <cbag/common/point.h>
 
 namespace cbag {
 
 class point_array {
   private:
-    std::vector<point> points{};
+    std::vector<point> points;
 
   public:
     explicit point_array(uint32_t size = 0) : points(size) {}

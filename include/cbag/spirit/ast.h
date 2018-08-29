@@ -53,8 +53,8 @@ struct range : x3::position_tagged {
  *  Could be either a scalar name ("foo") or a vector bit name ("bar<3>").
  */
 struct name_bit : x3::position_tagged {
-    std::string base{};
-    boost::optional<uint32_t> index{};
+    std::string base;
+    boost::optional<uint32_t> index;
 
     name_bit();
 
@@ -75,8 +75,8 @@ struct name_bit : x3::position_tagged {
  */
 struct name_unit : x3::position_tagged {
     uint32_t mult = 1;
-    std::string base{};
-    range idx_range{0, 0, 0};
+    std::string base;
+    range idx_range;
 
     name_unit();
 
@@ -98,9 +98,9 @@ struct name_unit : x3::position_tagged {
 struct name : x3::position_tagged {
     class const_iterator {
       private:
-        const name *ptr;
-        unsigned long unit_index;
-        uint32_t bit_index;
+        const name *ptr = nullptr;
+        unsigned long unit_index = 0;
+        uint32_t bit_index = 0;
 
       public:
         const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index);
@@ -114,7 +114,7 @@ struct name : x3::position_tagged {
         name_bit operator*() const;
     };
 
-    std::vector<name_unit> unit_list{};
+    std::vector<name_unit> unit_list;
 
     name();
 

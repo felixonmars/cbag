@@ -56,8 +56,8 @@ class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
 class oa_database {
   private:
     // OA namespace objects
-    const oa::oaNativeNS ns{};
-    const oa::oaCdbaNS ns_cdba{};
+    const oa::oaNativeNS ns;
+    const oa::oaCdbaNS ns_cdba;
 
     const std::string lib_def_file;
     const LibDefObserver lib_def_obs{1};

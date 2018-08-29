@@ -58,7 +58,7 @@ bool range::operator<(const range &other) const {
             (stop < other.stop || (stop == other.stop && step < other.step)));
 }
 
-name_bit::name_bit() {}
+name_bit::name_bit() = default;
 
 name_bit::name_bit(std::string base) : base(std::move(base)) {}
 
@@ -84,7 +84,7 @@ bool name_bit::operator<(const name_bit &other) const {
     }
 }
 
-name_unit::name_unit() {}
+name_unit::name_unit() = default;
 
 uint32_t name_unit::size() const { return mult * std::max(idx_range.size(), 1u); }
 
@@ -121,7 +121,7 @@ name::const_iterator &name::const_iterator::operator++() {
     return *this;
 }
 
-name::name() {}
+name::name() = default;
 
 bool name::const_iterator::operator!=(const const_iterator &other) const {
     return ptr != other.ptr || unit_index != other.unit_index || bit_index != other.bit_index;

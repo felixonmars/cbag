@@ -13,8 +13,14 @@
 namespace cbag {
 
 class verilog_builder : public netlist_builder {
+  private:
+    static const size_t ncol = 120;
+    static const char cnt_char = '\0';
+    static const bool break_before = true;
+    static const int tab_size = 4;
+
   public:
-    explicit verilog_builder(const char *fname) : netlist_builder(fname) {}
+    explicit verilog_builder(const char *fname);
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 
@@ -28,11 +34,6 @@ class verilog_builder : public netlist_builder {
 
     void write_instance_helper(const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info) override;
-
-    static const size_t ncol = 120;
-    static const char cnt_char = '\0';
-    static const bool break_before = true;
-    static const int tab_size = 4;
 };
 
 } // namespace cbag

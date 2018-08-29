@@ -18,7 +18,7 @@ struct shape_base {
   public:
     lay_t layer = 0;
     purp_t purpose = 0;
-    std::string net{};
+    std::string net;
 
     shape_base();
 

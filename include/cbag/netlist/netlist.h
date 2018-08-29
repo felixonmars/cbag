@@ -34,11 +34,11 @@ class netlist_builder {
      */
     class line_builder {
       private:
-        std::vector<std::string> tokens{};
-        size_t ncol;
-        char cnt_char;
-        bool break_before;
-        int tab_size;
+        std::vector<std::string> tokens;
+        size_t ncol = 80;
+        char cnt_char = ' ';
+        bool break_before = false;
+        int tab_size = 4;
 
       public:
         line_builder(size_t ncol, char cnt_char, bool break_before, int tab_size);
@@ -81,8 +81,8 @@ class netlist_builder {
 
 class write_param_visitor {
   private:
-    netlist_builder::line_builder *ptr;
-    const std::string *key;
+    netlist_builder::line_builder *ptr = nullptr;
+    const std::string *key = nullptr;
 
   public:
     write_param_visitor(netlist_builder::line_builder *ptr, const std::string *key);

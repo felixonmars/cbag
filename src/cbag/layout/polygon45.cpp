@@ -3,7 +3,7 @@
 namespace cbag {
 namespace layout {
 
-polygon45::polygon45() : polygon() {}
+polygon45::polygon45() = default;
 
 polygon45::polygon45(std::size_t n) : polygon(n) {}
 

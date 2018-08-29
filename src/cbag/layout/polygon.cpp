@@ -3,7 +3,7 @@
 namespace cbag {
 namespace layout {
 
-polygon::polygon() {}
+polygon::polygon() = default;
 
 polygon::polygon(std::size_t n) { data.reserve(n); }
 

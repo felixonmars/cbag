@@ -3,7 +3,7 @@
 namespace cbag {
 namespace sch {
 
-arc::arc() {}
+arc::arc() = default;
 
 arc::arc(lay_t lay, purp_t purp, std::string net, double start, double stop)
     : shape_base(lay, purp, std::move(net)), ang_start(start), ang_stop(stop) {}

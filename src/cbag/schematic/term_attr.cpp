@@ -3,7 +3,7 @@
 namespace cbag {
 namespace sch {
 
-term_attr::term_attr() {}
+term_attr::term_attr() = default;
 
 term_attr::term_attr(term_attr_type attr_type, lay_t lay, purp_t purp, std::string net,
                      text_align align, orientation orient, font_t font, dist_t height,

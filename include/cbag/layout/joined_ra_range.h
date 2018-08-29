@@ -49,8 +49,8 @@ class joined_ra_range {
       private:
         std::size_t idx = 0;
         const std::size_t lsize = 0;
-        const typename ltype::const_iterator lstart{};
-        const typename rtype::const_iterator rstart{};
+        const typename ltype::const_iterator lstart;
+        const typename rtype::const_iterator rstart;
 
       public:
         joined_ra_iterator() {}

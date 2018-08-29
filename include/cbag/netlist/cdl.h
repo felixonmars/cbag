@@ -13,8 +13,14 @@
 namespace cbag {
 
 class cdl_builder : public netlist_builder {
+  private:
+    static const size_t ncol = 80;
+    static const char cnt_char = '+';
+    static const bool break_before = false;
+    static const int tab_size = 0;
+
   public:
-    explicit cdl_builder(const char *fname) : netlist_builder(fname) {}
+    explicit cdl_builder(const char *fname);
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 
@@ -28,11 +34,6 @@ class cdl_builder : public netlist_builder {
 
     void write_instance_helper(const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info) override;
-
-    static const size_t ncol = 80;
-    static const char cnt_char = '+';
-    static const bool break_before = false;
-    static const int tab_size = 0;
 };
 
 } // namespace cbag

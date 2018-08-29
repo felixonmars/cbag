@@ -18,10 +18,10 @@ class instance {
     std::string cell;
     std::string view;
     transform xform;
-    uint32_t nx;
-    uint32_t ny;
-    coord_t spx;
-    coord_t spy;
+    uint32_t nx = 1;
+    uint32_t ny = 1;
+    offset_t spx = 0;
+    offset_t spy = 0;
     cellview *master = nullptr;
 
   public:

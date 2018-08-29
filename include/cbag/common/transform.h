@@ -26,7 +26,7 @@ class transform {
     orientation oval = oR0;
 
   public:
-    transform() {}
+    transform() = default;
 
     transform(coord_t x, coord_t y, orientation orient = oR0) : x(x), y(y), oval(orient) {}
 

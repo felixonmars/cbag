@@ -3,7 +3,7 @@
 namespace cbag {
 namespace sch {
 
-rectangle::rectangle() {}
+rectangle::rectangle() = default;
 
 rectangle::rectangle(lay_t lay, purp_t purp, std::string net)
     : shape_base(lay, purp, std::move(net)) {}

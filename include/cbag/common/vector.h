@@ -24,7 +24,7 @@ class vector {
     offset_t dy = 0;
 
   public:
-    vector() {}
+    vector() = default;
 
     vector(offset_t dx, offset_t dy) : dx(dx), dy(dy) {}
 

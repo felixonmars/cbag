@@ -16,7 +16,7 @@ namespace sch {
 
 struct text_t : public text_base {
   public:
-    std::string text{};
+    std::string text;
 
     text_t();
 

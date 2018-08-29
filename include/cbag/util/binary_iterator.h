@@ -13,7 +13,7 @@ class binary_iterator {
     T low;
     std::optional<T> high;
     T current;
-    std::optional<T> marker{};
+    std::optional<T> marker;
 
   public:
     binary_iterator(T low, T high) : low(low), high(high), current((high + low) / 2) {}

@@ -19,7 +19,7 @@ namespace sch {
 
 struct text_base : public shape_base {
   public:
-    point origin{0, 0};
+    point origin;
     text_align alignment = taCC;
     orientation orient = oR0;
     font_t font = fRoman;

@@ -20,8 +20,8 @@ namespace sch {
  */
 struct pin_object {
   public:
-    instance inst{};
-    term_attr attr{};
+    instance inst;
+    term_attr attr;
 
     pin_object();
 
