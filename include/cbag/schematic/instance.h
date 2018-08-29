@@ -18,12 +18,14 @@ namespace sch {
  */
 struct instance {
   public:
-    std::string lib_name, cell_name, view_name;
-    transform xform;
-    box_t bbox;
-    bool is_primitive;
-    std::map<std::string, std::string> connections;
-    param_map params;
+    std::string lib_name{};
+    std::string cell_name{};
+    std::string view_name{};
+    transform xform{};
+    box_t bbox{};
+    bool is_primitive = false;
+    std::map<std::string, std::string> connections{};
+    param_map params{};
 
     instance();
 

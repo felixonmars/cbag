@@ -17,10 +17,11 @@ namespace sch {
 
 struct path : public shape_base {
   public:
-    dist_t width;
-    point_array points;
-    path_style style;
-    dist_t begin_ext, end_ext;
+    dist_t width = 0;
+    point_array points{};
+    path_style style = psTruncate;
+    dist_t begin_ext = 0;
+    dist_t end_ext = 0;
 
     path();
 

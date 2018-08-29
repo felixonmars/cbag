@@ -27,6 +27,10 @@ namespace ast {
  *  step size of 0 means that this range is empty; it doesn't contain any item.
  */
 struct range : x3::position_tagged {
+    uint32_t start = 0;
+    uint32_t stop = 0;
+    uint32_t step = 0;
+
     range();
 
     range(uint32_t start, uint32_t stop, uint32_t step);
@@ -42,10 +46,6 @@ struct range : x3::position_tagged {
     bool operator!=(const range &other) const;
 
     bool operator<(const range &other) const;
-
-    uint32_t start;
-    uint32_t stop;
-    uint32_t step;
 };
 
 /** Represents a single name
@@ -53,6 +53,9 @@ struct range : x3::position_tagged {
  *  Could be either a scalar name ("foo") or a vector bit name ("bar<3>").
  */
 struct name_bit : x3::position_tagged {
+    std::string base{};
+    boost::optional<uint32_t> index{};
+
     name_bit();
 
     explicit name_bit(std::string base);
@@ -64,9 +67,6 @@ struct name_bit : x3::position_tagged {
     bool operator!=(const name_bit &other) const;
 
     bool operator<(const name_bit &other) const;
-
-    std::string base;
-    boost::optional<uint32_t> index;
 };
 
 /** Represents a name unit
@@ -74,6 +74,9 @@ struct name_bit : x3::position_tagged {
  *  Possible formats are "foo", "bar<3:0>", "<*3>baz", or "<*3>asdf<3:0>".
  */
 struct name_unit : x3::position_tagged {
+    uint32_t mult = 1;
+    std::string base{};
+    range idx_range{0, 0, 0};
 
     name_unit();
 
@@ -88,16 +91,17 @@ struct name_unit : x3::position_tagged {
     bool operator!=(const name_unit &other) const;
 
     bool operator<(const name_unit &other) const;
-
-    uint32_t mult;
-    std::string base;
-    range idx_range;
 };
 
 /** Represents a list of name units.
  */
 struct name : x3::position_tagged {
     class const_iterator {
+      private:
+        const name *ptr;
+        unsigned long unit_index;
+        uint32_t bit_index;
+
       public:
         const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index);
 
@@ -108,12 +112,11 @@ struct name : x3::position_tagged {
         bool operator==(const const_iterator &other) const;
 
         name_bit operator*() const;
-
-      private:
-        const name *ptr;
-        unsigned long unit_index;
-        uint32_t bit_index;
     };
+
+    std::vector<name_unit> unit_list{};
+
+    name();
 
     const_iterator begin() const;
 
@@ -126,9 +129,8 @@ struct name : x3::position_tagged {
     bool operator!=(const name &other) const;
 
     bool operator<(const name &other) const;
-
-    std::vector<name_unit> unit_list;
 };
+
 } // namespace ast
 } // namespace spirit
 } // namespace cbag

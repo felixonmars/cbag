@@ -14,9 +14,9 @@ namespace layout {
 
 class compact_iterator : public std::iterator<std::forward_iterator_tag, coord_t> {
   private:
-    point_vector_t::const_iterator start;
-    point_vector_t::const_iterator stop;
-    bool second;
+    point_vector_t::const_iterator start{};
+    point_vector_t::const_iterator stop{};
+    bool second = false;
 
   public:
     compact_iterator();
@@ -39,9 +39,9 @@ class compact_iterator : public std::iterator<std::forward_iterator_tag, coord_t
 
 class point_iterator : public std::iterator<std::forward_iterator_tag, point_t> {
   private:
-    const point_vector_t *ptr;
-    std::size_t idx;
-    bool between;
+    const point_vector_t *ptr = nullptr;
+    std::size_t idx = 0;
+    bool between = false;
 
   public:
     point_iterator();

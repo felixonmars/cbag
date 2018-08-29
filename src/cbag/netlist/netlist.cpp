@@ -19,7 +19,7 @@ namespace cbag {
 
 netlist_builder::line_builder::line_builder(size_t ncol, char cnt_char, bool break_before,
                                             int tab_size)
-    : tokens(), ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
+    : ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
 
 netlist_builder::line_builder &operator<<(netlist_builder::line_builder &builder,
                                           const std::string &token) {

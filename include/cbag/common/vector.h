@@ -20,10 +20,11 @@ namespace cbag {
 
 class vector {
   private:
-    offset_t dx, dy;
+    offset_t dx = 0;
+    offset_t dy = 0;
 
   public:
-    vector() = default;
+    vector() {}
 
     vector(offset_t dx, offset_t dy) : dx(dx), dy(dy) {}
 

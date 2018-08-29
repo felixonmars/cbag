@@ -3,7 +3,7 @@
 namespace cbag {
 namespace sch {
 
-cellview_info::cellview_info() = default;
+cellview_info::cellview_info() {}
 
 cellview_info::cellview_info(std::string name, size_t num_in, size_t num_out, size_t num_inout,
                              bool is_prim)

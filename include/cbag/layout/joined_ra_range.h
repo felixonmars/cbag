@@ -47,13 +47,13 @@ class joined_ra_range {
                                                        typename ltype::value_type>::difference_type;
 
       private:
-        std::size_t idx;
-        const std::size_t lsize;
-        const typename ltype::const_iterator lstart;
-        const typename rtype::const_iterator rstart;
+        std::size_t idx = 0;
+        const std::size_t lsize = 0;
+        const typename ltype::const_iterator lstart{};
+        const typename rtype::const_iterator rstart{};
 
       public:
-        joined_ra_iterator() = default;
+        joined_ra_iterator() {}
 
         joined_ra_iterator(typename ltype::const_iterator lstart,
                            typename rtype::const_iterator rstart, std::size_t idx,

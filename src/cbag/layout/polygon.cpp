@@ -3,9 +3,9 @@
 namespace cbag {
 namespace layout {
 
-polygon::polygon() : wdir(winding_dir::unknown_winding) {}
+polygon::polygon() {}
 
-polygon::polygon(std::size_t n) : wdir(winding_dir::unknown_winding) { data.reserve(n); }
+polygon::polygon(std::size_t n) { data.reserve(n); }
 
 polygon::polygon(point_vector_t data, winding_dir wdir) : data(std::move(data)), wdir(wdir) {}
 

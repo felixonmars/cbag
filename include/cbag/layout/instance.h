@@ -22,7 +22,7 @@ class instance {
     uint32_t ny;
     coord_t spx;
     coord_t spy;
-    cellview *master;
+    cellview *master = nullptr;
 
   public:
     instance(std::string lib, std::string cell, std::string view, transform xform, uint32_t nx = 1,

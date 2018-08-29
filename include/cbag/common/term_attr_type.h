@@ -19,7 +19,7 @@ constexpr term_attr_type tatNumBits = term_attr_type::oacNumBitsTermAttrType;
 
 namespace cbag {
 
-enum term_attr_type { name, hasPins, numBits };
+enum term_attr_type : uint32_t { name, hasPins, numBits };
 constexpr term_attr_type tatName = term_attr_type::name;
 constexpr term_attr_type tatHasPin = term_attr_type::hasPins;
 constexpr term_attr_type tatNumBits = term_attr_type::numBits;

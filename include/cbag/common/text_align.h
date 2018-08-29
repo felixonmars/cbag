@@ -25,7 +25,7 @@ constexpr text_align taLR = text_align::oacLowerRightTextAlign;
 
 namespace cbag {
 
-enum text_align {
+enum text_align : uint32_t {
     upperLeft,
     centerLeft,
     lowerLeft,

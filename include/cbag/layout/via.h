@@ -21,8 +21,8 @@ class via {
     vector lay1_off;
     vector lay2_enc;
     vector lay2_off;
-    polygon_ref<rectangle> lay1_ref;
-    polygon_ref<rectangle> lay2_ref;
+    polygon_ref<rectangle> lay1_ref{};
+    polygon_ref<rectangle> lay2_ref{};
 
   public:
     via(std::string via_id, uint32_t num_row, uint32_t num_col, uint32_t cut_w, uint32_t cut_h,

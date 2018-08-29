@@ -19,12 +19,14 @@ namespace sch {
 
 struct text_base : public shape_base {
   public:
-    point origin;
-    text_align alignment;
-    orientation orient;
-    font_t font;
-    dist_t height;
-    bool overbar, visible, drafting;
+    point origin{0, 0};
+    text_align alignment = taCC;
+    orientation orient = oR0;
+    font_t font = fRoman;
+    dist_t height = 0;
+    bool overbar = false;
+    bool visible = true;
+    bool drafting = false;
 
     text_base();
 

@@ -15,7 +15,7 @@ namespace sch {
 
 struct line : public shape_base {
   public:
-    point_array points;
+    point_array points{};
 
     line();
 

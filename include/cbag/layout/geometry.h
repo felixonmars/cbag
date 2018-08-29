@@ -17,10 +17,10 @@ namespace layout {
  */
 class geometry {
   private:
-    rectangle_set rect_set;
-    polygon90_set poly90_set;
-    polygon45_set poly45_set;
-    polygon_set poly_set;
+    rectangle_set rect_set{};
+    polygon90_set poly90_set{};
+    polygon45_set poly45_set{};
+    polygon_set poly_set{};
     uint8_t mode;
     union_view view;
 

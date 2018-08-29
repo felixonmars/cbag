@@ -16,8 +16,8 @@ namespace sch {
 
 struct term_attr : public text_base {
   public:
-    term_attr_type attr_type;
-    text_disp_format format;
+    term_attr_type attr_type = tatName;
+    text_disp_format format = tdfNameValue;
 
     term_attr();
 

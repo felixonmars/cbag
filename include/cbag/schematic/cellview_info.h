@@ -20,10 +20,12 @@ namespace sch {
  */
 struct cellview_info {
   public:
-    std::string cell_name;
-    std::vector<std::string> in_terms, out_terms, io_terms;
-    param_map props;
-    bool is_prim;
+    std::string cell_name{};
+    std::vector<std::string> in_terms{};
+    std::vector<std::string> out_terms{};
+    std::vector<std::string> io_terms{};
+    param_map props{};
+    bool is_prim = false;
 
     cellview_info();
 

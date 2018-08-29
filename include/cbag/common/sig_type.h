@@ -26,7 +26,18 @@ constexpr sig_type stReset = sig_type::oacResetSigType;
 
 namespace cbag {
 
-enum sig_type { signal, power, ground, clock, tieOff, tieHi, tieLo, analog, scan, reset };
+enum sig_type : uint32_t {
+    signal,
+    power,
+    ground,
+    clock,
+    tieOff,
+    tieHi,
+    tieLo,
+    analog,
+    scan,
+    reset
+};
 constexpr sig_type stSignal = sig_type::signal;
 constexpr sig_type stPower = sig_type::power;
 constexpr sig_type stGround = sig_type::ground;

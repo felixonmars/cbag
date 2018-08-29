@@ -20,7 +20,7 @@
 namespace cbag {
 namespace sch {
 
-cellview::cellview() = default;
+cellview::cellview() {}
 
 cellview::cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox)
     : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}

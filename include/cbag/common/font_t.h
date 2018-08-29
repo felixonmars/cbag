@@ -25,7 +25,7 @@ constexpr font_t fMilSpec = font_t::oacMilSpecFont;
 
 namespace cbag {
 
-enum font_t { euroStyle, gothic, math, roman, script, stick, fixed, swedish, milSpec };
+enum font_t : uint32_t { euroStyle, gothic, math, roman, script, stick, fixed, swedish, milSpec };
 constexpr font_t fEuro = euroStyle;
 constexpr font_t fGoth = gothic;
 constexpr font_t fMath = math;

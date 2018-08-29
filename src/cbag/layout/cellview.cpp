@@ -14,7 +14,7 @@ namespace cbag {
 namespace layout {
 
 cellview::cellview(std::string tech, uint8_t geo_mode)
-    : tech(std::move(tech)), inst_name_cnt(0), geo_mode(geo_mode) {}
+    : tech(std::move(tech)), geo_mode(geo_mode) {}
 
 rectangle cellview::get_bbox(const layer_t &layer) const {
     auto iter = geo_map.find(layer);
@@ -71,7 +71,6 @@ polygon_ref<polygon> cellview::add_poly(const layer_t &layer, point_vector_t dat
 
 void cellview::add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                             dist_t width, const char *style0, const char *style1) {}
-
 
 std::string cellview::get_inst_name() {
     cbag::util::binary_iterator<uint32_t> iter(inst_name_cnt, std::optional<uint32_t>());

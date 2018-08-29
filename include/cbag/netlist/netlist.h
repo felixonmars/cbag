@@ -29,15 +29,12 @@ struct binary_t;
 // netlister base class
 
 class netlist_builder {
-  protected:
-    std::ofstream out_file;
-
   public:
     /** A helper class for writing a line with column limit
      */
     class line_builder {
       private:
-        std::vector<std::string> tokens;
+        std::vector<std::string> tokens{};
         size_t ncol;
         char cnt_char;
         bool break_before;
@@ -53,6 +50,10 @@ class netlist_builder {
         friend std::ofstream &operator<<(std::ofstream &stream, const line_builder &b);
     };
 
+  protected:
+    std::ofstream out_file;
+
+  public:
     explicit netlist_builder(const char *fname);
 
     virtual void init(const std::vector<std::string> &inc_list, bool shell) = 0;

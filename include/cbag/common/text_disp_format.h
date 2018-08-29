@@ -19,7 +19,7 @@ constexpr text_disp_format tdfNameValue = text_disp_format::oacNameValueTextDisp
 
 namespace cbag {
 
-enum text_disp_format { name, value, nameValue };
+enum text_disp_format : uint32_t { name, value, nameValue };
 constexpr text_disp_format tdfName = text_disp_format::name;
 constexpr text_disp_format tdfValue = text_disp_format::value;
 constexpr text_disp_format tdfNameValue = text_disp_format::nameValue;

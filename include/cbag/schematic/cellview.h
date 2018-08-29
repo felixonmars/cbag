@@ -23,7 +23,6 @@ namespace cbag {
 namespace sch {
 
 struct instance;
-struct cellview;
 struct cellview_info;
 
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
@@ -33,13 +32,17 @@ using inst_iter_t = std::map<std::string, instance>::iterator;
  */
 struct cellview {
   public:
-    std::string lib_name, cell_name, view_name;
-    box_t bbox;
-    term_t in_terms, out_terms, io_terms;
+    std::string lib_name{};
+    std::string cell_name{};
+    std::string view_name{};
+    box_t bbox{};
+    term_t in_terms;
+    term_t out_terms;
+    term_t io_terms;
     std::vector<shape_t> shapes;
     std::map<std::string, instance> instances;
-    param_map props;
-    param_map app_defs;
+    param_map props{};
+    param_map app_defs{};
     std::unique_ptr<cellview> sym_ptr;
 
     cellview();

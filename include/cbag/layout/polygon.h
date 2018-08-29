@@ -23,7 +23,7 @@ class polygon {
 
   protected:
     point_vector_t data;
-    mutable winding_dir wdir;
+    mutable winding_dir wdir = winding_dir::unknown_winding;
 
   public:
     polygon();

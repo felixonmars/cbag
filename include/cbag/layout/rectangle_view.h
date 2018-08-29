@@ -29,10 +29,10 @@ class rectangle_view {
     using operator_arg_type = rectangle_view;
 
   private:
-    const rectangle_set *ptr;
+    const rectangle_set *ptr = nullptr;
 
   public:
-    rectangle_view() = default;
+    rectangle_view() {}
 
     explicit rectangle_view(const rectangle_set &val) : ptr(&val) {}
 

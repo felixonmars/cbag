@@ -19,7 +19,7 @@ constexpr term_type trmInout = term_type::oacInputOutputTermType;
 
 namespace cbag {
 
-enum term_type { input, output, inout };
+enum term_type : uint32_t { input, output, inout };
 constexpr term_type trmInput = term_type::input;
 constexpr term_type trmOutput = term_type::output;
 constexpr term_type trmInout = term_type::inout;

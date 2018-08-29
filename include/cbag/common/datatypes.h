@@ -21,7 +21,7 @@ namespace cbag {
  *  std::variant will not be confused.
  */
 struct time_struct {
-    time_t time_val;
+    time_t time_val = 0;
 };
 
 /** A custom struct representing binary data.
@@ -30,8 +30,8 @@ struct time_struct {
  *  std::variant will not be confused.
  */
 struct binary_t {
-    std::string name;
-    std::string bin_val;
+    std::string name{};
+    std::string bin_val{};
 };
 
 /** Type definition for a parameter value type.

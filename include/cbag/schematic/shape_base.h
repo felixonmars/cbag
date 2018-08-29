@@ -16,9 +16,9 @@ namespace sch {
 
 struct shape_base {
   public:
-    lay_t layer;
-    purp_t purpose;
-    std::string net;
+    lay_t layer = 0;
+    purp_t purpose = 0;
+    std::string net{};
 
     shape_base();
 

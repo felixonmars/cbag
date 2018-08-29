@@ -19,10 +19,11 @@ class polygon45_view : public joined_ra_range<polygon45_set, polygon90_view> {
     using coordinate_type = coord_t;
     using operator_arg_type = polygon45_view;
 
-    polygon45_view(const polygon45_set &val0, const polygon90_set &val1, const rectangle_set &val2);
-
   private:
     polygon90_view view_90;
+
+  public:
+    polygon45_view(const polygon45_set &val0, const polygon90_set &val1, const rectangle_set &val2);
 };
 
 } // namespace layout

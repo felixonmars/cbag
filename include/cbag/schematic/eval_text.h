@@ -14,7 +14,7 @@ namespace sch {
 
 struct eval_text : public text_t {
   public:
-    std::string evaluator;
+    std::string evaluator{};
 
     eval_text();
 

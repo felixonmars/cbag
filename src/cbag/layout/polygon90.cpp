@@ -3,7 +3,7 @@
 namespace cbag {
 namespace layout {
 
-compact_iterator::compact_iterator() = default;
+compact_iterator::compact_iterator() {}
 
 compact_iterator::compact_iterator(point_vector_t::const_iterator start,
                                    point_vector_t::const_iterator stop, bool second)
@@ -19,7 +19,7 @@ compact_iterator &compact_iterator::operator++() {
     return *this;
 }
 
-point_iterator::point_iterator() = default;
+point_iterator::point_iterator() {}
 
 point_iterator::point_iterator(const point_vector_t *ptr, std::size_t idx, bool between)
     : ptr(ptr), idx(idx), between(between) {}

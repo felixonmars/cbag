@@ -20,7 +20,7 @@ constexpr path_style psVariable = path_style::oacVariablePathStyle;
 
 namespace cbag {
 
-enum path_style { truncate, extend, round, variable };
+enum path_style : uint32_t { truncate, extend, round, variable };
 constexpr path_style psTruncate = truncate;
 constexpr path_style psExtend = extend;
 constexpr path_style psRound = round;

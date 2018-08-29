@@ -32,13 +32,13 @@ using inst_map_t = std::unordered_map<std::string, instance>;
 class cellview {
   private:
     std::string tech;
-    geo_map_t geo_map;
-    inst_map_t inst_map;
-    std::vector<via> via_list;
-    block_map_t lay_block_map;
-    std::vector<polygon> area_block_list;
-    std::vector<boundary> boundary_list;
-    uint32_t inst_name_cnt;
+    geo_map_t geo_map{};
+    inst_map_t inst_map{};
+    std::vector<via> via_list{};
+    block_map_t lay_block_map{};
+    std::vector<polygon> area_block_list{};
+    std::vector<boundary> boundary_list{};
+    uint32_t inst_name_cnt = 0;
     uint8_t geo_mode;
 
   public:

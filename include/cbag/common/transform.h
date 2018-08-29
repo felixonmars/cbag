@@ -21,11 +21,12 @@ namespace cbag {
 
 class transform {
   private:
-    coord_t x, y;
-    orientation oval;
+    coord_t x = 0;
+    coord_t y = 0;
+    orientation oval = oR0;
 
   public:
-    transform() : x(0), y(0), oval(oR0) {}
+    transform() {}
 
     transform(coord_t x, coord_t y, orientation orient = oR0) : x(x), y(y), oval(orient) {}
 

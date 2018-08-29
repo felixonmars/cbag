@@ -24,7 +24,7 @@ constexpr orientation oMXR90 = orientation::oacMXR90;
 
 namespace cbag {
 
-enum orientation { R0, R90, R180, R270, MY, MYR90, MX, MXR90 };
+enum orientation : uint32_t { R0, R90, R180, R270, MY, MYR90, MX, MXR90 };
 constexpr orientation oR0 = R0;
 constexpr orientation oR90 = R90;
 constexpr orientation oR180 = R180;

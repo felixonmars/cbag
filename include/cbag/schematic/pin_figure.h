@@ -20,8 +20,8 @@ using pin_fig_t = std::variant<rectangle, pin_object>;
 
 struct pin_figure {
   public:
-    pin_fig_t obj;
-    sig_type stype;
+    pin_fig_t obj{};
+    sig_type stype = stSignal;
 
     pin_figure();
 

@@ -20,10 +20,13 @@ namespace cbag {
 
 class box_t {
   private:
-    coord_t xl, yl, xh, yh;
+    coord_t xl = 0;
+    coord_t yl = 0;
+    coord_t xh = 0;
+    coord_t yh = 0;
 
   public:
-    box_t() = default;
+    box_t() {}
 
     box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) : xl(xl), yl(yl), xh(xh), yh(yh) {}
 

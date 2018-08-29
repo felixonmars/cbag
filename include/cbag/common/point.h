@@ -20,10 +20,11 @@ namespace cbag {
 
 class point {
   private:
-    coord_t xv, yv;
+    coord_t xv = 0;
+    coord_t yv = 0;
 
   public:
-    point() = default;
+    point() {}
 
     point(coord_t xv, coord_t yv) : xv(xv), yv(yv) {}
 

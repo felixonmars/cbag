@@ -23,9 +23,21 @@ constexpr blockage_type blkScreen = blockage_type::oacScreenBlockageType;
 
 #else
 
+#include <cstdint>
+
 namespace cbag {
 
-enum blockage_type { routing, via, placement, wiring, fill, slot, pin, feed_thru, screen };
+enum blockage_type : uint32_t {
+    routing,
+    via,
+    placement,
+    wiring,
+    fill,
+    slot,
+    pin,
+    feed_thru,
+    screen
+};
 constexpr blockage_type blkRoute = blockage_type::routing;
 constexpr blockage_type blkVia = blockage_type::via;
 constexpr blockage_type blkPlacement = blockage_type::placement;

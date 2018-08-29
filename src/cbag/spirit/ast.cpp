@@ -20,7 +20,7 @@
 namespace cbag {
 namespace spirit {
 namespace ast {
-range::range() : start(0), stop(0), step(0) {}
+range::range() {}
 
 range::range(uint32_t start, uint32_t stop, uint32_t step) : start(start), stop(stop), step(step) {}
 
@@ -58,7 +58,7 @@ bool range::operator<(const range &other) const {
             (stop < other.stop || (stop == other.stop && step < other.step)));
 }
 
-name_bit::name_bit() : base("") {}
+name_bit::name_bit() {}
 
 name_bit::name_bit(std::string base) : base(std::move(base)) {}
 
@@ -84,7 +84,7 @@ bool name_bit::operator<(const name_bit &other) const {
     }
 }
 
-name_unit::name_unit() : mult(1), base(""), idx_range({0, 0, 0}) {}
+name_unit::name_unit() {}
 
 uint32_t name_unit::size() const { return mult * std::max(idx_range.size(), 1u); }
 
@@ -120,6 +120,8 @@ name::const_iterator &name::const_iterator::operator++() {
 
     return *this;
 }
+
+name::name() {}
 
 bool name::const_iterator::operator!=(const const_iterator &other) const {
     return ptr != other.ptr || unit_index != other.unit_index || bit_index != other.bit_index;

@@ -52,7 +52,7 @@ oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oa
 oa_database::oa_database(const std::string &lib_def_file) : oa_database(lib_def_file.c_str()) {}
 
 oa_database::oa_database(const char *lib_def_file)
-    : lib_def_file(lib_def_file), lib_def_obs(1), logger(spdlog::get("cbag")) {
+    : lib_def_file(lib_def_file), logger(spdlog::get("cbag")) {
     try {
 
         reader = std::make_unique<oa_reader>(ns_cdba, logger);
