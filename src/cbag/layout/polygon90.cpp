@@ -44,11 +44,11 @@ point_iterator &point_iterator::operator++() {
     return *this;
 }
 
-polygon90::polygon90() = default;
+polygon90::polygon90() : polygon45() {}
 
 polygon90::polygon90(std::size_t n) : polygon45(n) {}
 
-polygon90::polygon90(point_vector_t data) : polygon45(std::move(data)) {}
+polygon90::polygon90(point_vector_t data, winding_dir wdir) : polygon45(std::move(data), wdir) {}
 
 } // namespace layout
 } // namespace cbag

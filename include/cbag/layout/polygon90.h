@@ -73,10 +73,8 @@ class polygon90 : public polygon45 {
     using iterator_type = point_iterator;
 
     polygon90();
-
     explicit polygon90(std::size_t n);
-
-    explicit polygon90(point_vector_t data);
+    explicit polygon90(point_vector_t data, winding_dir wdir = winding_dir::unknown_winding);
 
     compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
     compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }
