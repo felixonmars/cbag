@@ -13,10 +13,11 @@
 namespace cbag {
 namespace layout {
 
-const std::unordered_map<std::string, path_style> geometry::style_map = {
-    {"truncate", psTruncate},
-    {"extend", psExtend},
-    {"round", psRound},
+const std::unordered_map<std::string, end_style> geometry::style_map = {
+    {"truncate", end_style::truncate},
+    {"extend", end_style::extend},
+    {"round", end_style::round},
+    {"triangle", end_style::triangle},
 };
 
 geometry::geometry(uint8_t mode) : mode(mode), view(make_union_view()) {}
@@ -65,56 +66,60 @@ union_view geometry::make_union_view() {
 
 constexpr double root2 = cbag::math::sqrt(2);
 
-void add_path_points(point_vector_t &vec, coord_t x, coord_t y, path_style style,
-                     offset_t half_width, const vector45 &p, const vector45 &n) {
-    bool is_45 = p.is_45_or_invalid();
-    uint32_t half_diag = round(half_width / root2);
-    uint32_t w_main, w_norm;
-    if (is_45) {
-        w_main = half_diag;
-        w_norm = half_width - half_diag;
-    } else {
-        w_main = half_width;
-        w_norm = 2 * half_diag - half_width;
-    }
+void add_path_points(point_vector_t &vec, coord_t x, coord_t y, const vector45 &p,
+                     const vector45 &n, bool is_45, end_style style, uint32_t w_main,
+                     uint32_t w_norm) {
     switch (style) {
-    case psTruncate:
-        vec.emplace_back(x + n.dx * w_main, y + n.dy * w_main);
-        vec.emplace_back(x - n.dx * w_main, y - n.dy * w_main);
+    case end_style::truncate: {
+        uint32_t xw = n.dx * w_main;
+        uint32_t yw = n.dy * w_main;
+        vec.emplace_back(x + xw, y + yw);
+        vec.emplace_back(x - xw, y - yw);
         break;
-    case psExtend:
+    }
+    case end_style::extend:
         vec.emplace_back(x - (p.dx - n.dx) * w_main, y - (p.dy - n.dy) * w_main);
         vec.emplace_back(x - (p.dx + n.dx) * w_main, y - (p.dy + n.dy) * w_main);
         break;
-    default:
+    case end_style::triangle: {
+        uint32_t xw = n.dx * w_main;
+        uint32_t yw = n.dy * w_main;
+        vec.emplace_back(x + xw, y + yw);
+        vec.emplace_back(x - w_main * p.dx, y - w_main * p.dy);
+        vec.emplace_back(x - xw, y - yw);
+        break;
+    }
+    default: {
+        uint32_t xnm = n.dx * w_main;
+        uint32_t ynm = n.dy * w_main;
+        uint32_t xpm = p.dx * w_main;
+        uint32_t ypm = p.dy * w_main;
+        uint32_t xnn = n.dx * w_norm;
+        uint32_t ynn = n.dy * w_norm;
+        uint32_t xpn = p.dx * w_norm;
+        uint32_t ypn = p.dy * w_norm;
+        vec.emplace_back(x - xpn + xnm, y - ypn + ynm);
+        vec.emplace_back(x - xpm + xnn, y - ypm + ynn);
+        vec.emplace_back(x - xpm - xnn, y - ypm - ynn);
+        vec.emplace_back(x - xpn - xnm, y - ypn - ynm);
+    }
+    }
+}
+
+end_style geometry::get_style(const char *style_str, offset_t half_width, bool is_45) {
+    end_style ans = style_map.at(style_str);
+    if (ans == end_style::round) {
+        // handle degenerate cases
         switch (half_width) {
         case 1:
-            if (is_45) {
-                vec.emplace_back(x + n.dx, y + n.dy);
-                vec.emplace_back(x - p.dx, y - p.dy);
-                vec.emplace_back(x - n.dx, y - n.dy);
-            } else {
-                vec.emplace_back(x - (p.dx - n.dx), y - (p.dy - n.dy));
-                vec.emplace_back(x - (p.dx + n.dx), y - (p.dy + n.dy));
-            }
-            break;
+            return (is_45) ? end_style::triangle : end_style::extend;
         case 2:
-            if (is_45) {
-                vec.emplace_back(x - (p.dx - n.dx), y - (p.dy - n.dy));
-                vec.emplace_back(x - (p.dx + n.dx), y - (p.dy + n.dy));
-            } else {
-                vec.emplace_back(x + 2 * n.dx, y + 2 * n.dy);
-                vec.emplace_back(x - 2 * p.dx, y - 2 * p.dy);
-                vec.emplace_back(x - 2 * n.dx, y - 2 * n.dy);
-            }
-            break;
+            return (is_45) ? end_style::extend : end_style::triangle;
         default:
-            vec.emplace_back(x - w_norm * p.dx + w_main * n.dx, y - w_norm * p.dy + w_main * n.dy);
-            vec.emplace_back(x - w_main * p.dx + w_norm * n.dx, y - w_main * p.dy + w_norm * n.dy);
-            vec.emplace_back(x - w_main * p.dx - w_norm * n.dx, y - w_main * p.dy - w_norm * n.dy);
-            vec.emplace_back(x - w_norm * p.dx - w_main * n.dx, y - w_norm * p.dy - w_main * n.dy);
+            return end_style::round;
         }
     }
+    return ans;
 }
 
 point_vector_t geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
@@ -132,8 +137,9 @@ point_vector_t geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coor
         throw std::invalid_argument(fmt::format("path segment vector {} not valid", p));
     }
 
-    path_style sty0 = style_map.at(style0);
-    path_style sty1 = style_map.at(style1);
+    bool is_45 = p.is_45_or_invalid();
+    end_style sty0 = get_style(style0, half_width, is_45);
+    end_style sty1 = get_style(style1, half_width, is_45);
 
     // initialize point array, reserve space for worst case
     point_vector_t ans;
@@ -141,10 +147,20 @@ point_vector_t geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coor
 
     vector45 p_norm = p.get_norm();
     vector45 n_norm = p.get_rotate90();
-    add_path_points(ans, x0, y0, sty0, half_width, p_norm, n_norm);
+    uint32_t half_diag = round(half_width / root2);
+    uint32_t w_main, w_norm;
+    if (is_45) {
+        w_main = half_diag;
+        w_norm = half_width - half_diag;
+    } else {
+        w_main = half_width;
+        w_norm = 2 * half_diag - half_width;
+    }
+
+    add_path_points(ans, x0, y0, p_norm, n_norm, is_45, sty0, w_main, w_norm);
     p_norm.invert();
     n_norm.invert();
-    add_path_points(ans, x1, y1, sty1, half_width, p_norm, n_norm);
+    add_path_points(ans, x1, y1, p_norm, n_norm, is_45, sty1, w_main, w_norm);
 
     return ans;
 }

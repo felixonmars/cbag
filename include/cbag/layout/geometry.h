@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <cbag/common/path_style.h>
+#include <cbag/layout/end_style.h>
 #include <cbag/layout/polygon45_view.h>
 #include <cbag/layout/polygon90_view.h>
 #include <cbag/layout/polygon_ref.h>
@@ -21,7 +21,7 @@ namespace layout {
  */
 class geometry {
   private:
-    static const std::unordered_map<std::string, path_style> style_map;
+    static const std::unordered_map<std::string, end_style> style_map;
 
     rectangle_set rect_set;
     polygon90_set poly90_set;
@@ -53,6 +53,8 @@ class geometry {
 
   private:
     union_view make_union_view();
+
+    static end_style get_style(const char *style_str, offset_t half_width, bool is_45);
 };
 
 } // namespace layout
