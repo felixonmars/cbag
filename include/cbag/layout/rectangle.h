@@ -28,16 +28,20 @@ class rectangle : public polygon90 {
     rectangle(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
 
     template <typename T1, typename T2>
-    rectangle(const T1 &hrange, const T2 &vrange) : polygon90({point_t(0, 0), point_t(0, 0)}) {
-        set(bp::HORIZONTAL, hrange);
-        set(bp::VERTICAL, vrange);
-    }
+    rectangle(const T1 &hrange, const T2 &vrange)
+        : polygon90({point_t(bp::low(hrange), bp::low(vrange)),
+                     point_t(bp::high(hrange), bp::high(vrange))}) {}
 
     interval_type get(bp::orientation_2d orient) const;
 
     template <typename T2> void set(bp::orientation_2d orient, const T2 &interval) {
-        data[0].set(orient, bp::low(interval));
-        data[1].set(orient, bp::high(interval));
+        if (orient.to_int() == bp::orientation_2d_enum::HORIZONTAL) {
+            data[0].x(bp::low(interval));
+            data[1].x(bp::high(interval));
+        } else {
+            data[0].y(bp::low(interval));
+            data[1].y(bp::high(interval));
+        }
     }
 };
 

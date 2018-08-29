@@ -52,6 +52,7 @@ namespace polygon {
 
 template <> struct geometry_concept<cbag::layout::polygon> { using type = polygon_concept; };
 
+// specialize traits to override winding
 template <> struct polygon_traits<cbag::layout::polygon> {
     using coordinate_type = cbag::layout::polygon::coordinate_type;
     using iterator_type = cbag::layout::polygon::iterator_type;
@@ -64,16 +65,6 @@ template <> struct polygon_traits<cbag::layout::polygon> {
     static inline std::size_t size(const cbag::layout::polygon &t) { return t.size(); }
 
     static inline winding_direction winding(const cbag::layout::polygon &t) { return t.winding(); }
-};
-
-template <> struct polygon_mutable_traits<cbag::layout::polygon> {
-    // expects stl style iterators
-    template <typename iT>
-    static inline cbag::layout::polygon &set_points(cbag::layout::polygon &t, iT input_begin,
-                                                    iT input_end) {
-        t.set(input_begin, input_end);
-        return t;
-    }
 };
 
 } // namespace polygon

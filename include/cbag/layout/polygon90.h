@@ -92,6 +92,7 @@ class polygon90 : public polygon45 {
             data.emplace_back(tmp, *input_begin);
             ++input_begin;
         }
+        wdir = winding_dir::unknown_winding;
     }
 
     template <class iT> void set(iT input_begin, iT input_end) {
@@ -101,6 +102,7 @@ class polygon90 : public polygon45 {
             ++input_begin;
             ++input_begin;
         }
+        wdir = winding_dir::unknown_winding;
     }
 };
 
@@ -111,6 +113,43 @@ namespace boost {
 namespace polygon {
 
 template <> struct geometry_concept<cbag::layout::polygon90> { using type = polygon_90_concept; };
+
+// specialize traits to override winding
+template <> struct polygon_90_traits<cbag::layout::polygon90> {
+    using coordinate_type = cbag::layout::polygon90::coordinate_type;
+    using compact_iterator_type = cbag::layout::polygon90::compact_iterator_type;
+
+    static inline compact_iterator_type begin_compact(const cbag::layout::polygon90 &t) {
+        return t.begin_compact();
+    }
+
+    static inline compact_iterator_type end_compact(const cbag::layout::polygon90 &t) {
+        return t.end_compact();
+    }
+
+    static inline std::size_t size(const cbag::layout::polygon90 &t) { return t.size(); }
+
+    static inline winding_direction winding(const cbag::layout::polygon90 &t) {
+        return t.winding();
+    }
+};
+
+// specialize traits to override point iterator and winding
+template <> struct polygon_traits_90<cbag::layout::polygon90> {
+    using coordinate_type = cbag::layout::polygon90::coordinate_type;
+    using iterator_type = cbag::layout::polygon90::iterator_type;
+    using point_type = cbag::layout::polygon90::point_type;
+
+    static inline iterator_type begin_points(const cbag::layout::polygon90 &t) { return t.begin(); }
+
+    static inline iterator_type end_points(const cbag::layout::polygon90 &t) { return t.end(); }
+
+    static inline std::size_t size(const cbag::layout::polygon90 &t) { return t.size(); }
+
+    static inline winding_direction winding(const cbag::layout::polygon90 &t) {
+        return t.winding();
+    }
+};
 
 } // namespace polygon
 } // namespace boost
