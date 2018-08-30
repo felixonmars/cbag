@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <cbag/common/transform.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/layout/transformation.h>
 
 namespace cbag {
 namespace layout {
@@ -17,7 +17,7 @@ class instance {
     std::string lib;
     std::string cell;
     std::string view;
-    transform xform;
+    transformation xform;
     uint32_t nx = 1;
     uint32_t ny = 1;
     offset_t spx = 0;
@@ -25,7 +25,7 @@ class instance {
     cellview *master = nullptr;
 
   public:
-    instance(std::string lib, std::string cell, std::string view, transform xform, uint32_t nx = 1,
+    instance(std::string lib, std::string cell, std::string view, transformation xform, uint32_t nx = 1,
              uint32_t ny = 1, coord_t spx = 0, coord_t spy = 0);
 };
 

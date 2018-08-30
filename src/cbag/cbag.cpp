@@ -22,14 +22,17 @@
 
 namespace cbag {
 
-void init_logging() {
-    spdlog::installCrashHandler();
+constexpr uint32_t max_log_size = 1024 * 1024 * 10;
+constexpr uint32_t num_log_file = 3;
 
-    constexpr uint32_t max_log_size = 1024 * 1024 * 10;
-    constexpr uint32_t num_log_file = 3;
-    spdlog::create<spdlog::sinks::rotating_file_sink_st>("cbag", "cbag.log", max_log_size,
-                                                         num_log_file);
-    spdlog::flush_on(spdlog::level::err);
+void init_logging() {
+    if (spdlog::get("cbag") == nullptr) {
+        spdlog::installCrashHandler();
+
+        spdlog::create<spdlog::sinks::rotating_file_sink_st>("cbag", "cbag.log", max_log_size,
+                                                             num_log_file);
+        spdlog::flush_on(spdlog::level::err);
+    }
 }
 
 std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,

@@ -19,6 +19,8 @@ namespace layout {
 // as the result, rectangle always have exactly 2 points in data.
 // -----------------------------------------------------------------------------
 
+class transformation;
+
 class rectangle : public polygon90 {
   public:
     using interval_type = bp::interval_data<coordinate_type>;
@@ -31,6 +33,12 @@ class rectangle : public polygon90 {
     rectangle(const T1 &hrange, const T2 &vrange)
         : polygon90({point_t(bp::low(hrange), bp::low(vrange)),
                      point_t(bp::high(hrange), bp::high(vrange))}) {}
+
+    void set_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
+
+    rectangle &transform(const transformation &xform);
+
+    // methods for boost::polygon
 
     interval_type get(bp::orientation_2d orient) const;
 

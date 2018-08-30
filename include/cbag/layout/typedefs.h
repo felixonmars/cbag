@@ -14,10 +14,10 @@
 
 #include <cbag/common/typedefs.h>
 
+namespace bp = boost::polygon;
+
 namespace cbag {
 namespace layout {
-
-namespace bp = boost::polygon;
 
 using point_t = bp::point_data<coord_t>;
 using point_vector_t = std::vector<point_t>;
