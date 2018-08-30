@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from pybag cimport *
+from schematic cimport *
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
