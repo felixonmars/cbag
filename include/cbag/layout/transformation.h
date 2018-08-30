@@ -22,6 +22,7 @@ class transformation : public bp::transformation<coord_t> {
     explicit transformation(bp::axis_transformation::ATR orient);
     transformation(coord_t dx, coord_t dy);
     transformation(coord_t dx, coord_t dy, bp::axis_transformation::ATR orient);
+    transformation(coord_t dx, coord_t dy, uint32_t mode);
 };
 
 } // namespace layout
