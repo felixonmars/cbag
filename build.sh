@@ -3,6 +3,8 @@
 cmake -H. -B_build -DCMAKE_BUILD_TYPE=Debug
 cmake --build _build --target install -- -j 8
 
-cd python/
+cd python/src_pybag
 ${CBAG_PYTHON} setup.py build
-cd ..
+cd ../src_pybagoa
+${CBAG_PYTHON} setup.py build
+cd ../..
