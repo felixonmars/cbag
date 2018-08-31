@@ -39,12 +39,13 @@ template <typename ltype, typename rtype,
               nullptr>
 class joined_ra_range {
   private:
-    class joined_ra_iterator
-        : public std::iterator<std::random_access_iterator_tag, typename ltype::value_type> {
+    class joined_ra_iterator {
       public:
+        using iterator_category = std::random_access_iterator_tag;
         using value_type = typename ltype::value_type;
-        using difference_type = typename std::iterator<std::random_access_iterator_tag,
-                                                       typename ltype::value_type>::difference_type;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const value_type *;
+        using reference = const value_type &;
 
       private:
         std::size_t idx = 0;
@@ -60,21 +61,21 @@ class joined_ra_range {
                            std::size_t lsize)
             : idx(idx), lsize(lsize), lstart(std::move(lstart)), rstart(std::move(rstart)) {}
 
-        joined_ra_iterator *operator+=(difference_type rhs) {
+        joined_ra_iterator &operator+=(difference_type rhs) {
             idx += rhs;
             return *this;
         }
-        joined_ra_iterator *operator-=(difference_type rhs) {
+        joined_ra_iterator &operator-=(difference_type rhs) {
             idx -= rhs;
             return *this;
         }
-        const typename ltype::value_type &operator*() const {
+        reference operator*() const {
             return (idx < lsize) ? lstart[idx] : rstart[idx - lsize];
         }
-        const typename ltype::value_type *operator->() const {
+        pointer operator->() const {
             return (idx < lsize) ? lstart + idx : rstart + (idx - lsize);
         }
-        const typename ltype::value_type &operator[](difference_type rhs) const {
+        reference operator[](difference_type rhs) const {
             std::size_t tmp = idx + rhs;
             return (tmp < lsize) ? lstart[tmp] : rstart[tmp - lsize];
         }
@@ -105,9 +106,6 @@ class joined_ra_range {
         }
         friend joined_ra_iterator operator+(difference_type lhs, const joined_ra_iterator &rhs) {
             return {rhs.lstart, rhs.rstart, rhs.idx + lhs, rhs.lsize};
-        }
-        friend joined_ra_iterator operator-(difference_type lhs, const joined_ra_iterator &rhs) {
-            return {rhs.lstart, rhs.rstart, rhs.idx - lhs, rhs.lsize};
         }
         bool operator==(const joined_ra_iterator &rhs) const {
             return idx == rhs.idx && lsize == rhs.lsize && lstart == rhs.lstart &&

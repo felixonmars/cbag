@@ -31,8 +31,8 @@ class rectangle : public polygon90 {
 
     template <typename T1, typename T2>
     rectangle(const T1 &hrange, const T2 &vrange)
-        : polygon90({point_t(bp::low(hrange), bp::low(vrange)),
-                     point_t(bp::high(hrange), bp::high(vrange))}) {}
+        : polygon90({bp::low(hrange), bp::low(vrange), bp::high(hrange), bp::high(vrange)},
+                    winding_dir::clockwise_winding) {}
 
     void set_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
 
@@ -44,11 +44,11 @@ class rectangle : public polygon90 {
 
     template <typename T2> void set(bp::orientation_2d orient, const T2 &interval) {
         if (orient.to_int() == bp::orientation_2d_enum::HORIZONTAL) {
-            data[0].x(bp::low(interval));
-            data[1].x(bp::high(interval));
+            data[0][0] = bp::low(interval);
+            data[1][0] = bp::high(interval);
         } else {
-            data[0].y(bp::low(interval));
-            data[1].y(bp::high(interval));
+            data[0][1] = bp::low(interval);
+            data[1][1] = bp::high(interval);
         }
     }
 };

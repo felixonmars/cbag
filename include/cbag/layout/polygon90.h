@@ -12,54 +12,90 @@
 namespace cbag {
 namespace layout {
 
-class compact_iterator : public std::iterator<std::forward_iterator_tag, coord_t> {
+namespace poly90_iter {
+
+class compact_iterator {
+  public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = coord_t;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const value_type *;
+    using reference = const value_type &;
+
   private:
-    point_vector_t::const_iterator start;
-    point_vector_t::const_iterator stop;
-    bool second = false;
+    pt_vector::const_iterator iter;
+    uint8_t parity = 0;
 
   public:
     compact_iterator();
 
-    compact_iterator(point_vector_t::const_iterator start, point_vector_t::const_iterator stop,
-                     bool second = false);
+    compact_iterator(pt_vector::const_iterator iter, uint8_t parity);
 
-    coord_t operator*() const { return second ? start->y() : start->x(); }
-
+    compact_iterator &operator+=(difference_type rhs);
+    compact_iterator &operator-=(difference_type rhs);
+    const value_type operator*() const;
+    pointer operator->() const;
+    const value_type operator[](difference_type rhs) const;
     compact_iterator &operator++();
-
-    bool operator==(const compact_iterator &rhs) const {
-        return start == rhs.start && stop == rhs.stop && second == rhs.second;
-    }
-
-    bool operator!=(const compact_iterator &rhs) const {
-        return start != rhs.start || stop != rhs.stop || second != rhs.second;
-    }
+    compact_iterator &operator--();
+    compact_iterator operator++(int);
+    compact_iterator operator--(int);
+    difference_type operator-(const compact_iterator &rhs) const;
+    compact_iterator operator+(difference_type rhs) const;
+    compact_iterator operator-(difference_type rhs) const;
+    friend compact_iterator operator+(difference_type lhs, const compact_iterator &rhs);
+    bool operator==(const compact_iterator &rhs) const;
+    bool operator!=(const compact_iterator &rhs) const;
+    bool operator>(const compact_iterator &rhs) const;
+    bool operator<(const compact_iterator &rhs) const;
+    bool operator>=(const compact_iterator &rhs) const;
+    bool operator<=(const compact_iterator &rhs) const;
 };
 
-class point_iterator : public std::iterator<std::forward_iterator_tag, point_t> {
+class point_iterator {
+  public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = point_t;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const value_type *;
+    using reference = const value_type &;
+
   private:
-    const point_vector_t *ptr = nullptr;
-    std::size_t idx = 0;
-    bool between = false;
+    pt_vector::const_iterator start;
+    pt_vector::size_type size = 0;
+    uint64_t idx = 0;
+    value_type pt;
 
   public:
     point_iterator();
 
-    point_iterator(const point_vector_t *ptr, std::size_t idx, bool between);
+    point_iterator(pt_vector::const_iterator start, pt_vector::size_type size, uint64_t idx);
 
-    point_t operator*() const;
-
+    point_iterator &operator+=(difference_type rhs);
+    point_iterator &operator-=(difference_type rhs);
+    reference operator*() const;
+    pointer operator->() const;
+    const value_type operator[](difference_type rhs) const;
     point_iterator &operator++();
+    point_iterator &operator--();
+    point_iterator operator++(int);
+    point_iterator operator--(int);
+    difference_type operator-(const point_iterator &rhs) const;
+    point_iterator operator+(difference_type rhs) const;
+    point_iterator operator-(difference_type rhs) const;
+    friend point_iterator operator+(difference_type lhs, const point_iterator &rhs);
+    bool operator==(const point_iterator &rhs) const;
+    bool operator!=(const point_iterator &rhs) const;
+    bool operator>(const point_iterator &rhs) const;
+    bool operator<(const point_iterator &rhs) const;
+    bool operator>=(const point_iterator &rhs) const;
+    bool operator<=(const point_iterator &rhs) const;
 
-    bool operator==(const point_iterator &rhs) const {
-        return ptr == rhs.ptr && idx == rhs.idx && between == rhs.between;
-    }
-
-    bool operator!=(const point_iterator &rhs) const {
-        return idx != rhs.idx || between != rhs.between || ptr != rhs.ptr;
-    }
+  private:
+    void set_point();
 };
+
+} // namespace poly90_iter
 
 // -----------------------------------------------------------------------------
 // polygon90 declaration
@@ -69,39 +105,18 @@ class point_iterator : public std::iterator<std::forward_iterator_tag, point_t> 
 
 class polygon90 : public polygon45 {
   public:
-    using compact_iterator_type = compact_iterator;
-    using iterator_type = point_iterator;
+    using compact_iterator_type = poly90_iter::compact_iterator;
+    using iterator_type = poly90_iter::point_iterator;
 
     polygon90();
     explicit polygon90(std::size_t n);
-    explicit polygon90(point_vector_t data, winding_dir wdir = winding_dir::unknown_winding);
+    explicit polygon90(pt_vector data, winding_dir wdir = winding_dir::unknown_winding);
 
-    compact_iterator_type begin_compact() const { return {data.begin(), data.end(), false}; }
-    compact_iterator_type end_compact() const { return {data.end(), data.end(), true}; }
-    iterator_type begin() const { return {&data, 0, false}; }
-    iterator_type end() const { return {&data, data.size(), false}; }
+    compact_iterator_type begin_compact() const;
+    compact_iterator_type end_compact() const;
+    iterator_type begin() const;
+    iterator_type end() const;
     std::size_t size() const { return 2 * data.size(); }
-
-    template <class iT> void set_compact(iT input_begin, iT input_end) {
-        data.clear();
-        while (input_begin != input_end) {
-            coord_t tmp = *input_begin;
-            ++input_begin;
-            data.emplace_back(tmp, *input_begin);
-            ++input_begin;
-        }
-        wdir = winding_dir::unknown_winding;
-    }
-
-    template <class iT> void set(iT input_begin, iT input_end) {
-        data.clear();
-        while (input_begin != input_end) {
-            data.push_back(*input_begin);
-            ++input_begin;
-            ++input_begin;
-        }
-        wdir = winding_dir::unknown_winding;
-    }
 };
 
 } // namespace layout

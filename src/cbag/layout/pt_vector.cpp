@@ -15,7 +15,7 @@ class bad_alloc_pt_vector : public std::bad_alloc {
 
 pt_vector::pt_vector() = default;
 
-pt_vector::pt_vector(uint32_t n) {
+pt_vector::pt_vector(size_type n) {
     if (n > 2) {
         // allocate memory
         void *ptr = malloc(n * sizeof(point_t));

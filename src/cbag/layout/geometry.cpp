@@ -30,21 +30,21 @@ polygon_ref<rectangle> geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, co
     return {&rect_set, idx};
 }
 
-polygon_ref<polygon90> geometry::add_poly90(point_vector_t data) {
+polygon_ref<polygon90> geometry::add_poly90(pt_vector data) {
     std::size_t idx = poly90_set.size();
     mode = std::max(mode, 1_uc);
     poly90_set.emplace_back(std::move(data));
     return {&poly90_set, idx};
 }
 
-polygon_ref<polygon45> geometry::add_poly45(point_vector_t data) {
+polygon_ref<polygon45> geometry::add_poly45(pt_vector data) {
     std::size_t idx = poly45_set.size();
     mode = std::max(mode, 2_uc);
     poly45_set.emplace_back(std::move(data));
     return {&poly45_set, idx};
 }
 
-polygon_ref<polygon> geometry::add_poly(point_vector_t data) {
+polygon_ref<polygon> geometry::add_poly(pt_vector data) {
     std::size_t idx = poly_set.size();
     mode = std::max(mode, 3_uc);
     poly_set.emplace_back(std::move(data));
@@ -66,9 +66,8 @@ union_view geometry::make_union_view() {
 
 constexpr double root2 = cbag::math::sqrt(2);
 
-void add_path_points(point_vector_t &vec, coord_t x, coord_t y, const vector45 &p,
-                     const vector45 &n, bool is_45, end_style style, uint32_t w_main,
-                     uint32_t w_norm) {
+void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, const vector45 &n,
+                     bool is_45, end_style style, uint32_t w_main, uint32_t w_norm) {
     switch (style) {
     case end_style::truncate: {
         uint32_t xw = n.dx * w_main;
@@ -122,9 +121,8 @@ end_style geometry::get_style(const char *style_str, offset_t half_width, bool i
     return ans;
 }
 
-point_vector_t geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                                        offset_t half_width, const char *style0,
-                                        const char *style1) {
+pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+                                   offset_t half_width, const char *style0, const char *style1) {
 
     vector45 p{x1 - x0, y1 - y0};
 
@@ -142,8 +140,7 @@ point_vector_t geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coor
     end_style sty1 = get_style(style1, half_width, is_45);
 
     // initialize point array, reserve space for worst case
-    point_vector_t ans;
-    ans.reserve(8);
+    pt_vector ans(8);
 
     vector45 p_norm = p.get_norm();
     vector45 n_norm = p.get_rotate90();

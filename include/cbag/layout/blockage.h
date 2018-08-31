@@ -7,12 +7,14 @@
 namespace cbag {
 namespace layout {
 
+class pt_vector;
+
 class blockage : public polygon {
   private:
-    blockage_type type = blkRoute;;
+    blockage_type type = blkRoute;
 
   public:
-    blockage(point_vector_t data, blockage_type type);
+    blockage(pt_vector data, blockage_type type);
 };
 
 } // namespace layout

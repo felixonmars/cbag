@@ -19,8 +19,6 @@ namespace bp = boost::polygon;
 namespace cbag {
 namespace layout {
 
-using point_t = bp::point_data<coord_t>;
-using point_vector_t = std::vector<point_t>;
 using winding_dir = bp::winding_direction;
 
 // custom unsigned char literal definition

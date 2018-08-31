@@ -45,7 +45,7 @@ polygon_ref<rectangle> cellview::add_rect(const layer_t &layer, coord_t xl, coor
     return iter->second.add_rect(xl, yl, xh, yh);
 }
 
-polygon_ref<polygon90> cellview::add_poly90(const layer_t &layer, point_vector_t data) {
+polygon_ref<polygon90> cellview::add_poly90(const layer_t &layer, pt_vector data) {
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
         iter = geo_map.emplace(layer, geometry(geo_mode)).first;
@@ -53,7 +53,7 @@ polygon_ref<polygon90> cellview::add_poly90(const layer_t &layer, point_vector_t
     return iter->second.add_poly90(std::move(data));
 }
 
-polygon_ref<polygon45> cellview::add_poly45(const layer_t &layer, point_vector_t data) {
+polygon_ref<polygon45> cellview::add_poly45(const layer_t &layer, pt_vector data) {
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
         iter = geo_map.emplace(layer, geometry(geo_mode)).first;
@@ -61,7 +61,7 @@ polygon_ref<polygon45> cellview::add_poly45(const layer_t &layer, point_vector_t
     return iter->second.add_poly45(std::move(data));
 }
 
-polygon_ref<polygon> cellview::add_poly(const layer_t &layer, point_vector_t data) {
+polygon_ref<polygon> cellview::add_poly(const layer_t &layer, pt_vector data) {
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
         iter = geo_map.emplace(layer, geometry(geo_mode)).first;

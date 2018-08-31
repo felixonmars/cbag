@@ -15,6 +15,7 @@
 namespace cbag {
 namespace layout {
 
+class pt_vector;
 class polygon;
 class boundary;
 class blockage;
@@ -56,11 +57,11 @@ class cellview {
     polygon_ref<rectangle> add_rect(const layer_t &layer, coord_t xl, coord_t yl, coord_t xh,
                                     coord_t yh);
 
-    polygon_ref<polygon90> add_poly90(const layer_t &layer, point_vector_t data);
+    polygon_ref<polygon90> add_poly90(const layer_t &layer, pt_vector data);
 
-    polygon_ref<polygon45> add_poly45(const layer_t &layer, point_vector_t data);
+    polygon_ref<polygon45> add_poly45(const layer_t &layer, pt_vector data);
 
-    polygon_ref<polygon> add_poly(const layer_t &layer, point_vector_t data);
+    polygon_ref<polygon> add_poly(const layer_t &layer, pt_vector data);
 
     void add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                       dist_t width, const char *style0, const char *style1);

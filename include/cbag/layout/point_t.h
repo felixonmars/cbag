@@ -9,7 +9,7 @@
 namespace cbag {
 namespace layout {
 
-/** A 32-bit data structure represented as 4 bytes
+/** A POD 32-bit data structure represented as 4 bytes
  *
  * This class is used over 32-bit integers because it has 1-byte alignment.
  */
@@ -32,7 +32,7 @@ struct byte4_t {
     static byte4_t convert(int32_t value) { return *reinterpret_cast<byte4_t *>(&value); }
 };
 
-/** A custom point type for boost polygon.
+/** A POD custom point type for boost polygon.
  *
  *  This class is special because it can be re-interpreted as a 64-bit pointer,
  *  and also return unsigned version of the two integers.  This is used to hack a
@@ -55,17 +55,25 @@ struct point_t {
 
     byte4_t &operator[](uint32_t idx) { return val[idx]; }
 
+    const int32_t *get_val_ptr(uint32_t idx) const {
+        return reinterpret_cast<const int32_t *>(val + idx);
+    }
+
     void set(uint32_t ux, uint32_t uy) {
         val[0] = ux;
         val[1] = uy;
     }
 
-    void set(int32_t ux, int32_t uy) {
-        val[0] = ux;
-        val[1] = uy;
+    void set(int32_t x, int32_t y) {
+        val[0] = x;
+        val[1] = y;
     }
 
     void set(void *ptr) { *(reinterpret_cast<uint64_t *>(val)) = reinterpret_cast<uint64_t>(ptr); }
+
+    static point_t create(coord_t x, coord_t y) {
+        return {cbag::layout::byte4_t::convert(x), cbag::layout::byte4_t::convert(y)};
+    }
 };
 
 } // namespace layout
@@ -94,7 +102,7 @@ template <> struct point_mutable_traits<cbag::layout::point_t> {
     }
     static inline cbag::layout::point_t construct(coordinate_type x_value,
                                                   coordinate_type y_value) {
-        return {cbag::layout::byte4_t::convert(x_value), cbag::layout::byte4_t::convert(y_value)};
+        return cbag::layout::point_t::create(x_value, y_value);
     }
 };
 } // namespace polygon

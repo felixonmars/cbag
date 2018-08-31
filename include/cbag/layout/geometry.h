@@ -17,6 +17,8 @@
 namespace cbag {
 namespace layout {
 
+class pt_vector;
+
 /** A class representing layout geometries on the same layer.
  */
 class geometry {
@@ -41,15 +43,14 @@ class geometry {
 
     polygon_ref<rectangle> add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
 
-    polygon_ref<polygon90> add_poly90(point_vector_t data);
+    polygon_ref<polygon90> add_poly90(pt_vector data);
 
-    polygon_ref<polygon45> add_poly45(point_vector_t data);
+    polygon_ref<polygon45> add_poly45(pt_vector data);
 
-    polygon_ref<polygon> add_poly(point_vector_t data);
+    polygon_ref<polygon> add_poly(pt_vector data);
 
-    static point_vector_t path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                                         offset_t half_width, const char *style0,
-                                         const char *style1);
+    static pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
+                                    offset_t half_width, const char *style0, const char *style1);
 
   private:
     union_view make_union_view();

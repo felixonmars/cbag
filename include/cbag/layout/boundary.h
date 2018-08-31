@@ -7,12 +7,14 @@
 namespace cbag {
 namespace layout {
 
+class pt_vector;
+
 class boundary : public polygon {
   private:
     boundary_type type = boundary_type::PR;
 
   public:
-    boundary(point_vector_t data, boundary_type type);
+    boundary(pt_vector data, boundary_type type);
 };
 
 } // namespace layout

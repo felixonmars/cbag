@@ -3,8 +3,7 @@
 namespace cbag {
 namespace layout {
 
-boundary::boundary(point_vector_t data, boundary_type type)
-    : polygon(std::move(data)), type(type) {}
+boundary::boundary(pt_vector data, boundary_type type) : polygon(std::move(data)), type(type) {}
 
 } // namespace layout
 } // namespace cbag

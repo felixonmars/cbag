@@ -7,6 +7,7 @@
 #ifndef CBAG_LAYOUT_POLYGON_H
 #define CBAG_LAYOUT_POLYGON_H
 
+#include <cbag/layout/pt_vector.h>
 #include <cbag/layout/typedefs.h>
 
 namespace cbag {
@@ -15,14 +16,14 @@ namespace layout {
 class polygon {
   public:
     using coordinate_type = coord_t;
-    using iterator_type = point_vector_t::const_iterator;
+    using iterator_type = pt_vector::const_iterator;
     using point_type = point_t;
     using area_type =
         typename bp::area_type_by_domain<typename bp::geometry_domain<bp::polygon_concept>,
                                          coordinate_type>::type;
 
   protected:
-    point_vector_t data;
+    pt_vector data;
     mutable winding_dir wdir = winding_dir::unknown_winding;
 
   public:
@@ -30,18 +31,12 @@ class polygon {
 
     explicit polygon(std::size_t n);
 
-    explicit polygon(point_vector_t data, winding_dir wdir = winding_dir::unknown_winding);
+    explicit polygon(pt_vector data, winding_dir wdir = winding_dir::unknown_winding);
 
     iterator_type begin() const { return data.begin(); }
     iterator_type end() const { return data.end(); }
     std::size_t size() const { return data.size(); }
     winding_dir winding() const;
-
-    template <class iT> inline void set(iT input_begin, iT input_end) {
-        data.clear();
-        data.insert(data.end(), input_begin, input_end);
-        wdir = winding_dir::unknown_winding;
-    }
 };
 
 } // namespace layout
