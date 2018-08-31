@@ -14,9 +14,7 @@ namespace layout {
 
 class polygon45 : public polygon {
   public:
-    polygon45();
-    explicit polygon45(std::size_t n);
-    explicit polygon45(pt_vector data, winding_dir wdir = winding_dir::unknown_winding);
+    using polygon::polygon;
 };
 
 } // namespace layout

@@ -25,7 +25,7 @@ pt_vector::pt_vector() noexcept = default;
 pt_vector::pt_vector(const pt_vector &other) : mode(other.mode) {
     if (mode > STACK_SIZE) {
         // create new array and copy data over
-        size_type n = points[STACK_SIZE - 1].ux();
+        size_type n = other.points[STACK_SIZE - 1].ux();
         void *dest = malloc(n * sizeof(point_t));
         if (dest == nullptr) {
             throw bad_alloc_pt_vector();
@@ -34,7 +34,7 @@ pt_vector::pt_vector(const pt_vector &other) : mode(other.mode) {
         points[0].set(dest);
         points[STACK_SIZE - 1].set(n, n);
     } else {
-        memcpy(points, other.points, STACK_SIZE * sizeof(point_t));
+        memcpy(points, other.points, mode * sizeof(point_t));
     }
 }
 

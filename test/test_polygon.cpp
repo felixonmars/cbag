@@ -1,47 +1,55 @@
 #include <iostream>
-#include <variant>
 #include <vector>
-#include <memory>
-#include <string>
 
 #include <boost/polygon/polygon.hpp>
 
+#include <cbag/layout/polygon90.h>
+#include <cbag/layout/pt_vector.h>
+
 namespace bp = boost::polygon;
+namespace bl = cbag::layout;
 
-using point_t = bp::point_data<int32_t>;
+using bp_point_t = bp::point_data<int32_t>;
+using bp_poly90 = bp::polygon_90_data<int32_t>;
 
-struct opt_ptr_t {
-    uint32_t addr_u;
-    uint32_t addr_l;
-};
-
-struct opt_vector {
-    opt_ptr_t addr;
-    uint32_t size;
-    uint32_t capacity;
-};
-
-using test_type = std::variant<opt_vector, point_t[2]>;
+template <typename T> void print_poly(T &data) {
+    std::cout << "points:" << std::endl;
+    for (auto const &p : data) {
+        std::cout << p.x() << " " << p.y() << std::endl;
+    }
+    std::cout << "coords:" << std::endl;
+    for (auto iter = data.begin_compact(); iter < data.end_compact(); ++iter) {
+        std::cout << *iter << std::endl;
+    }
+    std::cout << "done" << std::endl;
+}
 
 int main(int argc, char *argv[]) {
-    bp::point_data<int> shift(-1, 3);
-    auto rotate = bp::axis_transformation(bp::axis_transformation::ATR::ROTATE_LEFT);
-    auto xform = bp::transformation<int>(rotate, shift);
 
-    bp::rectangle_data<int> rect(4, -2, 7, -1);
-    std::cout << "before: [" << bp::xl(rect) << ", " << bp::yl(rect) << ", " << bp::xh(rect) << ", "
-              << bp::yh(rect) << "]" << std::endl;
-    bp::transform(rect, xform);
-    std::cout << "after: [" << bp::xl(rect) << ", " << bp::yl(rect) << ", " << bp::xh(rect) << ", "
-              << bp::yh(rect) << "]" << std::endl;
+    std::vector<bp_point_t> point_list = {
+        {0, 0}, {6, 0}, {6, 2}, {2, 2}, {2, 5}, {-2, 5}, {-2, 3}, {0, 3},
+    };
 
-    std::cout << "2 points size: " << sizeof(point_t[2]) << std::endl;
-    std::cout << "point vector size: " << sizeof(opt_vector) << std::endl;
-    std::cout << "variant size: " << sizeof(test_type) << std::endl;
-    std::cout << "unique_ptr size: " << sizeof(std::unique_ptr<point_t>) << std::endl;
-    std::cout << "shared_ptr size: " << sizeof(std::shared_ptr<point_t>) << std::endl;
-    std::cout << "string size: " << sizeof(std::string) << std::endl;
-    std::cout << "int32 string size: " << sizeof(std::basic_string<int32_t>) << std::endl;
+    bp_poly90 data;
+    data.set(point_list.begin(), point_list.end());
+
+    std::cout << "boost:" << std::endl;
+    print_poly(data);
+
+    bl::pt_vector pt_vec;
+    for (std::size_t idx = 0; idx < point_list.size(); idx += 2) {
+        pt_vec.emplace_back(point_list[idx].x(), point_list[idx].y());
+    }
+
+    std::cout << "pt_vector:" << std::endl;
+    for (auto const &p : pt_vec) {
+        std::cout << "x: " << p.x() << ", y: " << p.y() << std::endl;
+    }
+    std::cout << "done" << std::endl;
+
+    bl::polygon90 poly(pt_vec);
+    std::cout << "cbag size : " << poly.size() << std::endl;
+    print_poly(poly);
 
     return 0;
 }

@@ -278,6 +278,10 @@ set_target_properties(test_polygon PROPERTIES
   INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
   )
 
+target_link_libraries(test_polygon
+  cbag
+  )
+
 add_executable(test_casting
   ${CMAKE_SOURCE_DIR}/test/test_casting.cpp
   )
@@ -298,8 +302,8 @@ install(TARGETS
 #  read_prop
 #  test_yaml
 #  netmap_sample
-#  test_polygon
-  test_casting
+  test_polygon
+#  test_casting
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
   )
