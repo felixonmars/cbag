@@ -13,79 +13,57 @@ namespace layout {
  *  This optmized vector
  *  This point vector is optimized in the sense of total size.  It only takes up 17 bytes (instead
  *  of 24 bytes on 64-bit systems).  The tradeoff is that it can only be 2^32-1 elements long,
- *  and only works on 64-bit systems or below.  Furthermore, it's alignment is only 1 bytes.
+ *  and only works on 64-bit systems or below.  Another advantage is that it's alignment is only 1 byte.
  *
- *  The advantage of this point vector class is its compactness.  Furthermore, no memory allocation
+ *  The advantage of this point vector class is its compactness.  Also, no memory allocation
  *  will occur on the heap if the number of points is less than 3 (which is a very common case for
  *  rectangles).  Furthermore, the mode flag not only keeps track of the size, but also the winding
- *  direction of the points.
+ *  direction of the points, making it good for implementing polygons.
+ *
+ *  Note: move constructor/assignment will make the other vector empty.  copy constructor will set
+ *        capacity = size for the new object.  copy assignment will also not copy capacity;
+ *        memory reallocation will only occur if the destination capacity is smaller than source
+ *        size.  In this case, the new destination capacity will be set equal to size.
  */
 class pt_vector {
-  private:
-    class pt_iterator {
-      public:
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = point_t;
-        using difference_type = std::ptrdiff_t;
-        using pointer = const value_type *;
-        using reference = const value_type &;
+  public:
+    static constexpr uint32_t INIT_SIZE = 8;
 
-      private:
-        point_t *ptr = nullptr;
-
-      public:
-        pt_iterator();
-
-        pt_iterator(point_t *ptr);
-
-        pt_iterator &operator+=(difference_type rhs);
-        pt_iterator &operator-=(difference_type rhs);
-        reference operator*() const;
-        pointer operator->() const;
-        reference operator[](difference_type rhs) const;
-        pt_iterator &operator++();
-        pt_iterator &operator--();
-        pt_iterator operator++(int);
-        pt_iterator operator--(int);
-        difference_type operator-(const pt_iterator &rhs) const;
-        pt_iterator operator+(difference_type rhs) const;
-        pt_iterator operator-(difference_type rhs) const;
-        friend pt_iterator operator+(difference_type lhs, const pt_iterator &rhs);
-        bool operator==(const pt_iterator &rhs) const;
-        bool operator!=(const pt_iterator &rhs) const;
-        bool operator>(const pt_iterator &rhs) const;
-        bool operator<(const pt_iterator &rhs) const;
-        bool operator>=(const pt_iterator &rhs) const;
-        bool operator<=(const pt_iterator &rhs) const;
+    enum class winding : uint8_t {
+        UNKNOWN = 3,
+        CLOCKWISE = 4,
+        COUNTERCLOCKWISE = 5,
     };
 
-  public:
     using value_type = point_t;
     using size_type = uint32_t;
-    using const_iterator = pt_iterator;
+    using iterator = point_t *;
+    using const_iterator = const point_t *;
 
   private:
     uint8_t mode = 0;
     point_t points[2];
 
   public:
-    ~pt_vector();
-    pt_vector();
+    ~pt_vector() noexcept;
+    pt_vector() noexcept;
     pt_vector(const pt_vector &other);
     pt_vector &operator=(const pt_vector &other);
-    pt_vector(pt_vector &&other);
-    pt_vector &operator=(pt_vector &&other);
+    pt_vector(pt_vector &&other) noexcept;
+    pt_vector &operator=(pt_vector &&other) noexcept;
 
     pt_vector(size_type size);
 
-    pt_vector(coord_t x0, coord_t y0, coord_t x1, coord_t y1);
+    pt_vector(coord_t x0, coord_t y0, coord_t x1, coord_t y1) noexcept;
 
+    iterator begin();
     const_iterator begin() const;
+    iterator end();
     const_iterator end() const;
-    size_t size() const;
+    size_type size() const;
 
-    const value_type &operator[](size_t idx) const;
-    value_type &operator[](size_t idx);
+    const value_type &operator[](size_type idx) const;
+    value_type &operator[](size_type idx);
 
     value_type &emplace_back(coord_t x, coord_t y);
 

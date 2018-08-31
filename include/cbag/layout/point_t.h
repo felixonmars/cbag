@@ -16,20 +16,15 @@ namespace layout {
 struct byte4_t {
     uint8_t data[4];
 
-    explicit operator uint32_t() const { return *reinterpret_cast<const uint32_t *>(data); }
-    explicit operator int32_t() const { return *reinterpret_cast<const int32_t *>(data); }
+    explicit operator uint32_t() const;
 
-    const byte4_t operator=(int32_t value) {
-        *(reinterpret_cast<int32_t *>(data)) = value;
-        return *this;
-    }
+    explicit operator int32_t() const;
 
-    const byte4_t operator=(uint32_t value) {
-        *(reinterpret_cast<uint32_t *>(data)) = value;
-        return *this;
-    }
+    const byte4_t operator=(int32_t value);
 
-    static byte4_t convert(int32_t value) { return *reinterpret_cast<byte4_t *>(&value); }
+    const byte4_t operator=(uint32_t value);
+
+    static byte4_t convert(int32_t value);
 };
 
 /** A POD custom point type for boost polygon.
@@ -43,37 +38,31 @@ struct point_t {
 
     byte4_t val[2];
 
-    explicit operator uint64_t() const { return *reinterpret_cast<const uint64_t *>(val); }
-    explicit operator void *() const { return reinterpret_cast<void *>(operator uint64_t()); }
+    explicit operator uint64_t() const;
 
-    int32_t operator[](uint32_t idx) const { return val[idx].operator int32_t(); }
+    explicit operator void *() const;
 
-    int32_t x() const { return val[0].operator int32_t(); }
-    int32_t y() const { return val[1].operator int32_t(); }
-    uint32_t ux() const { return val[0].operator uint32_t(); }
-    uint32_t uy() const { return val[1].operator uint32_t(); }
+    int32_t x() const;
 
-    byte4_t &operator[](uint32_t idx) { return val[idx]; }
+    int32_t y() const;
 
-    const int32_t *get_val_ptr(uint32_t idx) const {
-        return reinterpret_cast<const int32_t *>(val + idx);
-    }
+    uint32_t ux() const;
 
-    void set(uint32_t ux, uint32_t uy) {
-        val[0] = ux;
-        val[1] = uy;
-    }
+    uint32_t uy() const;
 
-    void set(int32_t x, int32_t y) {
-        val[0] = x;
-        val[1] = y;
-    }
+    int32_t operator[](uint32_t idx) const;
 
-    void set(void *ptr) { *(reinterpret_cast<uint64_t *>(val)) = reinterpret_cast<uint64_t>(ptr); }
+    byte4_t &operator[](uint32_t idx);
 
-    static point_t create(coord_t x, coord_t y) {
-        return {cbag::layout::byte4_t::convert(x), cbag::layout::byte4_t::convert(y)};
-    }
+    const int32_t *get_val_ptr(uint32_t idx) const;
+
+    void set(uint32_t ux, uint32_t uy);
+
+    void set(int32_t x, int32_t y);
+
+    void set(void *ptr);
+
+    static point_t create(coord_t x, coord_t y);
 };
 
 } // namespace layout

@@ -209,5 +209,16 @@ polygon90::polygon90(std::size_t n) : polygon45(n) {}
 
 polygon90::polygon90(pt_vector data, winding_dir wdir) : polygon45(std::move(data), wdir) {}
 
+polygon90::compact_iterator_type polygon90::begin_compact() const { return {data.begin(), 0}; }
+
+polygon90::compact_iterator_type polygon90::end_compact() const { return {data.end(), 0}; }
+
+polygon90::iterator_type polygon90::begin() const { return {data.begin(), data.size(), 0}; }
+
+polygon90::iterator_type polygon90::end() const {
+    pt_vector::size_type size = data.size();
+    return {data.begin(), size, size};
+}
+
 } // namespace layout
 } // namespace cbag
