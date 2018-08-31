@@ -4,6 +4,7 @@
 #include <iterator>
 
 #include <cbag/layout/point_t.h>
+#include <cbag/layout/typedefs.h>
 
 namespace cbag {
 namespace layout {
@@ -13,12 +14,12 @@ namespace layout {
  *  This optmized vector
  *  This point vector is optimized in the sense of total size.  It only takes up 17 bytes (instead
  *  of 24 bytes on 64-bit systems).  The tradeoff is that it can only be 2^32-1 elements long,
- *  and only works on 64-bit systems or below.  Another advantage is that it's alignment is only 1 byte.
+ *  and only works on 64-bit systems or below.  Another advantage is that it's alignment is only 1
+ *  byte.
  *
  *  The advantage of this point vector class is its compactness.  Also, no memory allocation
  *  will occur on the heap if the number of points is less than 3 (which is a very common case for
- *  rectangles).  Furthermore, the mode flag not only keeps track of the size, but also the winding
- *  direction of the points, making it good for implementing polygons.
+ *  rectangles).
  *
  *  Note: move constructor/assignment will make the other vector empty.  copy constructor will set
  *        capacity = size for the new object.  copy assignment will also not copy capacity;
@@ -27,13 +28,8 @@ namespace layout {
  */
 class pt_vector {
   public:
-    static constexpr uint32_t INIT_SIZE = 8;
-
-    enum class winding : uint8_t {
-        UNKNOWN = 3,
-        CLOCKWISE = 4,
-        COUNTERCLOCKWISE = 5,
-    };
+    static constexpr uint32_t INIT_HEAP_SIZE = 8;
+    static constexpr uint32_t STACK_SIZE = 2;
 
     using value_type = point_t;
     using size_type = uint32_t;
@@ -42,7 +38,7 @@ class pt_vector {
 
   private:
     uint8_t mode = 0;
-    point_t points[2];
+    point_t points[STACK_SIZE];
 
   public:
     ~pt_vector() noexcept;
@@ -67,6 +63,7 @@ class pt_vector {
 
     value_type &emplace_back(coord_t x, coord_t y);
 
+    void reserve(size_type);
     void clear();
 };
 
