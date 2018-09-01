@@ -24,6 +24,12 @@ point_t::operator uint64_t() const { return *reinterpret_cast<const uint64_t *>(
 
 point_t::operator void *() const { return reinterpret_cast<void *>(operator uint64_t()); }
 
+point_t::operator point_t *() const { return reinterpret_cast<point_t *>(operator uint64_t()); }
+
+point_t::operator const point_t *() const {
+    return reinterpret_cast<const point_t *>(operator uint64_t());
+}
+
 int32_t point_t::x() const { return val[0].operator int32_t(); }
 
 int32_t point_t::y() const { return val[1].operator int32_t(); }

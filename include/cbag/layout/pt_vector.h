@@ -21,7 +21,7 @@ namespace layout {
  *  will occur on the heap if the number of points is less than 3 (which is a very common case for
  *  rectangles).
  *
- *  Note: move constructor/assignment will make the other vector empty.  copy constructor will set
+ *  Note: move constructor/assignment are done using copy-and-swap idiom.  copy constructor will set
  *        capacity = size for the new object.  copy assignment will also not copy capacity;
  *        memory reallocation will only occur if the destination capacity is smaller than source
  *        size.  In this case, the new destination capacity will be set equal to size.
@@ -39,14 +39,16 @@ class pt_vector {
   private:
     uint8_t mode = 0;
     point_t points[STACK_SIZE];
+    struct helper;
 
   public:
     ~pt_vector() noexcept;
     pt_vector() noexcept;
     pt_vector(const pt_vector &other);
-    pt_vector &operator=(const pt_vector &other);
+    pt_vector &operator=(pt_vector other) noexcept;
     pt_vector(pt_vector &&other) noexcept;
-    pt_vector &operator=(pt_vector &&other) noexcept;
+
+    friend void swap(pt_vector &first, pt_vector &second);
 
     pt_vector(size_type size);
 

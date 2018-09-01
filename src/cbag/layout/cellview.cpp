@@ -73,7 +73,7 @@ void cellview::add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_
                             dist_t width, const char *style0, const char *style1) {}
 
 std::string cellview::get_inst_name() {
-    cbag::util::binary_iterator<uint32_t> iter(inst_name_cnt, std::optional<uint32_t>());
+    cbag::util::binary_iterator<uint32_t> iter(inst_name_cnt, std::make_optional<uint32_t>());
     while (iter.has_next()) {
         if (inst_map.find(fmt::format("X{d}", *iter)) == inst_map.end()) {
             iter.save();

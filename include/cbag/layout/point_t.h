@@ -42,6 +42,10 @@ struct point_t {
 
     explicit operator void *() const;
 
+    explicit operator point_t *() const;
+
+    explicit operator const point_t *() const;
+
     int32_t x() const;
 
     int32_t y() const;
