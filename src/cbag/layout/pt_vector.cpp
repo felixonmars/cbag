@@ -59,9 +59,12 @@ struct pt_vector::helper {
         self.points[0].set(new_ptr);
         self.points[STACK_SIZE - 1][1] = n;
     }
-    static inline void reserve_no_ptr(pt_vector &self, size_type n, size_type new_size) {
+    static inline void reserve_no_ptr(pt_vector &self, size_type n, size_type copy_size,
+                                      size_type new_size) {
         auto *ptr = new_ptr(n);
-        std::copy(self.points, self.points + STACK_SIZE, ptr);
+        if (copy_size > 0) {
+            std::copy(self.points, self.points + copy_size, ptr);
+        }
         set_ptr(self, ptr);
         set_size_cap(self, new_size, n);
         self.mode = STACK_SIZE + 1;
@@ -109,10 +112,7 @@ void swap(pt_vector &first, pt_vector &second) {
 
 pt_vector::pt_vector(size_type n) {
     if (n > STACK_SIZE) {
-        // allocate memory
-        mode = STACK_SIZE + 1;
-        helper::set_ptr(*this, helper::new_ptr(n));
-        helper::set_size_cap(*this, 0u, n);
+        helper::reserve_no_ptr(*this, n, 0, 0);
     }
 }
 
@@ -163,7 +163,7 @@ pt_vector::value_type &pt_vector::emplace_back(coord_t x, coord_t y) {
         ++mode;
         return points[mode];
     } else {
-        helper::reserve_no_ptr(*this, INIT_HEAP_SIZE, STACK_SIZE + 1);
+        helper::reserve_no_ptr(*this, INIT_HEAP_SIZE, STACK_SIZE, STACK_SIZE + 1);
         auto *ptr = helper::get_ptr(*this) + STACK_SIZE;
         ptr->set(x, y);
         return *ptr;
@@ -179,7 +179,7 @@ void pt_vector::reserve(size_type size) {
     } else {
         // no memory
         if (size > STACK_SIZE) {
-            helper::reserve_no_ptr(*this, size, mode);
+            helper::reserve_no_ptr(*this, size, mode, mode);
         }
     }
 }
