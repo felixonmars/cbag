@@ -13,6 +13,32 @@
 namespace cbag {
 namespace layout {
 
+struct cellview::helper {
+    static std::string get_inst_name(cellview &self) {
+        cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt,
+                                                   std::make_optional<uint32_t>());
+        while (iter.has_next()) {
+            if (self.inst_map.find(fmt::format("X{d}", *iter)) == self.inst_map.end()) {
+                iter.save();
+                iter.down();
+            } else {
+                iter.up();
+            }
+        }
+
+        self.inst_name_cnt = *(iter.get_save());
+        return fmt::format("X{d}", self.inst_name_cnt);
+    }
+
+    static geo_map_t::iterator get_geometry(cellview &self, const layer_t &layer) {
+        geo_map_t::iterator iter = self.geo_map.find(layer);
+        if (iter == self.geo_map.end()) {
+            iter = self.geo_map.emplace(layer, geometry(self.geo_mode)).first;
+        }
+        return iter;
+    }
+};
+
 cellview::cellview(std::string tech, uint8_t geo_mode)
     : tech(std::move(tech)), geo_mode(geo_mode) {}
 
@@ -27,11 +53,11 @@ rectangle cellview::get_bbox(const layer_t &layer) const {
 std::string cellview::add_instance(instance inst, const char *name) {
     std::string inst_name;
     if (name == nullptr) {
-        inst_name = get_inst_name();
+        inst_name = helper::get_inst_name(*this);
     } else {
         inst_name = name;
         if (inst_map.find(inst_name) != inst_map.end()) {
-            inst_name = get_inst_name();
+            inst_name = helper::get_inst_name(*this);
         }
     }
 
@@ -41,7 +67,7 @@ std::string cellview::add_instance(instance inst, const char *name) {
 
 polygon_ref<rectangle> cellview::add_rect(const layer_t &layer, coord_t xl, coord_t yl, coord_t xh,
                                           coord_t yh) {
-    auto iter = get_geometry(layer);
+    auto iter = helper::get_geometry(*this, layer);
     return iter->second.add_rect(xl, yl, xh, yh);
 }
 
@@ -71,29 +97,6 @@ polygon_ref<polygon> cellview::add_poly(const layer_t &layer, pt_vector data) {
 
 void cellview::add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                             dist_t width, const char *style0, const char *style1) {}
-
-std::string cellview::get_inst_name() {
-    cbag::util::binary_iterator<uint32_t> iter(inst_name_cnt, std::make_optional<uint32_t>());
-    while (iter.has_next()) {
-        if (inst_map.find(fmt::format("X{d}", *iter)) == inst_map.end()) {
-            iter.save();
-            iter.down();
-        } else {
-            iter.up();
-        }
-    }
-
-    inst_name_cnt = *(iter.get_save());
-    return fmt::format("X{d}", inst_name_cnt);
-}
-
-geo_map_t::iterator cellview::get_geometry(const layer_t &layer) {
-    geo_map_t::iterator iter = geo_map.find(layer);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(layer, geometry(geo_mode)).first;
-    }
-    return iter;
-}
 
 } // namespace layout
 } // namespace cbag

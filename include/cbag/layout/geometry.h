@@ -23,14 +23,13 @@ class pt_vector;
  */
 class geometry {
   private:
-    static const std::unordered_map<std::string, end_style> style_map;
-
     rectangle_set rect_set;
     polygon90_set poly90_set;
     polygon45_set poly45_set;
     polygon_set poly_set;
     uint8_t mode = 0;
     union_view view;
+    struct helper;
 
   public:
     explicit geometry(uint8_t mode = 0);
@@ -51,11 +50,6 @@ class geometry {
 
     static pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                                     offset_t half_width, const char *style0, const char *style1);
-
-  private:
-    union_view make_union_view();
-
-    static end_style get_style(const char *style_str, offset_t half_width, bool is_45);
 };
 
 } // namespace layout

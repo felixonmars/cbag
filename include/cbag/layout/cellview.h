@@ -41,6 +41,7 @@ class cellview {
     std::vector<boundary> boundary_list;
     uint32_t inst_name_cnt = 0;
     uint8_t geo_mode = 0;
+    struct helper;
 
   public:
     explicit cellview(std::string tech, uint8_t geo_mode = 0);
@@ -65,11 +66,6 @@ class cellview {
 
     void add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                       dist_t width, const char *style0, const char *style1);
-
-  private:
-    std::string get_inst_name();
-
-    geo_map_t::iterator get_geometry(const layer_t &layer);
 };
 
 } // namespace layout

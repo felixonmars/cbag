@@ -13,14 +13,47 @@
 namespace cbag {
 namespace layout {
 
-const std::unordered_map<std::string, end_style> geometry::style_map = {
+struct geometry::helper {
+    static const std::unordered_map<std::string, end_style> style_map;
+
+    static union_view make_union_view(const geometry &self) {
+        switch (self.mode) {
+        case 0:
+            return rectangle_view(self.rect_set);
+        case 1:
+            return polygon90_view(self.poly90_set, self.rect_set);
+        case 2:
+            return polygon45_view(self.poly45_set, self.poly90_set, self.rect_set);
+        default:
+            return polygon_view(self.poly_set, self.poly45_set, self.poly90_set, self.rect_set);
+        }
+    }
+
+    static end_style get_style(const char *style_str, offset_t half_width, bool is_45) {
+        end_style ans = style_map.at(style_str);
+        if (ans == end_style::round) {
+            // handle degenerate cases
+            switch (half_width) {
+            case 1:
+                return (is_45) ? end_style::triangle : end_style::extend;
+            case 2:
+                return (is_45) ? end_style::extend : end_style::triangle;
+            default:
+                return end_style::round;
+            }
+        }
+        return ans;
+    }
+};
+
+const std::unordered_map<std::string, end_style> geometry::helper::style_map = {
     {"truncate", end_style::truncate},
     {"extend", end_style::extend},
     {"round", end_style::round},
     {"triangle", end_style::triangle},
 };
 
-geometry::geometry(uint8_t mode) : mode(mode), view(make_union_view()) {}
+geometry::geometry(uint8_t mode) : mode(mode), view(helper::make_union_view(*this)) {}
 
 rectangle geometry::get_bbox() const { return extents(view); }
 
@@ -49,19 +82,6 @@ polygon_ref<polygon> geometry::add_poly(pt_vector data) {
     mode = std::max(mode, 3_uc);
     poly_set.emplace_back(std::move(data));
     return {&poly_set, idx};
-}
-
-union_view geometry::make_union_view() {
-    switch (mode) {
-    case 0:
-        return rectangle_view(rect_set);
-    case 1:
-        return polygon90_view(poly90_set, rect_set);
-    case 2:
-        return polygon45_view(poly45_set, poly90_set, rect_set);
-    default:
-        return polygon_view(poly_set, poly45_set, poly90_set, rect_set);
-    }
 }
 
 constexpr double root2 = cbag::math::sqrt(2);
@@ -105,22 +125,6 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
     }
 }
 
-end_style geometry::get_style(const char *style_str, offset_t half_width, bool is_45) {
-    end_style ans = style_map.at(style_str);
-    if (ans == end_style::round) {
-        // handle degenerate cases
-        switch (half_width) {
-        case 1:
-            return (is_45) ? end_style::triangle : end_style::extend;
-        case 2:
-            return (is_45) ? end_style::extend : end_style::triangle;
-        default:
-            return end_style::round;
-        }
-    }
-    return ans;
-}
-
 pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                                    offset_t half_width, const char *style0, const char *style1) {
 
@@ -136,8 +140,8 @@ pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y
     }
 
     bool is_45 = p.is_45_or_invalid();
-    end_style sty0 = get_style(style0, half_width, is_45);
-    end_style sty1 = get_style(style1, half_width, is_45);
+    end_style sty0 = helper::get_style(style0, half_width, is_45);
+    end_style sty1 = helper::get_style(style1, half_width, is_45);
 
     // initialize point array, reserve space for worst case
     pt_vector ans(8);
