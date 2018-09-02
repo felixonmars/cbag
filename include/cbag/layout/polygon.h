@@ -31,7 +31,9 @@ class polygon {
 
     explicit polygon(std::size_t n);
 
-    explicit polygon(pt_vector data, winding_dir wdir = winding_dir::unknown_winding);
+    explicit polygon(const pt_vector &data, winding_dir wdir = winding_dir::unknown_winding);
+
+    explicit polygon(pt_vector &&data, winding_dir wdir = winding_dir::unknown_winding);
 
     iterator_type begin() const { return data.begin(); }
     iterator_type end() const { return data.end(); }

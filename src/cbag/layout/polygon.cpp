@@ -7,7 +7,9 @@ polygon::polygon() = default;
 
 polygon::polygon(std::size_t n) : data(n) {}
 
-polygon::polygon(pt_vector data, winding_dir wdir) : data(std::move(data)), wdir(wdir) {}
+polygon::polygon(const pt_vector &data, winding_dir wdir) : data(std::move(data)), wdir(wdir) {}
+
+polygon::polygon(pt_vector &&data, winding_dir wdir) : data(std::move(data)), wdir(wdir) {}
 
 winding_dir polygon::winding() const {
     if (wdir == winding_dir::unknown_winding) {

@@ -4,10 +4,10 @@
 namespace cbag {
 namespace layout {
 
-rectangle::rectangle() : polygon90({0, 0, 0, 0}, winding_dir::clockwise_winding) {}
+rectangle::rectangle() : polygon90(pt_vector(0, 0, 0, 0), winding_dir::clockwise_winding) {}
 
 rectangle::rectangle(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
-    : polygon90({xl, yl, xh, yh}, winding_dir::clockwise_winding) {}
+    : polygon90(pt_vector(xl, yl, xh, yh), winding_dir::clockwise_winding) {}
 
 rectangle &rectangle::transform(const cbag::layout::transformation &xform) {
     bp::transform(*this, xform);

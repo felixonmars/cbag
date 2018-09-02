@@ -31,7 +31,7 @@ class rectangle : public polygon90 {
 
     template <typename T1, typename T2>
     rectangle(const T1 &hrange, const T2 &vrange)
-        : polygon90({bp::low(hrange), bp::low(vrange), bp::high(hrange), bp::high(vrange)},
+        : polygon90(pt_vector(bp::low(hrange), bp::low(vrange), bp::high(hrange), bp::high(vrange)),
                     winding_dir::clockwise_winding) {}
 
     void set_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
