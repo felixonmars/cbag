@@ -82,7 +82,7 @@ void test_subclass_constructor() {
 }
 
 int main(int argc, char *argv[]) {
-    // test_rect_pt_vector();
-    test_subclass_constructor();
+    test_rect_pt_vector();
+    // test_subclass_constructor();
     return 0;
 }

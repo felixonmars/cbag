@@ -80,7 +80,6 @@ pt_vector::~pt_vector() noexcept {
 pt_vector::pt_vector() noexcept = default;
 
 pt_vector::pt_vector(const pt_vector &other) : mode(other.mode) {
-    std::cout << "pt_vector copy constructor called" << std::endl;
     if (mode > STACK_SIZE) {
         // create new array and copy data over
         size_type n = helper::get_ptr_size(other);
@@ -100,7 +99,6 @@ pt_vector &pt_vector::operator=(pt_vector other) noexcept {
 }
 
 pt_vector::pt_vector(pt_vector &&other) noexcept : pt_vector() {
-    std::cout << "pt_vector move constructor called" << std::endl;
     swap(*this, other);
 }
 
