@@ -1,7 +1,7 @@
 # distutils: language = c++
 
 from libcpp cimport bool as cbool
-from enum import Enum
+
 
 ctypedef unsigned int uint32_t
 
@@ -38,3 +38,4 @@ cdef class CBox:
 
     cdef coord_t _xm(self)
     cdef coord_t _ym(self)
+    cdef CBox _transform(self, coord_t dx, coord_t dy, uint32_t code)

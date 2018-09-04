@@ -38,7 +38,9 @@ extra_link_args = ["-std=c++17",
 
 setup(
     install_requires=['cython'],
-    packages=[pkg_name],
+    packages=[pkg_name,
+              pkg_name + '.layout',
+    ],
     zip_safe=False,
     name=pkg_name,
     cmdclass={'build_ext': build_ext},

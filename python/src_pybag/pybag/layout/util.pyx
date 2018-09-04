@@ -1,7 +1,8 @@
 # distutils: language = c++
 
 from util cimport *
-from util import Orientation
+from .pyutil import Orientation
+
 
 # initialize logging
 init_logging()
@@ -142,13 +143,16 @@ cdef class CBox:
             raise ValueError('unit_mode = False not supported.')
         return CBox(self._xl - dx, self._yl - dy, self._xh + dx, self._yh + dy)
 
+    cdef CBox _transform(self, coord_t dx, coord_t dy, uint32_t code):
+        cdef transformation xform = transformation(dx, dy, code)
+        cdef rectangle r = rectangle(self._xl, self._yl, self._xh, self._yh)
+        r.transform(xform)
+        return CBox(r.xl(), r.yl(), r.xh(), r.yh())
+
     def transform(self, loc=(0, 0), orient='R0', unit_mode=True):
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        cdef transformation xform = transformation(loc[0], loc[1], Orientation[orient])
-        cdef rectangle r = rectangle(self._xl, self._yl, self._xh, self._yh)
-        r.transform(xform)
-        return CBox(r.xl(), r.yl(), r.xh(). r.yh())
+        return self._transform(loc[0], loc[1], Orientation[orient].value)
 
     def move_by(self, int dx=0, int dy=0, unit_mode=True):
         if not unit_mode:
