@@ -46,12 +46,26 @@ setup(
         pkg_name: ['__init__.pxd',
                    'schematic.pxd',
                    'schematic.pyx',
+                   os.path.join('layout', '__init__.pxd'),
+                   os.path.join('layout', 'util.pxd'),
+                   os.path.join('layout', 'util.pyx'),
         ]
     },
     ext_modules=[
         Extension(pkg_name + '.schematic',
                   sources=[
                       os.path.join(pkg_name, 'schematic.pyx'),
+                  ],
+                  language='c++',
+                  include_dirs=include_dirs,
+                  libraries=libraries,
+                  library_dirs=library_dirs,
+                  extra_compile_args=extra_compile_args,
+                  extra_link_args=extra_link_args,
+        ),
+        Extension(pkg_name + '.layout.util',
+                  sources=[
+                      os.path.join(pkg_name, 'layout', 'util.pyx'),
                   ],
                   language='c++',
                   include_dirs=include_dirs,

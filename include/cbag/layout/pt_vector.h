@@ -59,14 +59,15 @@ class pt_vector {
     iterator end();
     const_iterator end() const;
     size_type size() const;
-
     const value_type &operator[](size_type idx) const;
     value_type &operator[](size_type idx);
 
     value_type &emplace_back(coord_t x, coord_t y);
-
     void reserve(size_type);
     void clear();
+
+    const value_type &at_raw(size_type idx) const { return points[idx]; }
+    value_type &at_raw(size_type idx) { return points[idx]; }
 };
 
 } // namespace layout

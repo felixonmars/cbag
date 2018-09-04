@@ -14,5 +14,7 @@
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/shape_t_def.h>
+#include <cbag/layout/rectangle.h>
+#include <cbag/layout/transformation.h>
 
 #endif // CBAG_CBAG_H

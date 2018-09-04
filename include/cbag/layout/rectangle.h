@@ -38,6 +38,14 @@ class rectangle : public polygon90 {
 
     rectangle &transform(const transformation &xform);
 
+    coord_t xl() const { return data.at_raw(0).x(); }
+    coord_t yl() const { return data.at_raw(0).y(); }
+    coord_t xh() const { return data.at_raw(1).x(); }
+    coord_t yh() const { return data.at_raw(1).y(); }
+    coord_t xm() const { return (xh() + xl()) / 2; }
+    coord_t ym() const { return (yh() + yl()) / 2; }
+    offset_t w() const { return xh() - xl(); }
+    offset_t h() const { return yh() - yl(); }
     // methods for boost::polygon
 
     interval_type get(bp::orientation_2d orient) const;
