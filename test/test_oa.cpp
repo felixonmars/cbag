@@ -3,7 +3,7 @@
 #include <cbag/cbag.h>
 #include <cbagoa/cbagoa.h>
 
-int read_oa() {
+void read_oa() {
     cbag::init_logging();
 
     std::string lib_file("cds.lib");
@@ -24,8 +24,23 @@ int read_oa() {
 
     db.read_sch_cellview(lib_name, cell_name2, view_name);
     db.read_sch_cellview(lib_name, cell_name2, sym_view_name);
+}
+
+
+void test_oa_box() {
+
+    oa::oaBox box(0, 0, 5, 7);
+    oa::oaPoint p;
+    box.getCenter(p);
+    std::cout << "center x: " << p.x() << std::endl;
+    std::cout << "center y: " << p.y() << std::endl;
+}
+
+
+int main(int argc, char *argv[]) {
+    // read_oa();
+
+    test_oa_box();
 
     return 0;
 }
-
-int main(int argc, char *argv[]) { return read_oa(); }

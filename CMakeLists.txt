@@ -297,12 +297,12 @@ install(TARGETS
   cbag
   cbagyaml
   cbagoa
-#  test_oa
+  test_oa
 #  test_spirit
 #  read_prop
 #  test_yaml
 #  netmap_sample
-  test_polygon
+#  test_polygon
 #  test_casting
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib

@@ -25,5 +25,17 @@ transformation::transformation(coord_t dx, coord_t dy, unsigned int mode)
     set_translation(bp::point_data<coord_t>(-dx, -dy));
 }
 
+coord_t transformation::x() const {
+    coord_t x = 0, y = 0;
+    transform(x, y);
+    return x;
+}
+
+coord_t transformation::y() const {
+    coord_t x = 0, y = 0;
+    transform(x, y);
+    return y;
+}
+
 } // namespace layout
 } // namespace cbag

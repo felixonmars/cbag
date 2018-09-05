@@ -8,6 +8,11 @@ from cython.operator cimport dereference as deref
 init_logging()
 
 
+cdef class PyRect:
+    def __init__(self):
+        pass
+
+
 cdef class PyLayInstance:
     def __init__(self, master):
         self._master = master
@@ -40,6 +45,13 @@ cdef class PyLayCellView:
 
     def finalize(self):
         pass
+
+    def _get_lay_purp(layer):
+        # type: (Union[str, Tuple[str, str]]) -> Tuple[int, int]
+        if isinstance(layer, str):
+            return self._layer_map[layer], self._purpose_map[self._def_purpose]
+        else:
+            return self._layer_map[layer[0]], self._purpose_map[layer[1]]
     
     def get_rect_bbox(self, layer):
         # type: (Union[str, Tuple[str, str]]) -> BBox
@@ -57,12 +69,7 @@ cdef class PyLayCellView:
         bbox : BBox
             the bounding box.
         """
-        if isinstance(layer, str):
-            lay_id = self._layer_map[layer]
-            purp_id = self._purpose_map[self._def_purpose]
-        else:
-            lay_id = self._layer_map[layer[0]]
-            purp_id = self._purpose_map[layer[1]]
+        lay_id, purp_id = self._get_lay_purp(layer)
 
         rectangle r = deref(self._ptr).get_bbox(lay_id, purp_id)
         return BBox(r.xl(), r.yl(), r.xh(), r.yh())
@@ -166,3 +173,25 @@ cdef class PyLayCellView:
 
         return self._add_cinst(master, master._layout, cname, make_transform(loc, orient), nx, ny,
                                spx, spy)
+
+    def add_rect(self, layer, bbox):
+        # type: (Union[str, Tuple[str, str]], BBox) -> PyRect
+        """Add a new rectangle.
+
+        Parameters
+        ----------
+        layer : Union[str, Tuple[str, str]]
+            the rectangle layer.
+        bbox : BBox
+            the rectangle bounding box.
+
+        Returns
+        -------
+        rect : PyRect
+            the rectangle object.
+        """
+        lay_id, purp_id = self._get_lay_purp(layer)
+
+        cdef PyRect ans
+        ans._ref = deref(self._ptr).add_rect(lay_id, purp_id, bbox.xl, bbox.yl, bbox.xh, bbox.yh)
+        return ans

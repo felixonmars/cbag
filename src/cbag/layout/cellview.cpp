@@ -7,8 +7,10 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/via.h>
+#include <cbag/layout/via_ref.h>
 
 namespace cbag {
 namespace layout {
@@ -59,38 +61,41 @@ rectangle cellview::get_bbox(lay_t lay_id, purp_t purp_id) const {
     return iter->second.get_bbox();
 }
 
-polygon_ref<rectangle> cellview::add_rect(const layer_t &layer, coord_t xl, coord_t yl, coord_t xh,
-                                          coord_t yh) {
-    auto iter = helper::get_geometry(*this, layer);
+polygon_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
+                                          coord_t xh, coord_t yh) {
+    auto iter = helper::get_geometry(*this, layer_t(lay_id, purp_id));
     return iter->second.add_rect(xl, yl, xh, yh);
 }
 
-polygon_ref<polygon90> cellview::add_poly90(const layer_t &layer, pt_vector data) {
+polygon_ref<polygon90> cellview::add_poly90(lay_t lay_id, purp_t purp_id, pt_vector data) {
+    layer_t layer(lay_id, purp_id);
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
-        iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        iter = geo_map.emplace(std::move(layer), geometry(geo_mode)).first;
     }
     return iter->second.add_poly90(std::move(data));
 }
 
-polygon_ref<polygon45> cellview::add_poly45(const layer_t &layer, pt_vector data) {
+polygon_ref<polygon45> cellview::add_poly45(lay_t lay_id, purp_t purp_id, pt_vector data) {
+    layer_t layer(lay_id, purp_id);
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
-        iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        iter = geo_map.emplace(std::move(layer), geometry(geo_mode)).first;
     }
     return iter->second.add_poly45(std::move(data));
 }
 
-polygon_ref<polygon> cellview::add_poly(const layer_t &layer, pt_vector data) {
+polygon_ref<polygon> cellview::add_poly(lay_t lay_id, purp_t purp_id, pt_vector data) {
+    layer_t layer(lay_id, purp_id);
     auto iter = geo_map.find(layer);
     if (iter == geo_map.end()) {
-        iter = geo_map.emplace(layer, geometry(geo_mode)).first;
+        iter = geo_map.emplace(std::move(layer), geometry(geo_mode)).first;
     }
     return iter->second.add_poly(std::move(data));
 }
 
-void cellview::add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                            dist_t width, const char *style0, const char *style1) {}
+void cellview::add_path_seg(lay_t lay_id, purp_t purp_id, coord_t x0, coord_t y0, coord_t x1,
+                            coord_t y1, dist_t width, const char *style0, const char *style1) {}
 
 inst_map_t::iterator cellview::add_prim_instance(const char *lib, const char *cell,
                                                  const char *view, const char *name,
@@ -113,6 +118,19 @@ inst_map_t::iterator cellview::add_instance(const cellview *cv, const char *name
         .emplace(helper::get_inst_name(*this, name),
                  instance(cv, std::move(xform), nx, ny, spx, spy))
         .first;
+}
+
+via_ref cellview::add_via(transformation xform, const char *via_id, const uint32_t (&num)[2],
+                          const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
+                          const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
+                          const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
+                          bool add_rect) {
+    std::size_t idx = via_list.size();
+    via v = via_list.emplace_back(xform, via_id, num, cut_dim, cut_sp, lay1_enc, lay1_off, lay2_enc,
+                                  lay2_off);
+    if (add_rect) {
+    }
+    return via_ref(&via_list, idx);
 }
 
 } // namespace layout

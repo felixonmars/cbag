@@ -12,11 +12,11 @@ template <typename T> class polygon_ref {
     std::size_t idx = 0;
 
   public:
-    inline polygon_ref() {}
+    polygon_ref() {}
 
-    inline polygon_ref(std::vector<T> *vec, std::size_t idx) : vec(vec), idx(idx) {}
+    polygon_ref(std::vector<T> *vec, std::size_t idx) : vec(vec), idx(idx) {}
 
-    inline T &value() { return (*vec)[idx]; }
+    T &value() { return (*vec)[idx]; }
 };
 
 } // namespace layout
