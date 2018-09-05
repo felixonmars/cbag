@@ -6,7 +6,6 @@ import pprint
 from .pyutil import Orientation
 
 
-
 # initialize logging
 init_logging()
 

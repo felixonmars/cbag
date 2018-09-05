@@ -46,12 +46,12 @@ class cellview {
   public:
     explicit cellview(std::string tech, uint8_t geo_mode = 0);
 
-    bool is_empty() const {
+    bool empty() const {
         return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
                area_block_list.empty() && boundary_list.empty();
     }
 
-    rectangle get_bbox(const layer_t &layer) const;
+    rectangle get_bbox(lay_t lay_id, purp_t purp_id) const;
 
     std::string add_instance(instance inst, const char *name = nullptr);
 
