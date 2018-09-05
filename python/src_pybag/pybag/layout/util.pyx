@@ -1,7 +1,10 @@
 # distutils: language = c++
 
 from util cimport *
+
+import pprint
 from .pyutil import Orientation
+
 
 
 # initialize logging
@@ -160,8 +163,7 @@ cdef class BBox:
     def as_bbox_collection(self):
         # type: () -> BBoxCollection
         """Cast this BBox as a BBoxCollection."""
-        # TODO: implemment this
-        return None
+        return BBoxCollection([self])
 
     def merge(self, bbox):
         # type: (BBox) -> BBox
@@ -516,8 +518,7 @@ cdef class BBoxArray:
 
     def as_bbox_collection(self):
         # type: () -> BBoxCollection
-        # TODO: Implement this
-        return None
+        return BBoxCollection([self])
 
     def get_bbox(self, int idx):
         # type: (int) -> BBox
@@ -633,8 +634,18 @@ cdef class BBoxArray:
         bcol : BBoxCollection
             a BBoxCollection of the arrayed copies.
         """
-        # TODO: Implement this
-        return None
+        if not unit_mode:
+            raise ValueError('unit_mode = False not supported.')
+
+        x_info = self._array_helper(nx, spx, self.nx, self._spx_unit)
+        y_info = self._array_helper(ny, spy, self.ny, self._spy_unit)
+
+        base = self.base
+        barr_list = [BBoxArray(base.move_by(dx, dy), nx=new_nx, ny=new_ny,
+                               spx=new_spx, spy=new_spy)
+                     for new_nx, new_spx, dx in zip(*x_info)
+                     for new_ny, new_spy, dy in zip(*y_info)]
+        return BBoxCollection(barr_list)
 
     @staticmethod
     def _array_helper(int n1, int sp1, int n2, int sp2):
@@ -659,3 +670,112 @@ cdef class BBoxArray:
     def __repr__(self):
         return '{}({}, nx={}, ny={}, spx={}, spy={})'.format(self.__class__.__name__, repr(self._bbox),
                                                              self._nx, self._ny, self._spx, self._spy)
+
+
+cdef class BBoxCollection:
+    """A collection of bounding boxes.
+
+    To support efficient computation, this class stores bounding boxes as a list of
+    BBoxArray objects.
+
+    Parameters
+    ----------
+    box_arr_list : List[BBoxArray]
+        list of BBoxArrays in this collections.
+    """
+
+    def __init__(self, box_arr_list):
+        self._box_arr_list = box_arr_list
+
+    def __iter__(self):
+        """Iterates over all BBoxArray in this collection."""
+        return self._box_arr_list.__iter__()
+
+    def __reversed__(self):
+        return self._box_arr_list.__reversed__()
+
+    def __len__(self):
+        return len(self._box_arr_list)
+
+    def as_bbox_array(self):
+        # type: () -> BBoxArray
+        """Attempt to cast this BBoxCollection into a BBoxArray.
+
+        Returns
+        -------
+        bbox_arr : BBoxArray
+            the BBoxArray object that's equivalent to this BBoxCollection.
+
+        Raises
+        ------
+        ValueError :
+            if this BBoxCollection cannot be cast into a BBoxArray.
+        """
+        if len(self._box_arr_list) != 1:
+            raise ValueError('Unable to cast this BBoxCollection into a BBoxArray.')
+
+        return self._box_arr_list[0]
+
+    def as_bbox(self):
+        # type: () -> BBox
+        """Attempt to cast this BBoxCollection into a BBox.
+
+        Returns
+        -------
+        bbox : BBox
+            the BBox object that's equivalent to this BBoxCollection.
+
+        Raises
+        ------
+        Exception :
+            if this BBoxCollection cannot be cast into a BBox.
+        """
+        if len(self._box_arr_list) != 1:
+            raise Exception('Unable to cast this BBoxCollection into a BBoxArray.')
+        box_arr = self._box_arr_list[0]
+        if box_arr.nx != 1 or box_arr.ny != 1:
+            raise Exception('Unable to cast this BBoxCollection into a BBoxArray.')
+        return box_arr.base
+
+    def get_bounding_box(self):
+        # type: () -> BBox
+        """Returns the bounding box that encloses all boxes in this collection.
+
+        Returns
+        -------
+        bbox : BBox
+            the bounding box of this BBoxCollection.
+        """
+        box = BBox.get_invalid_bbox()
+        for box_arr in self._box_arr_list:
+            all_box = BBox(box_arr.left, box_arr.bottom, box_arr.right, box_arr.top,
+                           box_arr.base.resolution)
+            box = box.merge(all_box)
+
+        return box
+
+    def transform(self, loc=(0, 0), orient='R0'):
+        # type: (Tuple[int, int], str) -> BBoxCollection
+        """Returns a new BBoxCollection under the given transformation.
+
+        rotates first before shift.
+
+        Parameters
+        ----------
+        loc : Tuple[int, int]
+            location of the anchor.
+        orient : str
+            the orientation of the bounding box.
+
+        Returns
+        -------
+        box_collection : BBoxCollection
+            the new BBoxCollection.
+        """
+        return BBoxCollection([box_arr.transform(loc=loc, orient=orient) for box_arr in self._box_arr_list])
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return pprint.pformat(self._box_arr_list)

@@ -48,3 +48,7 @@ cdef class BBoxArray:
     cdef int _ny
     cdef offset_t _spx
     cdef offset_t _spy
+
+
+cdef class BBoxCollection:
+    cdef _box_arr_list
