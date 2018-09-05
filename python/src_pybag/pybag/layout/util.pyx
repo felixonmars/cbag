@@ -469,6 +469,22 @@ cdef class BBoxArray:
         return self._spy
 
     @property
+    def xl(self):
+        return self._bbox.xl
+
+    @property
+    def xh(self):
+        return self._bbox.xh
+
+    @property
+    def yl(self):
+        return self._bbox.yl
+
+    @property
+    def yh(self):
+        return self._bbox.yh
+
+    @property
     def left_unit(self):
         # type: () -> int
         return self._bbox.xl
