@@ -119,11 +119,11 @@ target_link_libraries(cbag
   oaBase
   oaCommon
   oaPlugIn
+  # for Spirit X3 error code
+  boost_system
   PRIVATE
   # for primitives YAML serialization
   fmt-header-only
-  # for Spirit X3 error code
-  boost_system
   # multithreading for spdlog
   # Threads::Threads
   m
