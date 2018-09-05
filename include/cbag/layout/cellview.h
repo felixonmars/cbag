@@ -53,8 +53,6 @@ class cellview {
 
     rectangle get_bbox(lay_t lay_id, purp_t purp_id) const;
 
-    std::string add_instance(instance inst, const char *name = nullptr);
-
     polygon_ref<rectangle> add_rect(const layer_t &layer, coord_t xl, coord_t yl, coord_t xh,
                                     coord_t yh);
 
@@ -66,6 +64,13 @@ class cellview {
 
     void add_path_seg(const layer_t &layer, coord_t x0, coord_t y0, coord_t x1, coord_t y1,
                       dist_t width, const char *style0, const char *style1);
+
+    inst_map_t::iterator add_prim_instance(const char *lib, const char *cell, const char *view,
+                                           const char *name, transformation xform, uint32_t nx,
+                                           uint32_t ny, offset_t spx, offset_t spy);
+
+    inst_map_t::iterator add_instance(const cellview *cv, const char *name, transformation xform,
+                                      uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
 };
 
 } // namespace layout

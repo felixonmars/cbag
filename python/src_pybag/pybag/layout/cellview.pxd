@@ -1,22 +1,27 @@
 # distutils: language = c++
 
-from .util cimport rectangle
+from .util cimport rectangle, transformation, make_transform
 
 from libcpp cimport string
+from libcpp cimport pair
+from libcpp cimport unordered_map
 from libcpp cimport bool as cbool
 
 
 ctypedef unsigned int uint8_t
-
+ctypedef unsigned int uint32_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     ctypedef unsigned int lay_t
     ctypedef unsigned int purp_t
+    ctypedef int offset_t
     
     cdef void init_logging()
 
 
 cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
+    ctypedef unordered_map[string, instance] inst_map_t
+
     cdef cppclass cellview:
         cellview(string tech, uint8_t geo_mode)
 
@@ -24,6 +29,20 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         rectangle get_bbox(lay_t lay_id, purp_t purp_id) const
 
+        inst_map_t.iterator add_prim_instance(const char* lib, const char* cell, const char* view,
+                                              const char* name, transformation xform, uint32_t nx,
+                                              uint32_t ny, offset_t spx, offset_t spy)
+
+        inst_map_t.iterator add_instance(const cellview* cv, const char* name, transformation xform,
+                                         uint32_t nx, uint32_t ny, offset_t spx, offset_t spy)
+
+    cdef cppclass instance:
+        pass
+
+
+cdef class PyLayInstance:
+    cdef inst_map_t.iterator _ptr
+    cdef _master
 
 cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr

@@ -10,6 +10,10 @@ from .pyutil import Orientation
 init_logging()
 
 
+cdef transformation make_transform(loc, orient):
+    return transformation(loc[0], loc[1], Orientation[orient].value)
+
+
 cdef class BBox:
     """An immutable bounding box.
 
@@ -259,8 +263,7 @@ cdef class BBox:
             raise ValueError('unit_mode = False not supported.')
         return BBox(self._xl - dx, self._yl - dy, self._xh + dx, self._yh + dy)
 
-    cdef BBox _transform(self, coord_t dx, coord_t dy, uint32_t code):
-        cdef transformation xform = transformation(dx, dy, code)
+    cdef BBox _transform(self, const transformation& xform):
         cdef rectangle r = rectangle(self._xl, self._yl, self._xh, self._yh)
         r.transform(xform)
         return BBox(r.xl(), r.yl(), r.xh(), r.yh())
@@ -287,7 +290,7 @@ cdef class BBox:
         """
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        return self._transform(loc[0], loc[1], Orientation[orient].value)
+        return self._transform(make_transform(loc, orient))
 
     def move_by(self, int dx=0, int dy=0, unit_mode=True):
         # type: (int, int, bool) -> BBox

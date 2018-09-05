@@ -31,6 +31,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         rectangle& transform(const transformation& xform)
 
 
+cdef transformation make_transform(loc, orient)
+
+
 cdef class BBox:
     cdef coord_t _xl
     cdef coord_t _yl
@@ -39,7 +42,7 @@ cdef class BBox:
 
     cdef coord_t _xm(self)
     cdef coord_t _ym(self)
-    cdef BBox _transform(self, coord_t dx, coord_t dy, uint32_t code)
+    cdef BBox _transform(self, const transformation& xform)
 
 
 cdef class BBoxArray:
