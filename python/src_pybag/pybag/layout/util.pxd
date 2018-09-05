@@ -7,6 +7,7 @@ ctypedef unsigned int uint32_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     ctypedef int coord_t
+    ctypedef int offset_t
     
     cdef void init_logging()
 
@@ -30,7 +31,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         rectangle& transform(const transformation& xform)
 
 
-cdef class CBox:
+cdef class BBox:
     cdef coord_t _xl
     cdef coord_t _yl
     cdef coord_t _xh
@@ -38,4 +39,12 @@ cdef class CBox:
 
     cdef coord_t _xm(self)
     cdef coord_t _ym(self)
-    cdef CBox _transform(self, coord_t dx, coord_t dy, uint32_t code)
+    cdef BBox _transform(self, coord_t dx, coord_t dy, uint32_t code)
+
+
+cdef class BBoxArray:
+    cdef BBox _bbox
+    cdef int _nx
+    cdef int _ny
+    cdef offset_t _spx
+    cdef offset_t _spy
