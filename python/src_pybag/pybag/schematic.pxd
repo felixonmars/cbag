@@ -89,7 +89,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::sch" nogil:
                                            const vector[vector[pair[string, string]]]& conn_list) except +
 
 cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
-    cdef unique_ptr[cellview] from_file(const char* yaml_fname, const char* sym_view) except +
+    cdef unique_ptr[cellview] cv_from_file(const char* yaml_fname, const char* sym_view) except +
 
     cdef netlist_map_t read_netlist_map(const char* fname) except +
 

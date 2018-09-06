@@ -100,6 +100,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon_view.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/pt_vector.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/transformation.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/union_view.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/vector45.cpp
@@ -286,13 +287,13 @@ target_link_libraries(test_polygon
   cbag
   )
 
-add_executable(test_casting
-  ${CMAKE_SOURCE_DIR}/test/test_casting.cpp
+add_executable(test_misc
+  ${CMAKE_SOURCE_DIR}/test/test_misc.cpp
   )
 
 # append build directory to RPATH
 # we do it this way now because we're running directly from the build directory.
-set_target_properties(test_casting PROPERTIES
+set_target_properties(test_misc PROPERTIES
   INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
   )
 
@@ -324,7 +325,7 @@ install(TARGETS
 #  test_yaml
 #  netmap_sample
 #  test_polygon
-#  test_casting
+  test_misc
   write_tech_info
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib

@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include <cbag/layout/tech.h>
 #include <cbag/netlist/netlist_map_t.h>
 #include <cbag/schematic/cellview.h>
 
@@ -17,7 +18,9 @@ namespace cbag {
 
 void to_file(const sch::cellview &cv, const char *fname);
 
-std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym_view);
+std::unique_ptr<sch::cellview> cv_from_file(const char *yaml_fname, const char *sym_view);
+
+std::unique_ptr<layout::tech> tech_from_file(const char *layer_file);
 
 netlist_map_t read_netlist_map(const char *fname);
 

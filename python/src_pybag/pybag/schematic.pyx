@@ -190,7 +190,7 @@ cdef class PySchCellView:
         yaml_fname = yaml_fname.encode(encoding)
         sym_view = sym_view.encode(encoding)
         self.encoding = encoding
-        self.cv_ptr = move(from_file(yaml_fname, sym_view))
+        self.cv_ptr = move(cv_from_file(yaml_fname, sym_view))
 
     def __dealloc__(self):
         self.cv_ptr.reset()

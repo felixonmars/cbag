@@ -11,6 +11,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include "yaml-cpp/unordered_map.h"
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
@@ -29,7 +30,7 @@ void to_file(const sch::cellview &cv, const char *fname) {
     outfile.close();
 }
 
-std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym_view) {
+std::unique_ptr<sch::cellview> cv_from_file(const char *yaml_fname, const char *sym_view) {
     fs::path yaml_path(yaml_fname);
     YAML::Node n = YAML::LoadFile(yaml_path.string());
     auto ans = std::make_unique<sch::cellview>(n.as<sch::cellview>());
@@ -42,6 +43,13 @@ std::unique_ptr<sch::cellview> from_file(const char *yaml_fname, const char *sym
         }
     }
     return ans;
+}
+
+std::unique_ptr<layout::tech> tech_from_file(const char *layer_file) {
+    YAML::Node n = YAML::LoadFile(layer_file);
+    return std::make_unique<layout::tech>(n["layer"].as<layout::lay_map_t>(),
+                                          n["purpose"].as<layout::purp_map_t>(),
+                                          n["via_layers"].as<layout::via_map_t>());
 }
 
 netlist_map_t read_netlist_map(const char *fname) {
