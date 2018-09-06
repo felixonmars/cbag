@@ -194,6 +194,10 @@ set_target_properties(test_oa PROPERTIES
 # shared library dependencies
 target_link_libraries(test_oa
   cbagoa
+  oaDM
+  oaTech
+  oaDesign
+  dl
   )
 
 add_executable(test_spirit
@@ -292,18 +296,36 @@ set_target_properties(test_casting PROPERTIES
   INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
   )
 
+set(SRC_FILES_TECH_INFO
+  ${CMAKE_SOURCE_DIR}/test/write_tech_info.cpp
+  )
+add_executable(write_tech_info ${SRC_FILES_TECH_INFO})
+
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(write_tech_info PROPERTIES
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
+
+# shared library dependencies
+target_link_libraries(write_tech_info
+  cbag
+  cbagoa
+  )
+
 
 install(TARGETS
   cbag
   cbagyaml
   cbagoa
-  test_oa
+#  test_oa
 #  test_spirit
 #  read_prop
 #  test_yaml
 #  netmap_sample
 #  test_polygon
 #  test_casting
+  write_tech_info
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
   )

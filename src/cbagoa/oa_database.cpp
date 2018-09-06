@@ -13,6 +13,7 @@
 #include <spdlog/spdlog.h>
 
 #include <fmt/format.h>
+#include <yaml-cpp/yaml.h>
 
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
@@ -362,6 +363,74 @@ void oa_database::implement_sch_list(const char *lib_name,
     } catch (...) {
         helper::handle_oa_exceptions(logger);
     }
+}
+
+void oa_database::write_tech_info_file(const char *fname, const char *tech_lib) {
+    oa::oaTech *tech_ptr = helper::read_tech(ns, tech_lib);
+
+    // read layer/purpose/via mappings
+    std::map<oa::oaLayerNum, std::string> lay_map;
+    std::map<oa::oaPurposeNum, std::string> pur_map;
+    std::map<std::pair<oa::oaLayerNum, oa::oaLayerNum>, std::string> via_map;
+
+    oa::oaString tmp;
+    oa::oaIter<oa::oaLayer> lay_iter(tech_ptr->getLayers());
+    oa::oaLayer *lay;
+    while ((lay = lay_iter.getNext()) != nullptr) {
+        lay->getName(tmp);
+        lay_map.emplace(lay->getNumber(), std::string(tmp));
+    }
+
+    oa::oaIter<oa::oaPurpose> pur_iter(tech_ptr->getPurposes());
+    oa::oaPurpose *pur;
+    while ((pur = pur_iter.getNext()) != nullptr) {
+        pur->getName(tmp);
+        pur_map.emplace(pur->getNumber(), std::string(tmp));
+    }
+
+    oa::oaIter<oa::oaViaDef> via_iter(tech_ptr->getViaDefs());
+    oa::oaViaDef *via;
+    while ((via = via_iter.getNext()) != nullptr) {
+        via->getName(tmp);
+        via_map.emplace(std::make_pair(via->getLayer1Num(), via->getLayer2Num()), std::string(tmp));
+    }
+
+    // emit to YAML
+    YAML::Emitter out;
+    out.SetSeqFormat(YAML::Flow);
+    out << YAML::BeginMap;
+    out << YAML::Key << "layer" << YAML::Value;
+    out << YAML::BeginMap;
+    for (auto const &p : lay_map) {
+        out << YAML::Key << p.second << YAML::Value << p.first;
+    }
+    out << YAML::EndMap;
+
+    out << YAML::Key << "purpose" << YAML::Value;
+    out << YAML::BeginMap;
+    for (auto const &p : pur_map) {
+        out << YAML::Key << p.second << YAML::Value << p.first;
+    }
+    out << YAML::EndMap;
+
+    out << YAML::Key << "via_layers" << YAML::Value;
+    out << YAML::BeginMap;
+    for (auto const &p : via_map) {
+        out << YAML::Key << p.second << YAML::Value;
+        out << YAML::BeginSeq << p.first.first << p.first.second << YAML::EndSeq;
+    }
+    out << YAML::EndMap;
+
+    out << YAML::EndMap;
+
+    // write to file
+    fs::path file_path(fname);
+    if (file_path.has_parent_path()) {
+        fs::create_directories(file_path.parent_path());
+    }
+    std::ofstream out_file(fname, std::ios_base::out);
+    out_file << out.c_str();
+    out_file.close();
 }
 
 } // namespace cbagoa
