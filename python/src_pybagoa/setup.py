@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sysconfig
 from setuptools import setup, Extension
-from Cython.Distutils import build_ext
+from Cython.Build import cythonize
 
 
 pkg_name = 'pybagoa'
@@ -23,6 +24,8 @@ libraries = ['cbag',
              'oaTech',
              'oaDesign',
              'dl',
+             # for some reason Berkeley cannot find python link library
+             'python' + sysconfig.get_config_var('LDVERSION'),
 ]
 
 library_dirs = ['../lib',
@@ -42,22 +45,23 @@ setup(
     packages=[pkg_name],
     zip_safe=False,
     name=pkg_name,
-    cmdclass={'build_ext': build_ext},
     package_data={
         pkg_name: ['oa.pyx',
         ]
     },
-    ext_modules=[
-        Extension(pkg_name + '.oa',
-                  sources=[
-                      os.path.join(pkg_name, 'oa.pyx'),
-                  ],
-                  language='c++',
-                  include_dirs=include_dirs,
-                  libraries=libraries,
-                  library_dirs=library_dirs,
-                  extra_compile_args=extra_compile_args,
-                  extra_link_args=extra_link_args,
-        ),
-    ],
+    ext_modules=cythonize(
+        [
+            Extension(pkg_name + '.oa',
+                      sources=[
+                          os.path.join(pkg_name, 'oa.pyx'),
+                      ],
+                      language='c++',
+                      include_dirs=include_dirs,
+                      libraries=libraries,
+                      library_dirs=library_dirs,
+                      extra_compile_args=extra_compile_args,
+                      extra_link_args=extra_link_args,
+            ),
+        ],
+    ),
 )
