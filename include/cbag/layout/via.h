@@ -37,6 +37,10 @@ class via {
     rectangle bot_box() const;
 
     rectangle top_box() const;
+
+    void set_layer1(polygon_ref<rectangle> ref);
+
+    void set_layer2(polygon_ref<rectangle> ref);
 };
 
 } // namespace layout

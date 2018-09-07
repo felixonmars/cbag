@@ -399,6 +399,9 @@ void oa_database::write_tech_info_file(const char *fname, const char *tech_lib) 
     YAML::Emitter out;
     out.SetSeqFormat(YAML::Flow);
     out << YAML::BeginMap;
+
+    out << YAML::Key << "default_purpose" << YAML::Value << "drawing";
+
     out << YAML::Key << "layer" << YAML::Value;
     out << YAML::BeginMap;
     for (auto const &p : lay_map) {

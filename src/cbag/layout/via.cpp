@@ -29,13 +29,13 @@ via::via(transformation xform, const char *via_id, const uint32_t (&num)[2],
       lay1_off(lay1_off[0], lay1_off[1]), lay2_enc(lay2_enc[0], lay2_enc[1]),
       lay2_off(lay2_off[0], lay2_off[1]) {}
 
-rectangle via::bot_box() const {
-    return helper::get_box(*this, lay1_off, lay1_enc);
-}
+rectangle via::bot_box() const { return helper::get_box(*this, lay1_off, lay1_enc); }
 
-rectangle via::top_box() const {
-    return helper::get_box(*this, lay2_off, lay2_enc);
-}
+rectangle via::top_box() const { return helper::get_box(*this, lay2_off, lay2_enc); }
+
+void via::set_layer1(polygon_ref<rectangle> ref) { lay1_ref = std::move(ref); }
+
+void via::set_layer2(polygon_ref<rectangle> ref) { lay2_ref = std::move(ref); }
 
 } // namespace layout
 } // namespace cbag

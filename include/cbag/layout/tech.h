@@ -19,9 +19,10 @@ class tech {
     lay_map_t lay_map;
     purp_map_t purp_map;
     via_map_t via_map;
+    purp_t default_purpose;
 
   public:
-    tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map);
+    tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map, const std::string &def_purpose);
 
     lay_t get_layer_id(const char *layer) const;
 
