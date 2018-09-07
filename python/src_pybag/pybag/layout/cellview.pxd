@@ -1,15 +1,16 @@
 # distutils: language = c++
 
-from .util cimport rectangle, transformation, make_transform
+from .util cimport rectangle, transformation, make_transform, BBox
 
-from libcpp cimport string
-from libcpp cimport pair
-from libcpp cimport unordered_map
+from libcpp.string cimport string
+from libcpp.utility cimport pair
+from libcpp.unordered_map cimport unordered_map
 from libcpp cimport bool as cbool
-
+from libcpp.memory cimport unique_ptr
 
 ctypedef unsigned int uint8_t
 ctypedef unsigned int uint32_t
+
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     ctypedef unsigned int lay_t
@@ -21,7 +22,10 @@ cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
 
 
 cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
-    ctypedef unordered_map[string, instance] inst_map_t
+    ctypedef unordered_map[string, instance].iterator inst_iter_t
+
+    cdef cppclass tech:
+        pass
 
     cdef cppclass polygon_ref[T]:
         polygon_ref()
@@ -32,35 +36,43 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         pass
 
     cdef cppclass cellview:
-        cellview(string tech, uint8_t geo_mode)
+        cellview(tech* tech_ptr, uint8_t geo_mode)
 
         cbool empty() const
 
-        rectangle get_bbox(lay_t lay_id, purp_t purp_id) const
+        rectangle get_bbox(const char* layer, const char* purpose) const
 
-        inst_map_t.iterator add_prim_instance(const char* lib, const char* cell, const char* view,
-                                              const char* name, transformation xform, uint32_t nx,
-                                              uint32_t ny, offset_t spx, offset_t spy)
+        inst_iter_t add_prim_instance(const char* lib, const char* cell, const char* view,
+                                      const char* name, transformation xform, uint32_t nx,
+                                      uint32_t ny, offset_t spx, offset_t spy)
 
-        inst_map_t.iterator add_instance(const cellview* cv, const char* name, transformation xform,
-                                         uint32_t nx, uint32_t ny, offset_t spx, offset_t spy)
+        inst_iter_t add_instance(const cellview* cv, const char* name, transformation xform,
+                                 uint32_t nx, uint32_t ny, offset_t spx, offset_t spy)
 
-        polygon_ref[rectangle] add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
+        polygon_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl, coord_t yl,
                                         coord_t xh, coord_t yh)
+
+
+cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
+    cdef unique_ptr[tech] tech_from_file(const char* layer_file) except +
+
+
+cdef class PyTech:
+    cdef unique_ptr[tech] _ptr
+
 
 cdef class PyRect:
     cdef polygon_ref[rectangle] _ref
 
 
 cdef class PyLayInstance:
-    cdef inst_map_t.iterator _ptr
+    cdef inst_iter_t _ptr
     cdef _master
 
 
 cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr
-    cdef unicode _pin_purpose
-    cdef unicode _def_purpose
-    cdef _layer_map
-    cdef _purpose_map
     cdef unicode _encoding
+
+    cdef PyLayInstance _add_cinst(self, master, PyLayCellView cv, const char *inst_name,
+                                  transformation xform, int nx, int ny, int spx, int spy)

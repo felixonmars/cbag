@@ -4,8 +4,21 @@ from cellview cimport *
 
 from cython.operator cimport dereference as deref
 
+cdef extern from "<utility>" namespace "std" nogil:
+    cdef unique_ptr[tech] move(unique_ptr[tech])
+
+
 # initialize logging
 init_logging()
+
+
+cdef class PyTech:
+    def __init__(self, layer_file, encoding):
+        layer_file = layer_file.encode(encoding)
+        self._ptr = move(tech_from_file(layer_file))
+
+    def __dealloc__(self):
+        self._ptr.reset()
 
 
 cdef class PyRect:
@@ -19,24 +32,12 @@ cdef class PyLayInstance:
 
 
 cdef class PyLayCellView:
-    def __init__(self, tech_name, pin_purpose, def_purpose, layer_map, purpose_map,
-                 encoding, int geo_mode=0):
-        tech_name = tech_name.encode(encoding)
-
-        self._pin_purpose = pin_purpose
-        self._def_purpose = def_purpose
-        self._layer_map = layer_map
-        self._purpose_map = purpose_map
+    def __init__(self, PyTech tech, encoding, int geo_mode=0):
         self._encoding = encoding
-        self._ptr.reset(new cellview(tech_name, geo_mode))
+        self._ptr.reset(new cellview(tech._ptr.get(), geo_mode))
 
     def __dealloc__(self):
         self._ptr.reset()
-
-    @property
-    def pin_purpose(self):
-        # type: () -> str
-        return self._pin_purpose
 
     @property
     def is_empty(self):
@@ -45,13 +46,6 @@ cdef class PyLayCellView:
 
     def finalize(self):
         pass
-
-    def _get_lay_purp(layer):
-        # type: (Union[str, Tuple[str, str]]) -> Tuple[int, int]
-        if isinstance(layer, str):
-            return self._layer_map[layer], self._purpose_map[self._def_purpose]
-        else:
-            return self._layer_map[layer[0]], self._purpose_map[layer[1]]
     
     def get_rect_bbox(self, layer):
         # type: (Union[str, Tuple[str, str]]) -> BBox
@@ -69,9 +63,14 @@ cdef class PyLayCellView:
         bbox : BBox
             the bounding box.
         """
-        lay_id, purp_id = self._get_lay_purp(layer)
+        if isinstance(layer, str):
+            purpose = None
+            layer = layer[0].encode(self._encoding)
+        else:
+            purpose = layer[1].encode(self._encoding)
+            layer = layer[0].encode(self._encoding)
 
-        rectangle r = deref(self._ptr).get_bbox(lay_id, purp_id)
+        cdef rectangle r = deref(self._ptr).get_bbox(layer, purpose)
         return BBox(r.xl(), r.yl(), r.xh(), r.yh())
     
     def get_masters_set(self):
@@ -169,9 +168,7 @@ cdef class PyLayCellView:
         if inst_name is not None:
             inst_name = inst_name.encode(self._encoding)
 
-        cdef char* cname = inst_name
-
-        return self._add_cinst(master, master._layout, cname, make_transform(loc, orient), nx, ny,
+        return self._add_cinst(master, master._layout, inst_name, make_transform(loc, orient), nx, ny,
                                spx, spy)
 
     def add_rect(self, layer, bbox):
@@ -190,8 +187,13 @@ cdef class PyLayCellView:
         rect : PyRect
             the rectangle object.
         """
-        lay_id, purp_id = self._get_lay_purp(layer)
+        if isinstance(layer, str):
+            purpose = None
+            layer = layer[0].encode(self._encoding)
+        else:
+            purpose = layer[1].encode(self._encoding)
+            layer = layer[0].encode(self._encoding)
 
-        cdef PyRect ans
-        ans._ref = deref(self._ptr).add_rect(lay_id, purp_id, bbox.xl, bbox.yl, bbox.xh, bbox.yh)
+        cdef PyRect ans = PyRect()
+        ans._ref = deref(self._ptr).add_rect(layer, purpose, bbox.xl, bbox.yl, bbox.xh, bbox.yh)
         return ans

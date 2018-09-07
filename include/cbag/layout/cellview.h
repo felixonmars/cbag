@@ -31,6 +31,7 @@ using layer_t = std::pair<lay_t, purp_t>;
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<layer_t, std::vector<blockage>, boost::hash<layer_t>>;
 using inst_map_t = std::unordered_map<std::string, instance>;
+using inst_iter_t = inst_map_t::iterator;
 
 class cellview {
   private:
@@ -70,12 +71,12 @@ class cellview {
     void add_path_seg(const char *layer, const char *purpose, coord_t x0, coord_t y0, coord_t x1,
                       coord_t y1, dist_t width, const char *style0, const char *style1);
 
-    inst_map_t::iterator add_prim_instance(const char *lib, const char *cell, const char *view,
-                                           const char *name, transformation xform, uint32_t nx,
-                                           uint32_t ny, offset_t spx, offset_t spy);
+    inst_iter_t add_prim_instance(const char *lib, const char *cell, const char *view,
+                                  const char *name, transformation xform, uint32_t nx, uint32_t ny,
+                                  offset_t spx, offset_t spy);
 
-    inst_map_t::iterator add_instance(const cellview *cv, const char *name, transformation xform,
-                                      uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
+    inst_iter_t add_instance(const cellview *cv, const char *name, transformation xform,
+                             uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
 
     via_ref add_via(transformation xform, const char *via_id, const uint32_t (&num)[2],
                     const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],

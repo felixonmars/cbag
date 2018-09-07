@@ -78,6 +78,17 @@ setup(
                       extra_compile_args=extra_compile_args,
                       extra_link_args=extra_link_args,
             ),
+            Extension(pkg_name + '.layout.cellview',
+                      sources=[
+                          os.path.join(pkg_name, 'layout', 'cellview.pyx'),
+                      ],
+                      language='c++',
+                      include_dirs=include_dirs,
+                      libraries=libraries,
+                      library_dirs=library_dirs,
+                      extra_compile_args=extra_compile_args,
+                      extra_link_args=extra_link_args,
+            ),
         ],
     ),
 )

@@ -115,10 +115,9 @@ void cellview::add_path_seg(const char *layer, const char *purpose, coord_t x0, 
                             coord_t x1, coord_t y1, dist_t width, const char *style0,
                             const char *style1) {}
 
-inst_map_t::iterator cellview::add_prim_instance(const char *lib, const char *cell,
-                                                 const char *view, const char *name,
-                                                 transformation xform, uint32_t nx, uint32_t ny,
-                                                 offset_t spx, offset_t spy) {
+inst_iter_t cellview::add_prim_instance(const char *lib, const char *cell, const char *view,
+                                        const char *name, transformation xform, uint32_t nx,
+                                        uint32_t ny, offset_t spx, offset_t spy) {
     std::string key = helper::get_inst_name(*this, name);
 
     return inst_map
@@ -127,9 +126,8 @@ inst_map_t::iterator cellview::add_prim_instance(const char *lib, const char *ce
         .first;
 }
 
-inst_map_t::iterator cellview::add_instance(const cellview *cv, const char *name,
-                                            transformation xform, uint32_t nx, uint32_t ny,
-                                            offset_t spx, offset_t spy) {
+inst_iter_t cellview::add_instance(const cellview *cv, const char *name, transformation xform,
+                                   uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
     std::string key = helper::get_inst_name(*this, name);
 
     return inst_map

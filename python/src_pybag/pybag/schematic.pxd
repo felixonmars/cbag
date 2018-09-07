@@ -8,11 +8,11 @@ from libcpp.map cimport map
 from libcpp.unordered_map cimport unordered_map
 from libcpp.memory cimport unique_ptr
 
-ctypedef map[string, instance].iterator inst_iter_t
-ctypedef unordered_map[string, cellview_info] lib_map_t
-ctypedef unordered_map[string, lib_map_t] netlist_map_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
+    ctypedef unordered_map[string, cellview_info] lib_map_t
+    ctypedef unordered_map[string, lib_map_t] netlist_map_t
+
     cdef void init_logging()
 
     cdef void write_netlist(const vector[cellview *]& cv_list, const vector[string]& name_list,
@@ -20,6 +20,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
                             cbool flat, cbool shell, const char* fname) except +
 
 cdef extern from "cbag/cbag.h" namespace "cbag::sch" nogil:
+    ctypedef map[string, instance].iterator inst_iter_t
+
     cdef cppclass pin_figure:
         pass
 
