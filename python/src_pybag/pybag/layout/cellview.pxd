@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from .util cimport rectangle, transformation, make_transform, BBox
+from .util cimport rectangle, transformation, BBox
 
 from libcpp.string cimport string
 from libcpp.utility cimport pair
@@ -33,7 +33,13 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         T& value()
 
     cdef cppclass instance:
-        pass
+        void set_int_param(const char* name, int value)
+
+        void set_double_param(const char* name, double value)
+
+        void set_bool_param(const char* name, cbool value)
+
+        void set_string_param(const char* name, const char* value)
 
     cdef cppclass cellview:
         cellview(tech* tech_ptr, uint8_t geo_mode)
@@ -67,12 +73,14 @@ cdef class PyRect:
 
 cdef class PyLayInstance:
     cdef inst_iter_t _ptr
+    cdef _grid
     cdef _master
+    cdef unicode _lib_name
 
 
 cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr
     cdef unicode _encoding
 
-    cdef PyLayInstance _add_cinst(self, master, PyLayCellView cv, const char *inst_name,
+    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv, const char *inst_name,
                                   transformation xform, int nx, int ny, int spx, int spy)

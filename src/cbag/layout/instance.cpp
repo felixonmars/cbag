@@ -20,5 +20,33 @@ instance::instance(const cellview *master, transformation xform, uint32_t nx, ui
     : xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy),
       master(std::in_place_type_t<const cellview *>{}, master) {}
 
+void instance::set_int_param(const char *name, int value) {
+    auto *cv_ref = std::get_if<cellview_ref>(&master);
+    if (cv_ref != nullptr) {
+        cv_ref->params[name] = value;
+    }
+}
+
+void instance::set_double_param(const char *name, double value) {
+    auto *cv_ref = std::get_if<cellview_ref>(&master);
+    if (cv_ref != nullptr) {
+        cv_ref->params[name] = value;
+    }
+}
+
+void instance::set_bool_param(const char *name, bool value) {
+    auto *cv_ref = std::get_if<cellview_ref>(&master);
+    if (cv_ref != nullptr) {
+        cv_ref->params[name] = value;
+    }
+}
+
+void instance::set_string_param(const char *name, const char *value) {
+    auto *cv_ref = std::get_if<cellview_ref>(&master);
+    if (cv_ref != nullptr) {
+        cv_ref->params[name] = std::string(value);
+    }
+}
+
 } // namespace layout
 } // namespace cbag

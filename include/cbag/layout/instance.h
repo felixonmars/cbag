@@ -4,6 +4,7 @@
 #include <string>
 #include <variant>
 
+#include <cbag/common/datatypes.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/layout/transformation.h>
 
@@ -17,6 +18,7 @@ struct cellview_ref {
     std::string lib;
     std::string cell;
     std::string view;
+    param_map params;
 
     cellview_ref(const char *lib, const char *cell, const char *view);
 };
@@ -38,6 +40,14 @@ class instance {
 
     instance(const cellview *master, transformation xform, uint32_t nx = 1, uint32_t ny = 1,
              offset_t spx = 0, offset_t spy = 0);
+
+    void set_int_param(const char *name, int value);
+
+    void set_double_param(const char *name, double value);
+
+    void set_bool_param(const char *name, bool value);
+
+    void set_string_param(const char *name, const char *value);
 };
 
 } // namespace layout

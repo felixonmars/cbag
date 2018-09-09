@@ -4,6 +4,8 @@ from cellview cimport *
 
 from cython.operator cimport dereference as deref
 
+import numbers
+
 cdef extern from "<utility>" namespace "std" nogil:
     cdef unique_ptr[tech] move(unique_ptr[tech])
 
@@ -27,8 +29,10 @@ cdef class PyRect:
 
 
 cdef class PyLayInstance:
-    def __init__(self, master):
+    def __init__(self, grid, master, lib_name):
+        self._grid = grid
         self._master = master
+        self._lib_name = lib_name
 
 
 cdef class PyLayCellView:
@@ -78,9 +82,9 @@ cdef class PyLayCellView:
         # TODO: implement this
         return []
 
-    def add_prim_instance(self, lib, cell, view, inst_name=None, loc=(0, 0), orient='R0',
-                     int nx=1, int ny=1, int spx=0, int spy=0, unit_mode=True):
-        # type: (str, str, str, Optional[str], Tuple[int, int], str, int, int, int, int, bool) -> PyLayInstance
+    def add_prim_instance(self, lib, cell, view, inst_name, params, int dx, int dy, int ocode,
+                     int nx, int ny, int spx, int spy):
+        # type: (str, str, str, Optional[str], Dict[str, Any], int, int, int, int, int, int, int) -> None
         """Adds the given primitive instance to this layout.
 
         Parameters
@@ -93,6 +97,14 @@ cdef class PyLayCellView:
             view name.
         inst_name : Optional[str]
             optional instance name.
+        params : Dict[str, Any]
+            parameteric instance parameters.
+        dx : int
+            X coordinate.
+        dy : int
+            Y coordinate.
+        ocode : int
+            Orientation code.
         loc : Tuple[int, int]
             instance location.
         orient : str
@@ -105,48 +117,67 @@ cdef class PyLayCellView:
             column pitch.
         spy : int
             row pitch.
-        unit_mode : bool
-            deprecated parameter.
 
         Returns
         -------
         inst : PyLayInstance
             the instance object
         """
-        if not unit_mode:
-            raise ValueError('unit_mode = False not supported.')
-
         lib = lib.encode(self._encoding)
         cell = cell.encode(self._encoding)
         view = view.encode(self._encoding)
         if inst_name is not None:
             inst_name = inst_name.encode(self._encoding)
 
-        cdef PyLayInstance ans = PyLayInstance(None)
-        ans._ptr = deref(self._ptr).add_prim_instance(lib, cell, view, inst_name,
-                                                      make_transform(loc, orient),
-                                                      nx, ny, spx, spy)
-        return ans
+        cdef inst_iter_t ref = deref(self._ptr).add_prim_instance(lib, cell, view, inst_name,
+                                                                  transformation(dx, dy, ocode),
+                                                                  nx, ny, spx, spy)
 
-    cdef PyLayInstance _add_cinst(self, master, PyLayCellView cv, const char* inst_name, transformation xform,
+        # set pcell parameters
+        for key, val in params.items():
+            key = key.encode(self.encoding)
+            if isinstance(val, str):
+                val = val.encode(self.encoding)
+                deref(ref).second.set_string_param(key, val)
+            elif isinstance(val, numbers.Integral):
+                deref(ref).second.set_int_param(key, val)
+            elif isinstance(val, numbers.Real):
+                deref(ref).second.set_double_param(key, val)
+            elif isinstance(val, bool):
+                deref(ref).second.set_bool_param(key, val)
+            else:
+                raise ValueError('Unsupported value for key {}: {}'.format(key, val))
+
+    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv,
+                                  const char* inst_name, transformation xform,
                                   int nx, int ny, int spx, int spy):
         cdef cellview* template = cv._ptr.get()
-        cdef PyLayInstance ans = PyLayInstance(master)
+        cdef PyLayInstance ans = PyLayInstance(grid, master, lib_name)
         ans._ptr = deref(self._ptr).add_instance(template, inst_name, xform, nx, ny, spx, spy)
 
         return ans
 
-    def add_instance(self, master, inst_name=None, loc=(0, 0), orient='R0',
-                     int nx=1, int ny=1, int spx=0, int spy=0, unit_mode=True):
-        # type: (TemplateBase, Optional[str], Tuple[int, int], str, int, int, int, int, bool) -> PyLayInstance
+    def add_instance(self, grid, master, lib_name, inst_name, int dx, int dy, int ocode, int nx,
+                     int ny, int spx, int spy):
+        # type: (RoutingGrid, TemplateBase, str, Optional[str], int, int, int, int, int, int, int) -> PyLayInstance
         """Adds the given instance to this layout.
 
         Parameters
         ----------
+        grid : RoutingGrid
+            the routing grid object.
         master : TemplateBase
             the template master object.
+        lib_name : str
+            the layout library name.
         inst_name : Optional[str]
             optional instance name.
+        dx : int
+            X coordinate.
+        dy : int
+            Y coordinate.
+        ocode : int
+            orientation code.
         loc : Tuple[int, int]
             instance location.
         orient : str
@@ -159,17 +190,12 @@ cdef class PyLayCellView:
             column pitch.
         spy : int
             row pitch.
-        unit_mode : bool
-            deprecated parameter.
         """
-        if not unit_mode:
-            raise ValueError('unit_mode = False not supported.')
-
         if inst_name is not None:
             inst_name = inst_name.encode(self._encoding)
 
-        return self._add_cinst(master, master._layout, inst_name, make_transform(loc, orient), nx, ny,
-                               spx, spy)
+        return self._add_cinst(grid, master, lib_name, master._layout, inst_name,
+                               transformation(dx, dy, ocode), nx, ny, spx, spy)
 
     def add_rect(self, layer, bbox):
         # type: (Union[str, Tuple[str, str]], BBox) -> PyRect
