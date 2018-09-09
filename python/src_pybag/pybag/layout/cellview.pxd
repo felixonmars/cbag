@@ -71,6 +71,22 @@ cdef class PyRect:
     cdef polygon_ref[rectangle] _ref
 
 
+cdef class PyVia:
+    pass
+
+
+cdef class PyPath:
+    pass
+
+
+cdef class PyBlockage:
+    pass
+
+
+cdef class PyBoundary:
+    pass
+
+
 cdef class PyLayInstance:
     cdef inst_iter_t _ptr
     cdef _grid

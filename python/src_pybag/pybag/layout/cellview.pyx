@@ -28,6 +28,26 @@ cdef class PyRect:
         pass
 
 
+cdef class PyVia:
+    def __init__(self):
+        pass
+
+
+cdef class PyPath:
+    def __init__(self):
+        pass
+
+
+cdef class PyBlockage:
+    def __init__(self):
+        pass
+
+
+cdef class PyBoundary:
+    def __init__(self):
+        pass
+
+
 cdef class PyLayInstance:
     def __init__(self, grid, master, lib_name):
         self._grid = grid
