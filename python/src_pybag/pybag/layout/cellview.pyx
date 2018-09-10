@@ -28,6 +28,11 @@ cdef class PyRect:
         pass
 
 
+cdef class PyPolygon:
+    def __init__(self):
+        pass
+
+
 cdef class PyVia:
     def __init__(self):
         pass

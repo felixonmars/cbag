@@ -27,6 +27,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass tech:
         pass
 
+    cdef cppclass polygon:
+        pass
+
     cdef cppclass polygon_ref[T]:
         polygon_ref()
 
@@ -69,6 +72,10 @@ cdef class PyTech:
 
 cdef class PyRect:
     cdef polygon_ref[rectangle] _ref
+
+
+cdef class PyPolygon:
+    cdef polygon_ref[polygon] _ref
 
 
 cdef class PyVia:
