@@ -1,10 +1,17 @@
 # distutils: language = c++
 
-from pybag.schematic cimport *
+from pybag.schematic cimport cellview as sch_cellview
+from pybag.schematic cimport _add_py_cv
 
 from cython.operator cimport dereference as deref
 
+from libcpp.string cimport string
+from libcpp.vector cimport vector
+from libcpp.utility cimport pair
 from libcpp.unordered_set cimport unordered_set
+from libcpp.unordered_map cimport unordered_map
+from libcpp.memory cimport unique_ptr
+
 
 cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa" nogil:
     cdef cppclass oa_database:
@@ -30,7 +37,7 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa" nogil:
 
         void implement_sch_list(const char* lib_name, const vector[string]& cell_list,
                                 const char* sch_view, const char* sym_view,
-                                const vector[cellview *]& cv_list) except +
+                                const vector[sch_cellview *]& cv_list) except +
 
 
 cdef class PyOADatabase:
@@ -107,7 +114,7 @@ cdef class PyOADatabase:
         sym_view = sym_view.encode(self.encoding)
 
         cdef vector[string] cell_vec
-        cdef vector[cellview *] cv_vec
+        cdef vector[sch_cellview *] cv_vec
         cdef int num = len(content_list)
 
         cell_vec.reserve(num)
@@ -117,3 +124,19 @@ cdef class PyOADatabase:
             _add_py_cv(cv_vec, cv)
 
         deref(self.db_ptr).implement_sch_list(lib_name, cell_vec, sch_view, sym_view, cv_vec)
+
+    def implement_lay_list(self, lib_name, content_list, view):
+        lib_name = lib_name.encode(self.encoding)
+        view = view.encode(self.encoding)
+
+        cdef vector[string] cell_vec
+        cdef vector[sch_cellview *] cv_vec
+        cdef int num = len(content_list)
+
+        cell_vec.reserve(num)
+        cv_vec.reserve(num)
+        for name, cv in content_list:
+            cell_vec.push_back(name.encode(self.encoding))
+            _add_py_cv(cv_vec, cv)
+
+        deref(self.db_ptr).implement_sch_list(lib_name, cell_vec, view, view, cv_vec)
