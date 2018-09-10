@@ -332,7 +332,7 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
     name_list.reserve(num)
     for name, cv in content_list:
         name_list.push_back(name.encode(encoding))
-        _add_py_cv(cv_list, cv)
+        _add_py_sch_cv(cv_list, cv)
 
     cdef int ninc = len(inc_list)
     cinc_list.reserve(ninc)
@@ -345,5 +345,5 @@ def implement_netlist(content_list, cell_map, inc_list, fmt, fname,
     write_netlist(cv_list, name_list, cinc_list, net_map, fmt, flat, shell, fname)
 
 
-cdef _add_py_cv(vector[cellview *]& cv_list, PySchCellView pycv):
+cdef _add_py_sch_cv(vector[cellview *]& cv_list, PySchCellView pycv):
     cv_list.push_back(pycv.cv_ptr.get())

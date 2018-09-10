@@ -52,6 +52,8 @@ setup(
                    os.path.join('layout', '__init__.pxd'),
                    os.path.join('layout', 'util.pxd'),
                    os.path.join('layout', 'util.pyx'),
+                   os.path.join('layout', 'cellview.pxd'),
+                   os.path.join('layout', 'cellview.pyx'),
         ]
     },
     ext_modules=cythonize(

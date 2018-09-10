@@ -29,6 +29,10 @@ namespace sch {
 struct cellview;
 struct instance;
 } // namespace sch
+
+namespace layout {
+struct cellview;
+}
 } // namespace cbag
 
 namespace cbagoa {
@@ -136,6 +140,10 @@ class oa_database {
     void implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
                             const char *sch_view, const char *sym_view,
                             const std::vector<cbag::sch::cellview *> &cv_list) const;
+
+    void implement_lay_list(const char *lib_name, const std::vector<std::string> &cell_list,
+                            const char *view,
+                            const std::vector<cbag::layout::cellview *> &cv_list) const;
 
     void write_tech_info_file(const char *fname, const char *tech_lib);
 };

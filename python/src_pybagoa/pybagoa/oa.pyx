@@ -1,7 +1,9 @@
 # distutils: language = c++
 
 from pybag.schematic cimport cellview as sch_cellview
-from pybag.schematic cimport _add_py_cv
+from pybag.schematic cimport _add_py_sch_cv
+from pybag.layout.cellview cimport cellview as lay_cellview
+from pybag.layout.cellview cimport PyLayCellView
 
 from cython.operator cimport dereference as deref
 
@@ -38,6 +40,13 @@ cdef extern from "cbagoa/cbagoa.h" namespace "cbagoa" nogil:
         void implement_sch_list(const char* lib_name, const vector[string]& cell_list,
                                 const char* sch_view, const char* sym_view,
                                 const vector[sch_cellview *]& cv_list) except +
+
+        void implement_lay_list(const char* lib_name, const vector[string]& cell_list,
+                                const char* view, const vector[lay_cellview *]& cv_list) except +
+
+
+cdef _add_py_lay_cv(vector[lay_cellview *]& cv_list, PyLayCellView pycv):
+    cv_list.push_back(pycv._ptr.get())
 
 
 cdef class PyOADatabase:
@@ -121,7 +130,7 @@ cdef class PyOADatabase:
         cv_vec.reserve(num)
         for name, cv in content_list:
             cell_vec.push_back(name.encode(self.encoding))
-            _add_py_cv(cv_vec, cv)
+            _add_py_sch_cv(cv_vec, cv)
 
         deref(self.db_ptr).implement_sch_list(lib_name, cell_vec, sch_view, sym_view, cv_vec)
 
@@ -130,13 +139,13 @@ cdef class PyOADatabase:
         view = view.encode(self.encoding)
 
         cdef vector[string] cell_vec
-        cdef vector[sch_cellview *] cv_vec
+        cdef vector[lay_cellview *] cv_vec
         cdef int num = len(content_list)
 
         cell_vec.reserve(num)
         cv_vec.reserve(num)
         for name, cv in content_list:
             cell_vec.push_back(name.encode(self.encoding))
-            _add_py_cv(cv_vec, cv)
+            _add_py_lay_cv(cv_vec, cv)
 
-        deref(self.db_ptr).implement_sch_list(lib_name, cell_vec, view, view, cv_vec)
+        deref(self.db_ptr).implement_lay_list(lib_name, cell_vec, view, cv_vec)

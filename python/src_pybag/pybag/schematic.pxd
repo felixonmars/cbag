@@ -101,4 +101,4 @@ cdef class PySchCellView:
     cdef unicode encoding
 
     
-cdef _add_py_cv(vector[cellview *]& cv_list, PySchCellView pycv)
+cdef _add_py_sch_cv(vector[cellview *]& cv_list, PySchCellView pycv)

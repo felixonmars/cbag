@@ -15,6 +15,7 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/layout/cellview.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
 #include <cbagyaml/cbagyaml.h>
@@ -364,6 +365,15 @@ void oa_database::implement_sch_list(const char *lib_name,
         helper::handle_oa_exceptions(logger);
     }
 }
+
+void oa_database::implement_lay_list(const char *lib_name,
+                                     const std::vector<std::string> &cell_list, const char *view,
+                                     const std::vector<cbag::layout::cellview *> &cv_list) const {
+    try {
+    } catch (...) {
+        helper::handle_oa_exceptions(logger);
+    }
+} // namespace cbagoa
 
 void oa_database::write_tech_info_file(const char *fname, const char *tech_lib) {
     oa::oaTech *tech_ptr = helper::read_tech(ns, tech_lib);
