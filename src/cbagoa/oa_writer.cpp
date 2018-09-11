@@ -17,6 +17,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cbag/layout/cellview.h>
+#include <cbag/layout/instance.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
@@ -30,6 +32,13 @@
 namespace cbagoa {
 
 class make_pin_fig_visitor {
+  private:
+    const oa::oaCdbaNS *ns;
+    oa::oaBlock *block;
+    oa::oaPin *pin;
+    oa::oaTerm *term;
+    int *cnt;
+
   public:
     make_pin_fig_visitor(const oa::oaCdbaNS *ns, oa::oaBlock *block, oa::oaPin *pin,
                          oa::oaTerm *term, int *cnt)
@@ -55,16 +64,13 @@ class make_pin_fig_visitor {
                                   obj.attr.font, obj.attr.height, obj.attr.format, obj.attr.overbar,
                                   obj.attr.visible, obj.attr.drafting);
     }
-
-  private:
-    const oa::oaCdbaNS *ns;
-    oa::oaBlock *block;
-    oa::oaPin *pin;
-    oa::oaTerm *term;
-    int *cnt;
 };
 
 class make_shape_visitor {
+  private:
+    oa::oaBlock *block;
+    const oa::oaCdbaNS *ns;
+
   public:
     explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS *ns)
         : block(block), ns(ns) {}
@@ -132,12 +138,13 @@ class make_shape_visitor {
             ptr->addToNet(np);
         }
     }
-
-    oa::oaBlock *block;
-    const oa::oaCdbaNS *ns;
 };
 
 class make_prop_visitor {
+  private:
+    oa::oaObject *obj;
+    oa::oaString name;
+
   public:
     explicit make_prop_visitor(oa::oaObject *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
@@ -162,13 +169,13 @@ class make_prop_visitor {
             oa::oaByteArray(reinterpret_cast<const oa::oaByte *>(v.bin_val.data()),
                             static_cast<oa::oaUInt4>(v.bin_val.size())));
     }
-
-  private:
-    oa::oaObject *obj;
-    oa::oaString name;
 };
 
 class make_app_def_visitor {
+  private:
+    oa::oaDesign *obj;
+    oa::oaString name;
+
   public:
     explicit make_app_def_visitor(oa::oaDesign *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
@@ -200,10 +207,6 @@ class make_app_def_visitor {
     void operator()(const cbag::binary_t &v) const {
         throw std::invalid_argument("binary AppDef not supported yet.");
     }
-
-  private:
-    oa::oaDesign *obj;
-    oa::oaString name;
 };
 
 struct oa_writer::helper {
@@ -434,6 +437,71 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn) {}
+void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string &name,
+                     const cbag::layout::instance &inst, const char *lib_name,
+                     const char *view_name, const str_map_t *rename_map) {
+    oa::oaScalarName lib_oa(ns, inst.get_lib_name(lib_name));
+    oa::oaScalarName cell_oa(ns, inst.get_cell_name(rename_map));
+    oa::oaScalarName view_oa(ns, inst.get_view_name(view_name));
+    oa::oaScalarName inst_name(ns, name.c_str());
+
+    // create oa ParamArray
+    oa::oaParamArray oa_params;
+
+    const oa::oaParamArray *params_ptr = (oa_params.getNumElements() == 0) ? nullptr : &oa_params;
+    oa::oaTransform xform = inst.get_transform();
+    if (inst.nx > 1 || inst.ny > 1) {
+        oa::oaArrayInst::create(blk, lib_oa, cell_oa, view_oa, inst_name, xform, inst.spx, inst.spy,
+                                inst.ny, inst.nx, params_ptr);
+    } else {
+        oa::oaScalarInst::create(blk, lib_oa, cell_oa, view_oa, inst_name, xform, params_ptr);
+    }
+}
+
+void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
+                                   const str_map_t *rename_map) {
+
+    oa::oaString lib_name, view_name;
+    dsn->getLibName(ns, lib_name);
+    dsn->getViewName(ns, view_name);
+
+    // open design and top block
+    oa::oaBlock *blk = oa::oaBlock::create(dsn);
+
+    for (auto const &inst_pair : cv.inst_map) {
+        create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name, view_name,
+                        rename_map);
+    }
+
+    /*
+    // create geometries
+    for (bag::RectIter it = layout.rect_list.begin(); it != layout.rect_list.end(); it++) {
+        create_rect(blk_ptr, *it);
+    }
+    for (bag::PathSegIter it = layout.path_seg_list.begin(); it != layout.path_seg_list.end();
+         it++) {
+        create_path_seg(blk_ptr, *it);
+    }
+    for (bag::ViaIter it = layout.via_list.begin(); it != layout.via_list.end(); it++) {
+        create_via(blk_ptr, *it);
+    }
+    for (bag::PinIter it = layout.pin_list.begin(); it != layout.pin_list.end(); it++) {
+        create_pin(blk_ptr, *it);
+    }
+    for (bag::PolygonIter it = layout.polygon_list.begin(); it != layout.polygon_list.end(); it++) {
+        create_polygon(blk_ptr, *it);
+    }
+    for (bag::BlockageIter it = layout.block_list.begin(); it != layout.block_list.end(); it++) {
+        create_blockage(blk_ptr, *it);
+    }
+    for (bag::BoundaryIter it = layout.boundary_list.begin(); it != layout.boundary_list.end();
+         it++) {
+        create_boundary(blk_ptr, *it);
+    }
+    */
+
+    // save
+    dsn->save();
+}
 
 } // namespace cbagoa

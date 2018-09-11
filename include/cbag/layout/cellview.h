@@ -36,18 +36,20 @@ using inst_iter_t = inst_map_t::iterator;
 class cellview {
   private:
     tech *tech_ptr = nullptr;
+    uint32_t inst_name_cnt = 0;
+    uint8_t geo_mode = 0;
+    struct helper;
+
+  public:
+    std::string cell_name;
     geo_map_t geo_map;
     inst_map_t inst_map;
     std::vector<via> via_list;
     block_map_t lay_block_map;
     std::vector<polygon> area_block_list;
     std::vector<boundary> boundary_list;
-    uint32_t inst_name_cnt = 0;
-    uint8_t geo_mode = 0;
-    struct helper;
 
-  public:
-    explicit cellview(tech *tech_ptr, uint8_t geo_mode = 0);
+    explicit cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode = 0);
 
     bool empty() const {
         return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&

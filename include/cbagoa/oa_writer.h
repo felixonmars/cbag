@@ -91,7 +91,8 @@ class oa_writer {
     void write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                             const str_map_t *rename_map = nullptr);
 
-    void write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn);
+    void write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
+                            const str_map_t *rename_map = nullptr);
 };
 
 } // namespace cbagoa

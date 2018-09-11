@@ -6,6 +6,7 @@
 
 #include <cbag/common/datatypes.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/common/transform.h>
 #include <cbag/layout/transformation.h>
 
 namespace cbag {
@@ -23,16 +24,19 @@ struct cellview_ref {
     cellview_ref(const char *lib, const char *cell, const char *view);
 };
 
+using str_map_t = std::unordered_map<std::string, std::string>;
+
 class instance {
   private:
+    std::variant<const cellview *, cellview_ref> master = nullptr;
+
+  public:
     transformation xform;
     uint32_t nx = 1;
     uint32_t ny = 1;
     offset_t spx = 0;
     offset_t spy = 0;
-    std::variant<const cellview *, cellview_ref> master = nullptr;
 
-  public:
     instance();
 
     instance(const char *lib, const char *cell, const char *view, transformation xform,
@@ -40,6 +44,16 @@ class instance {
 
     instance(const cellview *master, transformation xform, uint32_t nx = 1, uint32_t ny = 1,
              offset_t spx = 0, offset_t spy = 0);
+
+    const char *get_lib_name(const char *output_lib) const;
+
+    const char *get_cell_name(const str_map_t *rename_map) const;
+
+    const char *get_view_name(const char *default_view) const;
+
+    const param_map *get_params() const;
+
+    const cbag::transform get_transform() const;
 
     void set_int_param(const char *name, int value);
 

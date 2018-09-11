@@ -6,6 +6,7 @@
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/polygon90.h>
 #include <cbag/layout/pt_vector.h>
+#include <cbag/layout/transformation.h>
 
 namespace bp = boost::polygon;
 namespace bl = cbag::layout;
@@ -28,7 +29,6 @@ template <typename T> void print_poly90(T &data) {
     }
     std::cout << "done" << std::endl;
 }
-
 
 void test_rect_pt_vector() {
     std::vector<bp_point_t> point_list = {
@@ -81,8 +81,30 @@ void test_subclass_constructor() {
     print_poly(poly);
 }
 
+void test_transformation() {
+    for (unsigned int code = 0; code < 8; ++code) {
+        bp::transformation<int> xform(static_cast<bp::axis_transformation::ATR>(code));
+        bp::direction_2d h_dir, v_dir;
+        xform.get_directions(h_dir, v_dir);
+        std::cout << "horzontal: " << h_dir.to_int() << ", vertical: " << v_dir.to_int()
+                  << std::endl;
+    }
+}
+
+void test_orient_mapping() {
+    for (unsigned int code = 0; code < 8; ++code) {
+        bp::rectangle_data<int> rect(0, 0, 4, 1);
+        cbag::layout::transformation xform(1, 2, code);
+        bp::transform(rect, xform);
+        std::cout << code << " " << xform.orient() << ": " << bp::xl(rect) << " " << bp::yl(rect)
+                  << " " << bp::xh(rect) << "  " << bp::yh(rect) << std::endl;
+    }
+}
+
 int main(int argc, char *argv[]) {
-    test_rect_pt_vector();
+    // test_rect_pt_vector();
     // test_subclass_constructor();
+    test_orient_mapping();
+
     return 0;
 }

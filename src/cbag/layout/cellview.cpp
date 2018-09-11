@@ -51,7 +51,8 @@ struct cellview::helper {
     }
 };
 
-cellview::cellview(tech *tech_ptr, uint8_t geo_mode) : tech_ptr(tech_ptr), geo_mode(geo_mode) {}
+cellview::cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode)
+    : tech_ptr(tech_ptr), geo_mode(geo_mode), cell_name(cell_name) {}
 
 rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     lay_t lay_id = tech_ptr->get_layer_id(layer);

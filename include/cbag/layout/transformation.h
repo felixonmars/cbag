@@ -3,11 +3,13 @@
 
 #include <boost/polygon/polygon.hpp>
 
+#include <cbag/common/transform.h>
 #include <cbag/common/typedefs.h>
 
 namespace bp = boost::polygon;
 
 namespace cbag {
+
 namespace layout {
 
 /** Our own geometry transformation class.
@@ -26,6 +28,8 @@ class transformation : public bp::transformation<coord_t> {
 
     coord_t x() const;
     coord_t y() const;
+    bp::axis_transformation::ATR orient() const;
+    cbag::transform to_transform() const;
 };
 
 } // namespace layout

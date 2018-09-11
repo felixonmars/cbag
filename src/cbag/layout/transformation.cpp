@@ -1,3 +1,4 @@
+#include <cbag/common/orientation.h>
 #include <cbag/layout/transformation.h>
 
 namespace cbag {
@@ -35,6 +36,41 @@ coord_t transformation::y() const {
     coord_t x = 0, y = 0;
     transform(x, y);
     return y;
+}
+
+bp::axis_transformation::ATR transformation::orient() const {
+    bp::direction_2d hdir, vdir;
+    get_directions(hdir, vdir);
+    unsigned int code = ((~vdir.to_int() & 0b11) << 1) | (~hdir.to_int() & 0b01);
+    return static_cast<bp::axis_transformation::ATR>(code);
+}
+
+cbag::orientation convert_orient(bp::axis_transformation::ATR orient) {
+    switch (orient) {
+    case bp::axis_transformation::ATR::NULL_TRANSFORM:
+        return oR0;
+    case bp::axis_transformation::ATR::FLIP_X:
+        return oMY;
+    case bp::axis_transformation::ATR::FLIP_Y:
+        return oMX;
+    case bp::axis_transformation::ATR::FLIP_XY:
+        return oR180;
+    case bp::axis_transformation::ATR::SWAP_XY:
+        return oMXR90;
+    case bp::axis_transformation::ATR::ROTATE_LEFT:
+        return oR270;
+    case bp::axis_transformation::ATR::ROTATE_RIGHT:
+        return oR90;
+    default:
+        return oMYR90;
+    }
+}
+
+cbag::transform transformation::to_transform() const {
+    coord_t x = 0, y = 0;
+    transform(x, y);
+
+    return {x, y, convert_orient(orient())};
 }
 
 } // namespace layout

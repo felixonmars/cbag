@@ -61,9 +61,10 @@ cdef class PyLayInstance:
 
 
 cdef class PyLayCellView:
-    def __init__(self, PyTech tech, encoding, int geo_mode=0):
+    def __init__(self, PyTech tech, cell_name, encoding, int geo_mode=0):
         self._encoding = encoding
-        self._ptr.reset(new cellview(tech._ptr.get(), geo_mode))
+        tmp = cell_name.encode(encoding)
+        self._ptr.reset(new cellview(tech._ptr.get(), tmp, geo_mode))
 
     def __dealloc__(self):
         self._ptr.reset()

@@ -324,8 +324,8 @@ install(TARGETS
 #  read_prop
 #  test_yaml
 #  netmap_sample
-#  test_polygon
-  test_misc
+  test_polygon
+#  test_misc
   write_tech_info
   RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
   LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib

@@ -362,13 +362,13 @@ void oa_database::implement_sch_list(const char *lib_name,
 }
 
 void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name,
-                                     const char *view_name,
-                                     const cbag::layout::cellview &cv) const {
+                                     const char *view_name, const cbag::layout::cellview &cv,
+                                     const str_map_t *rename_map) const {
     try {
         oa::oaDesign *dsn_ptr =
             helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        writer->write_lay_cellview(cv, dsn_ptr);
+        writer->write_lay_cellview(cv, dsn_ptr, rename_map);
         dsn_ptr->close();
     } catch (...) {
         helper::handle_oa_exceptions(logger);
@@ -379,10 +379,14 @@ void oa_database::implement_lay_list(const char *lib_name,
                                      const std::vector<std::string> &cell_list, const char *view,
                                      const std::vector<cbag::layout::cellview *> &cv_list) const {
     try {
+        str_map_t rename_map;
+
         std::size_t num = cell_list.size();
         for (std::size_t idx = 0; idx < num; ++idx) {
             const char *cell_name = cell_list[idx].c_str();
             write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]));
+            logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
+            rename_map[cv_list[idx]->cell_name] = cell_list[idx];
         }
     } catch (...) {
         helper::handle_oa_exceptions(logger);

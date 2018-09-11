@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <unordered_map>
 
 struct opt_int32_t {
