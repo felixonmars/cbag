@@ -11,11 +11,11 @@ void read_oa() {
     std::string lib_file("cds.lib");
     std::string lib_path(".");
     std::string tech_lib("tsmcN16");
-    std::string lib_name("AAAFOO_TEST_STRONGARM");
-    std::string cell_name("inv");
-    std::string cell_name2("inv2");
-    std::string view_name("schematic");
-    std::string sym_view_name("symbol");
+    const char *lib_name = "AAAFOO_TEST_STRONGARM";
+    const char *cell_name = "inv";
+    const char *cell_name2 = "inv2";
+    const char *view_name = "schematic";
+    const char *sym_view_name = "symbol";
 
     cbagoa::oa_database db(lib_file);
 

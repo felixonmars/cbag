@@ -104,22 +104,10 @@ class oa_database {
     cbag::sch::cellview read_sch_cellview(const char *lib_name, const char *cell_name,
                                           const char *view_name) const;
 
-    cbag::sch::cellview read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
-                                          const std::string &view_name) const;
-
     std::vector<cell_key_t>
     read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
                        const char *new_root_path, const str_map_t &lib_map,
                        const std::unordered_set<std::string> &exclude_libs) const;
-
-    std::vector<cell_key_t>
-    read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
-                       const std::string &view_name, const std::string &new_root_path,
-                       const str_map_t &lib_map,
-                       const std::unordered_set<std::string> &exclude_libs) const {
-        return read_sch_recursive(lib_name.c_str(), cell_name.c_str(), view_name.c_str(),
-                                  new_root_path.c_str(), lib_map, exclude_libs);
-    }
 
     std::vector<cell_key_t> read_library(const char *lib_name, const char *view_name,
                                          const char *new_root_path, const str_map_t &lib_map,
@@ -129,17 +117,12 @@ class oa_database {
                             bool is_sch, const cbag::sch::cellview &cv,
                             const str_map_t *rename_map = nullptr) const;
 
-    void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
-                            const std::string &view_name, bool is_sch,
-                            const cbag::sch::cellview &cv,
-                            const str_map_t *rename_map = nullptr) const {
-        write_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str(), is_sch, cv,
-                           rename_map);
-    }
-
     void implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
                             const char *sch_view, const char *sym_view,
                             const std::vector<cbag::sch::cellview *> &cv_list) const;
+
+    void write_lay_cellview(const char *lib_name, const char *cell_name, const char *view_name,
+                            const cbag::layout::cellview &cv) const;
 
     void implement_lay_list(const char *lib_name, const std::vector<std::string> &cell_list,
                             const char *view,

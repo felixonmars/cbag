@@ -70,7 +70,8 @@ struct oa_database::helper {
     static oa::oaDesign *open_design(const oa::oaNativeNS &ns,
                                      const std::shared_ptr<spdlog::logger> logger,
                                      const char *lib_name, const char *cell_name,
-                                     const char *view_name, char mode, bool is_sch) {
+                                     const char *view_name, char mode,
+                                     oa::oaReservedViewTypeEnum view_enum) {
         oa::oaScalarName lib_oa(ns, lib_name);
         oa::oaScalarName cell_oa(ns, cell_name);
         oa::oaScalarName view_oa(ns, view_name);
@@ -81,8 +82,7 @@ struct oa_database::helper {
         if (mode == 'r') {
             dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, mode);
         } else {
-            oa::oaViewType *view_type =
-                oa::oaViewType::get((is_sch) ? oa::oacSchematic : oa::oacSchematicSymbol);
+            oa::oaViewType *view_type = oa::oaViewType::get(view_enum);
             dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, view_type, mode);
         }
         if (dsn_ptr == nullptr) {
@@ -286,7 +286,7 @@ cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const c
                                                    const char *view_name) const {
     try {
         oa::oaDesign *dsn_ptr =
-            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'r', true);
+            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'r', oa::oacSchematic);
         logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
         cbag::sch::cellview ans = reader->read_sch_cellview(dsn_ptr);
         dsn_ptr->close();
@@ -295,12 +295,6 @@ cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const c
         helper::handle_oa_exceptions(logger);
         throw;
     }
-}
-
-cbag::sch::cellview oa_database::read_sch_cellview(const std::string &lib_name,
-                                                   const std::string &cell_name,
-                                                   const std::string &view_name) const {
-    return read_sch_cellview(lib_name.c_str(), cell_name.c_str(), view_name.c_str());
 }
 
 std::vector<cell_key_t>
@@ -335,7 +329,8 @@ void oa_database::write_sch_cellview(const char *lib_name, const char *cell_name
                                      const str_map_t *rename_map) const {
     try {
         oa::oaDesign *dsn_ptr =
-            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w', is_sch);
+            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w',
+                                is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
         writer->write_sch_cellview(cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
@@ -366,10 +361,29 @@ void oa_database::implement_sch_list(const char *lib_name,
     }
 }
 
+void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name,
+                                     const char *view_name,
+                                     const cbag::layout::cellview &cv) const {
+    try {
+        oa::oaDesign *dsn_ptr =
+            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
+        logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
+        writer->write_lay_cellview(cv, dsn_ptr);
+        dsn_ptr->close();
+    } catch (...) {
+        helper::handle_oa_exceptions(logger);
+    }
+}
+
 void oa_database::implement_lay_list(const char *lib_name,
                                      const std::vector<std::string> &cell_list, const char *view,
                                      const std::vector<cbag::layout::cellview *> &cv_list) const {
     try {
+        std::size_t num = cell_list.size();
+        for (std::size_t idx = 0; idx < num; ++idx) {
+            const char *cell_name = cell_list[idx].c_str();
+            write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]));
+        }
     } catch (...) {
         helper::handle_oa_exceptions(logger);
     }

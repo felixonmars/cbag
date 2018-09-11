@@ -81,6 +81,7 @@ class oa_writer {
   private:
     const oa::oaCdbaNS ns;
     std::shared_ptr<spdlog::logger> logger;
+    struct helper;
 
   public:
     oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger);
@@ -90,18 +91,9 @@ class oa_writer {
     void write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                             const str_map_t *rename_map = nullptr);
 
-    void write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
-                            const str_map_t *rename_map = nullptr) {}
-
-  private:
-    void create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
-                             const std::map<std::string, cbag::sch::pin_figure> &map,
-                             oa::oaTermTypeEnum term_type);
-
-    void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
-                             const oa::oaScalarName &cell_name, const oa::oaScalarName &view_name,
-                             const std::string &term_order);
+    void write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn);
 };
+
 } // namespace cbagoa
 
 #endif // CBAGOA_WRITE_OA_H

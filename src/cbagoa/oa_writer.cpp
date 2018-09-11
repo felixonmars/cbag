@@ -206,31 +206,82 @@ class make_app_def_visitor {
     oa::oaString name;
 };
 
-oa_writer::oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-    : ns(std::move(ns)), logger(std::move(logger)){};
-
-void oa_writer::create_terminal_pin(oa::oaBlock *block, int &pin_cnt,
+struct oa_writer::helper {
+    static void create_terminal_pin(const oa_writer &self, oa::oaBlock *block, int &pin_cnt,
                                     const std::map<std::string, cbag::sch::pin_figure> &map,
                                     oa::oaTermTypeEnum term_type) {
-    oa::oaName term_name;
-    for (auto const &pair : map) {
-        // create terminal, net, and pin
-        logger->info("Creating terminal {}", pair.first);
-        term_name.init(ns, pair.first.c_str());
-        logger->info("Creating terminal net");
-        oa::oaNet *term_net = oa::oaNet::find(block, term_name);
-        if (term_net == nullptr || term_net->isImplicit()) {
-            term_net = oa::oaNet::create(block, term_name, pair.second.stype);
+        oa::oaName term_name;
+        for (auto const &pair : map) {
+            // create terminal, net, and pin
+            self.logger->info("Creating terminal {}", pair.first);
+            term_name.init(self.ns, pair.first.c_str());
+            self.logger->info("Creating terminal net");
+            oa::oaNet *term_net = oa::oaNet::find(block, term_name);
+            if (term_net == nullptr || term_net->isImplicit()) {
+                term_net = oa::oaNet::create(block, term_name, pair.second.stype);
+            }
+            self.logger->info("Creating terminal");
+            oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
+            self.logger->info("Creating terminal pin");
+            oa::oaPin *pin = oa::oaPin::create(term);
+            self.logger->info("Creating terminal shape");
+            std::visit(make_pin_fig_visitor(&self.ns, block, pin, term, &pin_cnt), pair.second.obj);
+            self.logger->info("Create terminal done");
         }
-        logger->info("Creating terminal");
-        oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
-        logger->info("Creating terminal pin");
-        oa::oaPin *pin = oa::oaPin::create(term);
-        logger->info("Creating terminal shape");
-        std::visit(make_pin_fig_visitor(&ns, block, pin, term, &pin_cnt), pair.second.obj);
-        logger->info("Create terminal done");
     }
-}
+
+    static void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
+                                    const oa::oaScalarName &cell_name,
+                                    const oa::oaScalarName &view_name,
+                                    const std::string &term_order) {
+
+        // get dependencies
+        std::set<std::tuple<std::string, std::string, std::string>> dep_set;
+        for (auto const &inst : cv.instances) {
+            dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
+        }
+
+        // build dependencies
+        std::stringstream dependencies;
+        auto dep_cursor = dep_set.cbegin();
+        auto dep_end = dep_set.cend();
+        dependencies << '(';
+        if (dep_cursor != dep_end) {
+            dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                         << "\" \"" << std::get<2>(*dep_cursor) << "\")";
+            ++dep_cursor;
+        }
+        for (; dep_cursor != dep_end; ++dep_cursor) {
+            dependencies << " (\"" << std::get<0>(*dep_cursor) << "\" \""
+                         << std::get<1>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                         << "\")";
+        }
+        dependencies << ')';
+
+        // create cell data
+        std::string cdf_data_str = fmt::format(cell_data, term_order);
+        oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
+                                 cdf_data_str.size());
+        oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
+        oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
+        data->save();
+        data->close();
+
+        // create cellview data
+        std::string cv_cdf_data_str = dependencies.str();
+        oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
+                                    cv_cdf_data_str.size());
+        oa::oaCellViewDMData *cv_data =
+            oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
+        oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
+        oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
+        cv_data->save();
+        cv_data->close();
+    }
+};
+
+oa_writer::oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
+    : ns(std::move(ns)), logger(std::move(logger)){};
 
 void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
                                    const str_map_t *rename_map) {
@@ -258,11 +309,11 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
 
     int pin_cnt = 0;
     logger->info("Writing input terminals");
-    create_terminal_pin(block, pin_cnt, cv.in_terms, oa::oacInputTermType);
+    helper::create_terminal_pin(*this, block, pin_cnt, cv.in_terms, oa::oacInputTermType);
     logger->info("Writing output terminals");
-    create_terminal_pin(block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
+    helper::create_terminal_pin(*this, block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
     logger->info("Writing inout terminals");
-    create_terminal_pin(block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
+    helper::create_terminal_pin(*this, block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
     // TODO: add shape support for schematic
     if (!is_sch) {
@@ -368,7 +419,7 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
         dsn->getViewName(dsn_view);
 
         // write cellview data
-        write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
+        helper::write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
 
         // update extraction timestamp
         uint32_t num_op = 2;
@@ -383,51 +434,6 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
     logger->info("Finish writing schematic/symbol cellview");
 }
 
-void oa_writer::write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
-                                    const oa::oaScalarName &cell_name,
-                                    const oa::oaScalarName &view_name,
-                                    const std::string &term_order) {
-
-    // get dependencies
-    std::set<std::tuple<std::string, std::string, std::string>> dep_set;
-    for (auto const &inst : cv.instances) {
-        dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
-    }
-
-    // build dependencies
-    std::stringstream dependencies;
-    auto dep_cursor = dep_set.cbegin();
-    auto dep_end = dep_set.cend();
-    dependencies << '(';
-    if (dep_cursor != dep_end) {
-        dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
-                     << "\" \"" << std::get<2>(*dep_cursor) << "\")";
-        ++dep_cursor;
-    }
-    for (; dep_cursor != dep_end; ++dep_cursor) {
-        dependencies << " (\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
-                     << "\" \"" << std::get<1>(*dep_cursor) << "\")";
-    }
-    dependencies << ')';
-
-    // create cell data
-    std::string cdf_data_str = fmt::format(cell_data, term_order);
-    oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
-                             cdf_data_str.size());
-    oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
-    oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
-    data->save();
-    data->close();
-
-    // create cellview data
-    std::string cv_cdf_data_str = dependencies.str();
-    oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
-                                cv_cdf_data_str.size());
-    oa::oaCellViewDMData *cv_data = oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
-    oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
-    oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
-    cv_data->save();
-    cv_data->close();
-}
+void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn) {}
 
 } // namespace cbagoa
