@@ -21,6 +21,8 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
+#include <cbag/layout/pin.h>
+#include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
@@ -33,6 +35,8 @@
 #include <cbagoa/oa_writer.h>
 
 namespace cbagoa {
+
+constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
 class make_pin_fig_visitor {
   private:
@@ -556,12 +560,40 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
         }
     }
 
-    /*
-    // create geometries
-    for (bag::PinIter it = layout.pin_list.begin(); it != layout.pin_list.end(); it++) {
-        create_pin(blk_ptr, *it);
+    cbag::purp_t purp = cv.tech_ptr->pin_purpose;
+    for (auto const &pin_pair : cv.pin_map) {
+        cbag::lay_t lay = pin_pair.first;
+        for (auto const &pin : pin_pair.second) {
+            oa::oaPoint center(pin.xm(), pin.ym());
+            cbag::offset_t w = pin.w();
+            cbag::offset_t h = pin.h();
+            oa::oaOrient orient(oa::oacR0);
+            cbag::dist_t height = h;
+            if (h > w) {
+                orient = oa::oacR90;
+                height = w;
+            }
+
+            oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
+                               oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
+            if (pin.make_pin) {
+                auto *r = oa::oaRect::create(blk, lay, purp,
+                                             oa::oaBox(pin.xl(), pin.yl(), pin.xh(), pin.yh()));
+
+                oa::oaName term_name(ns, pin.net.c_str());
+                auto *term = oa::oaTerm::find(blk, term_name);
+                if (term == nullptr) {
+                    auto *net = oa::oaNet::find(blk, term_name);
+                    if (net == nullptr) {
+                        net = oa::oaNet::create(blk, term_name);
+                    }
+                    term = oa::oaTerm::create(net, term_name);
+                }
+                auto *pin = oa::oaPin::create(term, pin_dir);
+                r->addToPin(pin);
+            }
+        }
     }
-    */
 
     // save
     dsn->save();

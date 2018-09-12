@@ -398,7 +398,8 @@ void oa_database::implement_lay_list(const char *lib_name,
     }
 } // namespace cbagoa
 
-void oa_database::write_tech_info_file(const char *fname, const char *tech_lib) {
+void oa_database::write_tech_info_file(const char *fname, const char *tech_lib,
+                                       const char *pin_purpose) {
     oa::oaTech *tech_ptr = helper::read_tech(ns, tech_lib);
 
     // read layer/purpose/via mappings
@@ -433,6 +434,7 @@ void oa_database::write_tech_info_file(const char *fname, const char *tech_lib) 
     out.SetSeqFormat(YAML::Flow);
     out << YAML::BeginMap;
 
+    out << YAML::Key << "pin_purpose" << YAML::Value << pin_purpose;
     out << YAML::Key << "default_purpose" << YAML::Value << "drawing";
 
     out << YAML::Key << "layer" << YAML::Value;

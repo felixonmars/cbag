@@ -7,6 +7,7 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/pin.h>
 #include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
@@ -52,7 +53,7 @@ struct cellview::helper {
 };
 
 cellview::cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode)
-    : tech_ptr(tech_ptr), geo_mode(geo_mode), cell_name(cell_name) {}
+    : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(cell_name) {}
 
 rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
@@ -75,6 +76,16 @@ polygon_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t 
                                           coord_t xh, coord_t yh) {
     auto iter = helper::get_geometry(*this, layer_t(lay_id, purp_id));
     return iter->second.add_rect(xl, yl, xh, yh);
+}
+
+void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
+                       const char *net, const char *label, bool make_pin) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    auto iter = pin_map.find(lay_id);
+    if (iter == pin_map.end()) {
+        iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
+    }
+    iter->second.emplace_back(xl, yl, xh, yh, net, label, make_pin);
 }
 
 polygon_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,

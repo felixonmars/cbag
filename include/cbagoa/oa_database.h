@@ -129,7 +129,7 @@ class oa_database {
                             const char *view,
                             const std::vector<cbag::layout::cellview *> &cv_list) const;
 
-    void write_tech_info_file(const char *fname, const char *tech_lib);
+    void write_tech_info_file(const char *fname, const char *tech_lib, const char *pin_purpose);
 };
 
 } // namespace cbagoa

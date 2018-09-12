@@ -18,6 +18,7 @@ class pt_vector;
 class polygon;
 class boundary;
 class blockage;
+class pin;
 class via;
 class rectangle;
 class polygon90;
@@ -30,20 +31,22 @@ class tech;
 using layer_t = std::pair<lay_t, purp_t>;
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
+using pin_map_t = std::unordered_map<lay_t, std::vector<pin>>;
 using inst_map_t = std::unordered_map<std::string, instance>;
 using inst_iter_t = inst_map_t::iterator;
 
 class cellview {
   private:
-    tech *tech_ptr = nullptr;
     uint32_t inst_name_cnt = 0;
     uint8_t geo_mode = 0;
     struct helper;
 
   public:
+    tech *tech_ptr = nullptr;
     std::string cell_name;
     geo_map_t geo_map;
     inst_map_t inst_map;
+    pin_map_t pin_map;
     std::vector<via> via_list;
     block_map_t lay_block_map;
     std::vector<polygon> area_block_list;
@@ -63,6 +66,9 @@ class cellview {
 
     polygon_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
                                     coord_t xh, coord_t yh);
+
+    void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
+                 const char *label, bool make_pin);
 
     polygon_ref<polygon90> add_poly90(const char *layer, const char *purpose, pt_vector data);
 

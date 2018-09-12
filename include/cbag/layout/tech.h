@@ -22,7 +22,10 @@ class tech {
     purp_t default_purpose;
 
   public:
-    tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map, const std::string &def_purpose);
+    purp_t pin_purpose;
+
+    tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map, const std::string &def_purpose,
+         const std::string &pin_purpose_name);
 
     lay_t get_layer_id(const char *layer) const;
 

@@ -1,7 +1,8 @@
 #include <cbag/cbag.h>
 #include <cbagoa/cbagoa.h>
 
-void write_tech_info_file(const char *fname, const char *tech_lib, const char *lib_file = nullptr) {
+void write_tech_info_file(const char *fname, const char *tech_lib, const char *lib_file = nullptr,
+                          const char *pin_purpose = "pin") {
     cbag::init_logging();
 
     std::string lib_str("cds.lib");
@@ -10,16 +11,24 @@ void write_tech_info_file(const char *fname, const char *tech_lib, const char *l
     }
 
     cbagoa::oa_database db(lib_str);
-    db.write_tech_info_file(fname, tech_lib);
+    db.write_tech_info_file(fname, tech_lib, pin_purpose);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc == 3) {
+    switch (argc) {
+    case 3:
         write_tech_info_file(argv[1], argv[2]);
-    } else if (argc == 4) {
+        break;
+    case 4:
         write_tech_info_file(argv[1], argv[2], argv[3]);
-    } else {
-        std::cout << "Usage: write_tech_info <fname> <tech_lib> [<cds_lib_fname>]" << std::endl;
+        break;
+    case 5:
+        write_tech_info_file(argv[1], argv[2], argv[3], argv[4]);
+        break;
+    default:
+        std::cout << "Usage: write_tech_info <fname> <tech_lib> [<cds_lib_fname> [<pin_purpose>]]"
+                  << std::endl;
     }
+
     return 0;
 }
