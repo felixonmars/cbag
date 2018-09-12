@@ -10,10 +10,9 @@ namespace layout {
 class pt_vector;
 
 class boundary : public polygon {
-  private:
+  public:
     boundary_type type = boundary_type::PR;
 
-  public:
     boundary(pt_vector data, boundary_type type);
 };
 

@@ -7,7 +7,7 @@
 namespace cbag {
 // common primitive types
 
-enum boundary_type : uint8_t { PR, area, snap };
+enum boundary_type : uint8_t { PR, snap };
 } // namespace cbag
 
 #endif

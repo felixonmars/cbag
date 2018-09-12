@@ -17,6 +17,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cbag/layout/blockage.h>
+#include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
 #include <cbag/layout/via.h>
@@ -459,8 +461,7 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
     }
 }
 
-void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpose,
-                        const cbag::layout::polygon &poly, oa::oaPointArray &arr) {
+void set_point_array(const cbag::layout::polygon &poly, oa::oaPointArray &arr) {
     std::size_t size = poly.size();
     arr.setSize(size);
     auto start = poly.begin();
@@ -468,7 +469,11 @@ void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpos
         arr[idx] = oa::oaPoint(start->x(), start->y());
     }
     arr.setNumElements(size);
+}
 
+void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpose,
+                        const cbag::layout::polygon &poly, oa::oaPointArray &arr) {
+    set_point_array(poly, arr);
     oa::oaPolygon::create(blk, layer, purpose, arr);
 }
 
@@ -529,17 +534,32 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
         create_lay_via(logger, blk, tech, via);
     }
 
+    oa::oaPointArray pt_arr;
+    for (auto const &block_pair : cv.lay_block_map) {
+        for (auto const &block : block_pair.second) {
+            set_point_array(block, pt_arr);
+            oa::oaLayerBlockage::create(blk, block.type, block_pair.first, pt_arr);
+        }
+    }
+    for (auto const &block : cv.area_block_list) {
+        set_point_array(block, pt_arr);
+        oa::oaAreaBlockage::create(blk, pt_arr);
+    }
+
+    for (auto const &bndry : cv.boundary_list) {
+        set_point_array(bndry, pt_arr);
+        switch (bndry.type) {
+        case cbag::PR:
+            oa::oaPRBoundary::create(blk, pt_arr);
+        case cbag::snap:
+            oa::oaSnapBoundary::create(blk, pt_arr);
+        }
+    }
+
     /*
     // create geometries
     for (bag::PinIter it = layout.pin_list.begin(); it != layout.pin_list.end(); it++) {
         create_pin(blk_ptr, *it);
-    }
-    for (bag::BlockageIter it = layout.block_list.begin(); it != layout.block_list.end(); it++) {
-        create_blockage(blk_ptr, *it);
-        }
-    for (bag::BoundaryIter it = layout.boundary_list.begin(); it != layout.boundary_list.end();
-         it++) {
-        create_boundary(blk_ptr, *it);
     }
     */
 

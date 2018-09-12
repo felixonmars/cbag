@@ -10,10 +10,9 @@ namespace layout {
 class pt_vector;
 
 class blockage : public polygon {
-  private:
+  public:
     blockage_type type = blkRoute;
 
-  public:
     blockage(pt_vector data, blockage_type type);
 };
 

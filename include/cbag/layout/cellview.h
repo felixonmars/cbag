@@ -29,7 +29,7 @@ class tech;
 
 using layer_t = std::pair<lay_t, purp_t>;
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
-using block_map_t = std::unordered_map<layer_t, std::vector<blockage>, boost::hash<layer_t>>;
+using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
 using inst_map_t = std::unordered_map<std::string, instance>;
 using inst_iter_t = inst_map_t::iterator;
 
