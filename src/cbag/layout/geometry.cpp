@@ -57,27 +57,27 @@ geometry::geometry(uint8_t mode) : mode(mode), view(helper::make_union_view(*thi
 
 rectangle geometry::get_bbox() const { return extents(view); }
 
-polygon_ref<rectangle> geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
+vector_obj_ref<rectangle> geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
     std::size_t idx = rect_set.size();
     rect_set.emplace_back(xl, yl, xh, yh);
     return {&rect_set, idx};
 }
 
-polygon_ref<polygon90> geometry::add_poly90(pt_vector data) {
+vector_obj_ref<polygon90> geometry::add_poly90(pt_vector data) {
     std::size_t idx = poly90_set.size();
     mode = std::max(mode, 1_uc);
     poly90_set.emplace_back(std::move(data));
     return {&poly90_set, idx};
 }
 
-polygon_ref<polygon45> geometry::add_poly45(pt_vector data) {
+vector_obj_ref<polygon45> geometry::add_poly45(pt_vector data) {
     std::size_t idx = poly45_set.size();
     mode = std::max(mode, 2_uc);
     poly45_set.emplace_back(std::move(data));
     return {&poly45_set, idx};
 }
 
-polygon_ref<polygon> geometry::add_poly(pt_vector data) {
+vector_obj_ref<polygon> geometry::add_poly(pt_vector data) {
     std::size_t idx = poly_set.size();
     mode = std::max(mode, 3_uc);
     poly_set.emplace_back(std::move(data));

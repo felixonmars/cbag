@@ -249,3 +249,24 @@ cdef class PyLayCellView:
         cdef PyRect ans = PyRect()
         ans._ref = deref(self._ptr).add_rect(layer, purpose, bbox.xl, bbox.yl, bbox.xh, bbox.yh)
         return ans
+
+    def add_pin(self, net, layer, bbox, label):
+        # type: (str, str, BBox, str) -> None
+        """Add a new pin.
+
+        Parameters
+        ----------
+        net : str
+            the pin net name.
+        layer : str
+            the pin layer name.
+        bbox : BBox
+            the pin bounding box.
+        label : str
+            the pin label.
+        """
+        net = net.encode(self._encoding)
+        layer = layer.encode(self._encoding)
+        label = label.encode(self._encoding)
+
+        deref(self._ptr).add_pin(layer, bbox.xl, bbox.yl, bbox.xh, bbox.yh, net, label)

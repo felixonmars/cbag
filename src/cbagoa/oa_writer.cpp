@@ -561,6 +561,7 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
     }
 
     cbag::purp_t purp = cv.tech_ptr->pin_purpose;
+    bool make_pin_obj = cv.tech_ptr->make_pin_obj;
     for (auto const &pin_pair : cv.pin_map) {
         cbag::lay_t lay = pin_pair.first;
         for (auto const &pin : pin_pair.second) {
@@ -576,7 +577,7 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
 
             oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
                                oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
-            if (pin.make_pin) {
+            if (make_pin_obj) {
                 auto *r = oa::oaRect::create(blk, lay, purp,
                                              oa::oaBox(pin.xl(), pin.yl(), pin.xh(), pin.yh()));
 

@@ -8,9 +8,9 @@
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/pin.h>
-#include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
+#include <cbag/layout/vector_obj_ref.h>
 #include <cbag/layout/via.h>
 #include <cbag/layout/via_ref.h>
 
@@ -65,31 +65,31 @@ rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     return iter->second.get_bbox();
 }
 
-polygon_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, coord_t xl,
-                                          coord_t yl, coord_t xh, coord_t yh) {
+vector_obj_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, coord_t xl,
+                                             coord_t yl, coord_t xh, coord_t yh) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     return add_rect(lay_id, purp_id, xl, yl, xh, yh);
 }
 
-polygon_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
-                                          coord_t xh, coord_t yh) {
+vector_obj_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
+                                             coord_t xh, coord_t yh) {
     auto iter = helper::get_geometry(*this, layer_t(lay_id, purp_id));
     return iter->second.add_rect(xl, yl, xh, yh);
 }
 
 void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                       const char *net, const char *label, bool make_pin) {
+                       const char *net, const char *label) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
     }
-    iter->second.emplace_back(xl, yl, xh, yh, net, label, make_pin);
+    iter->second.emplace_back(xl, yl, xh, yh, net, label);
 }
 
-polygon_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,
-                                            pt_vector data) {
+vector_obj_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,
+                                               pt_vector data) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     layer_t key(lay_id, purp_id);
@@ -100,8 +100,8 @@ polygon_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpo
     return iter->second.add_poly90(std::move(data));
 }
 
-polygon_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose,
-                                            pt_vector data) {
+vector_obj_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose,
+                                               pt_vector data) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     layer_t key(lay_id, purp_id);
@@ -112,7 +112,7 @@ polygon_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpo
     return iter->second.add_poly45(std::move(data));
 }
 
-polygon_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, pt_vector data) {
+vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, pt_vector data) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     layer_t key(lay_id, purp_id);

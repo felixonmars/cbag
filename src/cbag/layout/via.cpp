@@ -48,9 +48,9 @@ rectangle via::top_box() const {
     return helper::get_box(*this, params.getLayer2Offset(), params.getLayer2Enc());
 }
 
-void via::set_layer1(polygon_ref<rectangle> ref) { lay1_ref = std::move(ref); }
+void via::set_layer1(vector_obj_ref<rectangle> ref) { lay1_ref = std::move(ref); }
 
-void via::set_layer2(polygon_ref<rectangle> ref) { lay2_ref = std::move(ref); }
+void via::set_layer2(vector_obj_ref<rectangle> ref) { lay2_ref = std::move(ref); }
 
 } // namespace layout
 } // namespace cbag

@@ -24,7 +24,7 @@ class rectangle;
 class polygon90;
 class polygon45;
 class polygon;
-template <typename T> class polygon_ref;
+template <typename T> class vector_obj_ref;
 class via_ref;
 class tech;
 
@@ -61,20 +61,20 @@ class cellview {
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
 
-    polygon_ref<rectangle> add_rect(const char *layer, const char *purpose, coord_t xl, coord_t yl,
-                                    coord_t xh, coord_t yh);
+    vector_obj_ref<rectangle> add_rect(const char *layer, const char *purpose, coord_t xl,
+                                       coord_t yl, coord_t xh, coord_t yh);
 
-    polygon_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
-                                    coord_t xh, coord_t yh);
+    vector_obj_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
+                                       coord_t xh, coord_t yh);
 
     void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
-                 const char *label, bool make_pin);
+                 const char *label);
 
-    polygon_ref<polygon90> add_poly90(const char *layer, const char *purpose, pt_vector data);
+    vector_obj_ref<polygon90> add_poly90(const char *layer, const char *purpose, pt_vector data);
 
-    polygon_ref<polygon45> add_poly45(const char *layer, const char *purpose, pt_vector data);
+    vector_obj_ref<polygon45> add_poly45(const char *layer, const char *purpose, pt_vector data);
 
-    polygon_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
+    vector_obj_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
 
     void add_path_seg(const char *layer, const char *purpose, coord_t x0, coord_t y0, coord_t x1,
                       coord_t y1, dist_t width, const char *style0, const char *style1);

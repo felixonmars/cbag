@@ -23,9 +23,10 @@ class tech {
 
   public:
     purp_t pin_purpose;
+    bool make_pin_obj = true;
 
     tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map, const std::string &def_purpose,
-         const std::string &pin_purpose_name);
+         const std::string &pin_purpose_name, bool make_pin_obj);
 
     lay_t get_layer_id(const char *layer) const;
 

@@ -30,8 +30,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass polygon:
         pass
 
-    cdef cppclass polygon_ref[T]:
-        polygon_ref()
+    cdef cppclass vector_obj_ref[T]:
+        vector_obj_ref()
 
         T& value()
 
@@ -58,9 +58,11 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         inst_iter_t add_instance(const cellview* cv, const char* name, transformation xform,
                                  uint32_t nx, uint32_t ny, offset_t spx, offset_t spy)
 
-        polygon_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl, coord_t yl,
-                                        coord_t xh, coord_t yh)
+        vector_obj_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl,
+                                           coord_t yl, coord_t xh, coord_t yh)
 
+        void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
+                     const char *net, const char *label)
 
 cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
     cdef unique_ptr[tech] tech_from_file(const char* layer_file) except +
@@ -71,11 +73,11 @@ cdef class PyTech:
 
 
 cdef class PyRect:
-    cdef polygon_ref[rectangle] _ref
+    cdef vector_obj_ref[rectangle] _ref
 
 
 cdef class PyPolygon:
-    cdef polygon_ref[polygon] _ref
+    cdef vector_obj_ref[polygon] _ref
 
 
 cdef class PyVia:

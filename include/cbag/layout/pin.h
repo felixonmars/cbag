@@ -16,12 +16,10 @@ class pin : public rectangle {
   public:
     std::string net;
     std::string label;
-    bool make_pin = true;
 
     pin();
 
-    pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net, const char *label,
-        bool make_pin = true);
+    pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net, const char *label);
 };
 
 } // namespace layout

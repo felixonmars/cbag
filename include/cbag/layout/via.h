@@ -5,8 +5,8 @@
 
 #include <cbag/common/typedefs.h>
 #include <cbag/common/via_param.h>
-#include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/transformation.h>
+#include <cbag/layout/vector_obj_ref.h>
 
 namespace cbag {
 namespace layout {
@@ -15,8 +15,8 @@ class rectangle;
 
 class via {
   private:
-    polygon_ref<rectangle> lay1_ref;
-    polygon_ref<rectangle> lay2_ref;
+    vector_obj_ref<rectangle> lay1_ref;
+    vector_obj_ref<rectangle> lay2_ref;
     struct helper;
 
   public:
@@ -34,9 +34,9 @@ class via {
 
     rectangle top_box() const;
 
-    void set_layer1(polygon_ref<rectangle> ref);
+    void set_layer1(vector_obj_ref<rectangle> ref);
 
-    void set_layer2(polygon_ref<rectangle> ref);
+    void set_layer2(vector_obj_ref<rectangle> ref);
 };
 
 } // namespace layout

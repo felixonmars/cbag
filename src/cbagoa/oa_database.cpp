@@ -434,8 +434,12 @@ void oa_database::write_tech_info_file(const char *fname, const char *tech_lib,
     out.SetSeqFormat(YAML::Flow);
     out << YAML::BeginMap;
 
-    out << YAML::Key << "pin_purpose" << YAML::Value << pin_purpose;
+    out << YAML::Key << "options" << YAML::Value;
+    out << YAML::BeginMap;
     out << YAML::Key << "default_purpose" << YAML::Value << "drawing";
+    out << YAML::Key << "pin_purpose" << YAML::Value << pin_purpose;
+    out << YAML::Key << "make_pin_obj" << YAML::Value << true;
+    out << YAML::EndMap;
 
     out << YAML::Key << "layer" << YAML::Value;
     out << YAML::BeginMap;

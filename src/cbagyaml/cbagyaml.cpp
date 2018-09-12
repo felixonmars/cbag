@@ -47,10 +47,13 @@ std::unique_ptr<sch::cellview> cv_from_file(const char *yaml_fname, const char *
 
 std::unique_ptr<layout::tech> tech_from_file(const char *layer_file) {
     YAML::Node n = YAML::LoadFile(layer_file);
+
+    YAML::Node options = n["options"];
+
     return std::make_unique<layout::tech>(
         n["layer"].as<layout::lay_map_t>(), n["purpose"].as<layout::purp_map_t>(),
-        n["via_layers"].as<layout::via_map_t>(), n["default_purpose"].as<std::string>(),
-        n["pin_purpose"].as<std::string>());
+        n["via_layers"].as<layout::via_map_t>(), options["default_purpose"].as<std::string>(),
+        options["pin_purpose"].as<std::string>(), options["make_pin_obj"].as<bool>());
 }
 
 netlist_map_t read_netlist_map(const char *fname) {

@@ -5,9 +5,10 @@ namespace cbag {
 namespace layout {
 
 tech::tech(lay_map_t lay_map, purp_map_t purp_map, via_map_t via_map,
-           const std::string &def_purpose, const std::string &pin_purpose_name)
+           const std::string &def_purpose, const std::string &pin_purpose_name, bool make_pin_obj)
     : lay_map(std::move(lay_map)), purp_map(std::move(purp_map)), via_map(std::move(via_map)),
-      default_purpose(purp_map.at(def_purpose)), pin_purpose(purp_map.at(pin_purpose_name)) {}
+      default_purpose(purp_map.at(def_purpose)), pin_purpose(purp_map.at(pin_purpose_name)),
+      make_pin_obj(make_pin_obj) {}
 
 lay_t tech::get_layer_id(const char *layer) const { return lay_map.at(layer); }
 
