@@ -17,6 +17,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     ctypedef unsigned int purp_t
     ctypedef int coord_t
     ctypedef int offset_t
+    ctypedef int dist_t
     
     cdef void init_logging()
 
@@ -28,6 +29,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         pass
 
     cdef cppclass polygon:
+        pass
+
+    cdef cppclass via:
         pass
 
     cdef cppclass vector_obj_ref[T]:
@@ -64,6 +68,12 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                      const char *net, const char *label)
 
+        vector_obj_ref[via] add_via(transformation xform, const char* vid, const uint32_t (&num)[2],
+                                    const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
+                                    const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
+                                    const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
+                                    cbool add_layers)
+
 cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
     cdef unique_ptr[tech] tech_from_file(const char* layer_file) except +
 
@@ -81,7 +91,7 @@ cdef class PyPolygon:
 
 
 cdef class PyVia:
-    pass
+    cdef vector_obj_ref[via] _ref
 
 
 cdef class PyPath:

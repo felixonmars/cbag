@@ -270,3 +270,29 @@ cdef class PyLayCellView:
         label = label.encode(self._encoding)
 
         deref(self._ptr).add_pin(layer, bbox.xl, bbox.yl, bbox.xh, bbox.yh, net, label)
+
+    def add_via(self, via_id, int dx, int dy, int ocode, int w, int h, int nx, int ny, int spx, int spy,
+                int enc1x, int enc1y, int enc2x, int enc2y, int off1x, int off1y,
+                int off2x, int off2y, cbool add_layers=False):
+        via_id = via_id.encode(self._encoding)
+
+        cdef uint32_t num[2]
+        cdef dist_t cut_dim[2]
+        cdef offset_t cut_sp[2]
+        cdef offset_t enc1[2]
+        cdef offset_t enc2[2]
+        cdef offset_t off1[2]
+        cdef offset_t off2[2]
+
+        num[:] = [nx, ny]
+        cut_dim[:] = [w, h]
+        cut_sp[:] = [spx, spy]
+        enc1[:] = [enc1x, enc1y]
+        enc2[:] = [enc2x, enc2y]
+        off1[:] = [off1x, off1y]
+        off2[:] = [off2x, off2y]
+
+        cdef PyVia ans = PyVia()
+        ans._ref = deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id, num, cut_dim,
+                                            cut_sp, enc1, off1, enc2, off2, add_layers)
+        return ans

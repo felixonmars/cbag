@@ -22,7 +22,6 @@
 #include <cbag/layout/transformation.h>
 #include <cbag/layout/vector_obj_ref.h>
 #include <cbag/layout/via.h>
-#include <cbag/layout/via_ref.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
