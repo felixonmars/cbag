@@ -116,7 +116,7 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  # for primitives YAML serialization
+  oaTech
   oaBase
   oaCommon
   oaPlugIn

@@ -22,11 +22,13 @@ class pt_vector;
 /** A class representing layout geometries on the same layer.
  */
 class geometry {
-  private:
+  public:
     rectangle_set rect_set;
     polygon90_set poly90_set;
     polygon45_set poly45_set;
     polygon_set poly_set;
+
+  private:
     uint8_t mode = 0;
     union_view view;
     struct helper;

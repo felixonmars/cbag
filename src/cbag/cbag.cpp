@@ -13,6 +13,7 @@
 
 #include "spdlog/details/signal_handler.h"
 #include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include <cbag/netlist/cdl.h>
@@ -29,9 +30,16 @@ void init_logging() {
     if (spdlog::get("cbag") == nullptr) {
         spdlog::installCrashHandler();
 
-        spdlog::create<spdlog::sinks::rotating_file_sink_st>("cbag", "cbag.log", max_log_size,
-                                                             num_log_file);
-        spdlog::flush_on(spdlog::level::err);
+        std::vector<spdlog::sink_ptr> sinks;
+        sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(
+            "cbag.log", max_log_size, num_log_file));
+        auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
+        stdout_sink->set_level(spdlog::level::warn);
+        sinks.push_back(std::move(stdout_sink));
+
+        auto logger = std::make_shared<spdlog::logger>("cbag", sinks.begin(), sinks.end());
+        spdlog::register_logger(logger);
+        spdlog::flush_on(spdlog::level::warn);
     }
 }
 

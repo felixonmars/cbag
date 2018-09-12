@@ -19,6 +19,7 @@
 
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
+#include <cbag/layout/via.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
@@ -458,14 +459,61 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
     }
 }
 
-void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
-                                   const str_map_t *rename_map) {
+void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpose,
+                        const cbag::layout::polygon &poly, oa::oaPointArray &arr) {
+    std::size_t size = poly.size();
+    arr.setSize(size);
+    auto start = poly.begin();
+    for (std::size_t idx = 0; idx < size; ++start, ++idx) {
+        arr[idx] = oa::oaPoint(start->x(), start->y());
+    }
+    arr.setNumElements(size);
 
+    oa::oaPolygon::create(blk, layer, purpose, arr);
+}
+
+void create_lay_geometry(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpose,
+                         const cbag::layout::geometry &geo) {
+    oa::oaBox box;
+    for (auto const &obj : geo.rect_set) {
+        box.set(obj.xl(), obj.yl(), obj.xh(), obj.yh());
+        oa::oaRect::create(blk, layer, purpose, box);
+    }
+
+    oa::oaPointArray arr;
+    for (auto const &obj : geo.poly_set) {
+        create_lay_polygon(blk, layer, purpose, obj, arr);
+    }
+    for (auto const &obj : geo.poly45_set) {
+        create_lay_polygon(blk, layer, purpose, obj, arr);
+    }
+    for (auto const &obj : geo.poly90_set) {
+        create_lay_polygon(blk, layer, purpose, obj, arr);
+    }
+}
+
+void create_lay_via(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk, oa::oaTech *tech,
+                    const cbag::layout::via &v) {
+    auto *via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, v.via_id.c_str()));
+    if (via_def == nullptr) {
+        logger->warn("unknown via ID {}, skipping.", v.via_id);
+        return;
+    }
+
+    oa::oaStdVia::create(blk, via_def, v.xform.to_transform(), &v.params);
+}
+
+void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
+                                   oa::oaTech *tech, const str_map_t *rename_map) {
+
+    // get library/view
     oa::oaString lib_name, view_name;
-    dsn->getLibName(ns, lib_name);
+    oa::oaScalarName lib_name_oa;
+    dsn->getLibName(lib_name_oa);
+    lib_name_oa.get(ns, lib_name);
     dsn->getViewName(ns, view_name);
 
-    // open design and top block
+    // create top block
     oa::oaBlock *blk = oa::oaBlock::create(dsn);
 
     for (auto const &inst_pair : cv.inst_map) {
@@ -473,27 +521,22 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
                         rename_map);
     }
 
+    for (auto const &geo_pair : cv.geo_map) {
+        create_lay_geometry(blk, geo_pair.first.first, geo_pair.first.second, geo_pair.second);
+    }
+
+    for (auto const &via : cv.via_list) {
+        create_lay_via(logger, blk, tech, via);
+    }
+
     /*
     // create geometries
-    for (bag::RectIter it = layout.rect_list.begin(); it != layout.rect_list.end(); it++) {
-        create_rect(blk_ptr, *it);
-    }
-    for (bag::PathSegIter it = layout.path_seg_list.begin(); it != layout.path_seg_list.end();
-         it++) {
-        create_path_seg(blk_ptr, *it);
-    }
-    for (bag::ViaIter it = layout.via_list.begin(); it != layout.via_list.end(); it++) {
-        create_via(blk_ptr, *it);
-    }
     for (bag::PinIter it = layout.pin_list.begin(); it != layout.pin_list.end(); it++) {
         create_pin(blk_ptr, *it);
     }
-    for (bag::PolygonIter it = layout.polygon_list.begin(); it != layout.polygon_list.end(); it++) {
-        create_polygon(blk_ptr, *it);
-    }
     for (bag::BlockageIter it = layout.block_list.begin(); it != layout.block_list.end(); it++) {
         create_blockage(blk_ptr, *it);
-    }
+        }
     for (bag::BoundaryIter it = layout.boundary_list.begin(); it != layout.boundary_list.end();
          it++) {
         create_boundary(blk_ptr, *it);

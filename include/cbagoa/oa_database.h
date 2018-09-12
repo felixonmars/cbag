@@ -122,8 +122,8 @@ class oa_database {
                             const std::vector<cbag::sch::cellview *> &cv_list) const;
 
     void write_lay_cellview(const char *lib_name, const char *cell_name, const char *view_name,
-                            const cbag::layout::cellview &cv,
-                            const str_map_t *rename_map = nullptr) const;
+                            const cbag::layout::cellview &cv, const str_map_t *rename_map = nullptr,
+                            oa::oaTech *tech_ptr = nullptr) const;
 
     void implement_lay_list(const char *lib_name, const std::vector<std::string> &cell_list,
                             const char *view,

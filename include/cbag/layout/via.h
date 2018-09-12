@@ -4,7 +4,7 @@
 #include <string>
 
 #include <cbag/common/typedefs.h>
-#include <cbag/common/vector.h>
+#include <cbag/common/via_param.h>
 #include <cbag/layout/polygon_ref.h>
 #include <cbag/layout/transformation.h>
 
@@ -15,18 +15,14 @@ class rectangle;
 
 class via {
   private:
-    transformation xform;
-    std::string via_id;
-    uint32_t num[2] = {1, 1};
-    dist_t cut_dim[2] = {0, 0};
-    vector cut_spacing;
-    vector lay1_enc;
-    vector lay1_off;
-    vector lay2_enc;
-    vector lay2_off;
     polygon_ref<rectangle> lay1_ref;
     polygon_ref<rectangle> lay2_ref;
     struct helper;
+
+  public:
+    transformation xform;
+    std::string via_id;
+    via_param params;
 
   public:
     via(transformation xform, const char *via_id, const uint32_t (&num)[2],
