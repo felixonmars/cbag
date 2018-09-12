@@ -26,7 +26,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     ctypedef unordered_map[string, instance].iterator inst_iter_t
 
     cdef cppclass tech:
-        pass
+        tech(unordered_map[string, lay_t], unordered_map[string, purp_t],
+             unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool)
 
     cdef cppclass polygon:
         pass
@@ -73,9 +74,6 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
                                     const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
                                     const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
                                     cbool add_layers)
-
-cdef extern from "cbagyaml/cbagyaml.h" namespace "cbag" nogil:
-    cdef unique_ptr[tech] tech_from_file(const char* layer_file) except +
 
 
 cdef class PyTech:

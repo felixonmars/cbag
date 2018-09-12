@@ -15,9 +15,25 @@ init_logging()
 
 
 cdef class PyTech:
-    def __init__(self, layer_file, encoding):
-        layer_file = layer_file.encode(encoding)
-        self._ptr = move(tech_from_file(layer_file))
+    def __init__(self, tech_params, encoding):
+        cdef unordered_map[string, lay_t] lay_map
+        cdef unordered_map[string, purp_t] pur_map
+        cdef unordered_map[string, pair[lay_t, lay_t]] via_map
+        cdef pair[lay_t, lay_t] tmp_pair
+
+        for key, val in tech_params['layer'].items():
+            lay_map[key.encode(encoding)] = val
+        for key, val in tech_params['purpose'].items():
+            pur_map[key.encode(encoding)] = val
+        for key, val in tech_params['via_layers'].items():
+            tmp_pair.first = val[0]
+            tmp_pair.second = val[1]
+            via_map[key.encode(encoding)] = tmp_pair
+
+        def_purpose = tech_params['default_purpose'].encode(encoding)
+        pin_purpose = tech_params['pin_purpose'].encode(encoding)
+        self._ptr.reset(new tech(lay_map, pur_map, via_map, def_purpose,
+                                 pin_purpose, tech_params['make_pin_obj']))
 
     def __dealloc__(self):
         self._ptr.reset()
