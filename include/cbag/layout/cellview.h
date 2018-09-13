@@ -77,7 +77,7 @@ class cellview {
     vector_obj_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
 
     path_ref add_path(const char *layer, const char *purpose, pt_vector data, offset_t half_width,
-                      const char *style0, const char *style1, const char *stylem);
+                      uint8_t style0, uint8_t style1, uint8_t stylem);
 
     inst_iter_t add_prim_instance(const char *lib, const char *cell, const char *view,
                                   const char *name, transformation xform, uint32_t nx, uint32_t ny,

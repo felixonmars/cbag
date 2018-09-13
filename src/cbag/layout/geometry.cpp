@@ -30,13 +30,6 @@ struct geometry::helper {
     }
 };
 
-const std::unordered_map<std::string, end_style> style_map = {
-    {"truncate", end_style::truncate},
-    {"extend", end_style::extend},
-    {"round", end_style::round},
-    {"triangle", end_style::triangle},
-};
-
 geometry::geometry(uint8_t mode) : mode(mode), view(helper::make_union_view(*this)) {}
 
 rectangle geometry::get_bbox() const { return extents(view); }
@@ -109,8 +102,7 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
     }
 }
 
-end_style get_style(const char *style_str, offset_t half_width, bool is_45) {
-    end_style ans = style_map.at(style_str);
+end_style get_style(end_style ans, offset_t half_width, bool is_45) {
     if (ans == end_style::round) {
         // handle degenerate cases
         switch (half_width) {
@@ -125,8 +117,8 @@ end_style get_style(const char *style_str, offset_t half_width, bool is_45) {
     return ans;
 }
 
-pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_width,
-                         const char *style0, const char *style1) {
+pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_width, end_style sty0,
+                         end_style sty1) {
     coord_t x0 = p0.x();
     coord_t y0 = p0.y();
     coord_t x1 = p1.x();
@@ -144,8 +136,6 @@ pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_wid
     }
 
     bool is_45 = p.is_45_or_invalid();
-    end_style sty0 = get_style(style0, half_width, is_45);
-    end_style sty1 = get_style(style1, half_width, is_45);
 
     // initialize point array, reserve space for worst case
     pt_vector ans(8);
@@ -170,8 +160,8 @@ pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_wid
     return ans;
 }
 
-path_ref geometry::add_path(pt_vector data, offset_t half_width, const char *style0,
-                            const char *style1, const char *stylem) {
+path_ref geometry::add_path(pt_vector data, offset_t half_width, uint8_t style0, uint8_t style1,
+                            uint8_t stylem) {
     pt_vector::size_type n = data.size();
     if (n < 2) {
         throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));
@@ -180,10 +170,14 @@ path_ref geometry::add_path(pt_vector data, offset_t half_width, const char *sty
     std::size_t start = poly45_set.size();
     mode = std::max(mode, 2_uc);
 
+    auto s0 = static_cast<end_style>(style0);
+    auto s1 = static_cast<end_style>(style1);
+    auto sm = static_cast<end_style>(stylem);
+
     for (pt_vector::size_type istart = 0; istart < n - 1; ++istart) {
-        const char *s0 = (istart == 0) ? style0 : stylem;
-        const char *s1 = (istart == n - 2) ? style1 : stylem;
-        poly45_set.emplace_back(path_to_poly45(data[istart], data[istart + 1], half_width, s0, s1));
+        end_style c0 = (istart == 0) ? s0 : sm;
+        end_style c1 = (istart == n - 2) ? s1 : sm;
+        poly45_set.emplace_back(path_to_poly45(data[istart], data[istart + 1], half_width, c0, c1));
     }
 
     return {&poly45_set, start, start + n - 1};

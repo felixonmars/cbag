@@ -83,8 +83,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
                                            coord_t yl, coord_t xh, coord_t yh) except +
 
         path_ref add_path(const char* layer, const char* purpose, pt_vector data,
-                          offset_t half_width, const char* style0, const char* style1,
-                          const char* stylem) except +
+                          offset_t half_width, uint8_t style0, uint8_t style1,
+                          uint8_t stylem) except +
 
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                      const char *net, const char *label) except +

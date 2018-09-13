@@ -124,8 +124,7 @@ vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpos
 }
 
 path_ref cellview::add_path(const char *layer, const char *purpose, pt_vector data,
-                            offset_t half_width, const char *style0, const char *style1,
-                            const char *stylem) {
+                            offset_t half_width, uint8_t style0, uint8_t style1, uint8_t stylem) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     layer_t key(lay_id, purp_id);

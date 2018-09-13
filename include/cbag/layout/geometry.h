@@ -51,8 +51,8 @@ class geometry {
 
     vector_obj_ref<polygon> add_poly(pt_vector data);
 
-    path_ref add_path(pt_vector data, offset_t half_width, const char *style0, const char *style1,
-                      const char *stylem);
+    path_ref add_path(pt_vector data, offset_t half_width, uint8_t style0, uint8_t style1,
+                      uint8_t stylem);
 };
 
 } // namespace layout
