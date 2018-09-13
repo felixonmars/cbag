@@ -85,6 +85,12 @@ cdef class PyLayInstance:
         self._master = master
         self._lib_name = lib_name
 
+    @property
+    def master(self):
+        return self._master
+
+    def translate_master_box(self, BBox cur_box):
+        return cur_box._transform(deref(self._ptr).second.xform)
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
                               int& offx, int& offy):

@@ -10,7 +10,7 @@ pkg_name = 'pybag'
 include_dirs = [os.environ['OA_INCLUDE_DIR'],
                 '../../include',
                 '../../fmt/include',
-]
+                ]
 
 libraries = ['cbag',
              'cbagyaml',
@@ -24,25 +24,25 @@ libraries = ['cbag',
              'dl',
              # for some reason Berkeley cannot find python link library
              'python' + sysconfig.get_config_var('LDVERSION'),
-]
+             ]
 
 library_dirs = ['../lib',
-              os.environ['OA_LINK_DIR'],
-]
+                os.environ['OA_LINK_DIR'],
+                ]
 
 extra_compile_args = ['-std=c++17',
                       '-Wno-delete-non-virtual-dtor',
-]
+                      ]
 
 extra_link_args = ['-std=c++17',
                    '-Wl,--no-undefined',
-]
+                   ]
 
 setup(
     install_requires=['cython'],
     packages=[pkg_name,
               pkg_name + '.layout',
-    ],
+              ],
     zip_safe=False,
     name=pkg_name,
     package_data={
@@ -54,7 +54,7 @@ setup(
                    os.path.join('layout', 'util.pyx'),
                    os.path.join('layout', 'cellview.pxd'),
                    os.path.join('layout', 'cellview.pyx'),
-        ]
+                   ]
     },
     ext_modules=cythonize(
         [
@@ -68,7 +68,7 @@ setup(
                       library_dirs=library_dirs,
                       extra_compile_args=extra_compile_args,
                       extra_link_args=extra_link_args,
-            ),
+                      ),
             Extension(pkg_name + '.layout.util',
                       sources=[
                           os.path.join(pkg_name, 'layout', 'util.pyx'),
@@ -79,7 +79,7 @@ setup(
                       library_dirs=library_dirs,
                       extra_compile_args=extra_compile_args,
                       extra_link_args=extra_link_args,
-            ),
+                      ),
             Extension(pkg_name + '.layout.cellview',
                       sources=[
                           os.path.join(pkg_name, 'layout', 'cellview.pyx'),
@@ -90,7 +90,7 @@ setup(
                       library_dirs=library_dirs,
                       extra_compile_args=extra_compile_args,
                       extra_link_args=extra_link_args,
-            ),
+                      ),
         ],
     ),
 )

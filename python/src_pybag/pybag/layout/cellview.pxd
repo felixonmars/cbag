@@ -55,6 +55,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         path_ref()
 
     cdef cppclass instance:
+        transformation xform
+
         void set_int_param(const char* name, int value)
 
         void set_double_param(const char* name, double value)
