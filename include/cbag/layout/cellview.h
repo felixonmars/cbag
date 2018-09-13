@@ -21,6 +21,7 @@ class blockage;
 class pin;
 class via;
 class rectangle;
+class path_ref;
 class polygon90;
 class polygon45;
 class polygon;
@@ -75,8 +76,8 @@ class cellview {
 
     vector_obj_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
 
-    void add_path_seg(const char *layer, const char *purpose, coord_t x0, coord_t y0, coord_t x1,
-                      coord_t y1, dist_t width, const char *style0, const char *style1);
+    path_ref add_path(const char *layer, const char *purpose, pt_vector data, offset_t half_width,
+                      const char *style0, const char *style1, const char *stylem);
 
     inst_iter_t add_prim_instance(const char *lib, const char *cell, const char *view,
                                   const char *name, transformation xform, uint32_t nx, uint32_t ny,

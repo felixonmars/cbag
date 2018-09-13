@@ -12,12 +12,13 @@
 #include <cbag/layout/rectangle_view.h>
 #include <cbag/layout/typedefs.h>
 #include <cbag/layout/union_view.h>
-#include <cbag/layout/vector_obj_ref.h>
 
 namespace cbag {
 namespace layout {
 
 class pt_vector;
+class path_ref;
+template <typename T> class vector_obj_ref;
 
 /** A class representing layout geometries on the same layer.
  */
@@ -50,8 +51,8 @@ class geometry {
 
     vector_obj_ref<polygon> add_poly(pt_vector data);
 
-    static pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                                    offset_t half_width, const char *style0, const char *style1);
+    path_ref add_path(pt_vector data, offset_t half_width, const char *style0, const char *style1,
+                      const char *stylem);
 };
 
 } // namespace layout

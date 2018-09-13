@@ -7,6 +7,7 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/path_ref.h>
 #include <cbag/layout/pin.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
@@ -122,9 +123,18 @@ vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpos
     return iter->second.add_poly(std::move(data));
 }
 
-void cellview::add_path_seg(const char *layer, const char *purpose, coord_t x0, coord_t y0,
-                            coord_t x1, coord_t y1, dist_t width, const char *style0,
-                            const char *style1) {}
+path_ref cellview::add_path(const char *layer, const char *purpose, pt_vector data,
+                            offset_t half_width, const char *style0, const char *style1,
+                            const char *stylem) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    auto iter = geo_map.find(key);
+    if (iter == geo_map.end()) {
+        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
+    }
+    return iter->second.add_path(std::move(data), half_width, style0, style1, stylem);
+}
 
 inst_iter_t cellview::add_prim_instance(const char *lib, const char *cell, const char *view,
                                         const char *name, transformation xform, uint32_t nx,

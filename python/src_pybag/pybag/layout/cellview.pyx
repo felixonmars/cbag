@@ -8,7 +8,7 @@ import numbers
 
 cdef extern from "<utility>" namespace "std" nogil:
     cdef unique_ptr[tech] move(unique_ptr[tech])
-
+    cdef pt_vector move(pt_vector)
 
 # initialize logging
 init_logging()
@@ -390,4 +390,28 @@ cdef class PyLayCellView:
                     dy += spy
                 dx += spx
 
+        return ans
+
+    def add_path(self, layer, points, start_style, stop_style, join_style, int width):
+        cdef char* purpose = NULL
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
+            layer = layer[0].encode(self._encoding)
+
+        start_style = start_style.encode(self._encoding)
+        stop_style = stop_style.encode(self._encoding)
+        join_style = join_style.encode(self._encoding)
+
+        cdef int half_w = width // 2
+        cdef pt_vector data
+        data.reserve(len(points))
+        for x, y in points:
+            data.emplace_back(x, y)
+
+        cdef PyPath ans = PyPath()
+        ans._ref = deref(self._ptr).add_path(layer, purpose, move(data), half_w, start_style,
+                                             stop_style, join_style)
         return ans

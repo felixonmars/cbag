@@ -91,6 +91,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/instance.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/path_ref.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/pin.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/point_t.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon.cpp

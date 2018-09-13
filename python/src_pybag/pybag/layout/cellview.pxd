@@ -29,6 +29,16 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         tech(unordered_map[string, lay_t], unordered_map[string, purp_t],
              unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool) except +
 
+    cdef cppclass point_t:
+        pass
+
+    cdef cppclass pt_vector:
+        pt_vector()
+
+        void reserve(unsigned int)
+
+        point_t& emplace_back(coord_t x, coord_t y);
+
     cdef cppclass polygon:
         pass
 
@@ -40,6 +50,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         vector_obj_ref()
 
         T& value()
+
+    cdef cppclass path_ref:
+        path_ref()
 
     cdef cppclass instance:
         void set_int_param(const char* name, int value)
@@ -69,6 +82,10 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         vector_obj_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl,
                                            coord_t yl, coord_t xh, coord_t yh) except +
 
+        path_ref add_path(const char* layer, const char* purpose, pt_vector data,
+                          offset_t half_width, const char* style0, const char* style1,
+                          const char* stylem) except +
+
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                      const char *net, const char *label) except +
 
@@ -96,7 +113,7 @@ cdef class PyVia:
 
 
 cdef class PyPath:
-    pass
+    cdef path_ref _ref
 
 
 cdef class PyBlockage:

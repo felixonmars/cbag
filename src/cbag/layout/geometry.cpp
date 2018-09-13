@@ -7,15 +7,15 @@
 #include <fmt/ostream.h>
 
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/path_ref.h>
 #include <cbag/layout/vector45.h>
+#include <cbag/layout/vector_obj_ref.h>
 #include <cbag/math/constexpr.h>
 
 namespace cbag {
 namespace layout {
 
 struct geometry::helper {
-    static const std::unordered_map<std::string, end_style> style_map;
-
     static union_view make_union_view(const geometry &self) {
         switch (self.mode) {
         case 0:
@@ -28,25 +28,9 @@ struct geometry::helper {
             return polygon_view(self.poly_set, self.poly45_set, self.poly90_set, self.rect_set);
         }
     }
-
-    static end_style get_style(const char *style_str, offset_t half_width, bool is_45) {
-        end_style ans = style_map.at(style_str);
-        if (ans == end_style::round) {
-            // handle degenerate cases
-            switch (half_width) {
-            case 1:
-                return (is_45) ? end_style::triangle : end_style::extend;
-            case 2:
-                return (is_45) ? end_style::extend : end_style::triangle;
-            default:
-                return end_style::round;
-            }
-        }
-        return ans;
-    }
 };
 
-const std::unordered_map<std::string, end_style> geometry::helper::style_map = {
+const std::unordered_map<std::string, end_style> style_map = {
     {"truncate", end_style::truncate},
     {"extend", end_style::extend},
     {"round", end_style::round},
@@ -125,8 +109,28 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
     }
 }
 
-pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
-                                   offset_t half_width, const char *style0, const char *style1) {
+end_style get_style(const char *style_str, offset_t half_width, bool is_45) {
+    end_style ans = style_map.at(style_str);
+    if (ans == end_style::round) {
+        // handle degenerate cases
+        switch (half_width) {
+        case 1:
+            return (is_45) ? end_style::triangle : end_style::extend;
+        case 2:
+            return (is_45) ? end_style::extend : end_style::triangle;
+        default:
+            return end_style::round;
+        }
+    }
+    return ans;
+}
+
+pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_width,
+                         const char *style0, const char *style1) {
+    coord_t x0 = p0.x();
+    coord_t y0 = p0.y();
+    coord_t x1 = p1.x();
+    coord_t y1 = p1.y();
 
     vector45 p{x1 - x0, y1 - y0};
 
@@ -140,8 +144,8 @@ pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y
     }
 
     bool is_45 = p.is_45_or_invalid();
-    end_style sty0 = helper::get_style(style0, half_width, is_45);
-    end_style sty1 = helper::get_style(style1, half_width, is_45);
+    end_style sty0 = get_style(style0, half_width, is_45);
+    end_style sty1 = get_style(style1, half_width, is_45);
 
     // initialize point array, reserve space for worst case
     pt_vector ans(8);
@@ -164,6 +168,25 @@ pt_vector geometry::path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y
     add_path_points(ans, x1, y1, p_norm, n_norm, is_45, sty1, w_main, w_norm);
 
     return ans;
+}
+
+path_ref geometry::add_path(pt_vector data, offset_t half_width, const char *style0,
+                            const char *style1, const char *stylem) {
+    pt_vector::size_type n = data.size();
+    if (n < 2) {
+        throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));
+    }
+
+    std::size_t start = poly45_set.size();
+    mode = std::max(mode, 2_uc);
+
+    for (pt_vector::size_type istart = 0; istart < n - 1; ++istart) {
+        const char *s0 = (istart == 0) ? style0 : stylem;
+        const char *s1 = (istart == n - 2) ? style1 : stylem;
+        poly45_set.emplace_back(path_to_poly45(data[istart], data[istart + 1], half_width, s0, s1));
+    }
+
+    return {&poly45_set, start, start + n - 1};
 }
 
 } // namespace layout
