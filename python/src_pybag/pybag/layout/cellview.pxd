@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from .util cimport rectangle, transformation, BBox
+from .util cimport rectangle, transformation
 
 from libcpp.string cimport string
 from libcpp.utility cimport pair

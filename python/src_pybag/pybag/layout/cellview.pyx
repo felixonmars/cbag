@@ -1,5 +1,6 @@
 # distutils: language = c++
 
+from .util cimport BBox
 from cellview cimport *
 
 from cython.operator cimport dereference as deref

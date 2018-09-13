@@ -1,8 +1,5 @@
 # distutils: language = c++
 
-from libcpp cimport bool as cbool
-
-
 ctypedef unsigned int uint32_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
