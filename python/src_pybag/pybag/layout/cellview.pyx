@@ -30,10 +30,9 @@ cdef class PyTech:
             tmp_pair.second = val[1]
             via_map[key.encode(encoding)] = tmp_pair
 
-        def_purpose = tech_params['default_purpose'].encode(encoding)
-        pin_purpose = tech_params['pin_purpose'].encode(encoding)
-        self._ptr.reset(new tech(lay_map, pur_map, via_map, def_purpose,
-                                 pin_purpose, tech_params['make_pin_obj']))
+        options = tech_params['options']
+        self._ptr.reset(new tech(lay_map, pur_map, via_map, options['default_purpose'].encode(encoding),
+                                 options['pin_purpose'].encode(encoding), options['make_pin_obj']))
 
     def __dealloc__(self):
         self._ptr.reset()

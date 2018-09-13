@@ -27,7 +27,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
     cdef cppclass tech:
         tech(unordered_map[string, lay_t], unordered_map[string, purp_t],
-             unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool)
+             unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool) except +
 
     cdef cppclass polygon:
         pass
