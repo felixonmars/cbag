@@ -25,15 +25,37 @@ tech::tech(lay_map_t lay_map_tmp, purp_map_t purp_map_tmp, via_map_t via_map_tmp
     pin_purpose = pin_iter->second;
 }
 
-lay_t tech::get_layer_id(const char *layer) const { return lay_map.at(layer); }
-
-purp_t tech::get_purpose_id(const char *purpose) const {
-    return (purpose == nullptr) ? default_purpose : purp_map.at(purpose);
+lay_t tech::get_layer_id(const char *layer) const {
+    std::string key(layer);
+    try {
+        return lay_map.at(layer);
+    } catch (std::out_of_range) {
+        throw std::out_of_range(fmt::format("Cannot find layer: {}", key));
+    }
 }
 
-lay_t tech::get_bot_layer_id(const char *via) const { return via_map.at(via).first; }
+purp_t tech::get_purpose_id(const char *purpose) const {
+    if (purpose == nullptr) {
+        return default_purpose;
+    }
+    std::string key(purpose);
+    try {
+        return purp_map.at(key);
+    } catch (std::out_of_range) {
+        throw std::out_of_range(fmt::format("Cannot find purpose: {}", key));
+    }
+}
 
-lay_t tech::get_top_layer_id(const char *via) const { return via_map.at(via).second; }
+void tech::get_via_layers(const char *via, lay_t &bot, lay_t &top) const {
+    std::string key(via);
+    try {
+        auto temp = via_map.at(via);
+        bot = temp.first;
+        top = temp.second;
+    } catch (std::out_of_range) {
+        throw std::out_of_range(fmt::format("Cannot find via ID: {}", key));
+    }
+}
 
 } // namespace layout
 } // namespace cbag

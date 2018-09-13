@@ -30,7 +30,7 @@ cdef class BBox:
     **kwargs :
         deprecated parameters.
     """
-    def __init__(self, int xl, int yl, int xh, int yh, **kwargs):
+    def __init__(self, int xl, int yl, int xh, int yh, *args, **kwargs):
         self._xl = xl
         self._yl = yl
         self._xh = xh

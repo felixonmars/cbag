@@ -108,11 +108,12 @@ cdef class PyLayCellView:
         bbox : BBox
             the bounding box.
         """
+        cdef char* purpose = NULL
         if isinstance(layer, str):
-            purpose = None
-            layer = layer[0].encode(self._encoding)
+            layer = layer.encode(self._encoding)
         else:
-            purpose = layer[1].encode(self._encoding)
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
             layer = layer[0].encode(self._encoding)
 
         cdef rectangle r = deref(self._ptr).get_bbox(layer, purpose)
@@ -254,16 +255,61 @@ cdef class PyLayCellView:
         rect : PyRect
             the rectangle object.
         """
+        cdef char* purpose = NULL
         if isinstance(layer, str):
-            purpose = None
-            layer = layer[0].encode(self._encoding)
+            layer = layer.encode(self._encoding)
         else:
-            purpose = layer[1].encode(self._encoding)
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
             layer = layer[0].encode(self._encoding)
 
         cdef PyRect ans = PyRect()
         ans._ref = deref(self._ptr).add_rect(layer, purpose, bbox.xl, bbox.yl, bbox.xh, bbox.yh)
         return ans
+
+    def add_rect_arr(self, layer, bbox, int nx, int ny, int spx, int spy):
+        # type: (Union[str, Tuple[str, str]], BBox, int, int, int, int) -> None
+        """Add an array of rectangles.
+
+        Parameters
+        ----------
+        layer : Union[str, Tuple[str, str]]
+            the rectangle layer.
+        bbox : BBox
+            the bounding box.
+        nx : int
+            number of columns.
+        ny : int
+            number of rows.
+        spx : int
+            column pitch.
+        spy : int
+            row pitch.
+        """
+        cdef char* purp = NULL
+        cdef char* lay
+        if isinstance(layer, str):
+            tmp1 = layer.encode(self._encoding)
+            lay = tmp1
+        else:
+            tmp2 = layer[1].encode(self._encoding)
+            purp = tmp2
+            tmp1 = layer[0].encode(self._encoding)
+            lay = tmp1
+
+        cdef int dx = 0
+        cdef int dy = 0
+        cdef int xl = bbox.xl
+        cdef int yl = bbox.yl
+        cdef int xh = bbox.xh
+        cdef int yh = bbox.yh
+        with nogil:
+            for xi in range(nx):
+                dy = 0
+                for yi in range(ny):
+                    deref(self._ptr).add_rect(lay, purp, xl + dx, yl + dy, xh + dx, yh + dy)
+                    dy += spy
+                dx += spx
 
     def add_pin(self, net, layer, bbox, label):
         # type: (str, str, BBox, str) -> None

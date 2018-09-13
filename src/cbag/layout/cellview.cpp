@@ -157,8 +157,8 @@ vector_obj_ref<via> cellview::add_via(transformation xform, const char *via_id,
                                   lay2_off);
     if (add_layers) {
         purp_t purpose = tech_ptr->get_purpose_id(nullptr);
-        lay_t bot_lay = tech_ptr->get_bot_layer_id(via_id);
-        lay_t top_lay = tech_ptr->get_bot_layer_id(via_id);
+        lay_t bot_lay, top_lay;
+        tech_ptr->get_via_layers(via_id, bot_lay, top_lay);
         rectangle bot_r = v.bot_box();
         rectangle top_r = v.top_box();
         v.set_layer1(add_rect(bot_lay, purpose, bot_r.xl(), bot_r.yl(), bot_r.xh(), bot_r.yh()));

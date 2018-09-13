@@ -54,7 +54,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         cbool empty() const
 
-        rectangle get_bbox(const char* layer, const char* purpose) const
+        rectangle get_bbox(const char* layer, const char* purpose) except +
 
         inst_iter_t add_prim_instance(const char* lib, const char* cell, const char* view,
                                       const char* name, transformation xform, uint32_t nx,
@@ -64,16 +64,16 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
                                  uint32_t nx, uint32_t ny, offset_t spx, offset_t spy)
 
         vector_obj_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl,
-                                           coord_t yl, coord_t xh, coord_t yh)
+                                           coord_t yl, coord_t xh, coord_t yh) except +
 
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                     const char *net, const char *label)
+                     const char *net, const char *label) except +
 
         vector_obj_ref[via] add_via(transformation xform, const char* vid, const uint32_t (&num)[2],
                                     const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
                                     const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
                                     const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-                                    cbool add_layers)
+                                    cbool add_layers) except +
 
 
 cdef class PyTech:
