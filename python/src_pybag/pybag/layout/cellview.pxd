@@ -33,7 +33,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         pass
 
     cdef cppclass via:
-        pass
+        rectangle bot_box() const
+        rectangle top_box() const
 
     cdef cppclass vector_obj_ref[T]:
         vector_obj_ref()

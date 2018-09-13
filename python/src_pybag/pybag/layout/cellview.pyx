@@ -52,6 +52,16 @@ cdef class PyVia:
     def __init__(self):
         pass
 
+    @property
+    def bottom_box(self):
+        cdef rectangle r = self._ref.value().bot_box()
+        return BBox(r.xl(), r.yl(), r.xh(), r.yh())
+
+    @property
+    def top_box(self):
+        cdef rectangle r = self._ref.value().bot_box()
+        return BBox(r.xl(), r.yl(), r.xh(), r.yh())
+
 
 cdef class PyPath:
     def __init__(self):
@@ -74,6 +84,13 @@ cdef class PyLayInstance:
         self._master = master
         self._lib_name = lib_name
 
+
+cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
+                              int& offx, int& offy):
+    (&encx)[0] = (encl + encr) // 2
+    (&ency)[0] = (enct + encb) // 2
+    (&offx)[0] = (encr - encl) // 2
+    (&offy)[0] = (enct - encb) // 2
 
 cdef class PyLayCellView:
     def __init__(self, PyTech tech, cell_name, encoding, int geo_mode=0):
@@ -329,9 +346,9 @@ cdef class PyLayCellView:
 
         deref(self._ptr).add_pin(layer, bbox.xl, bbox.yl, bbox.xh, bbox.yh, net, label)
 
-    def add_via(self, via_id, int dx, int dy, int ocode, int w, int h, int nx, int ny, int spx, int spy,
-                int enc1x, int enc1y, int enc2x, int enc2y, int off1x, int off1y,
-                int off2x, int off2y, cbool add_layers=False):
+    def add_via_arr(self, via_id, penc1, penc2, int dx0, int dy0, int ocode, int w, int h,
+                    int nx, int ny, int spx, int spy, int vnx, int vny, int vspx, int vspy,
+                    cbool add_layers):
         via_id = via_id.encode(self._encoding)
 
         cdef uint32_t num[2]
@@ -345,12 +362,32 @@ cdef class PyLayCellView:
         num[:] = [nx, ny]
         cut_dim[:] = [w, h]
         cut_sp[:] = [spx, spy]
-        enc1[:] = [enc1x, enc1y]
-        enc2[:] = [enc2x, enc2y]
-        off1[:] = [off1x, off1y]
-        off2[:] = [off2x, off2y]
 
+        _get_via_enc_offset(penc1[0], penc1[1], penc1[2], penc1[3], enc1[0], enc1[1],
+                            off1[0], off1[1])
+        _get_via_enc_offset(penc2[0], penc2[1], penc2[2], penc2[3], enc2[0], enc2[1],
+                            off2[0], off2[1])
+
+        cdef char* via_id_str = via_id
+        cdef int dx = dx0
+        cdef int dy = dy0
         cdef PyVia ans = PyVia()
-        ans._ref = deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id, num, cut_dim,
-                                            cut_sp, enc1, off1, enc2, off2, add_layers)
+        with nogil:
+            ans._ref = deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
+                                                cut_sp, enc1, off1, enc2, off2, add_layers)
+            dy += spy
+            for yi in range(1, ny):
+                deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
+                                         cut_sp, enc1, off1, enc2, off2, add_layers)
+                dy += spy
+
+            dx += spx
+            for xi in range(1, nx):
+                dy = dy0
+                for yi in range(ny):
+                    deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
+                                             cut_sp, enc1, off1, enc2, off2, add_layers)
+                    dy += spy
+                dx += spx
+
         return ans
