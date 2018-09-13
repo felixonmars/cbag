@@ -481,12 +481,18 @@ void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpos
     oa::oaPolygon::create(blk, layer, purpose, arr);
 }
 
-void create_lay_geometry(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpose,
+void create_lay_geometry(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk,
+                         cbag::lay_t layer, cbag::purp_t purpose,
                          const cbag::layout::geometry &geo) {
     oa::oaBox box;
     for (auto const &obj : geo.rect_set) {
-        box.set(obj.xl(), obj.yl(), obj.xh(), obj.yh());
-        oa::oaRect::create(blk, layer, purpose, box);
+        if (!obj.is_physical()) {
+            logger->warn("non-physical BBox({}, {}, {}, {}) on layer ({}, {}), skipping.", obj.xl(),
+                         obj.yl(), obj.xh(), obj.yh(), layer, purpose);
+        } else {
+            box.set(obj.xl(), obj.yl(), obj.xh(), obj.yh());
+            oa::oaRect::create(blk, layer, purpose, box);
+        }
     }
 
     oa::oaPointArray arr;
@@ -525,19 +531,24 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
     // create top block
     oa::oaBlock *blk = oa::oaBlock::create(dsn);
 
+    logger->info("Making layout instances.");
     for (auto const &inst_pair : cv.inst_map) {
         create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name, view_name,
                         rename_map);
     }
 
+    logger->info("Making layout geometries.");
     for (auto const &geo_pair : cv.geo_map) {
-        create_lay_geometry(blk, geo_pair.first.first, geo_pair.first.second, geo_pair.second);
+        create_lay_geometry(logger, blk, geo_pair.first.first, geo_pair.first.second,
+                            geo_pair.second);
     }
 
+    logger->info("Making layout vias.");
     for (auto const &via : cv.via_list) {
         create_lay_via(logger, blk, tech, via);
     }
 
+    logger->info("Making layout blockages.");
     oa::oaPointArray pt_arr;
     for (auto const &block_pair : cv.lay_block_map) {
         for (auto const &block : block_pair.second) {
@@ -545,11 +556,13 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
             oa::oaLayerBlockage::create(blk, block.type, block_pair.first, pt_arr);
         }
     }
+    logger->info("Making layout area blockages.");
     for (auto const &block : cv.area_block_list) {
         set_point_array(block, pt_arr);
         oa::oaAreaBlockage::create(blk, pt_arr);
     }
 
+    logger->info("Making layout boundaries.");
     for (auto const &bndry : cv.boundary_list) {
         set_point_array(bndry, pt_arr);
         switch (bndry.type) {
@@ -560,11 +573,16 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
         }
     }
 
+    logger->info("Making layout pins.");
     cbag::purp_t purp = cv.tech_ptr->pin_purpose;
     bool make_pin_obj = cv.tech_ptr->make_pin_obj;
     for (auto const &pin_pair : cv.pin_map) {
         cbag::lay_t lay = pin_pair.first;
         for (auto const &pin : pin_pair.second) {
+            if (!pin.is_physical()) {
+                logger->warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
+                             pin.xl(), pin.yl(), pin.xh(), pin.yh(), lay, purp);
+            }
             oa::oaPoint center(pin.xm(), pin.ym());
             cbag::offset_t w = pin.w();
             cbag::offset_t h = pin.h();

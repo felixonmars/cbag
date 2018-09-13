@@ -89,8 +89,10 @@ cdef class PyLayCellView:
         # type: () -> bool
         return deref(self._ptr).empty()
 
-    def finalize(self):
-        pass
+    @property
+    def cell_name(self):
+        # type: () -> str
+        return deref(self._ptr).cell_name.decode(self._encoding)
     
     def get_rect_bbox(self, layer):
         # type: (Union[str, Tuple[str, str]]) -> BBox
@@ -118,11 +120,6 @@ cdef class PyLayCellView:
 
         cdef rectangle r = deref(self._ptr).get_bbox(layer, purpose)
         return BBox(r.xl(), r.yl(), r.xh(), r.yh())
-    
-    def get_masters_set(self):
-        """Returns a set of all template master keys used in this layout."""
-        # TODO: implement this
-        return []
 
     def add_prim_instance(self, lib, cell, view, inst_name, params, int dx, int dy, int ocode,
                      int nx, int ny, int spx, int spy):

@@ -50,6 +50,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         void set_string_param(const char* name, const char* value)
 
     cdef cppclass cellview:
+        string cell_name
+
         cellview(tech* tech_ptr, const char* cell_name, uint8_t geo_mode)
 
         cbool empty() const

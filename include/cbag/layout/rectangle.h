@@ -46,6 +46,8 @@ class rectangle : public polygon90 {
     coord_t ym() const { return (yh() + yl()) / 2; }
     offset_t w() const { return xh() - xl(); }
     offset_t h() const { return yh() - yl(); }
+    bool is_valid() const { return xh() >= xl() && yh() >= yl(); }
+    bool is_physical() const { return xh() > xl() && yh() > yl(); }
     // methods for boost::polygon
 
     interval_type get(bp::orientation_2d orient) const;

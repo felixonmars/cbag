@@ -88,18 +88,7 @@ class oa_database {
 
     std::string get_lib_path(const char *library) const;
 
-    /** Create a new library if it didn't already exist.
-     *
-     * @param library the library name.
-     * @param lib_path directory to create the library at.
-     * @param tech_lib the technology library name.
-     */
     void create_lib(const char *library, const char *lib_path, const char *tech_lib) const;
-
-    void create_lib(const std::string &library, const std::string &lib_path,
-                    const std::string &tech_lib) const {
-        create_lib(library.c_str(), lib_path.c_str(), tech_lib.c_str());
-    }
 
     cbag::sch::cellview read_sch_cellview(const char *lib_name, const char *cell_name,
                                           const char *view_name) const;

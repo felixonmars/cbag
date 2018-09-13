@@ -261,18 +261,26 @@ void oa_database::create_lib(const char *library, const char *lib_path,
         oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
+            // append library name to lib_path
+            fs::path new_lib_path(lib_path);
+            new_lib_path /= library;
+            if (new_lib_path.has_parent_path()) {
+                fs::create_directories(new_lib_path.parent_path());
+            }
+
             // create new library
-            logger->info("Creating library {} at path {}, with tech lib {}", library, lib_path,
-                         tech_lib);
+            logger->info("Creating library {} at path {}, with tech lib {}", library,
+                         new_lib_path.c_str(), tech_lib);
+
             oa::oaScalarName oa_tech_lib(ns, tech_lib);
-            lib_ptr = oa::oaLib::create(lib_name_oa, lib_path);
+            lib_ptr = oa::oaLib::create(lib_name_oa, new_lib_path.c_str());
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
             // NOTE: I cannot get open access to modify the library file, so
             // we just do it by hand.
             std::ofstream outfile;
             outfile.open(lib_def_file, std::ios_base::app);
-            outfile << "DEFINE " << library << " " << lib_path << std::endl;
+            outfile << "DEFINE " << library << " " << new_lib_path << std::endl;
             outfile.close();
         } else {
             logger->info("Library already exists, do nothing.");
