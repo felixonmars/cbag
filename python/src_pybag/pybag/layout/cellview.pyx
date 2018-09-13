@@ -392,7 +392,7 @@ cdef class PyLayCellView:
 
         return ans
 
-    def add_path(self, layer, points, start_style, stop_style, join_style, int width):
+    def add_path(self, layer, points, int width, int start_style, int stop_style, int join_style):
         cdef char* purpose = NULL
         if isinstance(layer, str):
             layer = layer.encode(self._encoding)
@@ -400,10 +400,6 @@ cdef class PyLayCellView:
             tmp = layer[1].encode(self._encoding)
             purpose = tmp
             layer = layer[0].encode(self._encoding)
-
-        start_style = start_style.encode(self._encoding)
-        stop_style = stop_style.encode(self._encoding)
-        join_style = join_style.encode(self._encoding)
 
         cdef int half_w = width // 2
         cdef pt_vector data

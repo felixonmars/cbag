@@ -11,3 +11,10 @@ class Orientation(Enum):
     R270 = 5
     R90 = 6
     MYR90 = 7
+
+
+class PathStyle(Enum):
+    TRUNCATE = 0
+    EXTEND = 1
+    ROUND = 2
+    TRIANGLE = 3
