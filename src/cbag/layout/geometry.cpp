@@ -119,24 +119,24 @@ end_style get_style(end_style ans, offset_t half_width, bool is_45) {
 
 pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t half_width,
                          end_style sty0, end_style sty1) {
-    vector45 p{x1 - x0, y1 - y0};
+    vector45 p_norm{x1 - x0, y1 - y0};
+    p_norm.normalize();
 
     // handle empty path
-    if (half_width == 0 || (p.dx == 0 && p.dy == 0)) {
+    if (half_width == 0 || (p_norm.dx == 0 && p_norm.dy == 0)) {
         return {};
     }
     // handle invalid path
-    if (!p.valid()) {
-        throw std::invalid_argument(fmt::format("path segment vector {} not valid", p));
+    if (!p_norm.valid()) {
+        throw std::invalid_argument(fmt::format("path segment vector {} not valid", p_norm));
     }
 
-    bool is_45 = p.is_45_or_invalid();
+    bool is_45 = p_norm.is_45_or_invalid();
 
     // initialize point array, reserve space for worst case
     pt_vector ans(8);
 
-    vector45 p_norm = p.get_norm();
-    vector45 n_norm = p.get_rotate90();
+    vector45 n_norm = p_norm.get_rotate90();
     uint32_t half_diag = round(half_width / root2);
     uint32_t w_main, w_norm;
     if (is_45) {
