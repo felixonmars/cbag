@@ -49,7 +49,7 @@ class cellview {
     pin_map_t pin_map;
     std::vector<via> via_list;
     block_map_t lay_block_map;
-    std::vector<polygon> area_block_list;
+    std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
 
     explicit cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode = 0);
@@ -75,6 +75,8 @@ class cellview {
     vector_obj_ref<polygon45> add_poly45(const char *layer, const char *purpose, pt_vector data);
 
     vector_obj_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
+
+    vector_obj_ref<blockage> add_blockage(const char *layer, uint8_t blk_code, pt_vector data);
 
     path_ref add_path(const char *layer, const char *purpose, pt_vector data, offset_t half_width,
                       uint8_t style0, uint8_t style1, uint8_t stylem);

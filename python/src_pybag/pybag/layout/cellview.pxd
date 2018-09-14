@@ -42,6 +42,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass polygon:
         pass
 
+    cdef cppclass blockage:
+        pass
+
     cdef cppclass via:
         rectangle bot_box() const
         rectangle top_box() const
@@ -84,6 +87,12 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         vector_obj_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl,
                                            coord_t yl, coord_t xh, coord_t yh) except +
 
+        vector_obj_ref[polygon] add_poly(const char* layer, const char* purpose,
+                                         pt_vector data) except +
+
+        vector_obj_ref[blockage] add_blockage(const char* layer, uint8_t blk_code,
+                                              pt_vector data) except +
+
         path_ref add_path(const char* layer, const char* purpose, pt_vector data,
                           offset_t half_width, uint8_t style0, uint8_t style1,
                           uint8_t stylem) except +
@@ -119,7 +128,7 @@ cdef class PyPath:
 
 
 cdef class PyBlockage:
-    pass
+    cdef vector_obj_ref[blockage] _ref
 
 
 cdef class PyBoundary:

@@ -3,6 +3,7 @@
 
 #include <cbag/util/binary_iterator.h>
 
+#include <cbag/common/blockage_type.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
@@ -121,6 +122,29 @@ vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpos
         iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
     }
     return iter->second.add_poly(std::move(data));
+}
+
+vector_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_code,
+                                                pt_vector data) {
+
+    auto btype = static_cast<blockage_type>(blk_code);
+    if (btype == blkPlacement) {
+        // area blockage
+        std::size_t idx = area_block_list.size();
+        area_block_list.emplace_back(std::move(data), btype);
+        return {&area_block_list, idx};
+    }
+
+    // layer blockage
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    auto iter = lay_block_map.find(lay_id);
+    if (iter == lay_block_map.end()) {
+        iter = lay_block_map.emplace(lay_id, std::vector<blockage>()).first;
+    }
+
+    std::size_t idx = iter->second.size();
+    iter->second.emplace_back(std::move(data), btype);
+    return {&(iter->second), idx};
 }
 
 path_ref cellview::add_path(const char *layer, const char *purpose, pt_vector data,

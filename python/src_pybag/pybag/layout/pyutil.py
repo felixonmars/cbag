@@ -15,7 +15,19 @@ class Orientation(Enum):
 
 
 class PathStyle(Enum):
-    TRUNCATE = 0
-    EXTEND = 1
-    ROUND = 2
-    TRIANGLE = 3
+    truncate = 0
+    extend = 1
+    round = 2
+    triangle = 3
+
+
+class BlockageType(Enum):
+    routing = 0
+    via = 1
+    placement = 2
+    wiring = 3
+    fill = 4
+    slot = 5
+    pin = 6
+    feed_thru = 7
+    screen = 8

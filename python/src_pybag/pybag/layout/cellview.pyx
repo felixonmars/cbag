@@ -332,6 +332,39 @@ cdef class PyLayCellView:
                     dy += spy
                 dx += spx
 
+    def add_polygon(self, layer, points):
+        cdef char* purpose = NULL
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
+            layer = layer[0].encode(self._encoding)
+
+        cdef pt_vector data
+        data.reserve(len(points))
+        for x, y in points:
+            data.emplace_back(x, y)
+
+        cdef PyPolygon ans = PyPolygon()
+        ans._ref = deref(self._ptr).add_poly(layer, purpose, move(data))
+        return ans
+
+    def add_blockage(self, layer, points, int blk_type):
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            layer = layer[0].encode(self._encoding)
+
+        cdef pt_vector data
+        data.reserve(len(points))
+        for x, y in points:
+            data.emplace_back(x, y)
+
+        cdef PyBlockage ans = PyBlockage()
+        ans._ref = deref(self._ptr).add_blockage(layer, blk_type, move(data))
+        return ans
+
     def add_pin(self, net, layer, bbox, label):
         # type: (str, str, BBox, str) -> None
         """Add a new pin.
