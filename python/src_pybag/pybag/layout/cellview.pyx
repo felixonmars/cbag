@@ -365,6 +365,16 @@ cdef class PyLayCellView:
         ans._ref = deref(self._ptr).add_blockage(layer, blk_type, move(data))
         return ans
 
+    def add_boundary(self, points, int bnd_type):
+        cdef pt_vector data
+        data.reserve(len(points))
+        for x, y in points:
+            data.emplace_back(x, y)
+
+        cdef PyBoundary ans = PyBoundary()
+        ans._ref = deref(self._ptr).add_boundary(bnd_type, move(data))
+        return ans
+
     def add_pin(self, net, layer, bbox, label):
         # type: (str, str, BBox, str) -> None
         """Add a new pin.

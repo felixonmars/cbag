@@ -31,3 +31,8 @@ class BlockageType(Enum):
     pin = 6
     feed_thru = 7
     screen = 8
+
+
+class BoundaryType(Enum):
+    PR = 0
+    snap = 1

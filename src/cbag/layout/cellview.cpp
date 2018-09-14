@@ -4,6 +4,7 @@
 #include <cbag/util/binary_iterator.h>
 
 #include <cbag/common/blockage_type.h>
+#include <cbag/common/boundary_type.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
@@ -126,7 +127,6 @@ vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpos
 
 vector_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_code,
                                                 pt_vector data) {
-
     auto btype = static_cast<blockage_type>(blk_code);
     if (btype == blkPlacement) {
         // area blockage
@@ -145,6 +145,13 @@ vector_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_c
     std::size_t idx = iter->second.size();
     iter->second.emplace_back(std::move(data), btype);
     return {&(iter->second), idx};
+}
+
+vector_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, pt_vector data) {
+    auto btype = static_cast<boundary_type>(bnd_code);
+    std::size_t idx = boundary_list.size();
+    boundary_list.emplace_back(std::move(data), btype);
+    return {&boundary_list, idx};
 }
 
 path_ref cellview::add_path(const char *layer, const char *purpose, pt_vector data,

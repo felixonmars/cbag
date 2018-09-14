@@ -7,7 +7,10 @@
 namespace cbag {
 // common primitive types
 
-enum boundary_type : uint8_t { PR, snap };
+enum boundary_type : uint8_t {
+    PR = 0,
+    snap = 1,
+};
 } // namespace cbag
 
 #endif

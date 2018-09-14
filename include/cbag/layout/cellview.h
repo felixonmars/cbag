@@ -78,6 +78,8 @@ class cellview {
 
     vector_obj_ref<blockage> add_blockage(const char *layer, uint8_t blk_code, pt_vector data);
 
+    vector_obj_ref<boundary> add_boundary(uint8_t bnd_code, pt_vector data);
+
     path_ref add_path(const char *layer, const char *purpose, pt_vector data, offset_t half_width,
                       uint8_t style0, uint8_t style1, uint8_t stylem);
 
