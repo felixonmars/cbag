@@ -2,6 +2,7 @@
 
 from .util cimport rectangle, transformation
 
+from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.utility cimport pair
 from libcpp.unordered_map cimport unordered_map
@@ -104,9 +105,13 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         vector_obj_ref[boundary] add_boundary(uint8_t bnd_code, pt_vector data) except +
 
-        path_ref add_path(const char* layer, const char* purpose, pt_vector data,
+        path_ref add_path(const char* layer, const char* purpose, const pt_vector& data,
                           offset_t half_width, uint8_t style0, uint8_t style1,
                           uint8_t stylem) except +
+
+        path_ref add_path45_bus(const char* layer, const char* purpose, const pt_vector& data,
+                                const vector[offset_t]& widths, const vector[offset_t]& spaces,
+                                uint8_t style0, uint8_t style1, uint8_t stylem) except +
 
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                      const char *net, const char *label) except +

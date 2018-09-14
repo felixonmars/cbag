@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <cbag/layout/end_style.h>
 #include <cbag/layout/polygon45_view.h>
@@ -51,8 +52,12 @@ class geometry {
 
     vector_obj_ref<polygon> add_poly(pt_vector data);
 
-    path_ref add_path(pt_vector data, offset_t half_width, uint8_t style0, uint8_t style1,
+    path_ref add_path(const pt_vector &data, offset_t half_width, uint8_t style0, uint8_t style1,
                       uint8_t stylem);
+
+    path_ref add_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
+                            const std::vector<offset_t> &spaces, uint8_t style0, uint8_t style1,
+                            uint8_t stylem);
 };
 
 } // namespace layout

@@ -117,13 +117,8 @@ end_style get_style(end_style ans, offset_t half_width, bool is_45) {
     return ans;
 }
 
-pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_width, end_style sty0,
-                         end_style sty1) {
-    coord_t x0 = p0.x();
-    coord_t y0 = p0.y();
-    coord_t x1 = p1.x();
-    coord_t y1 = p1.y();
-
+pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t half_width,
+                         end_style sty0, end_style sty1) {
     vector45 p{x1 - x0, y1 - y0};
 
     // handle empty path
@@ -160,8 +155,8 @@ pt_vector path_to_poly45(const point_t &p0, const point_t &p1, offset_t half_wid
     return ans;
 }
 
-path_ref geometry::add_path(pt_vector data, offset_t half_width, uint8_t style0, uint8_t style1,
-                            uint8_t stylem) {
+path_ref geometry::add_path(const pt_vector &data, offset_t half_width, uint8_t style0,
+                            uint8_t style1, uint8_t stylem) {
     pt_vector::size_type n = data.size();
     if (n < 2) {
         throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));
@@ -177,10 +172,137 @@ path_ref geometry::add_path(pt_vector data, offset_t half_width, uint8_t style0,
     for (pt_vector::size_type istart = 0; istart < n - 1; ++istart) {
         end_style c0 = (istart == 0) ? s0 : sm;
         end_style c1 = (istart == n - 2) ? s1 : sm;
-        poly45_set.emplace_back(path_to_poly45(data[istart], data[istart + 1], half_width, c0, c1));
+        poly45_set.emplace_back(path_to_poly45(data[istart].x(), data[istart].y(),
+                                               data[istart + 1].x(), data[istart + 1].y(),
+                                               half_width, c0, c1));
     }
 
     return {&poly45_set, start, start + n - 1};
+}
+
+path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
+                                  const std::vector<offset_t> &spaces, uint8_t style0,
+                                  uint8_t style1, uint8_t stylem) {
+
+    pt_vector::size_type n_pts = data.size();
+    if (n_pts < 2) {
+        throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));
+    }
+    std::size_t n_paths = widths.size();
+    if (n_paths != spaces.size() + 1) {
+        throw std::invalid_argument(fmt::format("invalid size for path bus widths/spaces."));
+    }
+
+    // compute total width
+    offset_t tot_width = 0;
+    for (offset_t val : widths) {
+        tot_width += val;
+    }
+    for (offset_t val : spaces) {
+        tot_width += val;
+    }
+
+    // compute deltas
+    std::vector<offset_t> deltas;
+    deltas.reserve(n_paths);
+    deltas[0] = (-tot_width + widths[0]) / 2;
+    for (std::size_t idx = 1; idx < n_paths; ++idx) {
+        deltas[idx] = deltas[idx - 1] + spaces[idx - 1] + (widths[idx - 1] + widths[idx]) / 2;
+    }
+
+    // get starting index and update mode
+    std::size_t start = poly45_set.size();
+    mode = std::max(mode, 2_uc);
+
+    // get initial points
+    pt_vector prev_pts;
+    prev_pts.reserve(n_paths);
+    coord_t x0 = data[0].x();
+    coord_t y0 = data[0].y();
+    vector45 s0{data[1].x() - x0, data[1].y() - y0};
+    s0.rotate90_norm();
+    if (s0.is_45_or_invalid()) {
+        for (std::size_t idx = 0; idx < n_paths; ++idx) {
+            int32_t scale = round(deltas[idx] / root2);
+            prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
+        }
+    } else {
+        for (std::size_t idx = 0; idx < n_paths; ++idx) {
+            int32_t scale = deltas[idx];
+            prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
+        }
+    }
+
+    // add intermediate path segments
+    auto sty1 = static_cast<end_style>(stylem);
+    for (pt_vector::size_type nidx = 2; nidx < n_pts; ++nidx) {
+        auto sty0 = static_cast<end_style>((nidx == 2) ? style0 : stylem);
+
+        coord_t xc = data[nidx - 1].x();
+        coord_t yc = data[nidx - 1].y();
+        s0.dx = xc - data[nidx - 2].x();
+        s0.dy = yc - data[nidx - 2].y();
+        vector45 s1{data[nidx].x() - xc, data[nidx].y() - yc};
+        s0.normalize();
+        s1.normalize();
+        vector45 dir1 = s1.get_rotate90();
+        if (dir1.is_45_or_invalid()) {
+            for (std::size_t idx = 0; idx < n_paths; ++idx) {
+                int32_t scale = round(deltas[idx] / root2);
+                coord_t prevx = prev_pts[idx].x();
+                coord_t prevy = prev_pts[idx].y();
+                coord_t pdx = xc + dir1.dx * scale - prevx;
+                coord_t pdy = yc + dir1.dy * scale - prevy;
+                int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
+                coord_t newx = prevx + k * s0.dx;
+                coord_t newy = prevy + k * s0.dy;
+                poly45_set.emplace_back(
+                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1));
+                prev_pts[idx].set(newx, newy);
+            }
+        } else {
+            for (std::size_t idx = 0; idx < n_paths; ++idx) {
+                int32_t scale = deltas[idx];
+                coord_t prevx = prev_pts[idx].x();
+                coord_t prevy = prev_pts[idx].y();
+                coord_t pdx = xc + dir1.dx * scale - prevx;
+                coord_t pdy = yc + dir1.dy * scale - prevy;
+                int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
+                coord_t newx = prevx + k * s0.dx;
+                coord_t newy = prevy + k * s0.dy;
+                poly45_set.emplace_back(
+                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1));
+                prev_pts[idx].set(newx, newy);
+            }
+        }
+    }
+
+    // add last path segment
+    auto sty0 = static_cast<end_style>((n_pts == 2) ? style0 : stylem);
+    sty1 = static_cast<end_style>(style1);
+    x0 = data[n_pts - 1].x();
+    y0 = data[n_pts - 1].y();
+    s0.dx = x0 - data[n_pts - 2].x();
+    s0.dy = y0 - data[n_pts - 2].y();
+    s0.rotate90_norm();
+    if (s0.is_45_or_invalid()) {
+        for (std::size_t idx = 0; idx < n_paths; ++idx) {
+            int32_t scale = round(deltas[idx] / root2);
+            poly45_set.emplace_back(path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(),
+                                                   x0 + s0.dx * scale, y0 + s0.dy * scale,
+                                                   widths[idx] / 2, sty0, sty1));
+        }
+    } else {
+        for (std::size_t idx = 0; idx < n_paths; ++idx) {
+            int32_t scale = deltas[idx];
+            poly45_set.emplace_back(path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(),
+                                                   x0 + s0.dx * scale, y0 + s0.dy * scale,
+                                                   widths[idx] / 2, sty0, sty1));
+        }
+    }
+
+    // return
+    return {&poly45_set, start, poly45_set.size()};
 }
 
 } // namespace layout

@@ -45,12 +45,19 @@ struct cellview::helper {
         return fmt::format("X{d}", self.inst_name_cnt);
     }
 
-    static geo_map_t::iterator get_geometry(cellview &self, const layer_t &layer) {
+    static geo_map_t::iterator get_geometry(cellview &self, layer_t &&layer) {
         geo_map_t::iterator iter = self.geo_map.find(layer);
         if (iter == self.geo_map.end()) {
-            iter = self.geo_map.emplace(layer, geometry(self.geo_mode)).first;
+            iter = self.geo_map.emplace(std::move(layer), geometry(self.geo_mode)).first;
         }
         return iter;
+    }
+
+    static geo_map_t::iterator get_geometry(cellview &self, const char *layer,
+                                            const char *purpose) {
+        lay_t lay_id = self.tech_ptr->get_layer_id(layer);
+        purp_t purp_id = self.tech_ptr->get_purpose_id(purpose);
+        return get_geometry(self, layer_t(lay_id, purp_id));
     }
 };
 
@@ -92,36 +99,18 @@ void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, co
 
 vector_obj_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,
                                                pt_vector data) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
-    }
+    auto iter = helper::get_geometry(*this, layer, purpose);
     return iter->second.add_poly90(std::move(data));
 }
 
 vector_obj_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose,
                                                pt_vector data) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
-    }
+    auto iter = helper::get_geometry(*this, layer, purpose);
     return iter->second.add_poly45(std::move(data));
 }
 
 vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, pt_vector data) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
-    }
+    auto iter = helper::get_geometry(*this, layer, purpose);
     return iter->second.add_poly(std::move(data));
 }
 
@@ -154,16 +143,18 @@ vector_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, pt_vector data
     return {&boundary_list, idx};
 }
 
-path_ref cellview::add_path(const char *layer, const char *purpose, pt_vector data,
+path_ref cellview::add_path(const char *layer, const char *purpose, const pt_vector &data,
                             offset_t half_width, uint8_t style0, uint8_t style1, uint8_t stylem) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
-    }
-    return iter->second.add_path(std::move(data), half_width, style0, style1, stylem);
+    auto iter = helper::get_geometry(*this, layer, purpose);
+    return iter->second.add_path(data, half_width, style0, style1, stylem);
+}
+
+path_ref cellview::add_path45_bus(const char *layer, const char *purpose, const pt_vector &data,
+                                  const std::vector<offset_t> &widths,
+                                  const std::vector<offset_t> &spaces, uint8_t style0,
+                                  uint8_t style1, uint8_t stylem) {
+    auto iter = helper::get_geometry(*this, layer, purpose);
+    return iter->second.add_path45_bus(data, widths, spaces, style0, style1, stylem);
 }
 
 inst_iter_t cellview::add_prim_instance(const char *lib, const char *cell, const char *view,

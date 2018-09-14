@@ -18,11 +18,16 @@ struct vector45 {
 
     vector45 get_rotate90() const;
     vector45 get_norm() const;
+    vector45 get_rotate90_norm() const;
     bool valid() const;
     /** Return true if vector is 45 degree or invalid.
      */
     bool is_45_or_invalid() const;
+
     void invert();
+    void rotate90();
+    void normalize();
+    void rotate90_norm();
 
     friend std::ostream &operator<<(std::ostream &os, const vector45 &d);
 };
