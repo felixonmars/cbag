@@ -479,6 +479,25 @@ cdef class PyLayCellView:
         cdef pt_vector data = _compress_points(points)
 
         cdef PyPath ans = PyPath()
-        ans._ref = deref(self._ptr).add_path(layer, purpose, move(data), half_w, start_style,
+        ans._ref = deref(self._ptr).add_path(layer, purpose, data, half_w, start_style,
                                              stop_style, join_style)
+        return ans
+
+    def add_path45_bus(self, layer, points, widths, spaces, int start_style, int stop_style,
+                       int join_style):
+        cdef char* purpose = NULL
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
+            layer = layer[0].encode(self._encoding)
+
+        cdef vector[offset_t] w_vec = widths
+        cdef vector[offset_t] sp_vec = spaces
+        cdef pt_vector data = _compress_points(points)
+
+        cdef PyPath ans = PyPath()
+        ans._ref = deref(self._ptr).add_path45_bus(layer, purpose, data, w_vec, sp_vec, start_style,
+                                                   stop_style, join_style)
         return ans
