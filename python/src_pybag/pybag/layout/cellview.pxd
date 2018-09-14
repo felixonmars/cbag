@@ -8,6 +8,7 @@ from libcpp.unordered_map cimport unordered_map
 from libcpp cimport bool as cbool
 from libcpp.memory cimport unique_ptr
 
+ctypedef int int32_t
 ctypedef unsigned int uint8_t
 ctypedef unsigned int uint32_t
 
@@ -30,14 +31,19 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
              unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool) except +
 
     cdef cppclass point_t:
-        pass
+        int32_t x() const
+        int32_t y() const
 
     cdef cppclass pt_vector:
         pt_vector()
 
         void reserve(unsigned int)
 
-        point_t& emplace_back(coord_t x, coord_t y);
+        point_t& emplace_back(coord_t x, coord_t y)
+
+        point_t& operator[](uint32_t idx)
+
+        void pop_back()
 
     cdef cppclass polygon:
         pass

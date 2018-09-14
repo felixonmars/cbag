@@ -92,12 +92,45 @@ cdef class PyLayInstance:
     def translate_master_box(self, BBox cur_box):
         return cur_box._transform(deref(self._ptr).second.xform)
 
+
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
                               int& offx, int& offy):
     (&encx)[0] = (encl + encr) // 2
     (&ency)[0] = (enct + encb) // 2
     (&offx)[0] = (encr - encl) // 2
     (&offy)[0] = (enct - encb) // 2
+
+
+cdef pt_vector _compress_points(points):
+    cdef pt_vector ans
+    cdef int cur_len = 0
+    cdef coord_t lastx, lasty, dx0, dy0
+
+    ans.reserve(len(points))
+    for x, y in points:
+        if cur_len == 0:
+            ans.emplace_back(x, y)
+            cur_len += 1
+        else:
+            lastx = ans[cur_len - 1].x()
+            lasty = ans[cur_len - 1].y()
+            # make sure we don't have duplicate points
+            if x != lastx or y != lasty:
+                dx, dy = x - lastx, y - lasty
+                if cur_len >= 2:
+                    # check for collinearity
+                    dx0 = lastx - ans[cur_len - 2].x()
+                    dy0 = lasty - ans[cur_len - 2].y()
+                    if (dx == 0 and dx0 == 0) or (dx != 0 and dx0 != 0 and
+                                                  dy * dx0 == dx * dy0):
+                        # collinear, remove middle point
+                        ans.pop_back()
+                        cur_len -= 1
+                ans.emplace_back(x, y)
+                cur_len += 1
+
+    return ans
+
 
 cdef class PyLayCellView:
     def __init__(self, PyTech tech, cell_name, encoding, int geo_mode=0):
@@ -341,10 +374,7 @@ cdef class PyLayCellView:
             purpose = tmp
             layer = layer[0].encode(self._encoding)
 
-        cdef pt_vector data
-        data.reserve(len(points))
-        for x, y in points:
-            data.emplace_back(x, y)
+        cdef pt_vector data = _compress_points(points)
 
         cdef PyPolygon ans = PyPolygon()
         ans._ref = deref(self._ptr).add_poly(layer, purpose, move(data))
@@ -356,20 +386,14 @@ cdef class PyLayCellView:
         else:
             layer = layer[0].encode(self._encoding)
 
-        cdef pt_vector data
-        data.reserve(len(points))
-        for x, y in points:
-            data.emplace_back(x, y)
+        cdef pt_vector data = _compress_points(points)
 
         cdef PyBlockage ans = PyBlockage()
         ans._ref = deref(self._ptr).add_blockage(layer, blk_type, move(data))
         return ans
 
     def add_boundary(self, points, int bnd_type):
-        cdef pt_vector data
-        data.reserve(len(points))
-        for x, y in points:
-            data.emplace_back(x, y)
+        cdef pt_vector data = _compress_points(points)
 
         cdef PyBoundary ans = PyBoundary()
         ans._ref = deref(self._ptr).add_boundary(bnd_type, move(data))
@@ -452,10 +476,7 @@ cdef class PyLayCellView:
             layer = layer[0].encode(self._encoding)
 
         cdef int half_w = width // 2
-        cdef pt_vector data
-        data.reserve(len(points))
-        for x, y in points:
-            data.emplace_back(x, y)
+        cdef pt_vector data = _compress_points(points)
 
         cdef PyPath ans = PyPath()
         ans._ref = deref(self._ptr).add_path(layer, purpose, move(data), half_w, start_style,

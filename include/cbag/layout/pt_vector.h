@@ -65,6 +65,7 @@ class pt_vector {
     value_type &emplace_back(coord_t x, coord_t y);
     void reserve(size_type);
     void clear();
+    void pop_back();
 
     const value_type &at_raw(size_type idx) const { return points[idx]; }
     value_type &at_raw(size_type idx) { return points[idx]; }

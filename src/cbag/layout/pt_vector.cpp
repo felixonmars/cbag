@@ -190,5 +190,13 @@ void pt_vector::clear() {
     }
 }
 
+void pt_vector::pop_back() {
+    if (mode > STACK_SIZE) {
+        helper::set_size(*this, size() - 1);
+    } else {
+        --mode;
+    }
+}
+
 } // namespace layout
 } // namespace cbag
