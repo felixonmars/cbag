@@ -95,5 +95,11 @@ void transformation::set_orient_code(uint32_t code) {
     set_location(x, y);
 }
 
+void transformation::move_by(offset_t dx, offset_t dy) {
+    coord_t x, y;
+    get_location(x, y);
+    set_location(x + dx, y + dy);
+}
+
 } // namespace layout
 } // namespace cbag

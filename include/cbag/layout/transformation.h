@@ -35,6 +35,7 @@ class transformation : public bp::transformation<coord_t> {
 
     void set_location(coord_t x, coord_t y);
     void set_orient_code(uint32_t code);
+    void move_by(offset_t dx, offset_t dy);
 };
 
 } // namespace layout

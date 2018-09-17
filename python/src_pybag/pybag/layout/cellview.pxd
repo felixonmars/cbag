@@ -1,6 +1,6 @@
 # distutils: language = c++
 
-from .util cimport rectangle, transformation
+from .util cimport rectangle, transformation, BBox
 
 from libcpp.vector cimport vector
 from libcpp.string cimport string
@@ -164,6 +164,7 @@ cdef class PyLayInstance:
     cdef unicode _lib_name
 
     cdef _update_inst_master(self, PyLayCellView cv)
+    cdef _translate_master_box_w_array(self, BBox box)
 
 cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr

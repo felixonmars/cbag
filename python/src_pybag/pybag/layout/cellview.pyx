@@ -91,6 +91,66 @@ cdef class PyLayInstance:
     cdef _update_inst_master(self, PyLayCellView cv):
         deref(self._ptr).second.set_master(cv._ptr.get())
 
+    cdef _translate_master_box_w_array(self, BBox box):
+        cdef uint32_t nx = deref(self._ptr).second.nx
+        cdef uint32_t ny = deref(self._ptr).second.ny
+        cdef offset_t spx = deref(self._ptr).second.spx
+        cdef offset_t spy = deref(self._ptr).second.spy
+        cdef BBoxArray box_arr = BBoxArray(box, nx=nx, ny=ny, spx=spx, spy=spy)
+        return box_arr.get_overall_bbox().c_transform(deref(self._ptr).second.xform)
+
+    @property
+    def nx(self):
+        # type: () -> int
+        """Number of columns."""
+        return deref(self._ptr).second.nx
+
+    @nx.setter
+    def nx(self, val):
+        # type: (int) -> None
+        """Sets the number of columns."""
+        deref(self._ptr).second.nx = val
+
+    @property
+    def ny(self):
+        # type: () -> int
+        """Number of rows."""
+        return deref(self._ptr).second.ny
+
+    @ny.setter
+    def ny(self, val):
+        # type: (int) -> None
+        """Sets the number of rows."""
+        deref(self._ptr).second.ny = val
+
+    @property
+    def spx_unit(self):
+        # type: () -> int
+        """The column pitch in resolution units."""
+        return deref(self._ptr).second.spx
+
+    @spx_unit.setter
+    def spx_unit(self, val):
+        # type: (int) -> None
+        """Sets the new column pitch in resolution units."""
+        if val < 0:
+            raise ValueError('Currently does not support negative pitches.')
+        deref(self._ptr).second.spx = val
+
+    @property
+    def spy_unit(self):
+        # type: () -> int
+        """The row pitch in resolution units."""
+        return deref(self._ptr).second.spy
+
+    @spy_unit.setter
+    def spy_unit(self, val):
+        # type: (int) -> None
+        """Sets the new row pitch in resolution units."""
+        if val < 0:
+            raise ValueError('Currently does not support negative pitches.')
+        deref(self._ptr).second.spy = val
+
     @property
     def master(self):
         # type: () -> PyLayCellView
@@ -126,12 +186,79 @@ cdef class PyLayInstance:
     def bound_box(self):
         # type: () -> BBox
         """Returns the overall bounding box of this instance."""
-        cdef uint32_t nx = deref(self._ptr).second.nx
-        cdef uint32_t ny = deref(self._ptr).second.ny
-        cdef offset_t spx = deref(self._ptr).second.spx
-        cdef offset_t spy = deref(self._ptr).second.spy
-        cdef BBoxArray box_arr = BBoxArray(self._master.bound_box, nx=nx, ny=ny, spx=spx, spy=spy)
-        return box_arr.get_overall_bbox()._transform(deref(self._ptr).second.xform)
+        return self._translate_master_box_w_array(self._master.bound_box)
+
+    @property
+    def array_box(self):
+        # type: () -> BBox
+        """Returns the array box of this instance."""
+        master_box = getattr(self._master, 'array_box', None)  # type: BBox
+        if master_box is None:
+            raise ValueError('Master template array box is not defined.')
+
+        return self._translate_master_box_w_array(master_box)
+
+    @property
+    def fill_box(self):
+        # type: () -> BBox
+        """Returns the fill box of this instance."""
+        master_box = getattr(self._master, 'fill_box', None)  # type: BBox
+        if master_box is None:
+            raise ValueError('Master template fill box is not defined.')
+
+        return self._translate_master_box_w_array(master_box)
+
+    def get_item_location(self, row=0, col=0, unit_mode=True):
+        # type: (int, int, bool) -> Tuple[int, int]
+        """Returns the location of the given item in the array.
+
+        Parameters
+        ----------
+        row : int
+            the item row index.  0 is the bottom-most row.
+        col : int
+            the item column index.  0 is the left-most column.
+        unit_mode : bool
+            deprecated parameter.
+
+        Returns
+        -------
+        xo : Union[float, int]
+            the item X coordinate.
+        yo : Union[float, int]
+            the item Y coordinate.
+        """
+        if not unit_mode:
+            raise ValueError('unit_mode = False not supported.')
+        if row < 0 or row >= self.ny or col < 0 or col >= self.nx:
+            raise ValueError('Invalid row/col index: row=%d, col=%d' % (row, col))
+
+        return col * self.spx_unit, row * self.spy_unit
+
+    def get_bound_box_of(self, row=0, col=0):
+        # type: (int, int) -> BBox
+        """Returns the bounding box of an instance in this mosaic."""
+        dx, dy = self.get_item_location(row=row, col=col, unit_mode=True)
+        cdef BBox box = self._master.bound_box
+        box = box.c_transform(deref(self._ptr).second.xform)
+        return box.move_by(dx, dy)
+
+    def move_by(self, dx=0, dy=0, unit_mode=True):
+        # type: (int, int, bool) -> None
+        """Move this instance by the given amount.
+
+        Parameters
+        ----------
+        dx : int
+            the X shift.
+        dy : int
+            the Y shift.
+        unit_mode : bool
+            deprecated parameter.
+        """
+        if not unit_mode:
+            raise ValueError('unit_mode = False not supported.')
+        deref(self._ptr).second.xform.move_by(dx, dy)
 
     def new_master_with(self, **kwargs):
         # type: (Any) -> None
@@ -150,7 +277,7 @@ cdef class PyLayInstance:
         self._update_inst_master(self._master)
 
     def translate_master_box(self, BBox cur_box):
-        return cur_box._transform(deref(self._ptr).second.xform)
+        return cur_box.c_transform(deref(self._ptr).second.xform)
 
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
