@@ -21,6 +21,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         void set_location(coord_t x, coord_t y)
         void set_orient_code(uint32_t code)
         void move_by(offset_t dx, offset_t dy)
+        void transform(coord_t x, coord_t y)
 
     cdef cppclass rectangle:
         rectangle()
@@ -48,6 +49,7 @@ cdef class BBox:
     cdef coord_t _ym(self)
     cdef BBox c_transform(self, const transformation& xform)
 
+    cpdef BBox move_by(self, int dx=?, int dy=?, unit_mode=?)
 
 cdef class BBoxArray:
     cdef BBox _bbox

@@ -294,7 +294,7 @@ cdef class BBox:
             raise ValueError('unit_mode = False not supported.')
         return self.c_transform(make_transform(loc, orient))
 
-    def move_by(self, int dx=0, int dy=0, unit_mode=True):
+    cpdef BBox move_by(self, int dx=0, int dy=0, unit_mode=True):
         # type: (int, int, bool) -> BBox
         """Returns a new BBox shifted by the given amount.
 

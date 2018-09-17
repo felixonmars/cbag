@@ -1,12 +1,12 @@
 # distutils: language = c++
 
-from .util cimport BBox, BBoxArray
-from cellview cimport *
-
 from cython.operator cimport dereference as deref
 
+from .util cimport BBox, BBoxArray
+from .cellview cimport *
+
 import numbers
-from typing import Any, Tuple
+from typing import Any, Tuple, Union, Optional, Dict
 
 from .pyutil import Orientation
 
@@ -276,8 +276,66 @@ cdef class PyLayInstance:
         self._master = self._master.new_template_with(**kwargs)
         self._update_inst_master(self._master)
 
-    def translate_master_box(self, BBox cur_box):
-        return cur_box.c_transform(deref(self._ptr).second.xform)
+    def translate_master_box(self, BBox box):
+        # type: (BBox) -> BBox
+        """Transform the bounding box in master template.
+
+        Parameters
+        ----------
+        box : BBox
+            the BBox in master template coordinate.
+
+        Returns
+        -------
+        new_box : BBox
+            the corresponding BBox in instance coordinate.
+        """
+        return box.c_transform(deref(self._ptr).second.xform)
+
+    def translate_master_location(self, mloc, unit_mode=True):
+        # type: (Tuple[int, int], bool) -> Tuple[int, int]
+        """Returns the actual location of the given point in master template.
+
+        Parameters
+        ----------
+        mloc : Tuple[int, int]
+            the location in master coordinate.
+        unit_mode : bool
+            deprecated parameter.
+
+        Returns
+        -------
+        loc : Tuple[int, int]
+            The actual location.
+        """
+        if not unit_mode:
+            raise ValueError('unit_mode = False not supported.')
+
+        cdef coord_t x = mloc[0]
+        cdef coord_t y = mloc[1]
+        deref(self._ptr).second.xform.transform(x, y)
+
+        return x, y
+
+    def translate_master_track(self, layer_id, track_idx):
+        # type: (int, Union[float, int]) -> Union[float, int]
+        """Returns the actual track index of the given track in master template.
+
+        Parameters
+        ----------
+        layer_id : int
+            the layer ID.
+        track_idx : Union[float, int]
+            the track index.
+
+        Returns
+        -------
+        new_idx : Union[float, int]
+            the new track index.
+        """
+        dx, dy = self.location_unit
+        return self._grid.transform_track(layer_id, track_idx, dx=dx, dy=dy,
+                                          orient=self.orientation, unit_mode=True)
 
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
@@ -388,10 +446,6 @@ cdef class PyLayCellView:
             Y coordinate.
         ocode : int
             Orientation code.
-        loc : Tuple[int, int]
-            instance location.
-        orient : str
-            instance orientation.
         nx : int
             number of columns.
         ny : int
@@ -418,9 +472,9 @@ cdef class PyLayCellView:
 
         # set pcell parameters
         for key, val in params.items():
-            key = key.encode(self.encoding)
+            key = key.encode(self._encoding)
             if isinstance(val, str):
-                val = val.encode(self.encoding)
+                val = val.encode(self._encoding)
                 deref(ref).second.set_string_param(key, val)
             elif isinstance(val, numbers.Integral):
                 deref(ref).second.set_int_param(key, val)
@@ -461,10 +515,6 @@ cdef class PyLayCellView:
             Y coordinate.
         ocode : int
             orientation code.
-        loc : Tuple[int, int]
-            instance location.
-        orient : str
-            instance orientation.
         nx : int
             number of columns.
         ny : int
