@@ -1,12 +1,14 @@
 # distutils: language = c++
 
-from .util cimport BBox
+from .util cimport BBox, BBoxArray
 from cellview cimport *
 
 from cython.operator cimport dereference as deref
 
 import numbers
-from typing import Any
+from typing import Any, Tuple
+
+from .pyutil import Orientation
 
 cdef extern from "<utility>" namespace "std" nogil:
     cdef unique_ptr[tech] move(unique_ptr[tech])
@@ -91,7 +93,45 @@ cdef class PyLayInstance:
 
     @property
     def master(self):
+        # type: () -> PyLayCellView
         return self._master
+
+    @property
+    def location_unit(self):
+        # type: () -> Tuple[int, int]
+        cdef coord_t x = 0
+        cdef coord_t y = 0
+        deref(self._ptr).second.xform.get_location(x, y)
+        return x, y
+
+    @location_unit.setter
+    def location_unit(self, new_loc):
+        # type: (Tuple[int, int]) -> None
+        """Sets the instance location."""
+        deref(self._ptr).second.xform.set_location(new_loc[0], new_loc[1])
+
+    @property
+    def orientation(self):
+        # type: () -> str
+        """The instance orientation"""
+        return Orientation(deref(self._ptr).second.xform.orient_code()).name
+
+    @orientation.setter
+    def orientation(self, val):
+        # type: (str) -> None
+        """Sets the instance orientation."""
+        deref(self._ptr).second.xform.set_orient_code(Orientation[val].value)
+
+    @property
+    def bound_box(self):
+        # type: () -> BBox
+        """Returns the overall bounding box of this instance."""
+        cdef uint32_t nx = deref(self._ptr).second.nx
+        cdef uint32_t ny = deref(self._ptr).second.ny
+        cdef offset_t spx = deref(self._ptr).second.spx
+        cdef offset_t spy = deref(self._ptr).second.spy
+        cdef BBoxArray box_arr = BBoxArray(self._master.bound_box, nx=nx, ny=ny, spx=spx, spy=spy)
+        return box_arr.get_overall_bbox()._transform(deref(self._ptr).second.xform)
 
     def new_master_with(self, **kwargs):
         # type: (Any) -> None

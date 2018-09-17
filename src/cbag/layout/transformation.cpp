@@ -21,7 +21,7 @@ transformation::transformation(coord_t dx, coord_t dy, bp::axis_transformation::
 
 transformation::transformation(coord_t dx, coord_t dy, unsigned int mode)
     : bp::transformation<coord_t>(static_cast<bp::axis_transformation::ATR>((mode))) {
-    auto tmp = bp::axis_transformation(static_cast<bp::axis_transformation::ATR>((mode)));
+    bp::axis_transformation tmp(static_cast<bp::axis_transformation::ATR>((mode)));
     tmp.invert().transform(dx, dy);
     set_translation(bp::point_data<coord_t>(-dx, -dy));
 }
@@ -39,11 +39,16 @@ coord_t transformation::y() const {
 }
 
 bp::axis_transformation::ATR transformation::orient() const {
+    return static_cast<bp::axis_transformation::ATR>(orient_code());
+}
+
+uint32_t transformation::orient_code() const {
     bp::direction_2d hdir, vdir;
     get_directions(hdir, vdir);
-    unsigned int code = ((~vdir.to_int() & 0b11) << 1) | (~hdir.to_int() & 0b01);
-    return static_cast<bp::axis_transformation::ATR>(code);
+    return ((~vdir.to_int() & 0b11) << 1) | (~hdir.to_int() & 0b01);
 }
+
+void transformation::get_location(coord_t &x, coord_t &y) const { transform(x, y); }
 
 cbag::orientation convert_orient(bp::axis_transformation::ATR orient) {
     switch (orient) {
@@ -71,6 +76,23 @@ cbag::transform transformation::to_transform() const {
     transform(x, y);
 
     return {x, y, convert_orient(orient())};
+}
+
+void transformation::set_location(coord_t x, coord_t y) {
+    auto atr = get_axis_transformation();
+    atr.invert().transform(x, y);
+    set_translation(bp::point_data<coord_t>(-x, -y));
+}
+
+void transformation::set_orient_code(uint32_t code) {
+    // get origin
+    coord_t x, y;
+    get_location(x, y);
+    // set new orientation
+    set_axis_transformation(
+        bp::axis_transformation(static_cast<bp::axis_transformation::ATR>(code)));
+    // set origin
+    set_location(x, y);
 }
 
 } // namespace layout

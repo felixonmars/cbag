@@ -85,13 +85,9 @@ const char *instance::get_view_name(const char *default_view) const {
 
 const param_map *instance::get_params() const { return std::visit(params_visitor(), master); }
 
-const cbag::transform instance::get_transform() const {
-    return xform.to_transform();
-}
+const cbag::transform instance::get_transform() const { return xform.to_transform(); }
 
-void instance::set_master(const cellview *new_master) {
-    master = new_master;
-}
+void instance::set_master(const cellview *new_master) { master = new_master; }
 
 void instance::set_int_param(const char *name, int value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);

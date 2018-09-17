@@ -5,8 +5,8 @@
 #include <variant>
 
 #include <cbag/common/datatypes.h>
-#include <cbag/common/typedefs.h>
 #include <cbag/common/transform.h>
+#include <cbag/common/typedefs.h>
 #include <cbag/layout/transformation.h>
 
 namespace cbag {

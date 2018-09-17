@@ -69,6 +69,10 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
     cdef cppclass instance:
         transformation xform
+        uint32_t nx
+        uint32_t ny
+        offset_t spx
+        offset_t spy
 
         void set_master(const cellview* new_master)
 

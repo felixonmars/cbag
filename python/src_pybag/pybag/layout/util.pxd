@@ -15,6 +15,12 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         transformation(coord_t dx, coord_t dy, uint32_t mode)
 
+        uint32_t orient_code() const
+        void get_location(coord_t& x, coord_t& y) const
+
+        void set_location(coord_t x, coord_t y)
+        void set_orient_code(uint32_t code)
+
     cdef cppclass rectangle:
         rectangle()
 
@@ -49,6 +55,7 @@ cdef class BBoxArray:
     cdef offset_t _spx
     cdef offset_t _spy
 
+    cpdef BBox get_overall_bbox(self)
 
 cdef class BBoxCollection:
     cdef _box_arr_list

@@ -3,6 +3,8 @@
 from util cimport *
 
 import pprint
+from typing import Generator, List, Tuple, Optional
+
 from .pyutil import Orientation
 
 
@@ -424,7 +426,7 @@ cdef class BBoxArray:
         deprecated parmeter.
     """
 
-    def __init__(self, BBox bbox, int nx=1, int ny=1, int spx=0, int spy=0, unit_mode=False):
+    def __init__(self, BBox bbox, int nx=1, int ny=1, int spx=0, int spy=0, unit_mode=True):
         # type: (BBox, int, int, int, int, bool) -> None
         if nx <= 0 or ny <= 0:
             raise ValueError('Cannot have 0 bounding boxes.')
@@ -536,7 +538,7 @@ cdef class BBoxArray:
         row_idx, col_idx = divmod(idx, self._nx)
         return self._bbox.move_by(dx=col_idx * self._spx, dy=row_idx * self._spy)
 
-    def get_overall_bbox(self):
+    cpdef BBox get_overall_bbox(self):
         # type: () -> BBox
         """Returns the overall bounding box of this BBoxArray.
 
@@ -545,7 +547,9 @@ cdef class BBoxArray:
         overall_bbox : BBox
             the overall bounding box of this BBoxArray.
         """
-        return BBox(self.left_unit, self.bottom_unit, self.right_unit, self.top_unit)
+        return BBox(self._bbox._xl, self._bbox.yl,
+                    self._bbox.xh + self._spx * (self._nx - 1),
+                    self._bbox.yh + self._spy * (self._ny - 1))
 
     def move_by(self, int dx=0, int dy=0, unit_mode=True):
         # type: (int, int, bool) -> BBoxArray
@@ -639,8 +643,8 @@ cdef class BBoxArray:
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
 
-        x_info = self._array_helper(nx, spx, self.nx, self._spx_unit)
-        y_info = self._array_helper(ny, spy, self.ny, self._spy_unit)
+        x_info = self._array_helper(nx, spx, self.nx, self._spx)
+        y_info = self._array_helper(ny, spy, self.ny, self._spy)
 
         base = self.base
         barr_list = [BBoxArray(base.move_by(dx, dy), nx=new_nx, ny=new_ny,

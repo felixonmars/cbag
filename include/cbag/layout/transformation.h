@@ -29,7 +29,12 @@ class transformation : public bp::transformation<coord_t> {
     coord_t x() const;
     coord_t y() const;
     bp::axis_transformation::ATR orient() const;
+    uint32_t orient_code() const;
+    void get_location(coord_t &x, coord_t &y) const;
     cbag::transform to_transform() const;
+
+    void set_location(coord_t x, coord_t y);
+    void set_orient_code(uint32_t code);
 };
 
 } // namespace layout
