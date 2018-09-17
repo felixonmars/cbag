@@ -55,6 +55,8 @@ class instance {
 
     const cbag::transform get_transform() const;
 
+    void set_master(const cellview *new_master);
+
     void set_int_param(const char *name, int value);
 
     void set_double_param(const char *name, double value);

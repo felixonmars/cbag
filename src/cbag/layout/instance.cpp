@@ -89,6 +89,10 @@ const cbag::transform instance::get_transform() const {
     return xform.to_transform();
 }
 
+void instance::set_master(const cellview *new_master) {
+    master = new_master;
+}
+
 void instance::set_int_param(const char *name, int value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {

@@ -70,6 +70,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass instance:
         transformation xform
 
+        void set_master(const cellview* new_master)
+
         void set_int_param(const char* name, int value)
 
         void set_double_param(const char* name, double value)
@@ -157,10 +159,12 @@ cdef class PyLayInstance:
     cdef _master
     cdef unicode _lib_name
 
+    cdef _update_inst_master(self, PyLayCellView cv)
 
 cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr
     cdef unicode _encoding
 
-    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv, const char *inst_name,
-                                  transformation xform, int nx, int ny, int spx, int spy)
+    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv,
+                                  const char *inst_name, transformation xform, int nx, int ny,
+                                  int spx, int spy)

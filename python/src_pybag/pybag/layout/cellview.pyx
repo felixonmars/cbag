@@ -6,6 +6,7 @@ from cellview cimport *
 from cython.operator cimport dereference as deref
 
 import numbers
+from typing import Any
 
 cdef extern from "<utility>" namespace "std" nogil:
     cdef unique_ptr[tech] move(unique_ptr[tech])
@@ -85,9 +86,28 @@ cdef class PyLayInstance:
         self._master = master
         self._lib_name = lib_name
 
+    cdef _update_inst_master(self, PyLayCellView cv):
+        deref(self._ptr).second.set_master(cv._ptr.get())
+
     @property
     def master(self):
         return self._master
+
+    def new_master_with(self, **kwargs):
+        # type: (Any) -> None
+        """Change the master template of this instance.
+
+        This method will get the old master template layout parameters, update
+        the parameter values with the given dictionary, then create a new master
+        template with those parameters and associate it with this instance.
+
+        Parameters
+        ----------
+        **kwargs
+            a dictionary of new parameter values.
+        """
+        self._master = self._master.new_template_with(**kwargs)
+        self._update_inst_master(self._master)
 
     def translate_master_box(self, BBox cur_box):
         return cur_box._transform(deref(self._ptr).second.xform)
