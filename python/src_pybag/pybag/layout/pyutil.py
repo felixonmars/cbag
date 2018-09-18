@@ -36,3 +36,8 @@ class BlockageType(Enum):
 class BoundaryType(Enum):
     PR = 0
     snap = 1
+
+
+class Orient2D(Enum):
+    x = 0
+    y = 1

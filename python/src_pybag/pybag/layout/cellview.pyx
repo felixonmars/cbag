@@ -35,11 +35,16 @@ cdef class PyTech:
             via_map[key.encode(encoding)] = tmp_pair
 
         options = tech_params['options']
+        self._pin_purpose = options['pin_purpose']
         self._ptr.reset(new tech(lay_map, pur_map, via_map, options['default_purpose'].encode(encoding),
-                                 options['pin_purpose'].encode(encoding), options['make_pin_obj']))
+                                 self._pin_purpose.encode(encoding), options['make_pin_obj']))
 
     def __dealloc__(self):
         self._ptr.reset()
+
+    @property
+    def pin_purpose(self):
+        return self._pin_purpose
 
 
 cdef class PyRect:

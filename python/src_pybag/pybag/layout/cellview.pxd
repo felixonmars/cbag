@@ -131,6 +131,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
 cdef class PyTech:
     cdef unique_ptr[tech] _ptr
+    cdef unicode _pin_purpose
 
 
 cdef class PyRect:
