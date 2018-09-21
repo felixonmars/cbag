@@ -6,7 +6,7 @@ from .util cimport BBox, BBoxArray
 from .cellview cimport *
 
 import numbers
-from typing import Any, Tuple, Union, Optional, Dict
+from typing import Any, Tuple, Union, Optional, Dict, List, Iterable
 
 from .pyutil import Orientation
 
@@ -243,7 +243,7 @@ cdef class PyLayInstance:
     def get_bound_box_of(self, row=0, col=0):
         # type: (int, int) -> BBox
         """Returns the bounding box of an instance in this mosaic."""
-        dx, dy = self.get_item_location(row=row, col=col, unit_mode=True)
+        dx, dy = self.get_item_location(row=row, col=col)
         cdef BBox box = self._master.bound_box
         box = box.c_transform(deref(self._ptr).second.xform)
         return box.move_by(dx, dy)
@@ -340,7 +340,129 @@ cdef class PyLayInstance:
         """
         dx, dy = self.location_unit
         return self._grid.transform_track(layer_id, track_idx, dx=dx, dy=dy,
-                                          orient=self.orientation, unit_mode=True)
+                                          orient=self.orientation)
+
+    def get_port(self, name='', row=0, col=0):
+        # type: (Optional[str], int, int) -> Port
+        """Returns the port object of the given instance in the array.
+
+        Parameters
+        ----------
+        name : Optional[str]
+            the port terminal name.  If None or empty, check if this
+            instance has only one port, then return it.
+        row : int
+            the instance row index.  Index 0 is the bottom-most row.
+        col : int
+            the instance column index.  Index 0 is the left-most column.
+
+        Returns
+        -------
+        port : Port
+            the port object.
+        """
+        dx, dy = self.get_item_location(row=row, col=col)
+        xshift, yshift = self.location_unit
+        loc = (xshift + dx, yshift + dy)
+        return self._master.get_port(name).transform(self._grid, loc=loc,
+                                                     orient=self.orientation)
+
+    def get_pin(self, name='', row=0, col=0, layer=-1):
+        # type: (Optional[str], int, int, int) -> Union[WireArray, BBox]
+        """Returns the first pin with the given name.
+
+        This is an efficient method if you know this instance has exactly one pin.
+
+        Parameters
+        ----------
+        name : Optional[str]
+            the port terminal name.  If None or empty, check if this
+            instance has only one port, then return it.
+        row : int
+            the instance row index.  Index 0 is the bottom-most row.
+        col : int
+            the instance column index.  Index 0 is the left-most column.
+        layer : int
+            the pin layer.  If negative, check to see if the given port has only one layer.
+            If so then use that layer.
+
+        Returns
+        -------
+        pin : Union[WireArray, BBox]
+            the first pin associated with the port of given name.
+        """
+        return self.get_port(name, row, col).get_pins(layer)[0]
+
+    def port_pins_iter(self, name='', layer=-1):
+        # type: (Optional[str], int) -> Iterable[WireArray]
+        """Iterate through all pins of all ports with the given name in this instance array.
+
+        Parameters
+        ----------
+        name : Optional[str]
+            the port terminal name.  If None or empty, check if this
+            instance has only one port, then return it.
+        layer : int
+            the pin layer.  If negative, check to see if the given port has only one layer.
+            If so then use that layer.
+
+        Yields
+        ------
+        pin : WireArray
+            the pin as WireArray.
+        """
+        for col in range(self.nx):
+            for row in range(self.ny):
+                try:
+                    port = self.get_port(name, row, col)
+                except KeyError:
+                    return
+                for warr in port.get_pins(layer):
+                    yield warr
+
+    def get_all_port_pins(self, name='', layer=-1):
+        # type: (Optional[str], int) -> List[WireArray]
+        """Returns a list of all pins of all ports with the given name in this instance array.
+
+        This method gathers ports from all instances in this array with the given name,
+        then find all pins of those ports on the given layer, then return as list of WireArrays.
+
+        Parameters
+        ----------
+        name : Optional[str]
+            the port terminal name.  If None or empty, check if this
+            instance has only one port, then return it.
+        layer : int
+            the pin layer.  If negative, check to see if the given port has only one layer.
+            If so then use that layer.
+
+        Returns
+        -------
+        pin_list : List[WireArray]
+            the list of pins as WireArrays.
+        """
+        return list(self.port_pins_iter(name=name, layer=layer))
+
+    def port_names_iter(self):
+        # type: () -> Iterable[str]
+        """Iterates over port names in this instance.
+
+        Yields
+        ------
+        port_name : str
+            name of a port in this instance.
+        """
+        return self._master.port_names_iter()
+
+    def has_port(self, port_name):
+        # type: (str) -> bool
+        """Returns True if this instance has the given port."""
+        return self._master.has_port(port_name)
+
+    def has_prim_port(self, port_name):
+        # type: (str) -> bool
+        """Returns True if this instance has the given primitive port."""
+        return self._master.has_prim_port(port_name)
 
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
