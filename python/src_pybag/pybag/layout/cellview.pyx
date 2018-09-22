@@ -189,13 +189,11 @@ cdef class PyLayInstance:
 
     @property
     def bound_box(self):
-        # type: () -> BBox
         """Returns the overall bounding box of this instance."""
         return self._translate_master_box_w_array(self._master.bound_box)
 
     @property
     def array_box(self):
-        # type: () -> BBox
         """Returns the array box of this instance."""
         master_box = getattr(self._master, 'array_box', None)  # type: BBox
         if master_box is None:
@@ -205,7 +203,6 @@ cdef class PyLayInstance:
 
     @property
     def fill_box(self):
-        # type: () -> BBox
         """Returns the fill box of this instance."""
         master_box = getattr(self._master, 'fill_box', None)  # type: BBox
         if master_box is None:
@@ -651,10 +648,14 @@ cdef class PyLayCellView:
         spy : int
             row pitch.
         """
-        if inst_name is not None:
+        cdef char* inst_name_char
+        if inst_name is None:
+            inst_name_char = NULL
+        else:
             inst_name = inst_name.encode(self._encoding)
+            inst_name_char = inst_name
 
-        return self._add_cinst(grid, master, lib_name, master._layout, inst_name,
+        return self._add_cinst(grid, master, lib_name, master._layout, inst_name_char,
                                transformation(dx, dy, ocode), nx, ny, spx, spy)
 
     def add_rect(self, layer, bbox):

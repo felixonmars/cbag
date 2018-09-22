@@ -33,7 +33,7 @@ struct cellview::helper {
         cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt,
                                                    std::make_optional<uint32_t>());
         while (iter.has_next()) {
-            if (self.inst_map.find(fmt::format("X{d}", *iter)) == map_end) {
+            if (self.inst_map.find(fmt::format("X{:d}", *iter)) == map_end) {
                 iter.save();
                 iter.down();
             } else {
@@ -42,7 +42,7 @@ struct cellview::helper {
         }
 
         self.inst_name_cnt = *(iter.get_save());
-        return fmt::format("X{d}", self.inst_name_cnt);
+        return fmt::format("X{:d}", self.inst_name_cnt);
     }
 
     static geo_map_t::iterator get_geometry(cellview &self, layer_t &&layer) {
