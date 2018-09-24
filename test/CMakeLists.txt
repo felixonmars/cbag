@@ -126,3 +126,18 @@ set_target_properties(test_misc PROPERTIES
   INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
   )
 ]]
+
+add_executable(test_rtree
+  ${CMAKE_SOURCE_DIR}/test/test_rtree.cpp
+  )
+
+# shared library dependencies
+target_link_libraries(test_rtree
+  cbag
+  )
+
+# append build directory to RPATH
+# we do it this way now because we're running directly from the build directory.
+set_target_properties(test_rtree PROPERTIES
+  INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/lib:${Boost_LIBRARY_DIRS}"
+  )
