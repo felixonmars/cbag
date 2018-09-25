@@ -38,6 +38,14 @@ uint32_t point_t::ux() const { return val[0].operator uint32_t(); }
 
 uint32_t point_t::uy() const { return val[1].operator uint32_t(); }
 
+void point_t::set_x(coord_t v) {
+    val[0] = v;
+}
+
+void point_t::set_y(coord_t v) {
+    val[1] = v;
+}
+
 int32_t point_t::operator[](uint32_t idx) const { return val[idx].operator int32_t(); }
 
 byte4_t &point_t::operator[](uint32_t idx) { return val[idx]; }

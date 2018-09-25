@@ -48,8 +48,13 @@ class rectangle : public polygon90 {
     offset_t h() const { return yh() - yl(); }
     bool is_valid() const { return xh() >= xl() && yh() >= yl(); }
     bool is_physical() const { return xh() > xl() && yh() > yl(); }
-    // methods for boost::polygon
 
+    const point_t &ll() const { return data.at_raw(0); }
+    const point_t &ur() const { return data.at_raw(1); }
+    point_t &ll() { return data.at_raw(0); }
+    point_t &ur() { return data.at_raw(1); }
+
+    // methods for boost::polygon
     interval_type get(bp::orientation_2d orient) const;
 
     template <typename T2> void set(bp::orientation_2d orient, const T2 &interval) {

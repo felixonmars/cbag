@@ -54,6 +54,10 @@ struct point_t {
 
     uint32_t uy() const;
 
+    void set_x(coord_t v);
+
+    void set_y(coord_t v);
+
     int32_t operator[](uint32_t idx) const;
 
     byte4_t &operator[](uint32_t idx);
