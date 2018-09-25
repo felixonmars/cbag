@@ -1,60 +1,74 @@
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/box.hpp>
 
+#include <iostream>
+
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-// to store queries results
-#include <vector>
-
-// just for output
-#include <iostream>
-#include <boost/foreach.hpp>
+#include <cbag/layout/point_t.h>
 
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 
-void test_rtree()
-{
-    typedef bg::model::point<float, 2, bg::cs::cartesian> point;
+namespace boost {
+namespace geometry {
+namespace traits {
+
+template <> struct tag<cbag::layout::point_t> { typedef point_tag type; };
+
+template <> struct coordinate_type<cbag::layout::point_t> { typedef cbag::coord_t type; };
+
+template <> struct coordinate_system<cbag::layout::point_t> { typedef cs::cartesian type; };
+
+template <> struct dimension<cbag::layout::point_t> : boost::mpl::int_<2> {};
+
+template <> struct access<cbag::layout::point_t, 0> {
+    static cbag::coord_t get(cbag::layout::point_t const &p) { return p.x(); }
+
+    static void set(cbag::layout::point_t &p, cbag::coord_t const &value) { p[0] = value; }
+};
+
+template <> struct access<cbag::layout::point_t, 1> {
+    static cbag::coord_t get(cbag::layout::point_t const &p) { return p.y(); }
+
+    static void set(cbag::layout::point_t &p, cbag::coord_t const &value) { p[1] = value; }
+};
+} // namespace traits
+} // namespace geometry
+} // namespace boost
+
+void test_rtree() {
+    typedef cbag::layout::point_t point;
     typedef bg::model::box<point> box;
     typedef std::pair<box, unsigned> value;
 
     // create the rtree using default constructor
-    bgi::rtree< value, bgi::quadratic<16> > rtree;
+    bgi::rtree<value, bgi::quadratic<16>> rtree;
 
     // create some values
-    for ( unsigned i = 0 ; i < 10 ; ++i )
-    {
+    for (unsigned i = 0; i < 20; i += 2) {
         // create a box
-        box b(point(i + 0.0f, i + 0.0f), point(i + 0.5f, i + 0.5f));
+        box b(point::create(i, i), point::create(i + 1, i + 1));
         // insert new value
         rtree.insert(std::make_pair(b, i));
     }
 
-    // find values intersecting some area defined by a box
-    box query_box(point(0, 0), point(5, 5));
-    std::vector<value> result_s;
-    rtree.query(bgi::intersects(query_box), std::back_inserter(result_s));
+    // print all boxes
+    std::cout << "All boxes:" << std::endl;
+    for (auto it = rtree.qbegin(bgi::intersects(rtree.bounds())); it != rtree.qend(); ++it) {
+        std::cout << bg::wkt<box>(it->first) << std::endl;
+    }
 
-    // find 5 nearest values to a point
-    std::vector<value> result_n;
-    rtree.query(bgi::nearest(point(0, 0), 5), std::back_inserter(result_n));
+    // remove a box
+    value val = std::make_pair(box(point::create(6, 6), point::create(7, 7)), 6);
+    std::cout << "Removing " << bg::wkt<box>(val.first) << std::endl;
+    rtree.remove(val);
 
-    // note: in Boost.Geometry WKT representation of a box is polygon
-
-    // display results
-    std::cout << "spatial query box:" << std::endl;
-    std::cout << bg::wkt<box>(query_box) << std::endl;
-    std::cout << "spatial query result:" << std::endl;
-    BOOST_FOREACH(value const& v, result_s)
-        std::cout << bg::wkt<box>(v.first) << " - " << v.second << std::endl;
-
-    std::cout << "knn query point:" << std::endl;
-    std::cout << bg::wkt<point>(point(0, 0)) << std::endl;
-    std::cout << "knn query result:" << std::endl;
-    BOOST_FOREACH(value const& v, result_n)
-        std::cout << bg::wkt<box>(v.first) << " - " << v.second << std::endl;
+    // print again
+    std::cout << "All boxes:" << std::endl;
+    for (auto it = rtree.qbegin(bgi::intersects(rtree.bounds())); it != rtree.qend(); ++it) {
+        std::cout << bg::wkt<box>(it->first) << std::endl;
+    }
 }
 
 int main(int argc, char *argv[]) {
