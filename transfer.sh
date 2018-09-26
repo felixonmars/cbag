@@ -5,7 +5,7 @@ rsync -zv build.sh erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/build.s
 rsync -zarv --delete include/ erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/include
 rsync -zarv --delete src/ erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/src
 rsync -zarv --delete test/ erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/test
-rsync -zarv --delete util/ erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/test
+rsync -zarv --delete util/ erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/util
 rsync -zv python/src_pybag/setup.py erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/python/src_pybag/setup.py
 rsync -zarv --delete python/src_pybag/pybag/ --include="*/" --include="*.py" --include="*.pyx" \
 --include="*.pxd" --exclude="*" erichang@bwrcrdsl-6.eecs.berkeley.edu:~/projects/cbag/python/src_pybag/pybag
