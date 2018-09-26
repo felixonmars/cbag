@@ -12,6 +12,7 @@ class blockage : public polygon {
     blockage_type type = blkRoute;
     lay_t layer;
 
+    blockage();
     blockage(const pt_vector &data, blockage_type type, lay_t layer);
 };
 

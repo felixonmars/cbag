@@ -31,7 +31,7 @@ class instance {
     std::variant<const cellview *, cellview_ref> master = nullptr;
 
   public:
-    std::string name;
+    const char *name;
     transformation xform;
     uint32_t nx = 1;
     uint32_t ny = 1;
@@ -40,11 +40,11 @@ class instance {
 
     instance();
 
-    instance(std::string name, const char *lib, const char *cell, const char *view,
+    instance(const char *name, const char *lib, const char *cell, const char *view,
              transformation xform, uint32_t nx = 1, uint32_t ny = 1, offset_t spx = 0,
              offset_t spy = 0);
 
-    instance(std::string name, const cellview *master, transformation xform, uint32_t nx = 1,
+    instance(const char *name, const cellview *master, transformation xform, uint32_t nx = 1,
              uint32_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
     const char *get_lib_name(const char *output_lib) const;

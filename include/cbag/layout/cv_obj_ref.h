@@ -12,16 +12,16 @@ namespace layout {
 
 template <typename T> class shape_ref {
   private:
-    cellview *parent = nullptr;
     layer_t key{0, 0};
 
   public:
+    cellview *parent = nullptr;
     T obj;
 
     shape_ref() = default;
 
     shape_ref(cellview *parent, layer_t &&key, T &&obj, bool add)
-        : parent(parent), key(std::move(key)), obj(std::move(obj)) {
+        : key(std::move(key)), parent(parent), obj(std::move(obj)) {
         if (add)
             commit();
     }
@@ -35,10 +35,8 @@ template <typename T> class shape_ref {
 };
 
 template <typename T> class cv_obj_ref {
-  private:
-    cellview *parent = nullptr;
-
   public:
+    cellview *parent = nullptr;
     T obj;
 
     cv_obj_ref() = default;

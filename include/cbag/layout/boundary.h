@@ -11,6 +11,7 @@ class boundary : public polygon {
   public:
     boundary_type type = boundary_type::PR;
 
+    boundary();
     boundary(const pt_vector &data, boundary_type type);
 };
 

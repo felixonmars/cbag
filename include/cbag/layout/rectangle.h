@@ -37,16 +37,19 @@ class rectangle {
     rectangle(const T1 &hrange, const T2 &vrange)
         : xl(bp::low(hrange)), yl(bp::low(vrange)), xh(bp::high(hrange)), yh(bp::high(vrange)) {}
 
-    void set_rect(coord_t x0, coord_t y0, coord_t x1, coord_t y1);
-
-    rectangle &transform(const transformation &xform);
-
     coord_t xm() const;
     coord_t ym() const;
     offset_t w() const;
     offset_t h() const;
 
     bool is_physical() const;
+    bool is_valid() const;
+    bool overlaps(const rectangle &r) const;
+
+    rectangle get_merge(const rectangle &other) const;
+    rectangle get_intersect(const rectangle &other) const;
+    rectangle get_extend_to(coord_t x, coord_t y) const;
+    rectangle get_transform(const transformation &xform) const;
 
     interval_type get(bp::orientation_2d orient) const;
 

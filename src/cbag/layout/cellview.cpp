@@ -17,19 +17,17 @@ namespace cbag {
 namespace layout {
 
 struct cellview::helper {
-    static std::string get_inst_name(cellview &self, const char *name) {
-        auto map_end = self.inst_map.end();
-        if (name != nullptr) {
+    static void add_inst(cellview &self, const instance &inst) {
+        if (inst.name != nullptr) {
             // test if given name is valid
-            std::string test(name);
-            if (self.inst_map.find(test) == map_end) {
-                // valid name, just return it
-                return test;
-            }
+            if (self.inst_map.emplace(std::string(inst.name), inst).second)
+                return;
         }
+        auto map_end = self.inst_map.end();
         cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt,
                                                    std::make_optional<uint32_t>());
         while (iter.has_next()) {
+
             if (self.inst_map.find(fmt::format("X{:d}", *iter)) == map_end) {
                 iter.save();
                 iter.down();
@@ -39,7 +37,7 @@ struct cellview::helper {
         }
 
         self.inst_name_cnt = *(iter.get_save());
-        return fmt::format("X{:d}", self.inst_name_cnt);
+        self.inst_map.emplace(fmt::format("X{:d}", self.inst_name_cnt), inst);
     }
 
     static geo_map_t::iterator make_geometry(cellview &self, const layer_t &key) {
@@ -172,18 +170,13 @@ cv_obj_ref<instance> cellview::add_prim_instance(const char *lib, const char *ce
                                                  const char *view, const char *name,
                                                  transformation xform, uint32_t nx, uint32_t ny,
                                                  offset_t spx, offset_t spy, bool commit) {
-    return {this,
-            instance(helper::get_inst_name(*this, name), lib, cell, view, std::move(xform), nx, ny,
-                     spx, spy),
-            commit};
+    return {this, instance(name, lib, cell, view, std::move(xform), nx, ny, spx, spy), commit};
 }
 
 cv_obj_ref<instance> cellview::add_instance(const cellview *cv, const char *name,
                                             transformation xform, uint32_t nx, uint32_t ny,
                                             offset_t spx, offset_t spy, bool commit) {
-    return {this,
-            instance(helper::get_inst_name(*this, name), cv, std::move(xform), nx, ny, spx, spy),
-            commit};
+    return {this, instance(name, cv, std::move(xform), nx, ny, spx, spy), commit};
 }
 
 void cellview::add_object(const blockage &obj) {
@@ -216,7 +209,7 @@ void cellview::add_object(const via &obj) {
     }
 }
 
-void cellview::add_object(const instance &obj) { inst_map.emplace(obj.name, obj); }
+void cellview::add_object(const instance &obj) { helper::add_inst(*this, obj); }
 
 } // namespace layout
 } // namespace cbag

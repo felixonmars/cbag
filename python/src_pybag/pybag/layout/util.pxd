@@ -1,5 +1,7 @@
 # distutils: language = c++
 
+from libcpp cimport bool as cbool
+
 ctypedef unsigned int uint32_t
 
 cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
@@ -24,29 +26,35 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         void transform(coord_t x, coord_t y)
 
     cdef cppclass rectangle:
+        coord_t xl
+        coord_t yl
+        coord_t xh
+        coord_t yh
+
         rectangle()
 
         rectangle(coord_t xl, coord_t yl, coord_t xh, coord_t yh)
 
-        coord_t xl() const
-        coord_t yl() const
-        coord_t xh() const
-        coord_t yh() const
+        coord_t xm() const
+        coord_t ym() const
+        offset_t w() const
+        offset_t h() const
 
-        rectangle& transform(const transformation& xform)
+        cbool is_physical() const
+        cbool is_valid() const
+        cbool overlaps(const rectangle &r) const
 
+        rectangle get_merge(const rectangle& other) const
+        rectangle get_intersect(const rectangle& other) const
+        rectangle get_extend_to(coord_t x, coord_t y) const
+        rectangle get_transform(const transformation& xform) const
 
 cdef transformation make_transform(loc, orient)
 
 
 cdef class BBox:
-    cdef coord_t _xl
-    cdef coord_t _yl
-    cdef coord_t _xh
-    cdef coord_t _yh
+    cdef rectangle _r
 
-    cdef coord_t _xm(self)
-    cdef coord_t _ym(self)
     cdef BBox c_transform(self, const transformation& xform)
 
     cpdef BBox move_by(self, int dx=?, int dy=?, unit_mode=?)

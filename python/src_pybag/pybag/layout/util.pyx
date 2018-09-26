@@ -33,10 +33,10 @@ cdef class BBox:
         deprecated parameters.
     """
     def __init__(self, int xl, int yl, int xh, int yh, *args, **kwargs):
-        self._xl = xl
-        self._yl = yl
-        self._xh = xh
-        self._yh = yh
+        self._r.xl = xl
+        self._r.yl = yl
+        self._r.xh = xh
+        self._r.yh = yh
         
     @classmethod
     def get_invalid_bbox(cls):
@@ -51,73 +51,67 @@ cdef class BBox:
 
     @property
     def xl(self):
-        return self._xl
+        return self._r.xl
 
     @property
     def xh(self):
-        return self._xh
+        return self._r.xh
 
     @property
     def yl(self):
-        return self._yl
+        return self._r.yl
 
     @property
     def yh(self):
-        return self._yh
-
-    cdef coord_t _xm(self):
-        return (self._xl + self._xh) // 2
-
-    cdef coord_t _ym(self):
-        return (self._yl + self._yh) // 2
+        return self._r.yh
     
     @property
     def xm(self):
-        return self._xm()
+        return self._r.xm()
 
     @property
     def ym(self):
-        return self._ym()
+        return self._r.ym()
 
     @property
     def w(self):
-        return self._xh - self._xl
+        return self._r.w()
 
     @property
     def h(self):
-        return self._yh - self._yl
+        return self._r.h()
     
     @property
     def left_unit(self):
-        return self._xl
+        return self._r.xl
 
     @property
     def right_unit(self):
-        return self._xh
+        return self._r.xh
 
     @property
     def bottom_unit(self):
-        return self._yl
+        return self._r.yl
 
     @property
     def top_unit(self):
-        return self._yh
+        return self._r.yh
 
     @property
     def width_unit(self):
-        return self.w
+        return self._r.w()
 
     @property
     def height_unit(self):
-        return self.h
+        return self._r.h()
 
     @property
     def xc_unit(self):
-        return self.xm
+        return self._r.xm()
 
     @property
     def yc_unit(self):
-        return self.ym
+        return self._r.ym()
 
     def is_physical(self):
         # type: () -> bool
@@ -128,7 +122,7 @@ cdef class BBox:
         is_physical : bool
             True if this bounding box has positive area.
         """
-        return self._xh > self._xl and self._yh > self._yl
+        return self._r.is_physical()
 
     def is_valid(self):
         # type: () -> bool
@@ -139,7 +133,7 @@ cdef class BBox:
         is_valid : bool
             True if this bounding box has nonnegative area.
         """
-        return self._xh >= self._xl and self._yh >= self._yl
+        return self._r.is_valid()
     
     def get_points(self, unit_mode=True):
         # type: (bool) -> List[Tuple[int, int]]
@@ -157,8 +151,8 @@ cdef class BBox:
         """
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        return [(self._xl, self._yl), (self._xl, self._yh),
-                (self._xh, self._yh), (self._xh, self._yl)]
+        return [(self._r.xl, self._r.yl), (self._r.xl, self._r.yh),
+                (self._r.xh, self._r.yh), (self._r.xh, self._r.yl)]
 
     def as_bbox_array(self):
         # type: () -> BBoxArray
@@ -170,7 +164,7 @@ cdef class BBox:
         """Cast this BBox as a BBoxCollection."""
         return BBoxCollection([self])
 
-    def merge(self, bbox):
+    def merge(self, BBox bbox):
         # type: (BBox) -> BBox
         """Returns a new bounding box that's the union of this bounding box and the given one.
 
@@ -184,15 +178,11 @@ cdef class BBox:
         total : BBox
             the merged bounding box.
         """
-        if not bbox.is_valid():
-            return self
-        if not self.is_valid():
-            return bbox
+        cdef rectangle r = self._r.get_merge(bbox._r)
 
-        return BBox(min(self._xl, bbox.xl), min(self._yl, bbox.yl),
-                    max(self._xh, bbox.xh), max(self._yh, bbox.yh))
+        return BBox(r.xl, r.yl, r.xh, r.yh)
 
-    def intersect(self, bbox):
+    def intersect(self, BBox bbox):
         # type: (BBox) -> BBox
         """Returns a new bounding box that's the intersection of this bounding box and the given one.
 
@@ -206,14 +196,14 @@ cdef class BBox:
         intersect : BBox
             the intersection bounding box.
         """
-        return BBox(max(self._xl, bbox.xl), max(self._yl, bbox.yl),
-                    min(self._xh, bbox.xh), min(self._yh, bbox.yh))
+        cdef rectangle r = self._r.get_intersect(bbox._r)
 
-    def overlaps(self, bbox):
+        return BBox(r.xl, r.yl, r.xh, r.yh)
+
+    def overlaps(self, BBox bbox):
         # type: (BBox) -> bool
         """Returns True if this BBox overlaps the given BBox."""
-        return ((max(self._xl, bbox.xl) < min(self._xh, bbox.xh)) and
-                (max(self._yl, bbox.yl) < min(self._yh, bbox.yh)))
+        return self._r.overlaps(bbox._r)
 
     def extend(self, x=None, y=None, unit_mode=True):
         # type: (Optional[int], Optional[int], bool) -> BBox
@@ -240,8 +230,8 @@ cdef class BBox:
         if y is None:
             y = self._yl
 
-        return BBox(min(self._xl, x), min(self._yl, y),
-                    max(self._xh, x), max(self._yh, y))
+        cdef rectangle r = self._r.get_extend_to(x, y)
+        return BBox(r.xl, r.yl, r.xh, r.yh)
 
     def expand(self, int dx=0, int dy=0, unit_mode=True):
         # type: (int, int, bool) -> BBox
@@ -263,12 +253,13 @@ cdef class BBox:
         """
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        return BBox(self._xl - dx, self._yl - dy, self._xh + dx, self._yh + dy)
+
+        return BBox(self._r.xl - dx, self._r.yl - dy,
+                    self._r.xh + dx, self._r.yh + dy)
 
     cdef BBox c_transform(self, const transformation& xform):
-        cdef rectangle r = rectangle(self._xl, self._yl, self._xh, self._yh)
-        r.transform(xform)
-        return BBox(r.xl(), r.yl(), r.xh(), r.yh())
+        cdef rectangle r = self._r.get_transform(xform)
+        return BBox(r.xl, r.yl, r.xh, r.yh)
 
     def transform(self, loc=(0, 0), orient='R0', unit_mode=True):
         # type: (Tuple[int, int], str, bool) -> BBox
@@ -314,12 +305,14 @@ cdef class BBox:
         """
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        return BBox(self._xl + dx, self._yl + dy, self._xh + dx, self._yh + dy)
+
+        return BBox(self._r.xl + dx, self._r.yl + dy,
+                    self._r.xh + dx, self._r.yh + dy)
 
     def flip_xy(self):
         # type: () -> BBox
         """Returns a new BBox with X and Y coordinate swapped."""
-        return BBox(self._yl, self._xl, self._yh, self._xh)
+        return BBox(self._r.yl, self._r.xl, self._r.yh, self._r.xh)
 
     def with_interval(self, direction, int lower, int upper, unit_mode=True):
         # type: (str, int, int, bool) -> BBox
@@ -344,9 +337,9 @@ cdef class BBox:
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
         if direction == 'x':
-            return BBox(lower, self._yl, upper, self._yh)
+            return BBox(lower, self._r.yl, upper, self._r.yh)
         else:
-            return BBox(self._xl, lower, self._xh, upper)
+            return BBox(self._r.xl, lower, self._r.xh, upper)
 
     def get_interval(self, direction, unit_mode=True):
         # type: (str, bool) -> Tuple[int, int]
@@ -367,9 +360,9 @@ cdef class BBox:
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
         if direction == 'x':
-            return self._xl, self._xh
+            return self._r.xl, self._r.xh
         else:
-            return self._yl, self._yh
+            return self._r.yl, self._r.yh
 
     def get_bounds(self, unit_mode=True):
         # type: (bool) -> Tuple[int, int, int, int]
@@ -387,7 +380,7 @@ cdef class BBox:
         """
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
-        return self._xl, self._yl, self._xh, self._yh
+        return self._r.xl, self._r.yl, self._r.xh, self._r.yh
 
     def get_immutable_key(self):
         return self
@@ -396,13 +389,15 @@ cdef class BBox:
         return repr(self)
 
     def __repr__(self):
-        return '{}({}, {}, {}, {})'.format(self.__class__.__name__, self._xl, self._yl, self._xh, self._yh)
+        return '{}({}, {}, {}, {})'.format(self.__class__.__name__, self._r.xl, self._r.yl,
+                                           self._r.xh, self._r.yh)
 
     def __hash__(self):
-        return hash((self._xl, self._yl, self._xh, self._yh))
+        return hash((self._r.xl, self._r.yl, self._r.xh, self._r.yh))
 
     def __eq__(self, other):
-        return self._xl == other.xl and self._yl == other.yl and self._xh == other.xh and self._yh == other.yh
+        return (self._r.xl == other.xl and self._r.yl == other.yl and
+                self._r.xh == other.xh and self._r.yh == other.yh)
 
 
 cdef class BBoxArray:
