@@ -7,6 +7,8 @@
 #ifndef CBAG_LAYOUT_PIN_H
 #define CBAG_LAYOUT_PIN_H
 
+#include <string>
+
 #include <cbag/layout/rectangle.h>
 
 namespace cbag {

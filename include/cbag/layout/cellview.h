@@ -14,26 +14,21 @@
 namespace cbag {
 namespace layout {
 
-class pt_vector;
-class polygon;
 class boundary;
 class blockage;
+class rectangle;
+class transformation;
 class pin;
 class via;
-class rectangle;
-class path_ref;
-class polygon90;
-class polygon45;
-class polygon;
-template <typename T> class vector_obj_ref;
 class tech;
+template <typename T> class shape_ref;
+template <typename T> class cv_obj_ref;
+class via_ref;
 
-using layer_t = std::pair<lay_t, purp_t>;
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
 using pin_map_t = std::unordered_map<lay_t, std::vector<pin>>;
 using inst_map_t = std::unordered_map<std::string, instance>;
-using inst_iter_t = inst_map_t::iterator;
 
 class cellview {
   private:
@@ -61,45 +56,57 @@ class cellview {
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
 
-    vector_obj_ref<rectangle> add_rect(const char *layer, const char *purpose, coord_t xl,
-                                       coord_t yl, coord_t xh, coord_t yh);
+    shape_ref<rectangle> add_rect(const char *layer, const char *purpose, coord_t xl, coord_t yl,
+                                  coord_t xh, coord_t yh, bool commit);
 
-    vector_obj_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
-                                       coord_t xh, coord_t yh);
+    shape_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl, coord_t xh,
+                                  coord_t yh, bool commit);
 
     void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
                  const char *label);
 
-    vector_obj_ref<polygon90> add_poly90(const char *layer, const char *purpose, pt_vector data);
+    shape_ref<polygon90> add_poly90(const char *layer, const char *purpose, const pt_vector &data,
+                                    bool commit);
 
-    vector_obj_ref<polygon45> add_poly45(const char *layer, const char *purpose, pt_vector data);
+    shape_ref<polygon45> add_poly45(const char *layer, const char *purpose, const pt_vector &data,
+                                    bool commit);
 
-    vector_obj_ref<polygon> add_poly(const char *layer, const char *purpose, pt_vector data);
+    shape_ref<polygon> add_poly(const char *layer, const char *purpose, const pt_vector &data,
+                                bool commit);
 
-    vector_obj_ref<blockage> add_blockage(const char *layer, uint8_t blk_code, pt_vector data);
+    shape_ref<polygon45_set> add_path(const char *layer, const char *purpose, const pt_vector &data,
+                                      offset_t half_width, uint8_t style0, uint8_t style1,
+                                      uint8_t stylem, bool commit);
 
-    vector_obj_ref<boundary> add_boundary(uint8_t bnd_code, pt_vector data);
+    shape_ref<polygon45_set> add_path45_bus(const char *layer, const char *purpose,
+                                            const pt_vector &data,
+                                            const std::vector<offset_t> &widths,
+                                            const std::vector<offset_t> &spaces, uint8_t style0,
+                                            uint8_t style1, uint8_t stylem, bool commit);
 
-    path_ref add_path(const char *layer, const char *purpose, const pt_vector &data,
-                      offset_t half_width, uint8_t style0, uint8_t style1, uint8_t stylem);
+    cv_obj_ref<blockage> add_blockage(const char *layer, uint8_t blk_code, const pt_vector &data,
+                                      bool commit);
 
-    path_ref add_path45_bus(const char *layer, const char *purpose, const pt_vector &data,
-                            const std::vector<offset_t> &widths,
-                            const std::vector<offset_t> &spaces, uint8_t style0, uint8_t style1,
-                            uint8_t stylem);
+    cv_obj_ref<boundary> add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit);
 
-    inst_iter_t add_prim_instance(const char *lib, const char *cell, const char *view,
-                                  const char *name, transformation xform, uint32_t nx, uint32_t ny,
-                                  offset_t spx, offset_t spy);
+    cv_obj_ref<via> add_via(transformation xform, const char *via_id, const uint32_t (&num)[2],
+                            const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
+                            const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
+                            const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
+                            bool add_layers, bool commit);
 
-    inst_iter_t add_instance(const cellview *cv, const char *name, transformation xform,
-                             uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
+    cv_obj_ref<instance> add_prim_instance(const char *lib, const char *cell, const char *view,
+                                           const char *name, transformation xform, uint32_t nx,
+                                           uint32_t ny, offset_t spx, offset_t spy, bool commit);
 
-    vector_obj_ref<via> add_via(transformation xform, const char *via_id, const uint32_t (&num)[2],
-                                const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
-                                const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
-                                const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-                                bool add_layers);
+    cv_obj_ref<instance> add_instance(const cellview *cv, const char *name, transformation xform,
+                                      uint32_t nx, uint32_t ny, offset_t spx, offset_t spy,
+                                      bool commit);
+
+    void add_object(const blockage &obj);
+    void add_object(const boundary &obj);
+    void add_object(const via &obj);
+    void add_object(const instance &obj);
 };
 
 } // namespace layout

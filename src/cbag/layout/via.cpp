@@ -27,8 +27,8 @@ struct via::helper {
 via::via(transformation xform, const char *via_id, const uint32_t (&num)[2],
          const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
          const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
-         const offset_t (&lay2_off)[2])
-    : xform(xform), via_id(via_id) {
+         const offset_t (&lay2_off)[2], bool add_layers)
+    : xform(std::move(xform)), via_id(via_id), add_layers(add_layers) {
     params.setCutColumns(num[0]);
     params.setCutRows(num[1]);
     params.setCutWidth(cut_dim[0]);
@@ -47,10 +47,6 @@ rectangle via::bot_box() const {
 rectangle via::top_box() const {
     return helper::get_box(*this, params.getLayer2Offset(), params.getLayer2Enc());
 }
-
-void via::set_layer1(vector_obj_ref<rectangle> ref) { lay1_ref = std::move(ref); }
-
-void via::set_layer2(vector_obj_ref<rectangle> ref) { lay2_ref = std::move(ref); }
 
 } // namespace layout
 } // namespace cbag

@@ -46,10 +46,9 @@ purp_t tech::get_purpose_id(const char *purpose) const {
     }
 }
 
-void tech::get_via_layers(const char *via, lay_t &bot, lay_t &top) const {
-    std::string key(via);
+void tech::get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const {
     try {
-        auto temp = via_map.at(via);
+        auto temp = via_map.at(key);
         bot = temp.first;
         top = temp.second;
     } catch (std::out_of_range) {

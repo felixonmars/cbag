@@ -61,15 +61,15 @@ cellview_ref::cellview_ref(const char *lib, const char *cell, const char *view)
 
 instance::instance() = default;
 
-instance::instance(const char *lib, const char *cell, const char *view, transformation xform,
-                   uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
-    : master(std::in_place_type_t<cellview_ref>{}, lib, cell, view), xform(std::move(xform)),
-      nx(nx), ny(ny), spx(spx), spy(spy) {}
+instance::instance(std::string name, const char *lib, const char *cell, const char *view,
+                   transformation xform, uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
+    : master(std::in_place_type_t<cellview_ref>{}, lib, cell, view), name(std::move(name)),
+      xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
-instance::instance(const cellview *master, transformation xform, uint32_t nx, uint32_t ny,
-                   coord_t spx, coord_t spy)
-    : master(std::in_place_type_t<const cellview *>{}, master), xform(std::move(xform)), nx(nx),
-      ny(ny), spx(spx), spy(spy) {}
+instance::instance(std::string name, const cellview *master, transformation xform, uint32_t nx,
+                   uint32_t ny, coord_t spx, coord_t spy)
+    : master(std::in_place_type_t<const cellview *>{}, master), name(std::move(name)),
+      xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
 const char *instance::get_lib_name(const char *output_lib) const {
     return std::visit(lib_name_visitor(output_lib), master);

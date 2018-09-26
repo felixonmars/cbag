@@ -32,6 +32,7 @@
 #include <cbag/schematic/shape_t_def.h>
 #include <cbag/spirit/ast.h>
 
+#include <cbagoa/oa_polygon.h>
 #include <cbagoa/oa_writer.h>
 
 namespace cbagoa {
@@ -484,27 +485,9 @@ void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpos
 void create_lay_geometry(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk,
                          cbag::lay_t layer, cbag::purp_t purpose,
                          const cbag::layout::geometry &geo) {
-    oa::oaBox box;
-    for (auto const &obj : geo.rect_set) {
-        if (!obj.is_physical()) {
-            logger->warn("non-physical BBox({}, {}, {}, {}) on layer ({}, {}), skipping.", obj.xl(),
-                         obj.yl(), obj.xh(), obj.yh(), layer, purpose);
-        } else {
-            box.set(obj.xl(), obj.yl(), obj.xh(), obj.yh());
-            oa::oaRect::create(blk, layer, purpose, box);
-        }
-    }
-
-    oa::oaPointArray arr;
-    for (auto const &obj : geo.poly_set) {
-        create_lay_polygon(blk, layer, purpose, obj, arr);
-    }
-    for (auto const &obj : geo.poly45_set) {
-        create_lay_polygon(blk, layer, purpose, obj, arr);
-    }
-    for (auto const &obj : geo.poly90_set) {
-        create_lay_polygon(blk, layer, purpose, obj, arr);
-    }
+    polygon_writer w(blk, layer, purpose, logger);
+    geo.write_geometry(w);
+    w.record_last();
 }
 
 void create_lay_via(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk, oa::oaTech *tech,
@@ -581,7 +564,7 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
         for (auto const &pin : pin_pair.second) {
             if (!pin.is_physical()) {
                 logger->warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
-                             pin.xl(), pin.yl(), pin.xh(), pin.yh(), lay, purp);
+                             pin.xl, pin.yl, pin.xh, pin.yh, lay, purp);
             }
             oa::oaPoint center(pin.xm(), pin.ym());
             cbag::offset_t w = pin.w();
@@ -596,8 +579,8 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
             oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
                                oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
             if (make_pin_obj) {
-                auto *r = oa::oaRect::create(blk, lay, purp,
-                                             oa::oaBox(pin.xl(), pin.yl(), pin.xh(), pin.yh()));
+                auto *r =
+                    oa::oaRect::create(blk, lay, purp, oa::oaBox(pin.xl, pin.yl, pin.xh, pin.yh));
 
                 oa::oaName term_name(ns, pin.net.c_str());
                 auto *term = oa::oaTerm::find(blk, term_name);

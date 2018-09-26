@@ -3,7 +3,9 @@
 namespace cbag {
 namespace layout {
 
-boundary::boundary(pt_vector data, boundary_type type) : polygon(std::move(data)), type(type) {}
+boundary::boundary(const pt_vector &data, boundary_type type) : type(type) {
+    set(data.begin(), data.end());
+}
 
 } // namespace layout
 } // namespace cbag

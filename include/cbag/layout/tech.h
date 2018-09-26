@@ -32,7 +32,7 @@ class tech {
 
     purp_t get_purpose_id(const char *purpose) const;
 
-    void get_via_layers(const char *via, lay_t &bot, lay_t &top) const;
+    void get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const;
 };
 
 } // namespace layout

@@ -88,23 +88,12 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/cellview.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/instance.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/path_ref.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/pin.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/point_t.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon45.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon45_view.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon90.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon90_view.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/polygon_view.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/pt_vector.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/transformation.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/union_view.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp

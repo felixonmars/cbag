@@ -1,64 +1,102 @@
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <cbag/layout/end_style.h>
 #include <cbag/layout/geometry.h>
-#include <cbag/layout/path_ref.h>
+#include <cbag/layout/rectangle.h>
 #include <cbag/layout/vector45.h>
-#include <cbag/layout/vector_obj_ref.h>
 #include <cbag/math/constexpr.h>
 
 namespace cbag {
 namespace layout {
 
-struct geometry::helper {
-    static union_view make_union_view(const geometry &self) {
-        switch (self.mode) {
-        case 0:
-            return rectangle_view(self.rect_set);
-        case 1:
-            return polygon90_view(self.poly90_set, self.rect_set);
-        case 2:
-            return polygon45_view(self.poly45_set, self.poly90_set, self.rect_set);
-        default:
-            return polygon_view(self.poly_set, self.poly45_set, self.poly90_set, self.rect_set);
-        }
+struct geometry::helper {};
+
+geometry::geometry(uint8_t mode) : mode(mode) {
+    if (mode != 0)
+        reset_to_mode(mode);
+}
+
+rectangle geometry::get_bbox() const {
+    rectangle ans;
+    std::visit(
+        overload{
+            [&](const auto &d) { bp::extents(ans, d); },
+        },
+        data);
+
+    return ans;
+}
+
+void geometry::reset_to_mode(uint8_t m) {
+    switch (m) {
+    case 0:
+        data.emplace<0>();
+    case 1:
+        data.emplace<1>();
+    case 2:
+        data.emplace<2>();
+    default:
+        throw std::invalid_argument(fmt::format("Unknown geometry mode: {}", m));
     }
-};
-
-geometry::geometry(uint8_t mode) : mode(mode), view(helper::make_union_view(*this)) {}
-
-rectangle geometry::get_bbox() const { return extents(view); }
-
-vector_obj_ref<rectangle> geometry::add_rect(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
-    std::size_t idx = rect_set.size();
-    rect_set.emplace_back(xl, yl, xh, yh);
-    return {&rect_set, idx};
+    mode = m;
 }
 
-vector_obj_ref<polygon90> geometry::add_poly90(pt_vector data) {
-    std::size_t idx = poly90_set.size();
-    mode = std::max(mode, 1_uc);
-    poly90_set.emplace_back(std::move(data));
-    return {&poly90_set, idx};
+void geometry::add_shape(const rectangle &obj) {
+    std::visit(
+        overload{
+            [&](polygon90_set &d) { d.insert(obj); },
+            [&](polygon45_set &d) { d.insert(obj); },
+            [&](polygon_set &d) { d.insert(obj); },
+        },
+        data);
 }
 
-vector_obj_ref<polygon45> geometry::add_poly45(pt_vector data) {
-    std::size_t idx = poly45_set.size();
-    mode = std::max(mode, 2_uc);
-    poly45_set.emplace_back(std::move(data));
-    return {&poly45_set, idx};
+void geometry::add_shape(const polygon90 &obj) {
+    std::visit(
+        overload{
+            [&](polygon90_set &d) { d.insert(obj); },
+            [&](polygon45_set &d) { d.insert(obj); },
+            [&](polygon_set &d) { d.insert(obj); },
+        },
+        data);
 }
 
-vector_obj_ref<polygon> geometry::add_poly(pt_vector data) {
-    std::size_t idx = poly_set.size();
-    mode = std::max(mode, 3_uc);
-    poly_set.emplace_back(std::move(data));
-    return {&poly_set, idx};
+void geometry::add_shape(const polygon45 &obj) {
+    std::visit(
+        overload{
+            [](polygon90_set &d) {
+                throw std::invalid_argument("Cannot add poly45 to poly90_set");
+            },
+            [&](polygon45_set &d) { d.insert(obj); },
+            [&](polygon_set &d) { d.insert(obj); },
+        },
+        data);
+}
+
+void geometry::add_shape(const polygon45_set &obj) {
+    std::visit(
+        overload{
+            [](polygon90_set &d) {
+                throw std::invalid_argument("Cannot add poly45 to poly90_set");
+            },
+            [&](polygon45_set &d) { d.insert(obj); },
+            [&](polygon_set &d) { d.insert(obj); },
+        },
+        data);
+}
+
+void geometry::add_shape(const polygon &obj) {
+    std::visit(
+        overload{
+            [](polygon90_set &d) { throw std::invalid_argument("Cannot add poly to poly90_set"); },
+            [](polygon45_set &d) { throw std::invalid_argument("Cannot add poly to poly45_set"); },
+            [&](polygon_set &d) { d.insert(obj); },
+        },
+        data);
 }
 
 constexpr double root2 = cbag::math::sqrt(2);
@@ -134,7 +172,8 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
     bool is_45 = p_norm.is_45_or_invalid();
 
     // initialize point array, reserve space for worst case
-    pt_vector ans(8);
+    pt_vector ans;
+    ans.reserve(8);
 
     vector45 n_norm = p_norm.get_rotate90();
     uint32_t half_diag = round(half_width / root2);
@@ -155,34 +194,34 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
     return ans;
 }
 
-path_ref geometry::add_path(const pt_vector &data, offset_t half_width, uint8_t style0,
-                            uint8_t style1, uint8_t stylem) {
+polygon45_set geometry::make_path(const pt_vector &data, offset_t half_width, uint8_t style0,
+                                  uint8_t style1, uint8_t stylem) {
     pt_vector::size_type n = data.size();
     if (n < 2) {
         throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));
     }
 
-    std::size_t start = poly45_set.size();
-    mode = std::max(mode, 2_uc);
-
     auto s0 = static_cast<end_style>(style0);
     auto s1 = static_cast<end_style>(style1);
     auto sm = static_cast<end_style>(stylem);
 
+    polygon45_set ans;
+    polygon45 tmp;
     for (pt_vector::size_type istart = 0; istart < n - 1; ++istart) {
         end_style c0 = (istart == 0) ? s0 : sm;
         end_style c1 = (istart == n - 2) ? s1 : sm;
-        poly45_set.emplace_back(path_to_poly45(data[istart].x(), data[istart].y(),
-                                               data[istart + 1].x(), data[istart + 1].y(),
-                                               half_width, c0, c1));
+        pt_vector pt_vec = path_to_poly45(data[istart].x(), data[istart].y(), data[istart + 1].x(),
+                                          data[istart + 1].y(), half_width, c0, c1);
+        tmp.set(pt_vec.begin(), pt_vec.end());
+        ans.insert(tmp);
     }
 
-    return {&poly45_set, start, start + n - 1};
+    return ans;
 }
 
-path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
-                                  const std::vector<offset_t> &spaces, uint8_t style0,
-                                  uint8_t style1, uint8_t stylem) {
+polygon45_set geometry::make_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
+                                        const std::vector<offset_t> &spaces, uint8_t style0,
+                                        uint8_t style1, uint8_t stylem) {
 
     pt_vector::size_type n_pts = data.size();
     if (n_pts < 2) {
@@ -210,10 +249,6 @@ path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offse
         deltas[idx] = deltas[idx - 1] + spaces[idx - 1] + (widths[idx - 1] + widths[idx]) / 2;
     }
 
-    // get starting index and update mode
-    std::size_t start = poly45_set.size();
-    mode = std::max(mode, 2_uc);
-
     // get initial points
     pt_vector prev_pts;
     prev_pts.reserve(n_paths);
@@ -234,6 +269,8 @@ path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offse
     }
 
     // add intermediate path segments
+    polygon45_set ans;
+    polygon45 tmp;
     auto sty1 = static_cast<end_style>(stylem);
     for (pt_vector::size_type nidx = 2; nidx < n_pts; ++nidx) {
         auto sty0 = static_cast<end_style>((nidx == 2) ? style0 : stylem);
@@ -256,9 +293,12 @@ path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offse
                 int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
                 coord_t newx = prevx + k * s0.dx;
                 coord_t newy = prevy + k * s0.dy;
-                poly45_set.emplace_back(
-                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1));
-                prev_pts[idx].set(newx, newy);
+                pt_vector vec =
+                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
+                tmp.set(vec.begin(), vec.end());
+                ans.insert(tmp);
+                prev_pts[idx].x(newx);
+                prev_pts[idx].y(newy);
             }
         } else {
             for (std::size_t idx = 0; idx < n_paths; ++idx) {
@@ -270,9 +310,12 @@ path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offse
                 int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
                 coord_t newx = prevx + k * s0.dx;
                 coord_t newy = prevy + k * s0.dy;
-                poly45_set.emplace_back(
-                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1));
-                prev_pts[idx].set(newx, newy);
+                pt_vector vec =
+                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
+                tmp.set(vec.begin(), vec.end());
+                ans.insert(tmp);
+                prev_pts[idx].x(newx);
+                prev_pts[idx].y(newy);
             }
         }
     }
@@ -288,21 +331,22 @@ path_ref geometry::add_path45_bus(const pt_vector &data, const std::vector<offse
     if (s0.is_45_or_invalid()) {
         for (std::size_t idx = 0; idx < n_paths; ++idx) {
             int32_t scale = round(deltas[idx] / root2);
-            poly45_set.emplace_back(path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(),
-                                                   x0 + s0.dx * scale, y0 + s0.dy * scale,
-                                                   widths[idx] / 2, sty0, sty1));
+            pt_vector vec = path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(), x0 + s0.dx * scale,
+                                           y0 + s0.dy * scale, widths[idx] / 2, sty0, sty1);
+            tmp.set(vec.begin(), vec.end());
+            ans.insert(tmp);
         }
     } else {
         for (std::size_t idx = 0; idx < n_paths; ++idx) {
             int32_t scale = deltas[idx];
-            poly45_set.emplace_back(path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(),
-                                                   x0 + s0.dx * scale, y0 + s0.dy * scale,
-                                                   widths[idx] / 2, sty0, sty1));
+            pt_vector vec = path_to_poly45(prev_pts[idx].x(), prev_pts[idx].y(), x0 + s0.dx * scale,
+                                           y0 + s0.dy * scale, widths[idx] / 2, sty0, sty1);
+            tmp.set(vec.begin(), vec.end());
+            ans.insert(tmp);
         }
     }
 
-    // return
-    return {&poly45_set, start, poly45_set.size()};
+    return ans;
 }
 
 } // namespace layout

@@ -3,7 +3,10 @@
 namespace cbag {
 namespace layout {
 
-blockage::blockage(pt_vector data, blockage_type type) : polygon(std::move(data)), type(type) {}
+blockage::blockage(const pt_vector &data, blockage_type type, lay_t layer)
+    : type(type), layer(layer) {
+    set(data.begin(), data.end());
+}
 
 } // namespace layout
 } // namespace cbag

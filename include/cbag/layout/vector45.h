@@ -2,7 +2,6 @@
 #define CBAG_LAYOUT_VECTOR45_H
 
 #include <cbag/common/typedefs.h>
-#include <cbag/layout/polygon.h>
 
 namespace cbag {
 namespace layout {

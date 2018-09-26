@@ -8,12 +8,9 @@
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/geometry.h>
-#include <cbag/layout/path_ref.h>
+#include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/pin.h>
-#include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
-#include <cbag/layout/vector_obj_ref.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
@@ -45,19 +42,12 @@ struct cellview::helper {
         return fmt::format("X{:d}", self.inst_name_cnt);
     }
 
-    static geo_map_t::iterator get_geometry(cellview &self, layer_t &&layer) {
-        geo_map_t::iterator iter = self.geo_map.find(layer);
+    static geo_map_t::iterator make_geometry(cellview &self, const layer_t &key) {
+        auto iter = self.geo_map.find(key);
         if (iter == self.geo_map.end()) {
-            iter = self.geo_map.emplace(std::move(layer), geometry(self.geo_mode)).first;
+            iter = self.geo_map.emplace(key, geometry(self.geo_mode)).first;
         }
         return iter;
-    }
-
-    static geo_map_t::iterator get_geometry(cellview &self, const char *layer,
-                                            const char *purpose) {
-        lay_t lay_id = self.tech_ptr->get_layer_id(layer);
-        purp_t purp_id = self.tech_ptr->get_purpose_id(purpose);
-        return get_geometry(self, layer_t(lay_id, purp_id));
     }
 };
 
@@ -74,17 +64,18 @@ rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     return iter->second.get_bbox();
 }
 
-vector_obj_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, coord_t xl,
-                                             coord_t yl, coord_t xh, coord_t yh) {
+shape_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, coord_t xl,
+                                        coord_t yl, coord_t xh, coord_t yh, bool commit) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    return add_rect(lay_id, purp_id, xl, yl, xh, yh);
+    return add_rect(lay_id, purp_id, xl, yl, xh, yh, commit);
 }
 
-vector_obj_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
-                                             coord_t xh, coord_t yh) {
-    auto iter = helper::get_geometry(*this, layer_t(lay_id, purp_id));
-    return iter->second.add_rect(xl, yl, xh, yh);
+shape_ref<rectangle> cellview::add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl,
+                                        coord_t xh, coord_t yh, bool commit) {
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    return {this, std::move(key), rectangle(xl, yl, xh, yh), commit};
 }
 
 void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
@@ -97,106 +88,135 @@ void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, co
     iter->second.emplace_back(xl, yl, xh, yh, net, label);
 }
 
-vector_obj_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,
-                                               pt_vector data) {
-    auto iter = helper::get_geometry(*this, layer, purpose);
-    return iter->second.add_poly90(std::move(data));
-}
-
-vector_obj_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose,
-                                               pt_vector data) {
-    auto iter = helper::get_geometry(*this, layer, purpose);
-    return iter->second.add_poly45(std::move(data));
-}
-
-vector_obj_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, pt_vector data) {
-    auto iter = helper::get_geometry(*this, layer, purpose);
-    return iter->second.add_poly(std::move(data));
-}
-
-vector_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_code,
-                                                pt_vector data) {
-    auto btype = static_cast<blockage_type>(blk_code);
-    if (btype == blkPlacement) {
-        // area blockage
-        std::size_t idx = area_block_list.size();
-        area_block_list.emplace_back(std::move(data), btype);
-        return {&area_block_list, idx};
-    }
-
-    // layer blockage
+shape_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose,
+                                          const pt_vector &data, bool commit) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
-    auto iter = lay_block_map.find(lay_id);
-    if (iter == lay_block_map.end()) {
-        iter = lay_block_map.emplace(lay_id, std::vector<blockage>()).first;
-    }
-
-    std::size_t idx = iter->second.size();
-    iter->second.emplace_back(std::move(data), btype);
-    return {&(iter->second), idx};
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    polygon90 val;
+    val.set(data.begin(), data.end());
+    return {this, std::move(key), std::move(val), commit};
 }
 
-vector_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, pt_vector data) {
+shape_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose,
+                                          const pt_vector &data, bool commit) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    polygon45 val;
+    val.set(data.begin(), data.end());
+    return {this, std::move(key), std::move(val), commit};
+}
+
+shape_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, const pt_vector &data,
+                                      bool commit) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    polygon val;
+    val.set(data.begin(), data.end());
+    return {this, std::move(key), std::move(val), commit};
+}
+
+shape_ref<polygon45_set> cellview::add_path(const char *layer, const char *purpose,
+                                            const pt_vector &data, offset_t half_width,
+                                            uint8_t style0, uint8_t style1, uint8_t stylem,
+                                            bool commit) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    polygon45_set val = geometry::make_path(data, half_width, style0, style1, stylem);
+    return {this, std::move(key), std::move(val), commit};
+}
+
+shape_ref<polygon45_set>
+cellview::add_path45_bus(const char *layer, const char *purpose, const pt_vector &data,
+                         const std::vector<offset_t> &widths, const std::vector<offset_t> &spaces,
+                         uint8_t style0, uint8_t style1, uint8_t stylem, bool commit) {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    layer_t key(lay_id, purp_id);
+    helper::make_geometry(*this, key);
+    polygon45_set val = geometry::make_path45_bus(data, widths, spaces, style0, style1, stylem);
+    return {this, std::move(key), std::move(val), commit};
+}
+
+cv_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_code,
+                                            const pt_vector &data, bool commit) {
+    auto btype = static_cast<blockage_type>(blk_code);
+    lay_t lay_id = (layer == nullptr) ? 0 : tech_ptr->get_layer_id(layer);
+    return {this, blockage(data, btype, lay_id), commit};
+}
+
+cv_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit) {
     auto btype = static_cast<boundary_type>(bnd_code);
-    std::size_t idx = boundary_list.size();
-    boundary_list.emplace_back(std::move(data), btype);
-    return {&boundary_list, idx};
+    return {this, boundary(data, btype), commit};
 }
 
-path_ref cellview::add_path(const char *layer, const char *purpose, const pt_vector &data,
-                            offset_t half_width, uint8_t style0, uint8_t style1, uint8_t stylem) {
-    auto iter = helper::get_geometry(*this, layer, purpose);
-    return iter->second.add_path(data, half_width, style0, style1, stylem);
+cv_obj_ref<via> cellview::add_via(transformation xform, const char *via_id,
+                                  const uint32_t (&num)[2], const dist_t (&cut_dim)[2],
+                                  const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
+                                  const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
+                                  const offset_t (&lay2_off)[2], bool add_layers, bool commit) {
+    return {this,
+            via(xform, via_id, num, cut_dim, cut_sp, lay1_enc, lay1_off, lay2_enc, lay2_off,
+                add_layers),
+            commit};
 }
 
-path_ref cellview::add_path45_bus(const char *layer, const char *purpose, const pt_vector &data,
-                                  const std::vector<offset_t> &widths,
-                                  const std::vector<offset_t> &spaces, uint8_t style0,
-                                  uint8_t style1, uint8_t stylem) {
-    auto iter = helper::get_geometry(*this, layer, purpose);
-    return iter->second.add_path45_bus(data, widths, spaces, style0, style1, stylem);
+cv_obj_ref<instance> cellview::add_prim_instance(const char *lib, const char *cell,
+                                                 const char *view, const char *name,
+                                                 transformation xform, uint32_t nx, uint32_t ny,
+                                                 offset_t spx, offset_t spy, bool commit) {
+    return {this,
+            instance(helper::get_inst_name(*this, name), lib, cell, view, std::move(xform), nx, ny,
+                     spx, spy),
+            commit};
 }
 
-inst_iter_t cellview::add_prim_instance(const char *lib, const char *cell, const char *view,
-                                        const char *name, transformation xform, uint32_t nx,
-                                        uint32_t ny, offset_t spx, offset_t spy) {
-    std::string key = helper::get_inst_name(*this, name);
-
-    return inst_map
-        .emplace(helper::get_inst_name(*this, name),
-                 instance(lib, cell, view, std::move(xform), nx, ny, spx, spy))
-        .first;
+cv_obj_ref<instance> cellview::add_instance(const cellview *cv, const char *name,
+                                            transformation xform, uint32_t nx, uint32_t ny,
+                                            offset_t spx, offset_t spy, bool commit) {
+    return {this,
+            instance(helper::get_inst_name(*this, name), cv, std::move(xform), nx, ny, spx, spy),
+            commit};
 }
 
-inst_iter_t cellview::add_instance(const cellview *cv, const char *name, transformation xform,
-                                   uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
-    std::string key = helper::get_inst_name(*this, name);
-
-    return inst_map
-        .emplace(helper::get_inst_name(*this, name),
-                 instance(cv, std::move(xform), nx, ny, spx, spy))
-        .first;
+void cellview::add_object(const blockage &obj) {
+    if (obj.type == blkPlacement) {
+        // area blockage
+        area_block_list.push_back(obj);
+    } else {
+        auto iter = lay_block_map.find(obj.layer);
+        if (iter == lay_block_map.end()) {
+            iter = lay_block_map.emplace(obj.layer, std::vector<blockage>()).first;
+        }
+        iter->second.push_back(obj);
+    }
 }
 
-vector_obj_ref<via> cellview::add_via(transformation xform, const char *via_id,
-                                      const uint32_t (&num)[2], const dist_t (&cut_dim)[2],
-                                      const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
-                                      const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
-                                      const offset_t (&lay2_off)[2], bool add_layers) {
-    std::size_t idx = via_list.size();
-    via v = via_list.emplace_back(xform, via_id, num, cut_dim, cut_sp, lay1_enc, lay1_off, lay2_enc,
-                                  lay2_off);
-    if (add_layers) {
+void cellview::add_object(const boundary &obj) { boundary_list.push_back(obj); }
+
+void cellview::add_object(const via &obj) {
+    via_list.push_back(obj);
+    if (obj.add_layers) {
         purp_t purpose = tech_ptr->get_purpose_id(nullptr);
         lay_t bot_lay, top_lay;
-        tech_ptr->get_via_layers(via_id, bot_lay, top_lay);
-        rectangle bot_r = v.bot_box();
-        rectangle top_r = v.top_box();
-        v.set_layer1(add_rect(bot_lay, purpose, bot_r.xl(), bot_r.yl(), bot_r.xh(), bot_r.yh()));
-        v.set_layer2(add_rect(top_lay, purpose, top_r.xl(), top_r.yl(), top_r.xh(), top_r.yh()));
+        tech_ptr->get_via_layers(obj.via_id, bot_lay, top_lay);
+        layer_t bot_key(bot_lay, purpose);
+        layer_t top_key(top_lay, purpose);
+        auto bot_iter = helper::make_geometry(*this, bot_key);
+        auto top_iter = helper::make_geometry(*this, top_key);
+        bot_iter->second.add_shape(obj.bot_box());
+        top_iter->second.add_shape(obj.top_box());
     }
-    return {&via_list, idx};
 }
+
+void cellview::add_object(const instance &obj) { inst_map.emplace(obj.name, obj); }
 
 } // namespace layout
 } // namespace cbag
