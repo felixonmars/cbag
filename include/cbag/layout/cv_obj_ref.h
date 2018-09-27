@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/typedefs.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {

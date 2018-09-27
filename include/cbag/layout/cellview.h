@@ -9,7 +9,6 @@
 
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
-#include <cbag/layout/typedefs.h>
 
 namespace cbag {
 namespace layout {

@@ -2,7 +2,9 @@
 #define CBAG_LAYOUT_BLOCKAGE_H
 
 #include <cbag/common/blockage_type.h>
-#include <cbag/layout/typedefs.h>
+#include <cbag/common/typedefs.h>
+#include <cbag/layout/polygon.h>
+#include <cbag/layout/pt_vector_fwd.h>
 
 namespace cbag {
 namespace layout {

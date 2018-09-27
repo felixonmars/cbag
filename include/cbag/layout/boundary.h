@@ -2,7 +2,8 @@
 #define CBAG_LAYOUT_BOUNDARY_H
 
 #include <cbag/common/boundary_type.h>
-#include <cbag/layout/typedefs.h>
+#include <cbag/layout/polygon.h>
+#include <cbag/layout/pt_vector_fwd.h>
 
 namespace cbag {
 namespace layout {

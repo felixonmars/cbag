@@ -1,10 +1,17 @@
 #ifndef CBAG_LAYOUT_GEOMETRY_H
 #define CBAG_LAYOUT_GEOMETRY_H
 
+#include <cstdint>
 #include <variant>
 #include <vector>
 
-#include <cbag/layout/typedefs.h>
+#include <cbag/layout/polygon45_fwd.h>
+#include <cbag/layout/polygon45_set.h>
+#include <cbag/layout/polygon90_fwd.h>
+#include <cbag/layout/polygon90_set.h>
+#include <cbag/layout/polygon_fwd.h>
+#include <cbag/layout/polygon_set.h>
+#include <cbag/layout/pt_vector_fwd.h>
 
 namespace cbag {
 namespace layout {

@@ -5,7 +5,6 @@
 
 #include <cbag/common/via_param.h>
 #include <cbag/layout/transformation.h>
-#include <cbag/layout/typedefs.h>
 
 namespace cbag {
 namespace layout {
