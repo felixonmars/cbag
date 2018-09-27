@@ -1,3 +1,4 @@
+#include <cstring>
 
 #include <fmt/format.h>
 
@@ -51,6 +52,17 @@ struct cellview::helper {
 
 cellview::cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode)
     : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(cell_name) {}
+
+void cellview::set_geometry_mode(uint8_t new_mode) {
+    if (!empty())
+        throw std::runtime_error("Cannot change geometry mode of non-empty layout.");
+    geo_mode = new_mode;
+}
+
+bool cellview::empty() const {
+    return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
+           area_block_list.empty() && boundary_list.empty() && pin_map.empty();
+}
 
 rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
@@ -146,7 +158,7 @@ cellview::add_path45_bus(const char *layer, const char *purpose, const pt_vector
 cv_obj_ref<blockage> cellview::add_blockage(const char *layer, uint8_t blk_code,
                                             const pt_vector &data, bool commit) {
     auto btype = static_cast<blockage_type>(blk_code);
-    lay_t lay_id = (layer == nullptr) ? 0 : tech_ptr->get_layer_id(layer);
+    lay_t lay_id = (layer == nullptr || strlen(layer) == 0) ? 0 : tech_ptr->get_layer_id(layer);
     return {this, blockage(data, btype, lay_id), commit};
 }
 

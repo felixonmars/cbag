@@ -35,10 +35,13 @@ void geometry::reset_to_mode(uint8_t m) {
     switch (m) {
     case 0:
         data.emplace<0>();
+        break;
     case 1:
         data.emplace<1>();
+        break;
     case 2:
         data.emplace<2>();
+        break;
     default:
         throw std::invalid_argument(fmt::format("Unknown geometry mode: {}", m));
     }
@@ -69,7 +72,7 @@ void geometry::add_shape(const polygon45 &obj) {
     std::visit(
         overload{
             [](polygon90_set &d) {
-                throw std::invalid_argument("Cannot add poly45 to poly90_set");
+                throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
             },
             [&](polygon45_set &d) { d.insert(obj); },
             [&](polygon_set &d) { d.insert(obj); },
@@ -81,7 +84,7 @@ void geometry::add_shape(const polygon45_set &obj) {
     std::visit(
         overload{
             [](polygon90_set &d) {
-                throw std::invalid_argument("Cannot add poly45 to poly90_set");
+                throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
             },
             [&](polygon45_set &d) { d.insert(obj); },
             [&](polygon_set &d) { d.insert(obj); },
@@ -92,8 +95,12 @@ void geometry::add_shape(const polygon45_set &obj) {
 void geometry::add_shape(const polygon &obj) {
     std::visit(
         overload{
-            [](polygon90_set &d) { throw std::invalid_argument("Cannot add poly to poly90_set"); },
-            [](polygon45_set &d) { throw std::invalid_argument("Cannot add poly to poly45_set"); },
+            [](polygon90_set &d) {
+                throw std::invalid_argument("Cannot add poly; incorrect cellview layout mode.");
+            },
+            [](polygon45_set &d) {
+                throw std::invalid_argument("Cannot add poly; incorrect cellview layout mode.");
+            },
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
@@ -222,7 +229,6 @@ polygon45_set geometry::make_path(const pt_vector &data, offset_t half_width, ui
 polygon45_set geometry::make_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
                                         const std::vector<offset_t> &spaces, uint8_t style0,
                                         uint8_t style1, uint8_t stylem) {
-
     pt_vector::size_type n_pts = data.size();
     if (n_pts < 2) {
         throw std::invalid_argument(fmt::format("Cannot draw path with less than 2 points."));

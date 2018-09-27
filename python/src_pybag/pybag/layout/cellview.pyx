@@ -503,6 +503,14 @@ cdef class PyLayInstance:
         return self._master.has_prim_port(port_name)
 
     def commit(self):
+        if self._grid.tech_info.use_flip_parity():
+            # update track parity
+            top_layer = self._master.top_layer
+            bot_layer = self._grid.get_bot_common_layer(self._master.grid, top_layer)
+            fp_dict = self._grid.get_flip_parity_at(bot_layer, top_layer, self.location_unit,
+                                                    self.orientation)
+            self.new_master_with(flip_parity=fp_dict)
+
         self._ref.commit()
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
@@ -564,6 +572,10 @@ cdef class PyLayCellView:
     def cell_name(self):
         # type: () -> str
         return deref(self._ptr).cell_name.decode(self._encoding)
+
+    def set_geometry_mode(self, int mode):
+        # type: (int) -> None
+        deref(self._ptr).set_geometry_mode(mode)
     
     def get_rect_bbox(self, layer):
         # type: (Union[str, Tuple[str, str]]) -> BBox

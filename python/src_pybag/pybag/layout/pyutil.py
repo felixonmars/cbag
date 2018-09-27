@@ -41,3 +41,9 @@ class BoundaryType(Enum):
 class Orient2D(Enum):
     x = 0
     y = 1
+
+
+class GeometryMode(Enum):
+    POLY_90 = 0
+    POLY_45 = 1
+    POLY = 2

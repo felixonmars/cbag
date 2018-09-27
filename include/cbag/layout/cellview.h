@@ -49,10 +49,9 @@ class cellview {
 
     explicit cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode = 0);
 
-    bool empty() const {
-        return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
-               area_block_list.empty() && boundary_list.empty();
-    }
+    void set_geometry_mode(uint8_t new_mode);
+
+    bool empty() const;
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
 

@@ -95,6 +95,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         cellview(tech* tech_ptr, const char* cell_name, uint8_t geo_mode)
 
+        void set_geometry_mode(uint8_t new_mode) except +
+
         cbool empty() const
 
         rectangle get_bbox(const char* layer, const char* purpose) except +

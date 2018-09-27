@@ -121,6 +121,10 @@ template <> struct polygon_mutable_traits<cbagoa::oa_polygon> {
         for (; input_begin != input_end; ++input_begin) {
             t.pt_arr.append(oa::oaPoint(bp::x(*input_begin), bp::y(*input_begin)));
         }
+        // remove last point if same as first point
+        auto n = t.pt_arr.getNumElements();
+        if (t.pt_arr[n - 1] == t.pt_arr[0])
+            t.pt_arr.setNumElements(n - 1);
         return t;
     }
 };
