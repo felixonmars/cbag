@@ -5,6 +5,9 @@
 #include <variant>
 #include <vector>
 
+#include <boost/geometry/index/rtree.hpp>
+
+#include <cbag/layout/geo_object.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set.h>
 #include <cbag/layout/polygon90_fwd.h>
@@ -13,6 +16,8 @@
 #include <cbag/layout/polygon_set.h>
 #include <cbag/layout/pt_vector_fwd.h>
 #include <cbag/util/overload.h>
+
+namespace bgi = boost::geometry::index;
 
 namespace cbag {
 namespace layout {
@@ -24,9 +29,10 @@ class rectangle;
 class geometry {
   private:
     using geometry_data = std::variant<polygon90_set, polygon45_set, polygon_set>;
-
+    using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
     uint8_t mode = 0;
     geometry_data data;
+    geometry_index index;
     struct helper;
 
   public:

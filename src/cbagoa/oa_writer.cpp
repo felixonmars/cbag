@@ -303,8 +303,8 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
 
     // build term order
     std::stringstream term_order;
-    auto tmp1 = boost::join(cv.in_terms, cv.out_terms);
-    auto tmp2 = boost::join(tmp1, cv.io_terms);
+    auto tmp1 = boost::range::join(cv.in_terms, cv.out_terms);
+    auto tmp2 = boost::range::join(tmp1, cv.io_terms);
     auto cursor = tmp2.begin();
     auto stop = tmp2.end();
     term_order << '(';
