@@ -65,13 +65,19 @@ bool cellview::empty() const {
 }
 
 rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
+    rectangle ans(0, 0, -1, -1);
+    // merge geometry bounding box
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     purp_t purp_id = tech_ptr->get_purpose_id(purpose);
     auto iter = geo_map.find(layer_t(lay_id, purp_id));
-    if (iter == geo_map.end()) {
-        return rectangle(0, 0, -1, -1);
+    if (iter != geo_map.end()) {
+        ans.merge(iter->second.get_bbox());
     }
-    return iter->second.get_bbox();
+    // merge instance bounding box
+    for (const auto &p : inst_map) {
+        ans.merge(p.second.get_bbox(layer, purpose));
+    }
+    return ans;
 }
 
 shape_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, coord_t xl,

@@ -19,11 +19,14 @@ offset_t rectangle::h() const { return yh - yl; }
 bool rectangle::is_physical() const { return xh > xl && yh > yl; }
 bool rectangle::is_valid() const { return xh >= xl && yh >= yl; }
 bool rectangle::overlaps(const rectangle &r) const { return bp::intersects(*this, r, false); }
+bool rectangle::operator==(const rectangle &r) const {
+    return xl == r.xl && xh == r.xh && yl == r.yl && yh == r.yh;
+}
 
 rectangle rectangle::get_merge(const rectangle &other) const {
-    if (!is_physical())
+    if (!is_valid())
         return other;
-    if (!other.is_physical())
+    if (!other.is_valid())
         return *this;
 
     return {std::min(xl, other.xl), std::min(yl, other.yl), std::max(xh, other.xh),
@@ -50,6 +53,21 @@ rectangle::interval_type rectangle::get(bp::orientation_2d orient) const {
     }
     return {yl, yh};
 }
+
+rectangle &rectangle::merge(const rectangle &other) {
+    if (!is_valid()) {
+        *this = other;
+    } else if (other.is_valid()) {
+        xl = std::min(xl, other.xl);
+        yl = std::min(yl, other.yl);
+        xh = std::max(xh, other.xh);
+        yh = std::max(yh, other.yh);
+    }
+
+    return *this;
+}
+
+rectangle &rectangle::transform(const transformation &xform) { return bp::transform(*this, xform); }
 
 } // namespace layout
 } // namespace cbag

@@ -14,6 +14,7 @@ namespace layout {
 
 // class forwarding
 class cellview;
+class rectangle;
 
 struct cellview_ref {
     std::string lib;
@@ -56,6 +57,8 @@ class instance {
     const param_map *get_params() const;
 
     const cbag::transform get_transform() const;
+
+    rectangle get_bbox(const char *layer, const char *purpose) const;
 
     void set_master(const cellview *new_master);
 

@@ -2,59 +2,11 @@
 
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
+#include <cbag/layout/rectangle.h>
+#include <cbag/util/overload.h>
 
 namespace cbag {
 namespace layout {
-
-class lib_name_visitor {
-  private:
-    const char *output_lib;
-
-  public:
-    explicit lib_name_visitor(const char *output_lib) : output_lib(output_lib) {}
-
-    const char *operator()(const cellview *v) { return output_lib; }
-
-    const char *operator()(const cellview_ref &v) { return v.lib.c_str(); }
-};
-
-class cell_name_visitor {
-  private:
-    const str_map_t *rename_map;
-
-  public:
-    explicit cell_name_visitor(const str_map_t *rename_map) : rename_map(rename_map) {}
-
-    const char *operator()(const cellview *v) {
-        if (rename_map == nullptr) {
-            return v->cell_name.c_str();
-        }
-        return (*rename_map).find(v->cell_name)->second.c_str();
-    }
-
-    const char *operator()(const cellview_ref &v) { return v.cell.c_str(); }
-};
-
-class view_name_visitor {
-  private:
-    const char *view;
-
-  public:
-    explicit view_name_visitor(const char *view) : view(view) {}
-
-    const char *operator()(const cellview *v) { return view; }
-
-    const char *operator()(const cellview_ref &v) { return v.view.c_str(); }
-};
-
-class params_visitor {
-  public:
-    params_visitor() {}
-
-    const param_map *operator()(const cellview *v) { return nullptr; }
-
-    const param_map *operator()(const cellview_ref &v) { return &(v.params); }
-};
 
 cellview_ref::cellview_ref(const char *lib, const char *cell, const char *view)
     : lib(lib), cell(cell), view(view) {}
@@ -72,20 +24,58 @@ instance::instance(const char *name, const cellview *master, transformation xfor
       nx(nx), ny(ny), spx(spx), spy(spy) {}
 
 const char *instance::get_lib_name(const char *output_lib) const {
-    return std::visit(lib_name_visitor(output_lib), master);
+    return std::visit(
+        overload{
+            [&](const cellview *v) { return output_lib; },
+            [&](const cellview_ref &v) { return v.lib.c_str(); },
+        },
+        master);
 }
 
 const char *instance::get_cell_name(const str_map_t *rename_map) const {
-    return std::visit(cell_name_visitor(rename_map), master);
+    return std::visit(
+        overload{
+            [&](const cellview *v) {
+                if (rename_map == nullptr) {
+                    return v->cell_name.c_str();
+                }
+                return (*rename_map).find(v->cell_name)->second.c_str();
+            },
+            [&](const cellview_ref &v) { return v.cell.c_str(); },
+        },
+        master);
 }
 
 const char *instance::get_view_name(const char *default_view) const {
-    return std::visit(view_name_visitor(default_view), master);
+    return std::visit(
+        overload{
+            [&](const cellview *v) { return default_view; },
+            [&](const cellview_ref &v) { return v.view.c_str(); },
+        },
+        master);
 }
 
-const param_map *instance::get_params() const { return std::visit(params_visitor(), master); }
+const param_map *instance::get_params() const {
+    return std::visit(
+        overload{
+            [&](const cellview *v) { return (const param_map *)nullptr; },
+            [&](const cellview_ref &v) { return &(v.params); },
+        },
+        master);
+}
 
 const cbag::transform instance::get_transform() const { return xform.to_transform(); }
+
+rectangle instance::get_bbox(const char *layer, const char *purpose) const {
+    rectangle r = std::visit(
+        overload{
+            [&](const cellview *v) { return v->get_bbox(layer, purpose); },
+            [&](const cellview_ref &v) { return rectangle(0, 0, 0, 0); },
+        },
+        master);
+
+    return r.transform(xform);
+}
 
 void instance::set_master(const cellview *new_master) { master = new_master; }
 

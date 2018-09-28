@@ -12,12 +12,10 @@
 #include <cbag/layout/polygon_fwd.h>
 #include <cbag/layout/polygon_set.h>
 #include <cbag/layout/pt_vector_fwd.h>
+#include <cbag/util/overload.h>
 
 namespace cbag {
 namespace layout {
-
-template <class... Ts> struct overload : Ts... { using Ts::operator()...; };
-template <class... Ts> overload(Ts...)->overload<Ts...>;
 
 class rectangle;
 

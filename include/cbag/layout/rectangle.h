@@ -45,6 +45,7 @@ class rectangle {
     bool is_physical() const;
     bool is_valid() const;
     bool overlaps(const rectangle &r) const;
+    bool operator==(const rectangle &r) const;
 
     rectangle get_merge(const rectangle &other) const;
     rectangle get_intersect(const rectangle &other) const;
@@ -52,6 +53,9 @@ class rectangle {
     rectangle get_transform(const transformation &xform) const;
 
     interval_type get(bp::orientation_2d orient) const;
+
+    rectangle &merge(const rectangle &other);
+    rectangle &transform(const transformation &xform);
 
     template <typename T2> void set(bp::orientation_2d orient, const T2 &interval) {
         if (orient.to_int() == bp::orientation_2d_enum::HORIZONTAL) {

@@ -35,15 +35,15 @@ class geo_object {
   public:
     const box_type bnd_box;
 
-    geo_object();
-
     template <typename T>
-    geo_object(T v, offset_t spx, offset_t spy)
-        : val(std::move(v)), spx(spx), spy(spy), bnd_box(geo_object::get_bnd_box(val, spx, spy)) {}
+    geo_object(T v, offset_t spx, offset_t spy, const char *lay, const char *purp)
+        : val(std::move(v)), spx(spx), spy(spy),
+          bnd_box(geo_object::get_bnd_box(val, spx, spy, lay, purp)) {}
 
-    bool operator==(const geo_object &v);
+    bool operator==(const geo_object &v) const;
 
-    static box_type get_bnd_box(const value_type &val, offset_t spx, offset_t spy);
+    static box_type get_bnd_box(const value_type &val, offset_t spx, offset_t spy, const char *lay,
+                                const char *purp);
 };
 
 } // namespace layout
