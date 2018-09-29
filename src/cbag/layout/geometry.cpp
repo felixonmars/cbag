@@ -13,7 +13,40 @@
 namespace cbag {
 namespace layout {
 
-struct geometry::helper {};
+struct geometry::helper {
+    template <typename T>
+    static void register_shape(geometry &self, const T &obj, offset_t spx, offset_t spy) {
+        self.index.insert(geo_object(obj, spx, spy, "", ""));
+    }
+};
+
+class poly45_writer {
+  public:
+    using value_type = bp::polygon_45_data<coord_t>;
+
+  private:
+    geometry_index &index;
+    offset_t spx;
+    offset_t spy;
+    value_type last;
+
+  public:
+    poly45_writer(geometry_index &index, offset_t spx, offset_t spy)
+        : index(index), spx(spx), spy(spy) {}
+
+    void push_back(value_type &&v) {
+        record_last();
+        last = std::move(v);
+    }
+
+    value_type &back() { return last; }
+
+    void record_last() const { index.insert(geo_object(last, spx, spy, "", "")); }
+
+    value_type *end() const { return nullptr; }
+
+    void insert(value_type *ptr, const value_type &v) { last = v; }
+};
 
 geometry::geometry(uint8_t mode) : mode(mode) {
     if (mode != 0)
@@ -48,7 +81,7 @@ void geometry::reset_to_mode(uint8_t m) {
     mode = m;
 }
 
-void geometry::add_shape(const rectangle &obj) {
+void geometry::add_shape(const rectangle &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [&](polygon90_set &d) { d.insert(obj); },
@@ -56,9 +89,10 @@ void geometry::add_shape(const rectangle &obj) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
+    helper::register_shape(*this, obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon90 &obj) {
+void geometry::add_shape(const polygon90 &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [&](polygon90_set &d) { d.insert(obj); },
@@ -66,9 +100,10 @@ void geometry::add_shape(const polygon90 &obj) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
+    helper::register_shape(*this, obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon45 &obj) {
+void geometry::add_shape(const polygon45 &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [](polygon90_set &d) {
@@ -78,9 +113,10 @@ void geometry::add_shape(const polygon45 &obj) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
+    helper::register_shape(*this, obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon45_set &obj) {
+void geometry::add_shape(const polygon45_set &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [](polygon90_set &d) {
@@ -90,9 +126,10 @@ void geometry::add_shape(const polygon45_set &obj) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
+    helper::register_shape(*this, obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon &obj) {
+void geometry::add_shape(const polygon &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [](polygon90_set &d) {
@@ -104,6 +141,7 @@ void geometry::add_shape(const polygon &obj) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
+    helper::register_shape(*this, obj, spx, spy);
 }
 
 constexpr double root2 = cbag::math::sqrt(2);

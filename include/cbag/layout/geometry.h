@@ -24,12 +24,14 @@ namespace layout {
 
 class rectangle;
 
+using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
+
 /** A class representing layout geometries on the same layer.
  */
 class geometry {
   private:
     using geometry_data = std::variant<polygon90_set, polygon45_set, polygon_set>;
-    using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
+
     uint8_t mode = 0;
     geometry_data data;
     geometry_index index;
@@ -42,11 +44,11 @@ class geometry {
 
     void reset_to_mode(uint8_t m);
 
-    void add_shape(const rectangle &obj);
-    void add_shape(const polygon90 &obj);
-    void add_shape(const polygon45 &obj);
-    void add_shape(const polygon45_set &obj);
-    void add_shape(const polygon &obj);
+    void add_shape(const rectangle &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon90 &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon45 &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon45_set &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon &obj, offset_t spx, offset_t spy);
 
     template <typename T> void write_geometry(T &output) const {
         std::visit(
