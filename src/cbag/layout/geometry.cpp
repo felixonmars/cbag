@@ -13,12 +13,7 @@
 namespace cbag {
 namespace layout {
 
-struct geometry::helper {
-    template <typename T>
-    static void register_shape(geometry &self, const T &obj, offset_t spx, offset_t spy) {
-        self.index.insert(geo_object(obj, spx, spy, "", ""));
-    }
-};
+struct geometry::helper {};
 
 class poly45_writer {
   public:
@@ -89,7 +84,7 @@ void geometry::add_shape(const rectangle &obj, offset_t spx, offset_t spy) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    helper::register_shape(*this, obj, spx, spy);
+    index.insert(geo_object(obj, spx, spy, "", ""));
 }
 
 void geometry::add_shape(const polygon90 &obj, offset_t spx, offset_t spy) {
@@ -100,7 +95,7 @@ void geometry::add_shape(const polygon90 &obj, offset_t spx, offset_t spy) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    helper::register_shape(*this, obj, spx, spy);
+    index.insert(geo_object(obj, spx, spy, "", ""));
 }
 
 void geometry::add_shape(const polygon45 &obj, offset_t spx, offset_t spy) {
@@ -113,7 +108,7 @@ void geometry::add_shape(const polygon45 &obj, offset_t spx, offset_t spy) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    helper::register_shape(*this, obj, spx, spy);
+    index.insert(geo_object(obj, spx, spy, "", ""));
 }
 
 void geometry::add_shape(const polygon45_set &obj, offset_t spx, offset_t spy) {
@@ -126,7 +121,9 @@ void geometry::add_shape(const polygon45_set &obj, offset_t spx, offset_t spy) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    helper::register_shape(*this, obj, spx, spy);
+    poly45_writer writer(index, spx, spy);
+    obj.get(writer);
+    writer.record_last();
 }
 
 void geometry::add_shape(const polygon &obj, offset_t spx, offset_t spy) {
@@ -141,7 +138,7 @@ void geometry::add_shape(const polygon &obj, offset_t spx, offset_t spy) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    helper::register_shape(*this, obj, spx, spy);
+    index.insert(geo_object(obj, spx, spy, "", ""));
 }
 
 constexpr double root2 = cbag::math::sqrt(2);

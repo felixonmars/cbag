@@ -27,7 +27,7 @@ template <typename T> class shape_ref {
 
     void commit() {
         if (parent != nullptr) {
-            parent->geo_map[key].add_shape(obj);
+            parent->geo_map[key].add_shape(obj, spx, spy);
             parent = nullptr;
         }
     }
