@@ -30,7 +30,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         string pin_purpose_name
 
-        offset_t get_min_space(const string& layer_type, offset_t width, uint8_t sp_type) const except +
+        offset_t get_min_space(const string& layer_type, offset_t width, uint8_t sp_type) except +
 
     cdef cppclass point_t:
         point_t(coord_t x, coord_t y)
@@ -94,7 +94,6 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
     cdef cppclass cellview:
         string cell_name
-        unordered_map[string, instance] inst_map
 
         cellview(tech* tech_ptr, const char* cell_name, uint8_t geo_mode)
 
@@ -104,6 +103,37 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         rectangle get_bbox(const char* layer, const char* purpose) except +
 
+        void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
+                     const char *net, const char *label) except +
+
+        shape_ref[rectangle] add_rect(const char* layer, const char* purpose, cbool is_horiz, coord_t xl,
+                                      coord_t yl, coord_t xh, coord_t yh, cbool commit) except +
+
+        shape_ref[polygon] add_poly(const char* layer, const char* purpose, cbool is_horiz,
+                                    const vector[point_t]& data, cbool commit) except +
+
+        shape_ref[polygon45_set] add_path(const char* layer, const char* purpose, cbool is_horiz,
+                                          const vector[point_t]& data,
+                                          offset_t half_width, uint8_t style0, uint8_t style1,
+                                          uint8_t stylem, cbool commit) except +
+
+        shape_ref[polygon45_set] add_path45_bus(const char* layer, const char* purpose, cbool is_horiz,
+                                                const vector[point_t]& data,
+                                                const vector[offset_t]& widths, const vector[offset_t]& spaces,
+                                                uint8_t style0, uint8_t style1, uint8_t stylem,
+                                                cbool commit) except +
+
+        cv_obj_ref[blockage] add_blockage(const char* layer, uint8_t blk_code,
+                                          const vector[point_t]& data, cbool commit) except +
+
+        cv_obj_ref[boundary] add_boundary(uint8_t bnd_code, const vector[point_t]& data, cbool commit) except +
+
+        cv_obj_ref[via] add_via(transformation xform, const char* vid, const uint32_t (&num)[2],
+                                const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
+                                const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
+                                const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
+                                cbool add_layers, cbool bot_horiz, cbool top_horiz, cbool commit) except +
+
         cv_obj_ref[instance] add_prim_instance(const char* lib, const char* cell, const char* view,
                                                const char* name, transformation xform, uint32_t nx,
                                                uint32_t ny, offset_t spx, offset_t spy, cbool commit)
@@ -111,36 +141,6 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         cv_obj_ref[instance] add_instance(const cellview* cv, const char* name, transformation xform,
                                           uint32_t nx, uint32_t ny, offset_t spx, offset_t spy,
                                           cbool commit)
-
-        shape_ref[rectangle] add_rect(const char* layer, const char* purpose, coord_t xl,
-                                      coord_t yl, coord_t xh, coord_t yh, cbool commit) except +
-
-        shape_ref[polygon] add_poly(const char* layer, const char* purpose,
-                                    const vector[point_t]& data, cbool commit) except +
-
-        cv_obj_ref[blockage] add_blockage(const char* layer, uint8_t blk_code,
-                                          const vector[point_t]& data, cbool commit) except +
-
-        cv_obj_ref[boundary] add_boundary(uint8_t bnd_code, const vector[point_t]& data, cbool commit) except +
-
-        shape_ref[polygon45_set] add_path(const char* layer, const char* purpose, const vector[point_t]& data,
-                                          offset_t half_width, uint8_t style0, uint8_t style1,
-                                          uint8_t stylem, cbool commit) except +
-
-        shape_ref[polygon45_set] add_path45_bus(const char* layer, const char* purpose,
-                                                const vector[point_t]& data,
-                                                const vector[offset_t]& widths, const vector[offset_t]& spaces,
-                                                uint8_t style0, uint8_t style1, uint8_t stylem,
-                                                cbool commit) except +
-
-        void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                     const char *net, const char *label) except +
-
-        cv_obj_ref[via] add_via(transformation xform, const char* vid, const uint32_t (&num)[2],
-                                const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
-                                const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
-                                const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-                                cbool add_layers, cbool commit) except +
 
 
 cdef class PyTech:

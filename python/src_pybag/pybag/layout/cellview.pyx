@@ -709,8 +709,8 @@ cdef class PyLayCellView:
         return self._add_cinst(grid, master, lib_name, master._layout, inst_name_char,
                                transformation(dx, dy, ocode), nx, ny, spx, spy, commit)
 
-    def add_rect(self, layer, BBox bbox, cbool commit=True):
-        # type: (Union[str, Tuple[str, str]], BBox, bool) -> PyRect
+    def add_rect(self, layer, BBox bbox, cbool is_horiz, cbool commit=True):
+        # type: (Union[str, Tuple[str, str]], BBox, bool, bool) -> PyRect
         """Add a new rectangle.
 
         Parameters
@@ -719,6 +719,8 @@ cdef class PyLayCellView:
             the rectangle layer.
         bbox : BBox
             the rectangle bounding box.
+        is_horiz : bool
+            True if this layer is horizontal.
         commit : bool
             True to commit the object immediately.
 
@@ -736,11 +738,11 @@ cdef class PyLayCellView:
             layer = layer[0].encode(self._encoding)
 
         cdef PyRect ans = PyRect()
-        ans._ref = move(deref(self._ptr).add_rect(layer, purpose, bbox.xl, bbox.yl, bbox.xh,
+        ans._ref = move(deref(self._ptr).add_rect(layer, purpose, is_horiz, bbox.xl, bbox.yl, bbox.xh,
                                                   bbox.yh, commit))
         return ans
 
-    def add_rect_arr(self, layer, bbox, int nx, int ny, int spx, int spy):
+    def add_rect_arr(self, layer, BBox bbox, cbool is_horiz, int nx, int ny, int spx, int spy):
         # type: (Union[str, Tuple[str, str]], BBox, int, int, int, int) -> None
         """Add an array of rectangles.
 
@@ -780,11 +782,11 @@ cdef class PyLayCellView:
             for xi in range(nx):
                 dy = 0
                 for yi in range(ny):
-                    deref(self._ptr).add_rect(lay, purp, xl + dx, yl + dy, xh + dx, yh + dy, True)
+                    deref(self._ptr).add_rect(lay, purp, is_horiz, xl + dx, yl + dy, xh + dx, yh + dy, True)
                     dy += spy
                 dx += spx
 
-    def add_polygon(self, layer, points, cbool commit=True):
+    def add_polygon(self, layer, points, cbool is_horiz, cbool commit=True):
         cdef char* purpose = NULL
         if isinstance(layer, str):
             layer = layer.encode(self._encoding)
@@ -797,7 +799,7 @@ cdef class PyLayCellView:
         _compress_points(points, data)
 
         cdef PyPolygon ans = PyPolygon()
-        ans._ref = move(deref(self._ptr).add_poly(layer, purpose, data, commit))
+        ans._ref = move(deref(self._ptr).add_poly(layer, purpose, is_horiz, data, commit))
         return ans
 
     def add_blockage(self, layer, points, int blk_type, cbool commit=True):
@@ -844,7 +846,7 @@ cdef class PyLayCellView:
 
     def add_via_arr(self, via_id, penc1, penc2, int dx0, int dy0, int ocode, int w, int h,
                     int nx, int ny, int spx, int spy, int vnx, int vny, int vspx, int vspy,
-                    cbool add_layers, cbool commit=True):
+                    cbool add_layers, cbool bot_horiz, cbool top_horiz, cbool commit=True):
         via_id = via_id.encode(self._encoding)
 
         cdef uint32_t num[2]
@@ -870,11 +872,13 @@ cdef class PyLayCellView:
         cdef PyVia ans = PyVia()
         with nogil:
             ans._ref = move(deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
-                                                     cut_sp, enc1, off1, enc2, off2, add_layers, commit))
+                                                     cut_sp, enc1, off1, enc2, off2, add_layers,
+                                                     bot_horiz, top_horiz, commit))
             dy += spy
             for yi in range(1, ny):
                 deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
-                                         cut_sp, enc1, off1, enc2, off2, add_layers, True)
+                                         cut_sp, enc1, off1, enc2, off2, add_layers, bot_horiz,
+                                         top_horiz, True)
                 dy += spy
 
             dx += spx
@@ -882,14 +886,15 @@ cdef class PyLayCellView:
                 dy = dy0
                 for yi in range(ny):
                     deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
-                                             cut_sp, enc1, off1, enc2, off2, add_layers, True)
+                                             cut_sp, enc1, off1, enc2, off2, add_layers,
+                                             bot_horiz, top_horiz, True)
                     dy += spy
                 dx += spx
 
         return ans
 
-    def add_path(self, layer, points, int width, int start_style, int stop_style, int join_style,
-                 cbool commit=True):
+    def add_path(self, layer, points, cbool is_horiz, int width, int start_style, int stop_style,
+                 int join_style, cbool commit=True):
         cdef char* purpose = NULL
         if isinstance(layer, str):
             layer = layer.encode(self._encoding)
@@ -903,11 +908,11 @@ cdef class PyLayCellView:
         _compress_points(points, data)
 
         cdef PyPath ans = PyPath()
-        ans._ref = move(deref(self._ptr).add_path(layer, purpose, data, half_w, start_style,
+        ans._ref = move(deref(self._ptr).add_path(layer, purpose, is_horiz, data, half_w, start_style,
                                                   stop_style, join_style, commit))
         return ans
 
-    def add_path45_bus(self, layer, points, widths, spaces, int start_style, int stop_style,
+    def add_path45_bus(self, layer, points, widths, spaces, cbool is_horiz, int start_style, int stop_style,
                        int join_style, cbool commit=True):
         cdef char* purpose = NULL
         if isinstance(layer, str):
@@ -923,6 +928,7 @@ cdef class PyLayCellView:
         _compress_points(points, data)
 
         cdef PyPath ans = PyPath()
-        ans._ref = move(deref(self._ptr).add_path45_bus(layer, purpose, data, w_vec, sp_vec, start_style,
+        ans._ref = move(deref(self._ptr).add_path45_bus(layer, purpose, is_horiz, data, w_vec,
+                                                        sp_vec, start_style,
                                                         stop_style, join_style, commit))
         return ans
