@@ -47,3 +47,9 @@ class GeometryMode(Enum):
     POLY_90 = 0
     POLY_45 = 1
     POLY = 2
+
+
+class SpaceQueryMode(Enum):
+    LINE_END = 0
+    DIFF_COLOR = 1
+    SAME_COLOR = 2

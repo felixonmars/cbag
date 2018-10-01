@@ -114,11 +114,10 @@ target_link_libraries(cbag
   oaPlugIn
   # for Spirit X3 error code
   boost_system
+  # for reading tech files
+  yaml-cpp
   PRIVATE
-  # for primitives YAML serialization
   fmt-header-only
-  # multithreading for spdlog
-  # Threads::Threads
   m
   ${CMAKE_DL_LIBS}
   )

@@ -28,12 +28,12 @@ class geo_object {
     using box_type = bg_box;
 
   private:
-    const value_type val;
+    value_type val;
     offset_t spx = 0;
     offset_t spy = 0;
 
   public:
-    const box_type bnd_box;
+    box_type bnd_box;
 
     template <typename T>
     geo_object(T v, offset_t spx, offset_t spy, const char *lay, const char *purp)

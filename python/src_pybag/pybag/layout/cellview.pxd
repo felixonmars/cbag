@@ -26,8 +26,11 @@ cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
 
 cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass tech:
-        tech(unordered_map[string, lay_t], unordered_map[string, purp_t],
-             unordered_map[string, pair[lay_t, lay_t]], const string&, const string&, bool) except +
+        tech(const char* fname) except +
+
+        string pin_purpose_name
+
+        offset_t get_min_space(const string& layer_type, offset_t width, uint8_t sp_type) const except +
 
     cdef cppclass point_t:
         point_t(coord_t x, coord_t y)
@@ -142,6 +145,7 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
 cdef class PyTech:
     cdef unique_ptr[tech] _ptr
+    cdef unicode _encoding
     cdef unicode _pin_purpose
 
 

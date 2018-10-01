@@ -26,25 +26,11 @@ init_logging()
 
 
 cdef class PyTech:
-    def __init__(self, tech_params, encoding):
-        cdef unordered_map[string, lay_t] lay_map
-        cdef unordered_map[string, purp_t] pur_map
-        cdef unordered_map[string, pair[lay_t, lay_t]] via_map
-        cdef pair[lay_t, lay_t] tmp_pair
-
-        for key, val in tech_params['layer'].items():
-            lay_map[key.encode(encoding)] = val
-        for key, val in tech_params['purpose'].items():
-            pur_map[key.encode(encoding)] = val
-        for key, val in tech_params['via_layers'].items():
-            tmp_pair.first = val[0]
-            tmp_pair.second = val[1]
-            via_map[key.encode(encoding)] = tmp_pair
-
-        options = tech_params['options']
-        self._pin_purpose = options['pin_purpose']
-        self._ptr.reset(new tech(lay_map, pur_map, via_map, options['default_purpose'].encode(encoding),
-                                 self._pin_purpose.encode(encoding), options['make_pin_obj']))
+    def __init__(self, tech_fname, encoding):
+        tech_fname = tech_fname.encode(encoding)
+        self._ptr.reset(new tech(tech_fname))
+        self._encoding = encoding
+        self._pin_purpose = deref(self._ptr).pin_purpose_name.decode(encoding)
 
     def __dealloc__(self):
         self._ptr.reset()
@@ -53,6 +39,10 @@ cdef class PyTech:
     def pin_purpose(self):
         return self._pin_purpose
 
+    def get_min_space(self, layer, int width, int sp_type):
+        layer = layer.encode(self._encoding)
+
+        return deref(self._ptr).get_min_space(layer, width, sp_type)
 
 cdef class PyRect:
     def __init__(self):

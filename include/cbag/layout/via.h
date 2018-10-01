@@ -20,6 +20,8 @@ class via {
     std::string via_id;
     via_param params;
     bool add_layers;
+    bool bot_horiz;
+    bool top_horiz;
 
   public:
     via();
@@ -27,7 +29,7 @@ class via {
     via(transformation xform, const char *via_id, const uint32_t (&num)[2],
         const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
         const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-        bool add_layers);
+        bool add_layers, bool bot_horiz, bool top_horiz);
 
     rectangle bot_box() const;
 

@@ -23,6 +23,7 @@ namespace cbag {
 namespace layout {
 
 class rectangle;
+class tech;
 
 using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
 
@@ -35,20 +36,24 @@ class geometry {
     uint8_t mode = 0;
     geometry_data data;
     geometry_index index;
+    std::string lay_type = "";
+    tech *tech_ptr = nullptr;
     struct helper;
 
   public:
-    explicit geometry(uint8_t mode = 0);
+    geometry();
+
+    geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode = 0);
 
     rectangle get_bbox() const;
 
     void reset_to_mode(uint8_t m);
 
-    void add_shape(const rectangle &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon90 &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon45 &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon45_set &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon &obj, offset_t spx, offset_t spy);
+    void add_shape(const rectangle &obj, bool is_horiz);
+    void add_shape(const polygon90 &obj, bool is_horiz);
+    void add_shape(const polygon45 &obj, bool is_horiz);
+    void add_shape(const polygon45_set &obj, bool is_horiz);
+    void add_shape(const polygon &obj, bool is_horiz);
 
     template <typename T> void write_geometry(T &output) const {
         std::visit(

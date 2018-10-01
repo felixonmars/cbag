@@ -54,29 +54,26 @@ class cellview {
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
 
-    shape_ref<rectangle> add_rect(const char *layer, const char *purpose, coord_t xl, coord_t yl,
-                                  coord_t xh, coord_t yh, bool commit);
-
-    shape_ref<rectangle> add_rect(lay_t lay_id, purp_t purp_id, coord_t xl, coord_t yl, coord_t xh,
-                                  coord_t yh, bool commit);
-
     void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
                  const char *label);
 
-    shape_ref<polygon90> add_poly90(const char *layer, const char *purpose, const pt_vector &data,
-                                    bool commit);
+    shape_ref<rectangle> add_rect(const char *layer, const char *purpose, bool is_horiz, coord_t xl,
+                                  coord_t yl, coord_t xh, coord_t yh, bool commit);
 
-    shape_ref<polygon45> add_poly45(const char *layer, const char *purpose, const pt_vector &data,
-                                    bool commit);
+    shape_ref<polygon90> add_poly90(const char *layer, const char *purpose, bool is_horiz,
+                                    const pt_vector &data, bool commit);
 
-    shape_ref<polygon> add_poly(const char *layer, const char *purpose, const pt_vector &data,
-                                bool commit);
+    shape_ref<polygon45> add_poly45(const char *layer, const char *purpose, bool is_horiz,
+                                    const pt_vector &data, bool commit);
 
-    shape_ref<polygon45_set> add_path(const char *layer, const char *purpose, const pt_vector &data,
-                                      offset_t half_width, uint8_t style0, uint8_t style1,
-                                      uint8_t stylem, bool commit);
+    shape_ref<polygon> add_poly(const char *layer, const char *purpose, bool is_horiz,
+                                const pt_vector &data, bool commit);
 
-    shape_ref<polygon45_set> add_path45_bus(const char *layer, const char *purpose,
+    shape_ref<polygon45_set> add_path(const char *layer, const char *purpose, bool is_horiz,
+                                      const pt_vector &data, offset_t half_width, uint8_t style0,
+                                      uint8_t style1, uint8_t stylem, bool commit);
+
+    shape_ref<polygon45_set> add_path45_bus(const char *layer, const char *purpose, bool is_horiz,
                                             const pt_vector &data,
                                             const std::vector<offset_t> &widths,
                                             const std::vector<offset_t> &spaces, uint8_t style0,
@@ -91,7 +88,7 @@ class cellview {
                             const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
                             const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
                             const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-                            bool add_layers, bool commit);
+                            bool add_layers, bool bot_horiz, bool top_horiz, bool commit);
 
     cv_obj_ref<instance> add_prim_instance(const char *lib, const char *cell, const char *view,
                                            const char *name, transformation xform, uint32_t nx,
