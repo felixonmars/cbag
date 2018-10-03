@@ -5,11 +5,8 @@
 #include <fmt/ostream.h>
 
 #include <cbag/layout/end_style.h>
-#include <cbag/layout/geo_instance.h>
-#include <cbag/layout/geo_object.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/rectangle.h>
-#include <cbag/layout/tech.h>
 #include <cbag/layout/transformation.h>
 #include <cbag/layout/vector45.h>
 #include <cbag/math/constexpr.h>
@@ -19,38 +16,10 @@ namespace layout {
 
 struct geometry::helper {};
 
-class poly45_writer {
-  public:
-    using value_type = bp::polygon_45_data<coord_t>;
-
-  private:
-    geometry_index &index;
-    offset_t spx;
-    offset_t spy;
-    value_type last;
-
-  public:
-    poly45_writer(geometry_index &index, offset_t spx, offset_t spy)
-        : index(index), spx(spx), spy(spy) {}
-
-    void push_back(value_type &&v) {
-        record_last();
-        last = std::move(v);
-    }
-
-    value_type &back() { return last; }
-
-    void record_last() const { index.insert(geo_object(last, spx, spy)); }
-
-    value_type *end() const { return nullptr; }
-
-    void insert(value_type *ptr, const value_type &v) { last = v; }
-};
-
 geometry::geometry() = default;
 
 geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
-    : mode(mode), lay_type(std::move(lay_type)), tech_ptr(tech_ptr) {
+    : mode(mode), index(std::move(lay_type), tech_ptr) {
     if (mode != 0)
         reset_to_mode(mode);
 }
@@ -96,22 +65,7 @@ void geometry::add_shape(const rectangle &obj, bool is_horiz) {
         },
         data);
 
-    coord_t spx, spy;
-    if (lay_type.empty()) {
-        spx = spy = 0;
-    } else {
-        if (is_horiz) {
-            offset_t w = obj.h();
-            spx = tech_ptr->get_min_space(lay_type, w, space_type::LINE_END);
-            spy = tech_ptr->get_min_space(lay_type, w, space_type::DIFF_COLOR);
-        } else {
-            offset_t w = obj.w();
-            spx = tech_ptr->get_min_space(lay_type, w, space_type::DIFF_COLOR);
-            spy = tech_ptr->get_min_space(lay_type, w, space_type::LINE_END);
-        }
-    }
-
-    index.insert(geo_object(obj, spx, spy));
+    index.insert(obj, is_horiz);
 }
 
 void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
@@ -122,8 +76,8 @@ void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0));
+
+    index.insert(obj, is_horiz);
 }
 
 void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
@@ -136,8 +90,8 @@ void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0));
+
+    index.insert(obj, is_horiz);
 }
 
 void geometry::add_shape(const polygon45_set &obj, bool is_horiz) {
@@ -150,10 +104,8 @@ void geometry::add_shape(const polygon45_set &obj, bool is_horiz) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    // TODO: space around polygons?
-    poly45_writer writer(index, 0, 0);
-    obj.get(writer);
-    writer.record_last();
+
+    index.insert(obj, is_horiz);
 }
 
 void geometry::add_shape(const polygon &obj, bool is_horiz) {
@@ -168,12 +120,12 @@ void geometry::add_shape(const polygon &obj, bool is_horiz) {
             [&](polygon_set &d) { d.insert(obj); },
         },
         data);
-    // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0));
+
+    index.insert(obj, is_horiz);
 }
 
 void geometry::record_instance(const geometry *master, transformation xform) {
-    index.insert(geo_object(geo_instance(master, std::move(xform)), 0, 0));
+    index.insert(master, std::move(xform));
 }
 
 constexpr double root2 = cbag::math::sqrt(2);

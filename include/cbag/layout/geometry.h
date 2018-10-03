@@ -5,9 +5,7 @@
 #include <variant>
 #include <vector>
 
-#include <boost/geometry/index/rtree.hpp>
-
-#include <cbag/layout/geo_object.h>
+#include <cbag/layout/geo_index.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set.h>
 #include <cbag/layout/polygon90_fwd.h>
@@ -26,8 +24,6 @@ class rectangle;
 class tech;
 class transformation;
 
-using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
-
 /** A class representing layout geometries on the same layer.
  */
 class geometry {
@@ -36,9 +32,7 @@ class geometry {
 
     uint8_t mode = 0;
     geometry_data data;
-    geometry_index index;
-    std::string lay_type = "";
-    tech *tech_ptr = nullptr;
+    geo_index index;
     struct helper;
 
   public:
