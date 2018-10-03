@@ -48,7 +48,9 @@ class instance {
     instance(const char *name, const cellview *master, transformation xform, uint32_t nx = 1,
              uint32_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
-    bool is_primitive() const;
+    bool is_reference() const;
+
+    const cellview *get_cellview() const;
 
     const char *get_lib_name(const char *output_lib) const;
 

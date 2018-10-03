@@ -232,8 +232,18 @@ void cellview::add_object(const via &obj) {
 
 void cellview::add_object(const instance &obj) {
     helper::add_inst(*this, obj);
-    if (!obj.is_primitive()) {
-
+    const cellview *master = obj.get_cellview();
+    if (master != nullptr) {
+        for (const auto &pair : master->geo_map) {
+            auto geo_iter = helper::make_geometry(*this, pair.first);
+            for (uint32_t ix = 0; ix < obj.nx; ++ix) {
+                for (uint32_t iy = 0; iy < obj.ny; ++iy) {
+                    // unordered map does not invalidate pointers to elements
+                    geo_iter->second.record_instance(
+                        &pair.second, obj.xform.get_move_by(obj.spx * ix, obj.spy * iy));
+                }
+            }
+        }
     }
 }
 

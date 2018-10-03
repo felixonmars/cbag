@@ -57,7 +57,7 @@ class geometry {
     void add_shape(const polygon45_set &obj, bool is_horiz);
     void add_shape(const polygon &obj, bool is_horiz);
 
-    void record_instance(geometry *master, const transformation &xform);
+    void record_instance(const geometry *master, transformation xform);
 
     template <typename T> void write_geometry(T &output) const {
         std::visit(

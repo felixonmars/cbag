@@ -72,10 +72,15 @@ cbag::orientation convert_orient(bp::axis_transformation::ATR orient) {
 }
 
 cbag::transform transformation::to_transform() const {
-    coord_t x = 0, y = 0;
-    transform(x, y);
-
+    coord_t x, y;
+    get_location(x, y);
     return {x, y, convert_orient(orient())};
+}
+
+transformation transformation::get_move_by(offset_t dx, offset_t dy) const {
+    coord_t x, y;
+    get_location(x, y);
+    return {x + dx, y + dy, orient()};
 }
 
 void transformation::set_location(coord_t x, coord_t y) {

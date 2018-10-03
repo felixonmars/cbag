@@ -11,13 +11,13 @@ class rectangle;
 
 class geo_instance {
   private:
-    geometry *master = nullptr;
+    const geometry *master = nullptr;
     transformation xform;
 
   public:
     geo_instance();
 
-    geo_instance(geometry *master, transformation xform);
+    geo_instance(const geometry *master, transformation xform);
 
     rectangle &get_bbox(rectangle &r) const;
 

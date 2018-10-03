@@ -23,7 +23,12 @@ instance::instance(const char *name, const cellview *master, transformation xfor
     : master(std::in_place_type_t<const cellview *>{}, master), name(name), xform(std::move(xform)),
       nx(nx), ny(ny), spx(spx), spy(spy) {}
 
-bool instance::is_primitive() const { return std::holds_alternative<cellview_ref>(master); }
+bool instance::is_reference() const { return std::holds_alternative<cellview_ref>(master); }
+
+const cellview *instance::get_cellview() const {
+    auto ptr = std::get_if<const cellview *>(&master);
+    return (ptr == nullptr) ? nullptr : *ptr;
+}
 
 const char *instance::get_lib_name(const char *output_lib) const {
     return std::visit(

@@ -172,8 +172,8 @@ void geometry::add_shape(const polygon &obj, bool is_horiz) {
     index.insert(geo_object(obj, 0, 0));
 }
 
-void geometry::record_instance(geometry *master, const transformation &xform) {
-    index.insert(geo_object(geo_instance(master, xform), 0, 0));
+void geometry::record_instance(const geometry *master, transformation xform) {
+    index.insert(geo_object(geo_instance(master, std::move(xform)), 0, 0));
 }
 
 constexpr double root2 = cbag::math::sqrt(2);

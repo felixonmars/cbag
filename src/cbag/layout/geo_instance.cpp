@@ -7,7 +7,7 @@ namespace layout {
 
 geo_instance::geo_instance() = default;
 
-geo_instance::geo_instance(geometry *master, transformation xform)
+geo_instance::geo_instance(const geometry *master, transformation xform)
     : master(master), xform(std::move(xform)) {}
 
 rectangle &geo_instance::get_bbox(rectangle &r) const {
