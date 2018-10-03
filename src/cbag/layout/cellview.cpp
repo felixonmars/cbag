@@ -230,7 +230,12 @@ void cellview::add_object(const via &obj) {
     }
 }
 
-void cellview::add_object(const instance &obj) { helper::add_inst(*this, obj); }
+void cellview::add_object(const instance &obj) {
+    helper::add_inst(*this, obj);
+    if (!obj.is_primitive()) {
+
+    }
+}
 
 } // namespace layout
 } // namespace cbag
