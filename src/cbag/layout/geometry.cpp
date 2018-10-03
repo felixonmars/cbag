@@ -5,9 +5,12 @@
 #include <fmt/ostream.h>
 
 #include <cbag/layout/end_style.h>
+#include <cbag/layout/geo_instance.h>
+#include <cbag/layout/geo_object.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
+#include <cbag/layout/transformation.h>
 #include <cbag/layout/vector45.h>
 #include <cbag/math/constexpr.h>
 
@@ -37,7 +40,7 @@ class poly45_writer {
 
     value_type &back() { return last; }
 
-    void record_last() const { index.insert(geo_object(last, spx, spy, "", "")); }
+    void record_last() const { index.insert(geo_object(last, spx, spy)); }
 
     value_type *end() const { return nullptr; }
 
@@ -54,13 +57,17 @@ geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
 
 rectangle geometry::get_bbox() const {
     rectangle ans;
+    return get_bbox(ans);
+}
+
+rectangle &geometry::get_bbox(rectangle &r) const {
     std::visit(
         overload{
-            [&](const auto &d) { bp::extents(ans, d); },
+            [&](const auto &d) { bp::extents(r, d); },
         },
         data);
 
-    return ans;
+    return r;
 }
 
 void geometry::reset_to_mode(uint8_t m) {
@@ -104,7 +111,7 @@ void geometry::add_shape(const rectangle &obj, bool is_horiz) {
         }
     }
 
-    index.insert(geo_object(obj, spx, spy, "", ""));
+    index.insert(geo_object(obj, spx, spy));
 }
 
 void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
@@ -116,7 +123,7 @@ void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
         },
         data);
     // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0, "", ""));
+    index.insert(geo_object(obj, 0, 0));
 }
 
 void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
@@ -130,7 +137,7 @@ void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
         },
         data);
     // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0, "", ""));
+    index.insert(geo_object(obj, 0, 0));
 }
 
 void geometry::add_shape(const polygon45_set &obj, bool is_horiz) {
@@ -162,7 +169,11 @@ void geometry::add_shape(const polygon &obj, bool is_horiz) {
         },
         data);
     // TODO: space around polygons?
-    index.insert(geo_object(obj, 0, 0, "", ""));
+    index.insert(geo_object(obj, 0, 0));
+}
+
+void geometry::record_instance(geometry *master, const transformation &xform) {
+    index.insert(geo_object(geo_instance(master, xform), 0, 0));
 }
 
 constexpr double root2 = cbag::math::sqrt(2);

@@ -24,6 +24,7 @@ namespace layout {
 
 class rectangle;
 class tech;
+class transformation;
 
 using geometry_index = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
 
@@ -46,6 +47,7 @@ class geometry {
     geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode = 0);
 
     rectangle get_bbox() const;
+    rectangle &get_bbox(rectangle &r) const;
 
     void reset_to_mode(uint8_t m);
 
@@ -54,6 +56,8 @@ class geometry {
     void add_shape(const polygon45 &obj, bool is_horiz);
     void add_shape(const polygon45_set &obj, bool is_horiz);
     void add_shape(const polygon &obj, bool is_horiz);
+
+    void record_instance(geometry *master, const transformation &xform);
 
     template <typename T> void write_geometry(T &output) const {
         std::visit(
