@@ -40,6 +40,7 @@ class geometry {
 
     geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode = 0);
 
+    bool index_empty() const;
     rectangle get_bbox() const;
     rectangle &get_bbox(rectangle &r) const;
     rectangle &get_index_bbox(rectangle &r) const;

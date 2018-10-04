@@ -24,6 +24,10 @@ geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
         reset_to_mode(mode);
 }
 
+bool geometry::index_empty() const {
+    return index.empty();
+}
+
 rectangle geometry::get_bbox() const {
     rectangle ans;
     return get_bbox(ans);
