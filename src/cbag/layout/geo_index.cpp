@@ -36,6 +36,15 @@ geo_index::geo_index() = default;
 geo_index::geo_index(std::string &&lay_type, tech *tech_ptr)
     : lay_type(std::move(lay_type)), tech_ptr(tech_ptr) {}
 
+rectangle &geo_index::get_bbox(rectangle &r) const {
+    auto box = index.bounds();
+    r.xl = box.min_corner().get<0>();
+    r.yl = box.min_corner().get<1>();
+    r.xh = box.max_corner().get<0>();
+    r.yh = box.max_corner().get<1>();
+    return r;
+}
+
 geo_index::const_iterator geo_index::qbegin(rectangle box, offset_t spx, offset_t spy) const {
     // TODO: fix this
     return qend();
@@ -87,7 +96,9 @@ void geo_index::insert(const polygon45_set &obj, bool is_horiz) {
 }
 
 void geo_index::insert(const geometry *master, transformation &&xform) {
-    index.insert(geo_object(geo_instance(master, std::move(xform)), 0, 0));
+    geo_object item(geo_instance(master, std::move(xform)), 0, 0);
+    if (bg::is_valid(item.bnd_box))
+        index.insert(item);
 }
 
 } // namespace layout

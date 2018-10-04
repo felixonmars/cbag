@@ -24,6 +24,8 @@ class geo_index {
 
     explicit geo_index(std::string &&lay_type, tech *tech_ptr);
 
+    rectangle &get_bbox(rectangle &r) const;
+
     const_iterator qbegin(rectangle box, offset_t spx, offset_t spy) const;
     const_iterator qend() const;
 

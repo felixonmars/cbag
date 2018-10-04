@@ -11,7 +11,7 @@ geo_instance::geo_instance(const geometry *master, transformation xform)
     : master(master), xform(std::move(xform)) {}
 
 rectangle &geo_instance::get_bbox(rectangle &r) const {
-    master->get_bbox(r);
+    master->get_index_bbox(r);
     return r.transform(xform);
 }
 

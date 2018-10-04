@@ -39,6 +39,10 @@ rectangle &geometry::get_bbox(rectangle &r) const {
     return r;
 }
 
+rectangle &geometry::get_index_bbox(rectangle &r) const {
+    return index.get_bbox(r);
+}
+
 void geometry::reset_to_mode(uint8_t m) {
     switch (m) {
     case 0:

@@ -42,6 +42,7 @@ class geometry {
 
     rectangle get_bbox() const;
     rectangle &get_bbox(rectangle &r) const;
+    rectangle &get_index_bbox(rectangle &r) const;
 
     void reset_to_mode(uint8_t m);
 
