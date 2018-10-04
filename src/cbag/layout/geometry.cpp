@@ -5,6 +5,7 @@
 #include <fmt/ostream.h>
 
 #include <cbag/layout/end_style.h>
+#include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/transformation.h>
@@ -24,9 +25,7 @@ geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
         reset_to_mode(mode);
 }
 
-bool geometry::index_empty() const {
-    return index.empty();
-}
+bool geometry::index_empty() const { return index.empty(); }
 
 rectangle geometry::get_bbox() const {
     rectangle ans;
@@ -43,9 +42,14 @@ rectangle &geometry::get_bbox(rectangle &r) const {
     return r;
 }
 
-rectangle &geometry::get_index_bbox(rectangle &r) const {
-    return index.get_bbox(r);
+rectangle &geometry::get_index_bbox(rectangle &r) const { return index.get_bbox(r); }
+
+geo_index::const_iterator geometry::qbegin(const rectangle &r, offset_t spx, offset_t spy,
+                                           const transformation &xform) const {
+    return index.qbegin(r, spx, spy, xform);
 }
+
+geo_index::const_iterator geometry::qend() const { return index.qend(); }
 
 void geometry::reset_to_mode(uint8_t m) {
     switch (m) {

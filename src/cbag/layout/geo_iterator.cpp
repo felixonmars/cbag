@@ -26,7 +26,8 @@ struct geo_iterator::helper {
         geo_visitor(geo_iterator &self) : self(self) {}
 
         bool operator()(const geo_instance &v) {
-            // TODO: set inner iterator
+            self.inner = std::make_shared<std::pair<geo_iterator, geo_iterator>>(
+                v.qbegin(self.box, self.spx, self.spy), v.qend());
             return true;
         }
 
@@ -73,10 +74,11 @@ struct geo_iterator::helper {
 
 geo_iterator::geo_iterator() = default;
 
-geo_iterator::geo_iterator(rectangle box, offset_t spx, offset_t spy, geo_query_iter &&cur,
-                           geo_query_iter &&end, transformation &&xform)
-    : box(std::move(box)), spx(spx), spy(spy), cur(std::move(cur)), end(std::move(end)),
-      xform(std::move(xform)) {
+geo_iterator::geo_iterator(geo_query_iter &&end) : cur(end), end(std::move(end)) {}
+
+geo_iterator::geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
+                           geo_query_iter &&end, const transformation &xform)
+    : box(box), spx(spx), spy(spy), cur(std::move(cur)), end(std::move(end)), xform(xform) {
     helper::get_val_reference(*this);
 }
 

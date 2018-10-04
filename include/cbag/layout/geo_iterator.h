@@ -32,8 +32,10 @@ class geo_iterator {
   public:
     geo_iterator();
 
-    geo_iterator(rectangle box, offset_t spx, offset_t spy, geo_query_iter &&cur,
-                 geo_query_iter &&end, transformation &&xform);
+    explicit geo_iterator(geo_query_iter &&end);
+
+    geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
+                 geo_query_iter &&end, const transformation &xform);
 
     geo_iterator &operator++();
     geo_iterator operator++(int);

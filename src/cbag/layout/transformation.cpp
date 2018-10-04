@@ -77,10 +77,23 @@ cbag::transform transformation::to_transform() const {
     return {x, y, convert_orient(orient())};
 }
 
+bool transformation::flip_xy() const {
+    bp::direction_2d x, y;
+    get_directions(x, y);
+    auto code = x.to_int();
+    return code == bp::direction_2d_enum::NORTH || code == bp::direction_2d_enum::SOUTH;
+}
+
 transformation transformation::get_move_by(offset_t dx, offset_t dy) const {
     coord_t x, y;
     get_location(x, y);
     return {x + dx, y + dy, orient()};
+}
+
+transformation transformation::get_inverse() const {
+    transformation ans = *this;
+    ans.invert();
+    return ans;
 }
 
 void transformation::set_location(coord_t x, coord_t y) {

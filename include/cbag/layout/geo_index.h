@@ -9,6 +9,7 @@ namespace layout {
 
 class tech;
 class geo_iterator;
+class transformation;
 
 class geo_index {
   public:
@@ -28,7 +29,8 @@ class geo_index {
 
     rectangle &get_bbox(rectangle &r) const;
 
-    const_iterator qbegin(rectangle box, offset_t spx, offset_t spy) const;
+    const_iterator qbegin(const rectangle &r, offset_t spx, offset_t spy,
+                          const transformation &xform) const;
     const_iterator qend() const;
 
     void insert(const rectangle &obj, bool is_horiz);

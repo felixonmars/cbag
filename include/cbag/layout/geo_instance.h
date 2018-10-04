@@ -6,6 +6,7 @@
 namespace cbag {
 namespace layout {
 
+class geo_iterator;
 class geometry;
 class rectangle;
 
@@ -22,6 +23,10 @@ class geo_instance {
     bool empty() const;
 
     rectangle &get_bbox(rectangle &r) const;
+
+    geo_iterator qbegin(const rectangle &r, offset_t spx, offset_t spy) const;
+
+    geo_iterator qend() const;
 
     bool operator==(const geo_instance &rhs) const;
 };

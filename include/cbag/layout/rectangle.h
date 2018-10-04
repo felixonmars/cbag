@@ -51,7 +51,7 @@ class rectangle {
     rectangle get_intersect(const rectangle &other) const;
     rectangle get_extend_to(coord_t x, coord_t y) const;
     rectangle get_expand(offset_t dx, offset_t dy) const;
-    rectangle get_transform(const bp::transformation<coord_t> &xform) const;
+    rectangle get_transform(const transformation &xform) const;
 
     interval_type get(bp::orientation_2d orient) const;
 

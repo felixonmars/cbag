@@ -47,15 +47,19 @@ rectangle &geo_index::get_bbox(rectangle &r) const {
     return r;
 }
 
-geo_index::const_iterator geo_index::qbegin(rectangle box, offset_t spx, offset_t spy) const {
-    // TODO: fix this
-    return qend();
+geo_index::const_iterator geo_index::qbegin(const rectangle &r, offset_t spx, offset_t spy,
+                                            const transformation &xform) const {
+
+    return {r,
+            spx,
+            spy,
+            index.qbegin(bgi::intersects(
+                bg_box(bg_point(r.xl - spx, r.yl - spy), bg_point(r.xh + spx, r.yh + spy)))),
+            index.qend(),
+            xform};
 }
 
-geo_index::const_iterator geo_index::qend() const {
-    // TODO: fix this
-    return {};
-}
+geo_index::const_iterator geo_index::qend() const { return geo_iterator(index.qend()); }
 
 void geo_index::insert(const rectangle &obj, bool is_horiz) {
     coord_t spx, spy;

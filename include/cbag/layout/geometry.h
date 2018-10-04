@@ -45,6 +45,10 @@ class geometry {
     rectangle &get_bbox(rectangle &r) const;
     rectangle &get_index_bbox(rectangle &r) const;
 
+    geo_index::const_iterator qbegin(const rectangle &r, offset_t spx, offset_t spy,
+                                     const transformation &xform = {0, 0}) const;
+    geo_index::const_iterator qend() const;
+
     void reset_to_mode(uint8_t m);
 
     void add_shape(const rectangle &obj, bool is_horiz);
