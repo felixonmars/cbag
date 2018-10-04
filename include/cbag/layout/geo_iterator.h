@@ -24,18 +24,20 @@ class geo_iterator {
     offset_t spy = 0;
     geo_query_iter cur;
     geo_query_iter end;
+    transformation xform;
     std::shared_ptr<std::pair<geo_iterator, geo_iterator>> inner = nullptr;
+    flat_geo_type cur_val;
     struct helper;
 
   public:
     geo_iterator();
 
     geo_iterator(rectangle box, offset_t spx, offset_t spy, geo_query_iter &&cur,
-                 geo_query_iter &&end);
+                 geo_query_iter &&end, transformation &&xform);
 
     geo_iterator &operator++();
     geo_iterator operator++(int);
-    value_type operator*() const;
+    reference operator*() const;
     bool operator==(const geo_iterator &rhs) const;
     bool operator!=(const geo_iterator &rhs) const;
 };
