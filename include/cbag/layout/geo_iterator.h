@@ -2,6 +2,7 @@
 #define CBAG_LAYOUT_GEO_ITERATOR_H
 
 #include <memory>
+#include <utility>
 
 #include <cbag/layout/geo_index_impl.h>
 
@@ -18,14 +19,19 @@ class geo_iterator {
     using reference = value_type &;
 
   private:
-    geo_query_iter ptr;
-    std::shared_ptr<geo_iterator> start = nullptr;
-    std::shared_ptr<geo_iterator> stop = nullptr;
+    rectangle box;
+    offset_t spx = 0;
+    offset_t spy = 0;
+    geo_query_iter cur;
+    geo_query_iter end;
+    std::shared_ptr<std::pair<geo_iterator, geo_iterator>> inner = nullptr;
+    struct helper;
 
   public:
     geo_iterator();
 
-    geo_iterator(geo_query_iter &&cur, bool step);
+    geo_iterator(rectangle box, offset_t spx, offset_t spy, geo_query_iter &&cur,
+                 geo_query_iter &&end);
 
     geo_iterator &operator++();
     geo_iterator operator++(int);

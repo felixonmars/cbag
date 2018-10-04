@@ -26,12 +26,10 @@ class geo_object {
     using value_type = std::variant<rectangle, polygon90, polygon45, polygon, geo_instance>;
     using box_type = bg_box;
 
-  private:
+  public:
     value_type val;
     offset_t spx = 0;
     offset_t spy = 0;
-
-  public:
     box_type bnd_box;
 
     template <typename T>
@@ -41,8 +39,6 @@ class geo_object {
     bool operator==(const geo_object &v) const;
 
     const geo_instance *get_instance() const;
-
-    const value_type &value() const;
 
     static box_type get_bnd_box(const value_type &val, offset_t spx, offset_t spy);
 };
