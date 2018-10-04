@@ -42,7 +42,11 @@ rectangle rectangle::get_extend_to(coord_t x, coord_t y) const {
     return {std::min(xl, x), std::min(yl, y), std::max(xh, x), std::max(yh, y)};
 }
 
-rectangle rectangle::get_transform(const transformation &xform) const {
+rectangle rectangle::get_expand(offset_t dx, offset_t dy) const {
+    return {xl - dx, yl - dy, xl + dx, yl + dy};
+}
+
+rectangle rectangle::get_transform(const bp::transformation<coord_t> &xform) const {
     rectangle ans = *this;
     return bp::transform(ans, xform);
 }

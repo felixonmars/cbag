@@ -90,6 +90,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/cellview.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_index.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_instance.cpp
+  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/instance.cpp

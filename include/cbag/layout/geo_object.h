@@ -40,6 +40,10 @@ class geo_object {
 
     bool operator==(const geo_object &v) const;
 
+    const geo_instance *get_instance() const;
+
+    const value_type &value() const;
+
     static box_type get_bnd_box(const value_type &val, offset_t spx, offset_t spy);
 };
 

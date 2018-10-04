@@ -7,9 +7,9 @@
 
 #include <cbag/layout/geo_index.h>
 #include <cbag/layout/polygon45_fwd.h>
-#include <cbag/layout/polygon45_set.h>
+#include <cbag/layout/polygon45_set_fwd.h>
 #include <cbag/layout/polygon90_fwd.h>
-#include <cbag/layout/polygon90_set.h>
+#include <cbag/layout/polygon90_set_fwd.h>
 #include <cbag/layout/polygon_fwd.h>
 #include <cbag/layout/polygon_set.h>
 #include <cbag/layout/pt_vector_fwd.h>

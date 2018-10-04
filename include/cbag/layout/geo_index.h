@@ -1,36 +1,31 @@
 #ifndef CBAG_LAYOUT_GEO_INDEX_H
 #define CBAG_LAYOUT_GEO_INDEX_H
 
-#include <vector>
-
-#include <boost/geometry/index/rtree.hpp>
-
-#include <cbag/layout/geo_object.h>
-#include <cbag/layout/polygon45_set.h>
-
-namespace bgi = boost::geometry::index;
+#include <cbag/layout/geo_index_impl.h>
+#include <cbag/layout/polygon45_set_fwd.h>
 
 namespace cbag {
 namespace layout {
 
 class tech;
+class geo_iterator;
 
 class geo_index {
-  private:
-    using index_impl = bgi::rtree<geo_object, bgi::quadratic<32, 16>>;
+  public:
+    using const_iterator = geo_iterator;
 
-    index_impl index;
+  private:
+    geo_index_impl index;
     std::string lay_type = "";
     tech *tech_ptr = nullptr;
 
-    class geo_iterator {};
-
   public:
-    using iterator = geo_iterator;
-
     geo_index();
 
     explicit geo_index(std::string &&lay_type, tech *tech_ptr);
+
+    const_iterator qbegin(rectangle box, offset_t spx, offset_t spy) const;
+    const_iterator qend() const;
 
     void insert(const rectangle &obj, bool is_horiz);
     void insert(const polygon90 &obj, bool is_horiz);

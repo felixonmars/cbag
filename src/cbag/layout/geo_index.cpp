@@ -1,5 +1,5 @@
 #include <cbag/layout/geo_index.h>
-#include <cbag/layout/geo_instance.h>
+#include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/tech.h>
 
 namespace cbag {
@@ -36,6 +36,16 @@ geo_index::geo_index() = default;
 geo_index::geo_index(std::string &&lay_type, tech *tech_ptr)
     : lay_type(std::move(lay_type)), tech_ptr(tech_ptr) {}
 
+geo_index::const_iterator geo_index::qbegin(rectangle box, offset_t spx, offset_t spy) const {
+    // TODO: fix this
+    return qend();
+}
+
+geo_index::const_iterator geo_index::qend() const {
+    // TODO: fix this
+    return {};
+}
+
 void geo_index::insert(const rectangle &obj, bool is_horiz) {
     coord_t spx, spy;
     if (lay_type.empty()) {
@@ -71,7 +81,6 @@ void geo_index::insert(const polygon &obj, bool is_horiz) {
 }
 
 void geo_index::insert(const polygon45_set &obj, bool is_horiz) {
-    // TODO: space around polygons?
     poly45_writer writer(*this, is_horiz);
     obj.get(writer);
     writer.record_last();

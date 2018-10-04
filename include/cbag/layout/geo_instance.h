@@ -10,11 +10,10 @@ class geometry;
 class rectangle;
 
 class geo_instance {
-  private:
+  public:
     const geometry *master = nullptr;
     transformation xform;
 
-  public:
     geo_instance();
 
     geo_instance(const geometry *master, transformation xform);
