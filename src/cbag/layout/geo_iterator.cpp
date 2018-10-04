@@ -9,11 +9,6 @@ namespace cbag {
 namespace layout {
 
 struct geo_iterator::helper {
-    enum rep_mode : uint8_t {
-        GOOD = 0,
-        INC_ITER = 1,
-        SET_INNER = 2,
-    };
 
     struct xform_visitor {
       public:
@@ -27,39 +22,37 @@ struct geo_iterator::helper {
     struct geo_visitor {
       public:
         geo_iterator &self;
-        rectangle test_box;
 
-        geo_visitor(geo_iterator &self)
-            : self(self), test_box(self.box.get_expand(std::max(self.spx, self.cur->spx),
-                                                       std::max(self.spy, self.cur->spy))) {}
+        geo_visitor(geo_iterator &self) : self(self) {}
 
-        rep_mode operator()(const geo_instance &v) {
+        bool operator()(const geo_instance &v) {
             // TODO: set inner iterator
-            return SET_INNER;
+            return true;
         }
 
-        template <typename T> rep_mode operator()(const T &v) {
+        template <typename T> bool operator()(const T &v) {
+            rectangle test_box = self.box.get_expand(std::max(self.spx, self.cur->spx),
+                                                     std::max(self.spy, self.cur->spy));
             if (bp::empty(v & test_box)) {
                 ++self.cur;
-                return INC_ITER;
+                return true;
             }
             self.cur_val = v;
             std::visit(xform_visitor(self.xform), self.cur_val);
-            return GOOD;
+            return false;
         }
     };
 
     // advance the iterator to the next point that
     static void get_val_reference(geo_iterator &self) {
-        for (auto mode = rep_mode::INC_ITER; mode != rep_mode::GOOD;) {
+        for (bool repeat = true; repeat;) {
             if (self.inner == nullptr) {
                 // no inner loop
                 if (self.cur == self.end) {
-                    // no more items
-                    mode = rep_mode::GOOD;
+                    return;
                 } else {
                     // still has item, check intersection
-                    mode = std::visit(geo_visitor(self), self.cur->val);
+                    repeat = std::visit(geo_visitor(self), self.cur->val);
                 }
             } else {
                 // has inner loop
@@ -71,6 +64,7 @@ struct geo_iterator::helper {
                     // get inner item
                     self.cur_val = *(self.inner->first);
                     std::visit(xform_visitor(self.xform), self.cur_val);
+                    return;
                 }
             }
         }
@@ -107,8 +101,9 @@ geo_iterator::reference geo_iterator::operator*() const { return cur_val; }
 bool geo_iterator::operator==(const geo_iterator &rhs) const {
     bool a = (cur == end);
     bool b = (rhs.cur == rhs.end);
-    return (a && b) || (!a && !b && box == rhs.box && spx == rhs.spx && spy == rhs.spy &&
-                        cur == rhs.cur && end == rhs.end && inner == rhs.inner);
+    return (a && b) ||
+           (!a && !b && box == rhs.box && spx == rhs.spx && spy == rhs.spy && cur == rhs.cur &&
+            end == rhs.end && xform == rhs.xform && inner == rhs.inner);
 }
 
 bool geo_iterator::operator!=(const geo_iterator &rhs) const { return !(*this == rhs); }
