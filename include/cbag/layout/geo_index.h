@@ -29,9 +29,9 @@ class geo_index {
 
     rectangle &get_bbox(rectangle &r) const;
 
-    const_iterator qbegin(const rectangle &r, offset_t spx, offset_t spy,
-                          const transformation &xform) const;
-    const_iterator qend() const;
+    const_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+                                   const transformation &xform) const;
+    const_iterator end_intersect() const;
 
     void insert(const rectangle &obj, bool is_horiz);
     void insert(const polygon90 &obj, bool is_horiz);

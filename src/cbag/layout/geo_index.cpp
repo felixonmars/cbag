@@ -47,8 +47,8 @@ rectangle &geo_index::get_bbox(rectangle &r) const {
     return r;
 }
 
-geo_index::const_iterator geo_index::qbegin(const rectangle &r, offset_t spx, offset_t spy,
-                                            const transformation &xform) const {
+geo_iterator geo_index::begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+                                        const transformation &xform) const {
 
     return {r,
             spx,
@@ -59,7 +59,7 @@ geo_index::const_iterator geo_index::qbegin(const rectangle &r, offset_t spx, of
             xform};
 }
 
-geo_index::const_iterator geo_index::qend() const { return geo_iterator(index.qend()); }
+geo_iterator geo_index::end_intersect() const { return {}; }
 
 void geo_index::insert(const rectangle &obj, bool is_horiz) {
     coord_t spx, spy;

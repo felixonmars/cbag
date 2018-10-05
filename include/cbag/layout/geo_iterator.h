@@ -25,17 +25,17 @@ class geo_iterator {
     geo_query_iter cur;
     geo_query_iter end;
     transformation xform;
-    std::shared_ptr<std::pair<geo_iterator, geo_iterator>> inner = nullptr;
+    std::shared_ptr<geo_iterator> inner = nullptr;
     flat_geo_type cur_val;
     struct helper;
 
   public:
     geo_iterator();
 
-    explicit geo_iterator(geo_query_iter &&end);
-
     geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
                  geo_query_iter &&end, const transformation &xform);
+
+    bool has_next() const;
 
     geo_iterator &operator++();
     geo_iterator operator++(int);

@@ -24,9 +24,9 @@ class geo_instance {
 
     rectangle &get_bbox(rectangle &r) const;
 
-    geo_iterator qbegin(const rectangle &r, offset_t spx, offset_t spy) const;
+    geo_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy) const;
 
-    geo_iterator qend() const;
+    geo_iterator end_intersect() const;
 
     bool operator==(const geo_instance &rhs) const;
 };

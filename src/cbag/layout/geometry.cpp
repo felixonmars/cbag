@@ -44,12 +44,12 @@ rectangle &geometry::get_bbox(rectangle &r) const {
 
 rectangle &geometry::get_index_bbox(rectangle &r) const { return index.get_bbox(r); }
 
-geo_index::const_iterator geometry::qbegin(const rectangle &r, offset_t spx, offset_t spy,
-                                           const transformation &xform) const {
-    return index.qbegin(r, spx, spy, xform);
+geo_iterator geometry::begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+                                       const transformation &xform) const {
+    return index.begin_intersect(r, spx, spy, xform);
 }
 
-geo_index::const_iterator geometry::qend() const { return index.qend(); }
+geo_iterator geometry::end_intersect() const { return {}; }
 
 void geometry::reset_to_mode(uint8_t m) {
     switch (m) {

@@ -18,15 +18,15 @@ rectangle &geo_instance::get_bbox(rectangle &r) const {
     return r.transform(xform);
 }
 
-geo_iterator geo_instance::qbegin(const rectangle &r, offset_t spx, offset_t spy) const {
+geo_iterator geo_instance::begin_intersect(const rectangle &r, offset_t spx, offset_t spy) const {
     rectangle test_r = r.get_transform(xform.get_inverse());
     if (xform.flip_xy()) {
-        return master->qbegin(test_r, spy, spx, xform);
+        return master->begin_intersect(test_r, spy, spx, xform);
     }
-    return master->qbegin(test_r, spx, spy, xform);
+    return master->begin_intersect(test_r, spx, spy, xform);
 }
 
-geo_iterator geo_instance::qend() const { return master->qend(); }
+geo_iterator geo_instance::end_intersect() const { return {}; }
 
 bool geo_instance::operator==(const geo_instance &rhs) const {
     return master == rhs.master && xform == rhs.xform;

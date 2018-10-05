@@ -26,8 +26,8 @@ struct geo_iterator::helper {
         geo_visitor(geo_iterator &self) : self(self) {}
 
         bool operator()(const geo_instance &v) {
-            self.inner = std::make_shared<std::pair<geo_iterator, geo_iterator>>(
-                v.qbegin(self.box, self.spx, self.spy), v.qend());
+            self.inner =
+                std::make_shared<geo_iterator>(v.begin_intersect(self.box, self.spx, self.spy));
             return true;
         }
 
@@ -57,15 +57,15 @@ struct geo_iterator::helper {
                 }
             } else {
                 // has inner loop
-                if (self.inner->first == self.inner->second) {
+                if (self.inner->has_next()) {
+                    // get inner item
+                    self.cur_val = *(*self.inner);
+                    std::visit(xform_visitor(self.xform), self.cur_val);
+                    return;
+                } else {
                     // no more inner items
                     self.inner.reset();
                     ++self.cur;
-                } else {
-                    // get inner item
-                    self.cur_val = *(self.inner->first);
-                    std::visit(xform_visitor(self.xform), self.cur_val);
-                    return;
                 }
             }
         }
@@ -74,19 +74,19 @@ struct geo_iterator::helper {
 
 geo_iterator::geo_iterator() = default;
 
-geo_iterator::geo_iterator(geo_query_iter &&end) : cur(end), end(std::move(end)) {}
-
 geo_iterator::geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
                            geo_query_iter &&end, const transformation &xform)
     : box(box), spx(spx), spy(spy), cur(std::move(cur)), end(std::move(end)), xform(xform) {
     helper::get_val_reference(*this);
 }
 
+bool geo_iterator::has_next() const { return cur != end; }
+
 geo_iterator &geo_iterator::operator++() {
     if (inner == nullptr) {
         ++cur;
     } else {
-        ++inner->first;
+        ++(*inner);
     }
     helper::get_val_reference(*this);
     return *this;
@@ -101,10 +101,10 @@ geo_iterator geo_iterator::operator++(int) {
 geo_iterator::reference geo_iterator::operator*() const { return cur_val; }
 
 bool geo_iterator::operator==(const geo_iterator &rhs) const {
-    bool a = (cur == end);
-    bool b = (rhs.cur == rhs.end);
-    return (a && b) ||
-           (!a && !b && box == rhs.box && spx == rhs.spx && spy == rhs.spy && cur == rhs.cur &&
+    bool a = has_next();
+    bool b = rhs.has_next();
+    return (!a && !b) ||
+           (a && b && box == rhs.box && spx == rhs.spx && spy == rhs.spy && cur == rhs.cur &&
             end == rhs.end && xform == rhs.xform && inner == rhs.inner);
 }
 
