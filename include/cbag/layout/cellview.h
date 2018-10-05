@@ -23,6 +23,7 @@ class tech;
 template <typename T> class shape_ref;
 template <typename T> class cv_obj_ref;
 class via_ref;
+class geo_iterator;
 
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
@@ -53,6 +54,11 @@ class cellview {
     bool empty() const;
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
+
+    geo_iterator begin_intersect(const char *layer, const char *purpose, const rectangle &r,
+                                 offset_t spx, offset_t spy) const;
+
+    geo_iterator end_intersect() const;
 
     void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
                  const char *label);

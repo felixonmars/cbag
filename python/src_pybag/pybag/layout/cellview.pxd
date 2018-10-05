@@ -92,6 +92,15 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         cv_obj_ref()
         void commit()
 
+    cdef cppclass geo_union:
+        T* get_if[T]() const
+
+    cdef cppclass geo_iterator:
+        cbool has_next() const
+
+        geo_iterator &operator++()
+        const geo_union &operator*() const
+
     cdef cppclass cellview:
         string cell_name
 
@@ -102,6 +111,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         cbool empty() const
 
         rectangle get_bbox(const char* layer, const char* purpose) except +
+
+        geo_iterator begin_intersect(const char* layer, const char* purpose, const rectangle& r,
+                                     offset_t spx, offset_t spy) const
 
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                      const char *net, const char *label) except +

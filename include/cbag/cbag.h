@@ -13,6 +13,7 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
+#include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/pin.h>
 #include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>

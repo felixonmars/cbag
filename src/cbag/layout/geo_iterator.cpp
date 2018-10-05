@@ -38,8 +38,8 @@ struct geo_iterator::helper {
                 ++self.cur;
                 return true;
             }
-            self.cur_val = v;
-            std::visit(xform_visitor(self.xform), self.cur_val);
+            self.cur_val = geo_union(v);
+            std::visit(xform_visitor(self.xform), self.cur_val.val);
             return false;
         }
     };
@@ -60,7 +60,7 @@ struct geo_iterator::helper {
                 if (self.inner->has_next()) {
                     // get inner item
                     self.cur_val = *(*self.inner);
-                    std::visit(xform_visitor(self.xform), self.cur_val);
+                    std::visit(xform_visitor(self.xform), self.cur_val.val);
                     return;
                 } else {
                     // no more inner items

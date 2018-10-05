@@ -9,9 +9,22 @@
 namespace cbag {
 namespace layout {
 
+class geo_union {
+  public:
+    std::variant<rectangle, polygon90, polygon45, polygon> val;
+
+    geo_union() = default;
+
+    template <typename T> explicit geo_union(T &&t) : val(std::move(t)) {}
+
+    template <typename T> explicit geo_union(const T &t) : val(t) {}
+
+    template <typename T> const T *get_if() const { return std::get_if<T>(val); }
+};
+
 class geo_iterator {
   public:
-    using flat_geo_type = std::variant<rectangle, polygon90, polygon45, polygon>;
+    using flat_geo_type = geo_union;
     using iterator_category = std::input_iterator_tag;
     using value_type = const flat_geo_type;
     using difference_type = std::ptrdiff_t;

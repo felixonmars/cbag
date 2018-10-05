@@ -10,6 +10,7 @@
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
+#include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/pin.h>
 #include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
@@ -82,6 +83,18 @@ rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     }
     return ans;
 }
+
+geo_iterator cellview::begin_intersect(const char *layer, const char *purpose, const rectangle &r,
+                                       offset_t spx, offset_t spy) const {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    auto iter = geo_map.find(layer_t(lay_id, purp_id));
+    if (iter == geo_map.end())
+        return {};
+    return iter->second.begin_intersect(r, spx, spy);
+}
+
+geo_iterator cellview::end_intersect() const { return {}; }
 
 void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                        const char *net, const char *label) {
