@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
 # noinspection PyUnresolvedReferences
-from .schematic import PySchCellView
+from .schematic import PySchCellView, DesignInstance
