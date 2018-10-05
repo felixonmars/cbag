@@ -53,10 +53,12 @@ class cellview {
 
     bool empty() const;
 
+    layer_t get_lay_purp_key(const char *layer, const char *purpose) const;
+
     rectangle get_bbox(const char *layer, const char *purpose) const;
 
-    geo_iterator begin_intersect(const char *layer, const char *purpose, const rectangle &r,
-                                 offset_t spx, offset_t spy) const;
+    geo_iterator begin_intersect(const layer_t &key, const rectangle &r, offset_t spx,
+                                 offset_t spy) const;
 
     geo_iterator end_intersect() const;
 

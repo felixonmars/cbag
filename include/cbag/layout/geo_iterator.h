@@ -9,6 +9,13 @@
 namespace cbag {
 namespace layout {
 
+enum geo_union_enum : uint8_t {
+    RECT = 0,
+    POLY90 = 1,
+    POLY45 = 2,
+    POLY = 3,
+};
+
 class geo_union {
   public:
     std::variant<rectangle, polygon90, polygon45, polygon> val;
@@ -19,7 +26,9 @@ class geo_union {
 
     template <typename T> explicit geo_union(const T &t) : val(t) {}
 
-    template <typename T> const T *get_if() const { return std::get_if<T>(val); }
+    template <typename T> T *get_if() { return std::get_if<T>(&val); }
+
+    geo_union_enum index() const { return static_cast<geo_union_enum>(val.index()); }
 };
 
 class geo_iterator {

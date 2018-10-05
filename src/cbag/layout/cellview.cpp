@@ -68,12 +68,16 @@ bool cellview::empty() const {
            area_block_list.empty() && boundary_list.empty() && pin_map.empty();
 }
 
+layer_t cellview::get_lay_purp_key(const char *layer, const char *purpose) const {
+    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    return {lay_id, purp_id};
+}
+
 rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     rectangle ans(0, 0, -1, -1);
     // merge geometry bounding box
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    auto iter = geo_map.find(layer_t(lay_id, purp_id));
+    auto iter = geo_map.find(get_lay_purp_key(layer, purpose));
     if (iter != geo_map.end()) {
         ans.merge(iter->second.get_bbox());
     }
@@ -84,11 +88,9 @@ rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     return ans;
 }
 
-geo_iterator cellview::begin_intersect(const char *layer, const char *purpose, const rectangle &r,
-                                       offset_t spx, offset_t spy) const {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    auto iter = geo_map.find(layer_t(lay_id, purp_id));
+geo_iterator cellview::begin_intersect(const layer_t &key, const rectangle &r, offset_t spx,
+                                       offset_t spy) const {
+    auto iter = geo_map.find(key);
     if (iter == geo_map.end())
         return {};
     return iter->second.begin_intersect(r, spx, spy);
@@ -109,19 +111,14 @@ void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, co
 shape_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, bool is_horiz,
                                         coord_t xl, coord_t yl, coord_t xh, coord_t yh,
                                         bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, rectangle(xl, yl, xh, yh), commit};
 }
 
 shape_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose, bool is_horiz,
                                           const pt_vector &data, bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     polygon90 val;
     val.set(data.begin(), data.end());
@@ -130,9 +127,7 @@ shape_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose
 
 shape_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose, bool is_horiz,
                                           const pt_vector &data, bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     polygon45 val;
     val.set(data.begin(), data.end());
@@ -141,9 +136,7 @@ shape_ref<polygon45> cellview::add_poly45(const char *layer, const char *purpose
 
 shape_ref<polygon> cellview::add_poly(const char *layer, const char *purpose, bool is_horiz,
                                       const pt_vector &data, bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     polygon val;
     val.set(data.begin(), data.end());
@@ -154,9 +147,7 @@ shape_ref<polygon45_set> cellview::add_path(const char *layer, const char *purpo
                                             const pt_vector &data, offset_t half_width,
                                             uint8_t style0, uint8_t style1, uint8_t stylem,
                                             bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz,
             geometry::make_path(data, half_width, style0, style1, stylem), commit};
@@ -168,9 +159,7 @@ shape_ref<polygon45_set> cellview::add_path45_bus(const char *layer, const char 
                                                   const std::vector<offset_t> &spaces,
                                                   uint8_t style0, uint8_t style1, uint8_t stylem,
                                                   bool commit) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
-    layer_t key(lay_id, purp_id);
+    layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz,
             geometry::make_path45_bus(data, widths, spaces, style0, style1, stylem), commit};

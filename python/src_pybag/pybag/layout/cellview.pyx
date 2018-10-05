@@ -1,6 +1,7 @@
 # distutils: language = c++
 
 from cython.operator cimport dereference as deref
+from cython.operator cimport preincrement as preinc
 
 from .util cimport BBox, BBoxArray
 from .cellview cimport *
@@ -45,6 +46,20 @@ cdef class PyTech:
         return deref(self._ptr).get_min_space(layer, width, sp_type)
 
 cdef class PyRect:
+    def __init__(self):
+        pass
+
+    def commit(self):
+        self._ref.commit()
+
+cdef class PyPolygon90:
+    def __init__(self):
+        pass
+
+    def commit(self):
+        self._ref.commit()
+
+cdef class PyPolygon45:
     def __init__(self):
         pass
 
@@ -932,3 +947,43 @@ cdef class PyLayCellView:
                                                         sp_vec, start_style,
                                                         stop_style, join_style, commit))
         return ans
+
+    def blockage_iter(self, layer, BBox box, int spx=0, int spy=0):
+        cdef char* lay
+        cdef char* purpose = NULL
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
+            layer = layer[0].encode(self._encoding)
+
+        cdef layer_t key = deref(self._ptr).get_lay_purp_key(layer, purpose)
+
+        cdef geo_union cur_geo
+        cdef geo_union_enum cur_type
+        cdef geo_iterator cur = deref(self._ptr).begin_intersect(key, box._r, spx, spy)
+        cdef PyRect ar
+        cdef PyPolygon90 ap90
+        cdef PyPolygon45 ap45
+        cdef PyPolygon ap
+        while cur.has_next():
+            cur_geo = deref(cur)
+            preinc(cur)
+            cur_type = cur_geo.index()
+            if cur_type == RECT:
+                ar = PyRect()
+                ar._ref = shape_ref[rectangle](key, cur_geo.get_if[rectangle]())
+                yield ar
+            elif cur_type == POLY90:
+                ap90 = PyPolygon90()
+                ap90._ref = shape_ref[polygon90](key, cur_geo.get_if[polygon90]())
+                yield ap90
+            elif cur_type == POLY45:
+                ap45 = PyPolygon45()
+                ap45._ref = shape_ref[polygon45](key, cur_geo.get_if[polygon45]())
+                yield ap45
+            else:
+                ap = PyPolygon()
+                ap._ref = shape_ref[polygon](key, cur_geo.get_if[polygon]())
+                yield ap

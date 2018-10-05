@@ -4,10 +4,9 @@ from .util cimport rectangle, transformation, BBox
 
 from libcpp.vector cimport vector
 from libcpp.string cimport string
-from libcpp.utility cimport pair
-from libcpp.unordered_map cimport unordered_map
 from libcpp cimport bool as cbool
 from libcpp.memory cimport unique_ptr
+from libcpp.utility cimport pair
 
 ctypedef int int32_t
 ctypedef unsigned int uint8_t
@@ -20,7 +19,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag" nogil:
     ctypedef int coord_t
     ctypedef int offset_t
     ctypedef int dist_t
-    
+
+    ctypedef pair[lay_t, purp_t] layer_t
+
     cdef void init_logging()
 
 
@@ -83,6 +84,8 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         T obj
 
         shape_ref()
+        shape_ref(const layer_t& key, T* ptr)
+
         void commit()
 
     cdef cppclass cv_obj_ref[T]:
@@ -92,8 +95,16 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
         cv_obj_ref()
         void commit()
 
+    enum geo_union_enum:
+        RECT
+        POLY90
+        POLY45
+        POLY
+
     cdef cppclass geo_union:
-        T* get_if[T]() const
+        T* get_if[T]()
+
+        geo_union_enum index() const
 
     cdef cppclass geo_iterator:
         cbool has_next() const
@@ -110,9 +121,11 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
 
         cbool empty() const
 
+        layer_t get_lay_purp_key(const char* layer, const char* purpose) except +
+
         rectangle get_bbox(const char* layer, const char* purpose) except +
 
-        geo_iterator begin_intersect(const char* layer, const char* purpose, const rectangle& r,
+        geo_iterator begin_intersect(const layer_t& key, const rectangle& r,
                                      offset_t spx, offset_t spy) const
 
         void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
@@ -164,6 +177,11 @@ cdef class PyTech:
 cdef class PyRect:
     cdef shape_ref[rectangle] _ref
 
+cdef class PyPolygon90:
+    cdef shape_ref[polygon90] _ref
+
+cdef class PyPolygon45:
+    cdef shape_ref[polygon45] _ref
 
 cdef class PyPolygon:
     cdef shape_ref[polygon] _ref
