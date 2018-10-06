@@ -4,7 +4,7 @@
 from .util import BBox, BBoxArray, BBoxCollection
 
 # noinspection PyUnresolvedReferences
-from .cellview import PyRect, PyPolygon, PyVia
+from .cellview import PyRect, PyPolygon90, PyPolygon45, PyPolygon, PyVia
 # noinspection PyUnresolvedReferences
 from .cellview import PyPath, PyBlockage, PyBoundary
 # noinspection PyUnresolvedReferences

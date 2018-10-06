@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
@@ -37,9 +39,9 @@ tech::tech(const char *tech_fname) {
     lay_map = node["layer"].as<lay_map_t>();
     purp_map = node["purpose"].as<purp_map_t>();
     via_map = node["via_layers"].as<via_map_t>();
-    pin_purpose_name = node["pin_purpose"].as<std::string>();
     make_pin_obj = node["make_pin_obj"].as<bool>();
 
+    std::string pin_purp = node["pin_purpose"].as<std::string>();
     std::string def_purp = node["default_purpose"].as<std::string>();
     try {
         default_purpose = purp_map.at(def_purp);
@@ -47,9 +49,9 @@ tech::tech(const char *tech_fname) {
         throw std::out_of_range(fmt::format("Cannot find default purpose: {}", def_purp));
     }
     try {
-        pin_purpose = purp_map.at(pin_purpose_name);
+        pin_purpose = purp_map.at(pin_purp);
     } catch (std::out_of_range) {
-        throw std::out_of_range(fmt::format("Cannot find pin purpose: {}", pin_purpose_name));
+        throw std::out_of_range(fmt::format("Cannot find pin purpose: {}", pin_purp));
     }
 
     // populate layer type map
@@ -76,6 +78,17 @@ tech::tech(const char *tech_fname) {
     } else {
         sp_sc_type = DIFF_COLOR;
     }
+}
+
+std::string tech::get_pin_purpose_name() const { return get_purpose_name(pin_purpose); }
+
+std::string tech::get_default_purpose_name() const { return get_purpose_name(default_purpose); }
+
+std::string tech::get_purpose_name(purp_t purp_id) const {
+    auto iter = std::find_if(
+        purp_map.begin(), purp_map.end(),
+        [&purp_id](const std::pair<std::string, purp_t> &v) { return purp_id == v.second; });
+    return iter->first;
 }
 
 lay_t tech::get_layer_id(const char *layer) const {

@@ -19,7 +19,8 @@ enum space_type : uint8_t {
 using lay_map_t = std::unordered_map<std::string, lay_t>;
 using purp_map_t = std::unordered_map<std::string, purp_t>;
 using via_map_t = std::unordered_map<std::string, std::pair<lay_t, lay_t>>;
-using sp_map_t = std::unordered_map<std::string, std::pair<std::vector<offset_t>, std::vector<offset_t>>>;
+using sp_map_t =
+    std::unordered_map<std::string, std::pair<std::vector<offset_t>, std::vector<offset_t>>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
 using lay_type_map_t = std::unordered_map<lay_t, std::string>;
 
@@ -34,11 +35,16 @@ class tech {
     space_type sp_sc_type;
 
   public:
-    std::string pin_purpose_name;
     purp_t pin_purpose;
     bool make_pin_obj = true;
 
     tech(const char *tech_fname);
+
+    std::string get_pin_purpose_name() const;
+
+    std::string get_default_purpose_name() const;
+
+    std::string get_purpose_name(purp_t purp_id) const;
 
     lay_t get_layer_id(const char *layer) const;
 

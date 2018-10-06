@@ -29,7 +29,9 @@ cdef extern from "cbag/cbag.h" namespace "cbag::layout" nogil:
     cdef cppclass tech:
         tech(const char* fname) except +
 
-        string pin_purpose_name
+        string get_pin_purpose_name() const
+
+        string get_default_purpose_name() const
 
         offset_t get_min_space(const string& layer_type, offset_t width, uint8_t sp_type) except +
 
@@ -172,16 +174,20 @@ cdef class PyTech:
     cdef unique_ptr[tech] _ptr
     cdef unicode _encoding
     cdef unicode _pin_purpose
+    cdef unicode _def_purpose
 
 
 cdef class PyRect:
     cdef shape_ref[rectangle] _ref
 
+
 cdef class PyPolygon90:
     cdef shape_ref[polygon90] _ref
 
+
 cdef class PyPolygon45:
     cdef shape_ref[polygon45] _ref
+
 
 cdef class PyPolygon:
     cdef shape_ref[polygon] _ref

@@ -31,7 +31,8 @@ cdef class PyTech:
         tech_fname = tech_fname.encode(encoding)
         self._ptr.reset(new tech(tech_fname))
         self._encoding = encoding
-        self._pin_purpose = deref(self._ptr).pin_purpose_name.decode(encoding)
+        self._pin_purpose = deref(self._ptr).get_pin_purpose_name().decode(encoding)
+        self._def_purpose = deref(self._ptr).get_default_purpose_name().decode(encoding)
 
     def __dealloc__(self):
         self._ptr.reset()
@@ -39,6 +40,10 @@ cdef class PyTech:
     @property
     def pin_purpose(self):
         return self._pin_purpose
+
+    @property
+    def default_purpose(self):
+        return self._def_purpose
 
     def get_min_space(self, layer, int width, int sp_type):
         layer = layer.encode(self._encoding)
