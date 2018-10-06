@@ -992,3 +992,18 @@ cdef class PyLayCellView:
                 ap = PyPolygon()
                 ap._ref = shape_ref[polygon](key, cur_geo.get_if[polygon]())
                 yield ap
+
+    def has_blockage(self, layer, BBox box, int spx=0, int spy=0):
+        cdef char* lay
+        cdef char* purpose = NULL
+        if isinstance(layer, str):
+            layer = layer.encode(self._encoding)
+        else:
+            tmp = layer[1].encode(self._encoding)
+            purpose = tmp
+            layer = layer[0].encode(self._encoding)
+
+        cdef layer_t key = deref(self._ptr).get_lay_purp_key(layer, purpose)
+
+        cdef geo_iterator cur = deref(self._ptr).begin_intersect(key, box._r, spx, spy)
+        return cur.has_next()
