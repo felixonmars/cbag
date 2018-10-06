@@ -62,9 +62,9 @@ class geometry {
     template <typename T> void write_geometry(T &output) const {
         std::visit(
             overload{
-                [&](const polygon90_set &d) { d.get(output); },
-                [&](const polygon45_set &d) { d.get(output); },
-                [&](const polygon_set &d) { d.get(output); },
+                [&output](const polygon90_set &d) { d.get(output); },
+                [&output](const polygon45_set &d) { d.get(output); },
+                [&output](const polygon_set &d) { d.get(output); },
             },
             data);
     }

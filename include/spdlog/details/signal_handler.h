@@ -232,10 +232,11 @@ inline void signalHandler(int signal_number, siginfo_t *info, void *unused_conte
                      << std::endl;
 
         std::string dumpstr(dump.c_str());
-        details::registry::instance().apply_all([&](std::shared_ptr<spdlog::logger> l) {
-            l->critical(dumpstr);
-            l->critical(fatal_stream.str());
-        });
+        details::registry::instance().apply_all(
+            [&dumpstr, &fatal_stream](std::shared_ptr<spdlog::logger> l) {
+                l->critical(dumpstr);
+                l->critical(fatal_stream.str());
+            });
     }
 
     details::registry::instance().flush_all();

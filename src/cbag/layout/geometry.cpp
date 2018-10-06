@@ -35,7 +35,7 @@ rectangle geometry::get_bbox() const {
 rectangle &geometry::get_bbox(rectangle &r) const {
     std::visit(
         overload{
-            [&](const auto &d) { bp::extents(r, d); },
+            [&r](const auto &d) { bp::extents(r, d); },
         },
         data);
 
@@ -71,9 +71,9 @@ void geometry::reset_to_mode(uint8_t m) {
 void geometry::add_shape(const rectangle &obj, bool is_horiz) {
     std::visit(
         overload{
-            [&](polygon90_set &d) { d.insert(obj); },
-            [&](polygon45_set &d) { d.insert(obj); },
-            [&](polygon_set &d) { d.insert(obj); },
+            [&obj](polygon90_set &d) { d.insert(obj); },
+            [&obj](polygon45_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
         },
         data);
 
@@ -83,9 +83,9 @@ void geometry::add_shape(const rectangle &obj, bool is_horiz) {
 void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
     std::visit(
         overload{
-            [&](polygon90_set &d) { d.insert(obj); },
-            [&](polygon45_set &d) { d.insert(obj); },
-            [&](polygon_set &d) { d.insert(obj); },
+            [&obj](polygon90_set &d) { d.insert(obj); },
+            [&obj](polygon45_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
         },
         data);
 
@@ -98,8 +98,8 @@ void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
             [](polygon90_set &d) {
                 throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
             },
-            [&](polygon45_set &d) { d.insert(obj); },
-            [&](polygon_set &d) { d.insert(obj); },
+            [&obj](polygon45_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
         },
         data);
 
@@ -112,8 +112,8 @@ void geometry::add_shape(const polygon45_set &obj, bool is_horiz) {
             [](polygon90_set &d) {
                 throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
             },
-            [&](polygon45_set &d) { d.insert(obj); },
-            [&](polygon_set &d) { d.insert(obj); },
+            [&obj](polygon45_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
         },
         data);
 
@@ -129,7 +129,7 @@ void geometry::add_shape(const polygon &obj, bool is_horiz) {
             [](polygon45_set &d) {
                 throw std::invalid_argument("Cannot add poly; incorrect cellview layout mode.");
             },
-            [&](polygon_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
         },
         data);
 

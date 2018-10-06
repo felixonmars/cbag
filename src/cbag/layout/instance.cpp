@@ -33,8 +33,8 @@ const cellview *instance::get_cellview() const {
 const char *instance::get_lib_name(const char *output_lib) const {
     return std::visit(
         overload{
-            [&](const cellview *v) { return output_lib; },
-            [&](const cellview_ref &v) { return v.lib.c_str(); },
+            [&output_lib](const cellview *v) { return output_lib; },
+            [](const cellview_ref &v) { return v.lib.c_str(); },
         },
         master);
 }
@@ -42,13 +42,13 @@ const char *instance::get_lib_name(const char *output_lib) const {
 const char *instance::get_cell_name(const str_map_t *rename_map) const {
     return std::visit(
         overload{
-            [&](const cellview *v) {
+            [&rename_map](const cellview *v) {
                 if (rename_map == nullptr) {
                     return v->cell_name.c_str();
                 }
                 return (*rename_map).find(v->cell_name)->second.c_str();
             },
-            [&](const cellview_ref &v) { return v.cell.c_str(); },
+            [](const cellview_ref &v) { return v.cell.c_str(); },
         },
         master);
 }
@@ -56,8 +56,8 @@ const char *instance::get_cell_name(const str_map_t *rename_map) const {
 const char *instance::get_view_name(const char *default_view) const {
     return std::visit(
         overload{
-            [&](const cellview *v) { return default_view; },
-            [&](const cellview_ref &v) { return v.view.c_str(); },
+            [&default_view](const cellview *v) { return default_view; },
+            [](const cellview_ref &v) { return v.view.c_str(); },
         },
         master);
 }
@@ -65,8 +65,8 @@ const char *instance::get_view_name(const char *default_view) const {
 const param_map *instance::get_params() const {
     return std::visit(
         overload{
-            [&](const cellview *v) { return (const param_map *)nullptr; },
-            [&](const cellview_ref &v) { return &(v.params); },
+            [](const cellview *v) { return (const param_map *)nullptr; },
+            [](const cellview_ref &v) { return &(v.params); },
         },
         master);
 }
@@ -76,8 +76,8 @@ const cbag::transform instance::get_transform() const { return xform.to_transfor
 rectangle instance::get_bbox(const char *layer, const char *purpose) const {
     rectangle r = std::visit(
         overload{
-            [&](const cellview *v) { return v->get_bbox(layer, purpose); },
-            [&](const cellview_ref &v) { return rectangle(0, 0, 0, 0); },
+            [&layer, &purpose](const cellview *v) { return v->get_bbox(layer, purpose); },
+            [](const cellview_ref &v) { return rectangle(0, 0, 0, 0); },
         },
         master);
 
