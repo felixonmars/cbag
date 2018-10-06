@@ -282,6 +282,12 @@ void oa_database::create_lib(const char *library, const char *lib_path,
             outfile.open(lib_def_file, std::ios_base::app);
             outfile << "DEFINE " << library << " " << new_lib_path << std::endl;
             outfile.close();
+
+            // Create cdsinfo.tag file
+            outfile.open((new_lib_path / "cdsinfo.tag").string(), std::ios_base::out);
+            outfile << "CDSLIBRARY" << std::endl;
+            outfile << "NAMESPACE LibraryUnix" << std::endl;
+            outfile.close();
         } else {
             logger->info("Library already exists, do nothing.");
         }
