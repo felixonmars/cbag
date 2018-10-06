@@ -48,7 +48,10 @@ uint32_t transformation::orient_code() const {
     return ((~vdir.to_int() & 0b11) << 1) | (~hdir.to_int() & 0b01);
 }
 
-void transformation::get_location(coord_t &x, coord_t &y) const { transform(x, y); }
+void transformation::get_location(coord_t &x, coord_t &y) const {
+    x = y = 0;
+    transform(x, y);
+}
 
 cbag::orientation convert_orient(bp::axis_transformation::ATR orient) {
     switch (orient) {
