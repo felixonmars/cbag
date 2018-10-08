@@ -212,6 +212,7 @@ cdef class PyBoundary:
 cdef class PyLayInstance:
     cdef cv_obj_ref[instance] _ref
     cdef _grid
+    cdef _dep_set
     cdef _master
     cdef unicode _lib_name
 
@@ -222,6 +223,6 @@ cdef class PyLayCellView:
     cdef unique_ptr[cellview] _ptr
     cdef unicode _encoding
 
-    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv,
+    cdef PyLayInstance _add_cinst(self, grid, dep_set, master, lib_name, PyLayCellView cv,
                                   const char *inst_name, transformation xform, int nx, int ny,
                                   int spx, int spy, cbool commit)

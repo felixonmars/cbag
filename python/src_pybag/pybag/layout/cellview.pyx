@@ -117,8 +117,9 @@ cdef class PyBoundary:
         self._ref.commit()
 
 cdef class PyLayInstance:
-    def __init__(self, grid, master, lib_name):
+    def __init__(self, grid, dep_set, master, lib_name):
         self._grid = grid
+        self._dep_set = dep_set
         self._master = master
         self._lib_name = lib_name
 
@@ -521,6 +522,7 @@ cdef class PyLayInstance:
                                                     self.orientation)
             self.new_master_with(flip_parity=fp_dict)
 
+        self._dep_set.add(self._master.key)
         self._ref.commit()
 
 cdef void _get_via_enc_offset(int encl, int encr, int enct, int encb, int& encx, int& ency,
@@ -673,24 +675,28 @@ cdef class PyLayCellView:
 
         ref.commit()
 
-    cdef PyLayInstance _add_cinst(self, grid, master, lib_name, PyLayCellView cv,
+    cdef PyLayInstance _add_cinst(self, grid, dep_set, master, lib_name, PyLayCellView cv,
                                   const char* inst_name, transformation xform,
                                   int nx, int ny, int spx, int spy, cbool commit):
         cdef cellview* template = cv._ptr.get()
-        cdef PyLayInstance ans = PyLayInstance(grid, master, lib_name)
-        ans._ref = move(deref(self._ptr).add_instance(template, inst_name, xform, nx, ny, spx, spy, commit))
+        cdef PyLayInstance ans = PyLayInstance(grid, dep_set, master, lib_name)
+        ans._ref = move(deref(self._ptr).add_instance(template, inst_name, xform, nx, ny,
+                                                      spx, spy, False))
 
+        if commit:
+            ans.commit()
         return ans
 
-    def add_instance(self, grid, master, lib_name, inst_name, int dx, int dy, int ocode, int nx,
-                     int ny, int spx, int spy, cbool commit=True):
-        # type: (RoutingGrid, TemplateBase, str, Optional[str], int, int, int, int, int, int, int) -> PyLayInstance
+    def add_instance(self, grid, dep_set, master, lib_name, inst_name, int dx, int dy, int ocode,
+                     int nx, int ny, int spx, int spy, cbool commit=True):
         """Adds the given instance to this layout.
 
         Parameters
         ----------
         grid : RoutingGrid
             the routing grid object.
+        dep_set : Set[Any]
+            the dependency set to register the master with.
         master : TemplateBase
             the template master object.
         lib_name : str
@@ -726,8 +732,9 @@ cdef class PyLayCellView:
             inst_name = inst_name.encode(self._encoding)
             inst_name_char = inst_name
 
-        return self._add_cinst(grid, master, lib_name, master._layout, inst_name_char,
-                               transformation(dx, dy, ocode), nx, ny, spx, spy, commit)
+        return self._add_cinst(grid, dep_set, master, lib_name, master.layout_cellview,
+                               inst_name_char, transformation(dx, dy, ocode),
+                               nx, ny, spx, spy, commit)
 
     def add_rect(self, layer, BBox bbox, cbool is_horiz, cbool commit=True):
         # type: (Union[str, Tuple[str, str]], BBox, bool, bool) -> PyRect
