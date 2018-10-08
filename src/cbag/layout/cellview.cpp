@@ -26,10 +26,8 @@ struct cellview::helper {
                 return;
         }
         auto map_end = self.inst_map.end();
-        cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt,
-                                                   std::make_optional<uint32_t>());
+        cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt);
         while (iter.has_next()) {
-
             if (self.inst_map.find(fmt::format("X{:d}", *iter)) == map_end) {
                 iter.save();
                 iter.down();

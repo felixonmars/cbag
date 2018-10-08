@@ -18,8 +18,7 @@ class binary_iterator {
   public:
     binary_iterator(T low, T high) : low(low), high(high), current((high + low) / 2) {}
 
-    binary_iterator(T low, std::optional<T> high)
-        : low(low), high(high), current(high ? (*high + low) / 2 : low) {}
+    binary_iterator(T low) : low(low), high(), current(low) {}
 
     bool has_next() const { return !high || low < *high; }
 
