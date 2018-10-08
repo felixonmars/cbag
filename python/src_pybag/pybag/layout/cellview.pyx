@@ -904,22 +904,22 @@ cdef class PyLayCellView:
             ans._ref = move(deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
                                                      cut_sp, enc1, off1, enc2, off2, add_layers,
                                                      bot_horiz, top_horiz, commit))
-            dy += spy
-            for yi in range(1, ny):
+            dy += vspy
+            for yi in range(1, vny):
                 deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
                                          cut_sp, enc1, off1, enc2, off2, add_layers, bot_horiz,
                                          top_horiz, True)
-                dy += spy
+                dy += vspy
 
-            dx += spx
-            for xi in range(1, nx):
+            dx += vspx
+            for xi in range(1, vnx):
                 dy = dy0
-                for yi in range(ny):
+                for yi in range(vny):
                     deref(self._ptr).add_via(transformation(dx, dy, ocode), via_id_str, num, cut_dim,
                                              cut_sp, enc1, off1, enc2, off2, add_layers,
                                              bot_horiz, top_horiz, True)
-                    dy += spy
-                dx += spx
+                    dy += vspy
+                dx += vspx
 
         return ans
 
