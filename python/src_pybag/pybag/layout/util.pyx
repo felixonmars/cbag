@@ -226,9 +226,9 @@ cdef class BBox:
         if not unit_mode:
             raise ValueError('unit_mode = False not supported.')
         if x is None:
-            x = self._xl
+            x = self._r.xl
         if y is None:
-            y = self._yl
+            y = self._r.yl
 
         cdef rectangle r = self._r.get_extend_to(x, y)
         return BBox(r.xl, r.yl, r.xh, r.yh)
@@ -542,7 +542,7 @@ cdef class BBoxArray:
         overall_bbox : BBox
             the overall bounding box of this BBoxArray.
         """
-        return BBox(self._bbox._xl, self._bbox.yl,
+        return BBox(self._bbox._r.xl, self._bbox._r.yl,
                     self._bbox.xh + self._spx * (self._nx - 1),
                     self._bbox.yh + self._spy * (self._ny - 1))
 

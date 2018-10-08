@@ -327,7 +327,7 @@ cdef class PyLayInstance:
             a dictionary of new parameter values.
         """
         self._master = self._master.new_template_with(**kwargs)
-        self._update_inst_master(self._master)
+        self._update_inst_master(self._master.layout_cellview)
 
     def translate_master_box(self, BBox box):
         # type: (BBox) -> BBox

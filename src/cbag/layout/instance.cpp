@@ -46,7 +46,10 @@ const char *instance::get_cell_name(const str_map_t *rename_map) const {
                 if (rename_map == nullptr) {
                     return v->cell_name.c_str();
                 }
-                return (*rename_map).find(v->cell_name)->second.c_str();
+                auto iter = rename_map->find(v->cell_name);
+                if (iter == rename_map->end())
+                    return v->cell_name.c_str();
+                return iter->second.c_str();
             },
             [](const cellview_ref &v) { return v.cell.c_str(); },
         },
