@@ -22,13 +22,16 @@ class poly45_writer {
         last = std::move(v);
     }
 
-    value_type &back() { return last; }
+    void insert(value_type *ptr, const value_type &v) {
+        record_last();
+        last = v;
+    }
 
     void record_last() const { index.insert(last, is_horiz); }
 
-    value_type *end() const { return nullptr; }
+    value_type &back() { return last; }
 
-    void insert(value_type *ptr, const value_type &v) { last = v; }
+    value_type *end() const { return nullptr; }
 };
 
 geo_index::geo_index() = default;

@@ -44,7 +44,10 @@ class polygon_writer {
         last = std::move(v);
     }
 
-    value_type &back() { return last; }
+    void insert(value_type *ptr, const value_type &v) {
+        record_last();
+        last = v;
+    }
 
     void record_last() const {
         if (last.pt_arr.getNumElements() > 0) {
@@ -58,9 +61,9 @@ class polygon_writer {
         }
     }
 
-    value_type *end() const { return nullptr; }
+    value_type &back() { return last; }
 
-    void insert(value_type *ptr, const value_type &v) { last = v; }
+    value_type *end() const { return nullptr; }
 };
 
 } // namespace cbagoa

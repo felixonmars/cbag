@@ -758,12 +758,12 @@ cdef class PyLayCellView:
             layer = layer[0].encode(self._encoding)
 
         cdef PyRect ans = PyRect()
-        ans._ref = move(deref(self._ptr).add_rect(layer, purpose, is_horiz, bbox.xl, bbox.yl, bbox.xh,
-                                                  bbox.yh, commit))
+        ans._ref = move(deref(self._ptr).add_rect(layer, purpose, is_horiz, bbox.xl, bbox.yl,
+                                                  bbox.xh, bbox.yh, commit))
         return ans
 
     def add_rect_arr(self, layer, BBox bbox, cbool is_horiz, int nx, int ny, int spx, int spy):
-        # type: (Union[str, Tuple[str, str]], BBox, int, int, int, int) -> None
+        # type: (Union[str, Tuple[str, str]], BBox, bool, int, int, int, int) -> None
         """Add an array of rectangles.
 
         Parameters
@@ -772,6 +772,8 @@ cdef class PyLayCellView:
             the rectangle layer.
         bbox : BBox
             the bounding box.
+        is_horiz : bool
+            True if this layer is horizontal.
         nx : int
             number of columns.
         ny : int
@@ -799,10 +801,11 @@ cdef class PyLayCellView:
         cdef int xh = bbox.xh
         cdef int yh = bbox.yh
         with nogil:
-            for xi in range(nx):
+            for _ in range(nx):
                 dy = 0
-                for yi in range(ny):
-                    deref(self._ptr).add_rect(lay, purp, is_horiz, xl + dx, yl + dy, xh + dx, yh + dy, True)
+                for _ in range(ny):
+                    deref(self._ptr).add_rect(lay, purp, is_horiz, xl + dx, yl + dy, xh + dx,
+                                              yh + dy, True)
                     dy += spy
                 dx += spx
 
