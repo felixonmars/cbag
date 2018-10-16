@@ -22,7 +22,7 @@ struct intv_comp {
     bool operator()(const interval_type &lhs, const interval_type &rhs) const;
 };
 
-class dist_intvs {
+class disjoint_intvs {
   public:
     using coord_t = offset_t;
     using key_type = std::pair<coord_t, coord_t>;
@@ -34,13 +34,15 @@ class dist_intvs {
     map_type table;
 
   public:
-    dist_intvs();
+    disjoint_intvs();
 
-    dist_intvs(map_type &&table);
+    disjoint_intvs(map_type &&table);
 
     const_iterator begin() const;
 
     const_iterator end() const;
+
+    std::pair<const_iterator, const_iterator> overlap_range(const key_type &key) const;
 
     bool empty() const;
 
@@ -58,15 +60,20 @@ class dist_intvs {
 
     bool covers(const key_type &key) const;
 
-    dist_intvs get_intersect(const dist_intvs &other) const;
+    disjoint_intvs get_intersect(const disjoint_intvs &other) const;
 
-    dist_intvs get_complement(coord_t lower, coord_t upper) const;
+    disjoint_intvs get_complement(coord_t lower, coord_t upper) const;
+
+    disjoint_intvs get_transform(coord_t scale, coord_t shift) const;
 
     bool remove(const key_type &key);
 
     bool remove_overlaps(const key_type &key);
 
-    bool add(key_type key, value_pointer value = nullptr, bool merge = false, bool abut = false);
+    bool substract(const key_type &key);
+
+    bool add(const key_type &key, value_pointer value = nullptr, bool merge = false,
+             bool abut = false);
 };
 
 } // namespace util

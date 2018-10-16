@@ -1,5 +1,6 @@
 
 #include <algorithm>
+#include <array>
 
 #include <cbag/util/interval.h>
 
@@ -18,33 +19,38 @@ bool intv_comp::operator()(const interval_type &lhs, const interval_type &rhs) c
     return lhs.second <= rhs.first;
 }
 
-dist_intvs::dist_intvs() = default;
+disjoint_intvs::disjoint_intvs() = default;
 
-dist_intvs::dist_intvs(map_type &&table) : table(std::move(table)) {}
+disjoint_intvs::disjoint_intvs(map_type &&table) : table(std::move(table)) {}
 
-dist_intvs::const_iterator dist_intvs::begin() const { return table.begin(); }
+disjoint_intvs::const_iterator disjoint_intvs::begin() const { return table.begin(); }
 
-dist_intvs::const_iterator dist_intvs::end() const { return table.end(); }
+disjoint_intvs::const_iterator disjoint_intvs::end() const { return table.end(); }
 
-bool dist_intvs::empty() const { return table.empty(); }
+std::pair<disjoint_intvs::const_iterator, disjoint_intvs::const_iterator>
+disjoint_intvs::overlap_range(const key_type &key) const {
+    return table.equal_range(key);
+}
 
-std::size_t dist_intvs::size() const { return table.size(); }
+bool disjoint_intvs::empty() const { return table.empty(); }
 
-dist_intvs::coord_t dist_intvs::start() const {
+std::size_t disjoint_intvs::size() const { return table.size(); }
+
+disjoint_intvs::coord_t disjoint_intvs::start() const {
     const auto iter = table.begin();
     if (iter == table.end())
         throw std::out_of_range("Cannot get start of empty interval.");
     return iter->first.first;
 }
 
-dist_intvs::coord_t dist_intvs::stop() const {
+disjoint_intvs::coord_t disjoint_intvs::stop() const {
     const auto iter = table.rbegin();
     if (iter == table.rend())
         throw std::out_of_range("Cannot get stop of empty interval.");
     return iter->first.second;
 }
 
-dist_intvs::const_iterator dist_intvs::find_exact(const key_type &key) const {
+disjoint_intvs::const_iterator disjoint_intvs::find_exact(const key_type &key) const {
     auto iter = table.find(key);
     auto end_iter = table.end();
     if (iter != end_iter && iter->first == key)
@@ -52,18 +58,18 @@ dist_intvs::const_iterator dist_intvs::find_exact(const key_type &key) const {
     return end_iter;
 }
 
-bool dist_intvs::contains(const key_type &key) const { return find_exact(key) != table.end(); }
+bool disjoint_intvs::contains(const key_type &key) const { return find_exact(key) != table.end(); }
 
-bool dist_intvs::overlaps(const key_type &key) const { return table.find(key) != table.end(); }
+bool disjoint_intvs::overlaps(const key_type &key) const { return table.find(key) != table.end(); }
 
-bool dist_intvs::covers(const key_type &key) const {
+bool disjoint_intvs::covers(const key_type &key) const {
     auto eq_range = table.equal_range(key);
     return eq_range.first != table.end() && ((++(eq_range.first)) == eq_range.second);
 }
 
-dist_intvs::map_type intersect_helper(const dist_intvs::map_type &t1,
-                                      const dist_intvs::map_type &t2) {
-    dist_intvs::map_type ans;
+disjoint_intvs::map_type intersect_helper(const disjoint_intvs::map_type &t1,
+                                          const disjoint_intvs::map_type &t2) {
+    disjoint_intvs::map_type ans;
     for (const auto &pv : t1) {
         auto intv1 = pv.first;
         auto iter_pair = t2.equal_range(intv1);
@@ -76,13 +82,13 @@ dist_intvs::map_type intersect_helper(const dist_intvs::map_type &t1,
     return ans;
 }
 
-dist_intvs dist_intvs::get_intersect(const dist_intvs &other) const {
+disjoint_intvs disjoint_intvs::get_intersect(const disjoint_intvs &other) const {
     if (size() < other.size())
-        return dist_intvs(intersect_helper(this->table, other.table));
-    return dist_intvs(intersect_helper(other.table, this->table));
+        return disjoint_intvs(intersect_helper(this->table, other.table));
+    return disjoint_intvs(intersect_helper(other.table, this->table));
 }
 
-dist_intvs dist_intvs::get_complement(coord_t lower, coord_t upper) const {
+disjoint_intvs disjoint_intvs::get_complement(coord_t lower, coord_t upper) const {
     map_type ans;
     if (table.empty()) {
         ans.emplace(std::make_pair(lower, upper), nullptr);
@@ -91,8 +97,8 @@ dist_intvs dist_intvs::get_complement(coord_t lower, coord_t upper) const {
         coord_t b = stop();
         if (a < lower || upper < b) {
             throw std::out_of_range(
-                fmt::format("dist_intvs interval [{:d}, {:d}) not covered by [{:d}, {:d})", a, b,
-                            lower, upper));
+                fmt::format("disjoint_intvs interval [{:d}, {:d}) not covered by [{:d}, {:d})", a,
+                            b, lower, upper));
         }
         for (const auto &pair : table) {
             if (lower < pair.first.first)
@@ -105,7 +111,25 @@ dist_intvs dist_intvs::get_complement(coord_t lower, coord_t upper) const {
     return {std::move(ans)};
 }
 
-bool dist_intvs::remove(const key_type &key) {
+disjoint_intvs disjoint_intvs::get_transform(coord_t scale, coord_t shift) const {
+    map_type new_table;
+
+    if (scale > 0) {
+        for (const auto &p : table) {
+            new_table.emplace(
+                key_type(scale * p.first.first + shift, scale * p.first.second + shift), p.second);
+        }
+    } else if (scale < 0) {
+        for (const auto &p : table) {
+            new_table.emplace(
+                key_type(scale * p.first.second + shift, scale * p.first.first + shift), p.second);
+        }
+    }
+
+    return {std::move(new_table)};
+}
+
+bool disjoint_intvs::remove(const key_type &key) {
     auto iter = find_exact(key);
     if (iter == table.end()) {
         return false;
@@ -114,7 +138,7 @@ bool dist_intvs::remove(const key_type &key) {
     return true;
 }
 
-bool dist_intvs::remove_overlaps(const key_type &key) {
+bool disjoint_intvs::remove_overlaps(const key_type &key) {
     auto iter_pair = table.equal_range(key);
     if (iter_pair.first == table.end())
         return false;
@@ -122,7 +146,68 @@ bool dist_intvs::remove_overlaps(const key_type &key) {
     return true;
 }
 
-bool dist_intvs::add(key_type key, value_pointer value, bool merge, bool abut) { return true; }
+bool disjoint_intvs::substract(const key_type &key) {
+    auto iter_pair = table.equal_range(key);
+    if (iter_pair.first == table.end())
+        return false;
+
+    // get intervals we need to add back
+    uint8_t add_mode = 0;
+    std::pair<key_type, value_pointer> val0;
+    std::pair<key_type, value_pointer> val1;
+    coord_t test = iter_pair.first->first.first;
+    if (test < key.first) {
+        val0.first = std::make_pair(test, key.first);
+        val0.second = iter_pair.first->second;
+        add_mode = 0b01;
+    }
+    auto last_iter = iter_pair.second;
+    test = (--last_iter)->first.second;
+    if (key.second < test) {
+        val1.first = std::make_pair(key.second, test);
+        val1.second = last_iter->second;
+        add_mode |= 0b10;
+    }
+
+    // remove intervals
+    table.erase(iter_pair.first, iter_pair.second);
+    // add back intervals
+    switch (add_mode) {
+    case 0b01:
+        table.insert(val0);
+        break;
+    case 0b10:
+        table.insert(val1);
+        break;
+    case 0b11:
+        table.insert(val0);
+        table.insert(val1);
+        break;
+    default:
+        break;
+    }
+    return true;
+}
+
+bool disjoint_intvs::add(const key_type &key, value_pointer value, bool merge, bool abut) {
+    abut = abut && merge;
+    auto iter_pair = (abut) ? table.equal_range(key_type(key.first - 1, key.second + 1))
+                            : table.equal_range(key);
+    if (iter_pair.first == table.end()) {
+        // no overlapping or abutting intervals
+        table.emplace(key, value);
+        return true;
+    } else if (merge) {
+        // have overlapping/abutting intervals, and we want to merge
+        auto last_iter = iter_pair.second;
+
+        coord_t lower = std::min(key.first, iter_pair.first->first.first);
+        coord_t upper = std::max(key.second, (--last_iter)->first.second);
+        table.erase(iter_pair.first, iter_pair.second);
+        table.emplace(key_type(lower, upper), value);
+    }
+    return false;
+}
 
 } // namespace util
 } // namespace cbag
