@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <array>
 
+#include <fmt/format.h>
+
 #include <cbag/util/interval.h>
 
 namespace cbag {
@@ -37,17 +39,11 @@ bool disjoint_intvs::empty() const { return table.empty(); }
 std::size_t disjoint_intvs::size() const { return table.size(); }
 
 disjoint_intvs::coord_t disjoint_intvs::start() const {
-    const auto iter = table.begin();
-    if (iter == table.end())
-        throw std::out_of_range("Cannot get start of empty interval.");
-    return iter->first.first;
+    return table.at_front().first.first;
 }
 
 disjoint_intvs::coord_t disjoint_intvs::stop() const {
-    const auto iter = table.rbegin();
-    if (iter == table.rend())
-        throw std::out_of_range("Cannot get stop of empty interval.");
-    return iter->first.second;
+    return table.at_back().first.second;
 }
 
 disjoint_intvs::const_iterator disjoint_intvs::find_exact(const key_type &key) const {
@@ -174,14 +170,14 @@ bool disjoint_intvs::substract(const key_type &key) {
     // add back intervals
     switch (add_mode) {
     case 0b01:
-        table.insert(val0);
+        table.insert(std::move(val0));
         break;
     case 0b10:
-        table.insert(val1);
+        table.insert(std::move(val1));
         break;
     case 0b11:
-        table.insert(val0);
-        table.insert(val1);
+        table.insert(std::move(val0));
+        table.insert(std::move(val1));
         break;
     default:
         break;

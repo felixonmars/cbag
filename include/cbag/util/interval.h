@@ -2,12 +2,10 @@
 #define CBAG_UTIL_INTERVAL_H
 
 #include <map>
-#include <type_traits>
 #include <utility>
 
-#include <fmt/format.h>
-
 #include <cbag/common/typedefs.h>
+#include <cbag/util/vector_map.h>
 
 namespace cbag {
 namespace util {
@@ -27,7 +25,7 @@ class disjoint_intvs {
     using coord_t = offset_t;
     using key_type = std::pair<coord_t, coord_t>;
     using value_pointer = void *;
-    using map_type = std::map<key_type, value_pointer, intv_comp>;
+    using map_type = vector_map<key_type, value_pointer, intv_comp>;
     using const_iterator = map_type::const_iterator;
 
   private:
