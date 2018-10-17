@@ -38,30 +38,22 @@ bool disjoint_intvs::empty() const { return table.empty(); }
 
 std::size_t disjoint_intvs::size() const { return table.size(); }
 
-disjoint_intvs::coord_t disjoint_intvs::start() const {
-    return table.at_front().first.first;
-}
+disjoint_intvs::coord_t disjoint_intvs::start() const { return table.at_front().first.first; }
 
-disjoint_intvs::coord_t disjoint_intvs::stop() const {
-    return table.at_back().first.second;
-}
+disjoint_intvs::coord_t disjoint_intvs::stop() const { return table.at_back().first.second; }
 
 disjoint_intvs::const_iterator disjoint_intvs::find_exact(const key_type &key) const {
-    auto iter = table.find(key);
-    auto end_iter = table.end();
-    if (iter != end_iter && iter->first == key)
-        return iter;
-    return end_iter;
+    return table.find_exact(key);
 }
 
 bool disjoint_intvs::contains(const key_type &key) const { return find_exact(key) != table.end(); }
 
-bool disjoint_intvs::overlaps(const key_type &key) const { return table.find(key) != table.end(); }
-
-bool disjoint_intvs::covers(const key_type &key) const {
-    auto eq_range = table.equal_range(key);
-    return eq_range.first != table.end() && ((++(eq_range.first)) == eq_range.second);
+bool disjoint_intvs::overlaps(const key_type &key) const {
+    auto iter_range = table.equal_range(key);
+    return iter_range.first != iter_range.second;
 }
+
+bool disjoint_intvs::covers(const key_type &key) const { return table.equal_size(key) == 1; }
 
 disjoint_intvs::map_type intersect_helper(const disjoint_intvs::map_type &t1,
                                           const disjoint_intvs::map_type &t2) {

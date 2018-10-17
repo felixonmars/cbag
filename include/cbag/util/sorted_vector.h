@@ -17,6 +17,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     using iterator = typename std::vector<T>::iterator;
     using const_reference = const value_type &;
     using const_iterator = typename std::vector<T>::const_iterator;
+    using difference_type = typename std::vector<T>::difference_type;
 
   private:
     std::vector<T> data_;
