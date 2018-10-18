@@ -198,7 +198,9 @@ bool disjoint_intvs::add(const key_type &key, value_pointer value, bool merge, b
         iter_pair.first->first.second = upper;
         iter_pair.first->second = value;
         // erase the rest
-        table.erase(iter_pair.first + 1, iter_pair.second);
+        ++(iter_pair.first);
+        if (iter_pair.second > iter_pair.first)
+            table.erase(iter_pair.first, iter_pair.second);
         return true;
     }
     // has overlap, and not merging; adding failed.

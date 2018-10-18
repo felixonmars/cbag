@@ -56,10 +56,6 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         return std::lower_bound(data_.begin(), data_.end(), x, comp_);
     }
 
-    template <class K> const_iterator upper_bound(const K &x) const {
-        return std::upper_bound(data_.begin(), data_.end(), x, comp_);
-    }
-
     template <class K> std::pair<const_iterator, const_iterator> equal_range(const K &x) const {
         return std::equal_range(data_.begin(), data_.end(), x, comp_);
     }

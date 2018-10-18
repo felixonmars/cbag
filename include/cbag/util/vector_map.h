@@ -68,7 +68,8 @@ template <class Key, class T, class Compare = std::less<Key>> class vector_map {
 
     const_iterator find_exact(const Key &x) const {
         auto iter = data_.lower_bound(x);
-        return (iter->first == x) ? iter : data_.end();
+        auto end = data_.end();
+        return (iter == end) ? end : (iter->first == x) ? iter : end;
     }
 
     template <class K> difference_type equal_size(const K &x) const {
