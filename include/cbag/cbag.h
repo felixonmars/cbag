@@ -9,6 +9,7 @@
 #define CBAG_CBAG_H
 
 #include <cbag/cbag_fwd.h>
+#include <cbag/util/interval.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>

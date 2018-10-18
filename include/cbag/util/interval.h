@@ -1,7 +1,6 @@
 #ifndef CBAG_UTIL_INTERVAL_H
 #define CBAG_UTIL_INTERVAL_H
 
-#include <map>
 #include <utility>
 
 #include <cbag/common/typedefs.h>
