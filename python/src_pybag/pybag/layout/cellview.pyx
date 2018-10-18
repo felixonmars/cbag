@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3
 
 from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as preinc

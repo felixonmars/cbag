@@ -1,6 +1,7 @@
 # distutils: language = c++
+#cython: language_level=3
 
-from util cimport *
+from .util cimport *
 
 import pprint
 from typing import Generator, List, Tuple, Optional

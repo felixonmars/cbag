@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3
 
 from pybag.schematic cimport cellview as sch_cellview
 from pybag.schematic cimport _add_py_sch_cv

@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3
 
 from libcpp cimport bool as cbool
 from libcpp.string cimport string

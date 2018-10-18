@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3
 
 from libcpp cimport bool as cbool
 from libcpp.utility cimport pair
@@ -39,7 +40,6 @@ cdef extern from "cbag/cbag.h" namespace "cbag::util" nogil:
         disjoint_intvs get_intersect(const disjoint_intvs& other) const
         disjoint_intvs get_complement(coord_t lower, coord_t upper) const
         disjoint_intvs get_transform(coord_t scale, coord_t shift) const
-        vector[void_ptr] get_values() const
 
         void clear()
         void_ptr remove(const intv_type& key)

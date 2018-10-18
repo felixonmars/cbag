@@ -1,4 +1,5 @@
 # distutils: language = c++
+#cython: language_level=3
 
 from cpython.ref cimport PyObject, Py_XINCREF, Py_XDECREF
 
@@ -7,7 +8,7 @@ from cython.operator import preincrement as preinc
 
 from typing import Tuple, Iterable, Any
 
-from interval cimport *
+from .interval cimport *
 
 # initialize logging
 init_logging()
@@ -27,8 +28,11 @@ cdef class PyDisjointIntervals:
 
     def __dealloc__(self):
         # decrement all Python pointer counters
-        cdef vector[void_ptr] values = self._intvs.get_values()
-        _decrement_references(values)
+        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
+        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
+        while beg_iter != end_iter:
+            Py_XDECREF(<PyObject*>deref(beg_iter).second)
+            preinc(beg_iter)
 
         # clear C++ object content
         self._intvs.clear()
@@ -122,9 +126,11 @@ cdef class PyDisjointIntervals:
         return self._intvs.covers(intv)
 
     cdef _increment_references(self):
-        cdef vector[void_ptr] values = self._intvs.get_values()
-        for ptr in values:
-            Py_XINCREF(<PyObject*>ptr)
+        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
+        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
+        while beg_iter != end_iter:
+            Py_XINCREF(<PyObject*>deref(beg_iter).second)
+            preinc(beg_iter)
 
     def copy(self):
         # type: () -> PyDisjointIntervals
