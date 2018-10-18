@@ -78,15 +78,17 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     }
 
     template <class... Args> std::pair<iterator, bool> emplace_unique(Args &&... args) {
-        T item(std::forward<Args>(args)...);
+        return insert_unique(value_type(std::forward<Args>(args)...));
+    }
 
+    std::pair<iterator, bool> insert_unique(const value_type &item) {
         auto iter_range = equal_range(item);
         if (iter_range.first != iter_range.second)
             return {iter_range.first, false};
-        return {data_.insert(iter_range.second, std::move(item)), true};
+        return {data_.insert(iter_range.second, item), true};
     }
 
-    std::pair<iterator, bool> insert_unique(T &&item) {
+    std::pair<iterator, bool> insert_unique(value_type &&item) {
         auto iter_range = equal_range(item);
         if (iter_range.first != iter_range.second)
             return {iter_range.first, false};

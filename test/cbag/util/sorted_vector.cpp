@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <set>
 #include <vector>
 
 #include <catch2/catch.hpp>
@@ -7,195 +8,161 @@
 
 namespace cu = cbag::util;
 
-SCENARIO("sorted_vector is empty", "[sorted_vector]") {
-    cu::sorted_vector<int> v;
-    REQUIRE(v.size() == 0);
-    REQUIRE(v.capacity() == 0);
-    REQUIRE(v.empty() == true);
+using sorted_vector = cu::sorted_vector<int>;
+using model_vector = std::vector<int>;
 
-    THEN("iterator behaves properly") {
-        REQUIRE(v.begin() == v.end());
-        REQUIRE(v.end() - v.begin() == 0);
-    }
-
-    THEN("at_front() and at_back() errors") {
-        REQUIRE_THROWS_AS(v.at_front(), std::out_of_range);
-        REQUIRE_THROWS_AS(v.at_back(), std::out_of_range);
-    }
-
-    THEN("lower_bound works") { REQUIRE(v.lower_bound(0) == v.end()); }
-
-    THEN("equal_range works") {
-        auto iter_range = v.equal_range(0);
-        REQUIRE(iter_range.first == v.end());
-        REQUIRE(iter_range.second == v.end());
-    }
-}
-
-SCENARIO("sorted_vector has some values", "[sorted_vector]") {
-    std::vector<int> data{6, 2, 4};
-    std::vector<int> expected(data);
-    std::sort(expected.begin(), expected.end());
-
-    WHEN("initializer list constructor") {
-        cu::sorted_vector<int> v{data[0], data[1], data[2]};
-
-        THEN("vector has right size and is sorted") {
-            REQUIRE(v.size() == expected.size());
-            REQUIRE(v.capacity() >= expected.size());
-            REQUIRE(v == expected);
-        }
-    }
-
-    WHEN("std vector constructor") {
-        cu::sorted_vector<int> v(data);
-
-        THEN("vector has right size and is sorted") {
-            REQUIRE(v.size() == expected.size());
-            REQUIRE(v.capacity() >= expected.size());
-            REQUIRE(v == expected);
-        }
-
-        THEN("iterator behaves properly") {
-            REQUIRE(*v.begin() == expected[0]);
-            REQUIRE(v.begin() != v.end());
-            REQUIRE(v.end() - v.begin() == v.size());
-        }
-
-        THEN("at_front() and at_back() works") {
+void check_equal(const sorted_vector &v, const model_vector &expected, bool deep = false) {
+    REQUIRE(v == expected);
+    if (deep) {
+        REQUIRE(expected == v);
+        REQUIRE(v.size() == expected.size());
+        REQUIRE(v.capacity() == expected.capacity());
+        REQUIRE(v.empty() == expected.empty());
+        REQUIRE(v.end() - v.begin() == expected.end() - expected.begin());
+        if (v.empty()) {
+            REQUIRE_THROWS_AS(v.at_front(), std::out_of_range);
+            REQUIRE_THROWS_AS(v.at_back(), std::out_of_range);
+        } else {
+            REQUIRE(*v.begin() == *expected.begin());
             REQUIRE(v.at_front() == expected.front());
             REQUIRE(v.at_back() == expected.back());
         }
+    }
+}
 
-        THEN("lower_bound works") {
-            REQUIRE(v.lower_bound(expected[0] - 1) - v.begin() == 0);
-            REQUIRE(v.lower_bound(expected[0]) - v.begin() == 0);
-            REQUIRE(v.lower_bound(expected[0] + 1) - v.begin() == 1);
-            REQUIRE(v.lower_bound(expected[1]) - v.begin() == 1);
-            REQUIRE(v.lower_bound(expected[2]) - v.begin() == 2);
-            REQUIRE(v.lower_bound(expected[2] + 1) == v.end());
+SCENARIO("constructors and accessors", "[sorted_vector]") {
+    GIVEN("empty") {
+        model_vector expected;
+
+        THEN("vector constructor works") {
+            sorted_vector v(expected);
+            check_equal(v, expected, true);
+            REQUIRE(v.size() == 0);
+            REQUIRE(v.capacity() == 0);
+            REQUIRE(v.empty() == true);
         }
 
-        THEN("equal_range works") {
-            auto iter_range = v.equal_range(expected[0] - 1);
-            REQUIRE(iter_range.first - v.begin() == 0);
-            REQUIRE(iter_range.second - v.begin() == 0);
-            iter_range = v.equal_range(expected[0]);
-            REQUIRE(iter_range.first - v.begin() == 0);
-            REQUIRE(iter_range.second - v.begin() == 1);
-            iter_range = v.equal_range(expected[0] + 1);
-            REQUIRE(iter_range.first - v.begin() == 1);
-            REQUIRE(iter_range.second - v.begin() == 1);
-            iter_range = v.equal_range(expected[1]);
-            REQUIRE(iter_range.first - v.begin() == 1);
-            REQUIRE(iter_range.second - v.begin() == 2);
-            iter_range = v.equal_range(expected[2]);
-            REQUIRE(iter_range.first - v.begin() == 2);
-            REQUIRE(iter_range.second == v.end());
-            iter_range = v.equal_range(expected[2] + 1);
+        THEN("initializer list constructor works") {
+            sorted_vector v{};
+            check_equal(v, expected, true);
+            REQUIRE(v.size() == 0);
+            REQUIRE(v.capacity() == 0);
+            REQUIRE(v.empty() == true);
+        }
+
+        sorted_vector v;
+
+        THEN("default constructor works") {
+            check_equal(v, expected, true);
+            REQUIRE(v.size() == 0);
+            REQUIRE(v.capacity() == 0);
+            REQUIRE(v.empty() == true);
+        }
+
+        THEN("lower_bound/equal_range returns end") {
+            auto iter_range = v.equal_range(0);
+            REQUIRE(v.lower_bound(0) == v.end());
             REQUIRE(iter_range.first == v.end());
             REQUIRE(iter_range.second == v.end());
         }
     }
+
+    THEN("non-empty initializer list constructor works") {
+        model_vector expected{2, 4, 6};
+        sorted_vector v{6, 2, 4};
+        check_equal(v, expected, true);
+    }
+
+    GIVEN("not empty") {
+        model_vector data = GENERATE(values<model_vector>({
+            {6, 2, 4},
+            {6, 6, 2, 4, 4, 4},
+        }));
+        model_vector expected(data);
+        std::sort(expected.begin(), expected.end());
+
+        sorted_vector v(data);
+
+        THEN("vector constructor works") { check_equal(v, expected, true); }
+
+        THEN("lower_bound works") {
+            for (std::size_t idx = 0; idx < expected.size(); ++idx) {
+                for (int offset = -1; offset < 2; ++offset) {
+                    int val = expected[idx] + offset;
+                    REQUIRE(v.lower_bound(val) - v.begin() ==
+                            std::lower_bound(expected.begin(), expected.end(), val) -
+                                expected.begin());
+                }
+            }
+        }
+
+        THEN("equal_range works") {
+            for (std::size_t idx = 0; idx < expected.size(); ++idx) {
+                for (int offset = -1; offset < 2; ++offset) {
+                    int val = expected[idx] + offset;
+                    auto pair1 = v.equal_range(val);
+                    auto pair2 = std::equal_range(expected.begin(), expected.end(), val);
+                    REQUIRE(pair1.first - v.begin() == pair2.first - expected.begin());
+                    REQUIRE(pair1.second - v.begin() == pair2.second - expected.begin());
+                }
+            }
+        }
+    }
 }
 
-SCENARIO("sorted_vector with duplicate values", "[sorted_vector]") {
-    std::vector<int> data{6, 2, 4, 4, 4};
-    std::vector<int> expected(data);
-    std::sort(expected.begin(), expected.end());
-    cu::sorted_vector<int> v(data);
+SCENARIO("insert_unique/emplace_unique test", "[sorted_vector]") {
+    model_vector data = GENERATE(values<model_vector>({
+        {6, 2, 4},
+        {6, 6, 2, 4, 4, 4},
+    }));
 
-    THEN("vector has right size and is sorted") {
-        REQUIRE(v.size() == expected.size());
-        REQUIRE(v.capacity() >= expected.size());
-        REQUIRE(v == expected);
-    }
+    int insert_mode = GENERATE(range(0, 3));
 
-    THEN("lower_bound works") {
-        REQUIRE(v.lower_bound(expected[0] - 1) - v.begin() == 0);
-        REQUIRE(v.lower_bound(expected[0]) - v.begin() == 0);
-        REQUIRE(v.lower_bound(expected[0] + 1) - v.begin() == 1);
-        REQUIRE(v.lower_bound(expected[1]) - v.begin() == 1);
-        REQUIRE(v.lower_bound(expected.back()) - v.begin() == expected.size() - 1);
-        REQUIRE(v.lower_bound(expected.back() + 1) == v.end());
-    }
+    sorted_vector v;
+    std::set<int> model;
 
-    THEN("equal_range works") {
-        auto iter_range = v.equal_range(expected[0] - 1);
-        REQUIRE(iter_range.first - v.begin() == 0);
-        REQUIRE(iter_range.second - v.begin() == 0);
-        iter_range = v.equal_range(expected[0]);
-        REQUIRE(iter_range.first - v.begin() == 0);
-        REQUIRE(iter_range.second - v.begin() == 1);
-        iter_range = v.equal_range(expected[0] + 1);
-        REQUIRE(iter_range.first - v.begin() == 1);
-        REQUIRE(iter_range.second - v.begin() == 1);
-        iter_range = v.equal_range(expected[1]);
-        REQUIRE(iter_range.first - v.begin() == 1);
-        REQUIRE(iter_range.second - v.begin() == 4);
-        iter_range = v.equal_range(expected.back());
-        REQUIRE(iter_range.first - v.begin() == expected.size() - 1);
-        REQUIRE(iter_range.second == v.end());
-        iter_range = v.equal_range(expected.back() + 1);
-        REQUIRE(iter_range.first == v.end());
-        REQUIRE(iter_range.second == v.end());
-    }
-}
+    for (auto val : data) {
+        bool success = model.emplace(val).second;
 
-SCENARIO("sorted_vector insertion", "[sorted_vector]") {
-    cu::sorted_vector<int> v;
-    auto ans = v.insert_unique(3);
-    REQUIRE(v.size() == 1);
-    REQUIRE(v.at_front() == 3);
-    REQUIRE(v.at_back() == 3);
-    REQUIRE(ans.first - v.begin() == 0);
-    REQUIRE(ans.second == true);
-
-    ans = v.emplace_unique(1);
-    REQUIRE(v.size() == 2);
-    REQUIRE(v.at_front() == 1);
-    REQUIRE(v.at_back() == 3);
-    REQUIRE(ans.first - v.begin() == 0);
-    REQUIRE(ans.second == true);
-
-    ans = v.insert_unique(2);
-    std::vector<int> expected{1, 2, 3};
-    REQUIRE(v == expected);
-    REQUIRE(ans.first - v.begin() == 1);
-    REQUIRE(ans.second == true);
-
-    THEN("insert/emplace duplicate values fail") {
-        ans = v.insert_unique(2);
-        REQUIRE(v == expected);
-        REQUIRE(ans.first - v.begin() == 1);
-        REQUIRE(ans.second == false);
-
-        ans = v.emplace_unique(2);
-        REQUIRE(v == expected);
-        REQUIRE(ans.first - v.begin() == 1);
-        REQUIRE(ans.second == false);
+        std::pair<sorted_vector::iterator, bool> ans;
+        switch (insert_mode) {
+        case 0:
+            ans = v.insert_unique(val);
+            break;
+        case 1:
+            ans = v.emplace_unique(val);
+            break;
+        default:
+            ans = v.insert_unique(std::move(val));
+            break;
+        }
+        REQUIRE(*(ans.first) == val);
+        REQUIRE(ans.second == success);
+        check_equal(v, model_vector(model.begin(), model.end()));
     }
 }
 
 SCENARIO("sorted_vector deletion", "[sorted_vector]") {
-    std::vector<int> expected{2, 4, 6, 8, 10};
-    cu::sorted_vector<int> v(expected);
+    GIVEN("some data") {
 
-    WHEN("erasing one element") {
-        v.erase(v.begin() + 1);
-        expected.erase(expected.begin() + 1);
-        REQUIRE(v == expected);
-    }
+        model_vector expected{2, 4, 6, 8, 10};
+        sorted_vector v(expected);
 
-    WHEN("erasing zero element") {
-        v.erase(v.begin() + 1, v.begin() + 1);
-        expected.erase(expected.begin() + 1, expected.begin() + 1);
-        REQUIRE(v == expected);
-    }
+        std::size_t start = GENERATE(range(0, 4));
 
-    WHEN("erasing multiple element") {
-        v.erase(v.begin() + 1, v.begin() + 4);
-        expected.erase(expected.begin() + 1, expected.begin() + 4);
-        REQUIRE(v == expected);
+        WHEN("deleting single element") {
+            auto iter1 = v.erase(v.begin() + start);
+            auto iter2 = expected.erase(expected.begin() + start);
+            REQUIRE(iter1 - v.begin() == iter2 - expected.begin());
+            check_equal(v, expected);
+        }
+        WHEN("deleting range") {
+            for (std::size_t stop = start; stop <= expected.size(); ++stop) {
+                auto iter1 = v.erase(v.begin() + start, v.begin() + stop);
+                auto iter2 = expected.erase(expected.begin() + start, expected.begin() + stop);
+                REQUIRE(iter1 - v.begin() == iter2 - expected.begin());
+                check_equal(v, expected);
+            }
+        }
     }
 }
