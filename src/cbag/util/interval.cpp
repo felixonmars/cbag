@@ -55,25 +55,41 @@ bool disjoint_intvs::overlaps(const key_type &key) const {
 
 bool disjoint_intvs::covers(const key_type &key) const { return table.equal_size(key) == 1; }
 
-disjoint_intvs::map_type intersect_helper(const disjoint_intvs::map_type &t1,
-                                          const disjoint_intvs::map_type &t2) {
-    disjoint_intvs::map_type ans;
-    for (const auto &pv : t1) {
-        auto intv1 = pv.first;
-        auto iter_pair = t2.equal_range(intv1);
-        for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
-            ans.emplace(std::make_pair(std::max(intv1.first, iter_pair.first->first.first),
-                                       std::min(intv1.second, iter_pair.first->first.second)),
-                        nullptr);
-        }
+void intersect_helper(disjoint_intvs::map_type &ans, const disjoint_intvs::key_type &intv,
+                      disjoint_intvs::const_iterator &first,
+                      const disjoint_intvs::const_iterator &last,
+                      const disjoint_intvs::map_type::compare_type &comp) {
+    auto iter_pair = std::equal_range(first, last, intv, comp);
+    first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
+    for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
+        coord_t start = std::max(intv.first, iter_pair.first->first.first);
+        coord_t stop = std::min(intv.second, iter_pair.first->first.second);
+        ans.emplace(std::make_pair(start, stop), nullptr);
     }
-    return ans;
 }
 
 disjoint_intvs disjoint_intvs::get_intersect(const disjoint_intvs &other) const {
-    if (size() < other.size())
-        return disjoint_intvs(intersect_helper(this->table, other.table));
-    return disjoint_intvs(intersect_helper(other.table, this->table));
+    auto iter1 = table.begin();
+    auto iter2 = other.table.begin();
+    auto end1 = table.end();
+    auto end2 = other.table.end();
+    const auto &comp = table.get_compare();
+
+    disjoint_intvs::map_type ans;
+    auto size1 = end1 - iter1;
+    auto size2 = end2 - iter2;
+    while (size1 > 0 && size2 > 0) {
+        if (size1 <= size2) {
+            intersect_helper(ans, iter1->first, iter2, end2, comp);
+            ++iter1;
+        } else {
+            intersect_helper(ans, iter2->first, iter1, end1, comp);
+            ++iter2;
+        }
+        size1 = end1 - iter1;
+        size2 = end2 - iter2;
+    }
+    return {std::move(ans)};
 }
 
 disjoint_intvs disjoint_intvs::get_complement(coord_t lower, coord_t upper) const {

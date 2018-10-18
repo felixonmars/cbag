@@ -40,6 +40,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
             throw std::out_of_range("Cannot get back of empty vector.");
         return data_.back();
     }
+    const Compare &get_compare() const { return comp_; }
 
     template <class K> const_iterator lower_bound(const K &x) const {
         return std::lower_bound(data_.begin(), data_.end(), x, comp_);

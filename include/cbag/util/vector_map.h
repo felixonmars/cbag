@@ -23,6 +23,7 @@ template <class Key, class T, class Compare = std::less<Key>> class vector_map {
     using iterator = typename vector_type::iterator;
     using const_iterator = typename vector_type::const_iterator;
     using difference_type = typename vector_type::difference_type;
+    using compare_type = KeyCompare;
 
   private:
     sorted_vector<value_type, KeyCompare> data_;
@@ -56,6 +57,7 @@ template <class Key, class T, class Compare = std::less<Key>> class vector_map {
     const_iterator end() const { return data_.end(); }
     const_reference at_front() const { return data_.at_front(); }
     const_reference at_back() const { return data_.at_back(); }
+    const compare_type &get_compare() const { return data_.get_compare(); }
 
     template <class K> const_iterator find(const K &x) const {
         auto iter_range = data_.equal_range(x);
