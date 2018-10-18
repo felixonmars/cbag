@@ -6,7 +6,7 @@ from cpython.ref cimport PyObject, Py_XINCREF, Py_XDECREF
 from cython.operator import dereference as deref
 from cython.operator import preincrement as preinc
 
-from typing import Tuple, Iterable, Any
+from typing import Tuple, Iterable, Any, Optional
 
 from .interval cimport *
 
@@ -62,14 +62,7 @@ cdef class PyDisjointIntervals:
         intv : Tuple[int, int]
             the next interval.
         """
-        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
-        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
-
-        cdef int a = 0
-        cdef int b = 0
-        while beg_iter != end_iter:
-            yield deref(beg_iter).first.first, deref(beg_iter).first.second
-            preinc(beg_iter)
+        return self.intervals()
 
     def __len__(self):
         # type: () -> int
@@ -124,6 +117,144 @@ cdef class PyDisjointIntervals:
         # type: (Tuple[int, int]) -> bool
         """Returns True if the given interval is completed covered by a single interval."""
         return self._intvs.covers(intv)
+
+    def items(self):
+        # type: () -> Iterable[Tuple[Tuple[int, int], Any]]
+        """Iterates over intervals and values in this IntervalSet
+
+        The intervals are returned in increasing order.
+
+        Yields
+        ------
+        intv : Tuple[Tuple[int, int]
+            the interval.
+        val : Any
+            the value associated with the interval.
+        """
+        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
+        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
+        while beg_iter != end_iter:
+            yield ((deref(beg_iter).first.first, deref(beg_iter).first.second),
+                   <object>(<PyObject*>deref(beg_iter).second))
+            preinc(beg_iter)
+
+    def intervals(self):
+        # type: () -> Iterable[Tuple[int, int]]
+        """Iterates over intervals in this IntervalSet
+
+        The intervals are returned in increasing order.
+
+        Yields
+        ------
+        intv : Tuple[int, int]
+            the interval.
+        """
+        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
+        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
+        while beg_iter != end_iter:
+            yield deref(beg_iter).first.first, deref(beg_iter).first.second
+            preinc(beg_iter)
+
+    def values(self):
+        # type: () -> Iterable[Any]
+        """Iterates over values in this IntervalSet
+
+        The values correspond to intervals in increasing order.
+
+        Yields
+        ------
+        val : Any
+            the value.
+        """
+        cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
+        cdef disjoint_intvs.const_iterator end_iter = self._intvs.end()
+        while beg_iter != end_iter:
+            yield <object>(<PyObject*>deref(beg_iter).second)
+            preinc(beg_iter)
+
+    def overlap_items(self, intv):
+        # type: (Tuple[int, int]) -> Iterable[Tuple[Tuple[int, int], Any]]
+        """Iterates over intervals and values overlapping the given interval.
+
+        Parameters
+        ----------
+        intv : Tuple[int, int]
+            the interval.
+
+        Yields
+        -------
+        ovl_intv : Tuple[int, int]
+            the overlapping interval.
+        val : Any
+            value associated with ovl_intv.
+        """
+        cdef pair[disjoint_intvs.const_iterator, disjoint_intvs.const_iterator] ans = \
+            self._intvs.overlap_range(intv)
+        while ans.first != ans.second:
+            yield ((deref(ans.first).first.first, deref(ans.first).first.second),
+                   <object>(<PyObject*>deref(ans.first).second))
+            preinc(ans.first)
+
+    def overlap_intervals(self, intv):
+        # type: (Tuple[int, int]) -> Iterable[Tuple[int, int]]
+        """Iterates over intervals overlapping the given interval.
+
+        Parameters
+        ----------
+        intv : Tuple[int, int]
+            the interval.
+
+        Yields
+        -------
+        ovl_intv : Tuple[int, int]
+            the overlapping interval.
+        """
+        cdef pair[disjoint_intvs.const_iterator, disjoint_intvs.const_iterator] ans = \
+            self._intvs.overlap_range(intv)
+        while ans.first != ans.second:
+            yield deref(ans.first).first.first, deref(ans.first).first.second
+            preinc(ans.first)
+
+    def overlap_values(self, intv):
+        # type: (Tuple[int, int]) -> Iterable[Any]
+        """Iterates over values of intervals overlapping the given interval.
+
+        Parameters
+        ----------
+        intv : Tuple[int, int]
+            the interval.
+
+        Yields
+        -------
+        ovl_intv : Tuple[int, int]
+            the overlapping interval.
+        """
+        cdef pair[disjoint_intvs.const_iterator, disjoint_intvs.const_iterator] ans = \
+            self._intvs.overlap_range(intv)
+        while ans.first != ans.second:
+            yield <object>(<PyObject*>deref(ans.first).second)
+            preinc(ans.first)
+
+    def get_first_overlap_item(self, intv):
+        # type: (Tuple[int, int]) -> Optional[Tuple[Tuple[int, int], Any]]
+        """Returns the first item with interval that overlaps the given one.
+
+        Parameters
+        ----------
+        intv : Tuple[int, int]
+            the interval.
+
+        Returns
+        -------
+        result : Optional[Tuple[Tuple[int, int], Any]]
+            the first overlapping item.  None if no overlap.
+        """
+        cdef pair[disjoint_intvs.const_iterator, disjoint_intvs.const_iterator] ans = \
+            self._intvs.overlap_range(intv)
+        if ans.first == ans.second:
+            return None
+        return ((deref(ans.first).first.first, deref(ans.first).first.second),
+                   <object>(<PyObject*>deref(ans.first).second))
 
     cdef _increment_references(self):
         cdef disjoint_intvs.const_iterator beg_iter = self._intvs.begin()
