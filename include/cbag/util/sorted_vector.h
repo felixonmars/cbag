@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <initializer_list>
 #include <utility>
 #include <vector>
 
@@ -24,12 +25,21 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     Compare comp_;
 
   public:
-    sorted_vector() = default;
+    sorted_vector() noexcept = default;
 
-    size_type size() const { return data_.size(); }
-    bool empty() const { return data_.empty(); }
-    const_iterator begin() const { return data_.begin(); }
-    const_iterator end() const { return data_.end(); }
+    sorted_vector(std::vector<T> data) : data_(std::move(data)) {
+        std::sort(data_.begin(), data_.end(), comp_);
+    }
+
+    sorted_vector(std::initializer_list<T> init) : data_(init) {
+        std::sort(data_.begin(), data_.end(), comp_);
+    }
+
+    size_type size() const noexcept { return data_.size(); }
+    size_type capacity() const noexcept { return data_.capacity(); }
+    bool empty() const noexcept { return data_.empty(); }
+    const_iterator begin() const noexcept { return data_.begin(); }
+    const_iterator end() const noexcept { return data_.end(); }
     const_reference at_front() const {
         if (data_.empty())
             throw std::out_of_range("Cannot get front of empty vector.");
@@ -56,6 +66,19 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
 
     template <class K> std::pair<iterator, iterator> equal_range(const K &x) {
         return std::equal_range(data_.begin(), data_.end(), x, comp_);
+    }
+
+    friend bool operator==(const sorted_vector<T, Compare> &lhs,
+                           const sorted_vector<T, Compare> &rhs) {
+        return lhs.data_ == rhs.data_;
+    }
+
+    friend bool operator==(const sorted_vector<T, Compare> &lhs, const std::vector<T> &rhs) {
+        return lhs.data_ == rhs;
+    }
+
+    friend bool operator==(const std::vector<T> &lhs, const sorted_vector<T, Compare> &rhs) {
+        return lhs == rhs.data_;
     }
 
     template <class... Args> std::pair<iterator, bool> emplace_unique(Args &&... args) {

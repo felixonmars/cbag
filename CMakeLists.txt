@@ -48,10 +48,13 @@ find_package(spdlog CONFIG REQUIRED)
 # Include threads for spdlog
 # find_package(Threads REQUIRED)
 
-# include yaml-cpp
+# Include yaml-cpp
 find_package(yaml-cpp)
 message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
 message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
+
+# Include Catch2
+find_package(Catch2 REQUIRED)
 
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
