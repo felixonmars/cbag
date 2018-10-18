@@ -39,12 +39,15 @@ cdef extern from "cbag/cbag.h" namespace "cbag::util" nogil:
         disjoint_intvs get_intersect(const disjoint_intvs& other) const
         disjoint_intvs get_complement(coord_t lower, coord_t upper) const
         disjoint_intvs get_transform(coord_t scale, coord_t shift) const
+        vector[void_ptr] get_values() const
 
-        void set(const disjoint_intvs& ref)
-        cbool remove(const intv_type& key)
-        cbool remove_overlaps(const intv_type& key)
-        cbool subtract(const intv_type& key)
+        void clear()
+        void_ptr remove(const intv_type& key)
+        vector[void_ptr] remove_overlaps(const intv_type& key)
+        vector[void_ptr] subtract(const intv_type& key)
         cbool add(const intv_type& key, void_ptr value, cbool merge, cbool abut)
 
 cdef class PyDisjointIntervals:
     cdef disjoint_intvs _intvs
+
+    cdef _increment_references(self)

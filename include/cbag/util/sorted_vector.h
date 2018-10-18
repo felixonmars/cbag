@@ -77,6 +77,8 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         return lhs == rhs.data_;
     }
 
+    void clear() noexcept { data_.clear(); }
+
     template <class... Args> std::pair<iterator, bool> emplace_unique(Args &&... args) {
         return insert_unique(value_type(std::forward<Args>(args)...));
     }

@@ -63,11 +63,17 @@ class disjoint_intvs {
 
     disjoint_intvs get_transform(coord_t scale, coord_t shift) const;
 
-    bool remove(const key_type &key);
+    std::vector<value_pointer> get_values() const;
 
-    bool remove_overlaps(const key_type &key);
+    std::vector<value_pointer> get_values(const_iterator first, const const_iterator &last) const;
 
-    bool subtract(const key_type &key);
+    void clear() noexcept;
+
+    value_pointer remove(const key_type &key);
+
+    std::vector<value_pointer> remove_overlaps(const key_type &key);
+
+    std::vector<value_pointer> subtract(const key_type &key);
 
     bool add(const key_type &key, value_pointer value = nullptr, bool merge = false,
              bool abut = false);

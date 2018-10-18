@@ -98,6 +98,8 @@ template <class Key, class T, class Compare = std::less<Key>> class vector_map {
         return data_.equal_range(x);
     }
 
+    void clear() noexcept { data_.clear(); }
+
     template <class K> std::pair<iterator, iterator> equal_range(const K &x) {
         return data_.equal_range(x);
     }

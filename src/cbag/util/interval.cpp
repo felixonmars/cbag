@@ -133,28 +133,50 @@ disjoint_intvs disjoint_intvs::get_transform(coord_t scale, coord_t shift) const
     return {std::move(new_table)};
 }
 
-bool disjoint_intvs::remove(const key_type &key) {
+std::vector<disjoint_intvs::value_pointer> disjoint_intvs::get_values() const {
+    return get_values(begin(), end());
+}
+
+std::vector<disjoint_intvs::value_pointer>
+disjoint_intvs::get_values(const_iterator first, const const_iterator &last) const {
+    auto num_remove = last - first;
+    std::vector<value_pointer> ans;
+    ans.reserve(num_remove);
+    for (; first != last; ++first) {
+        if (first->second != nullptr)
+            ans.emplace_back(first->second);
+    }
+    return ans;
+}
+
+void disjoint_intvs::clear() noexcept {
+    table.clear();
+}
+
+disjoint_intvs::value_pointer disjoint_intvs::remove(const key_type &key) {
     auto iter = find_exact(key);
     if (iter == table.end()) {
-        return false;
+        return nullptr;
     }
+    auto ans = iter->second;
     table.erase(iter);
-    return true;
+    return ans;
 }
 
-bool disjoint_intvs::remove_overlaps(const key_type &key) {
-    auto iter_pair = table.equal_range(key);
+std::vector<disjoint_intvs::value_pointer> disjoint_intvs::remove_overlaps(const key_type &key) {
+    auto iter_pair = overlap_range(key);
     if (iter_pair.first == iter_pair.second)
-        return false;
+        return {};
+    auto ans = get_values(iter_pair.first, iter_pair.second);
     table.erase(iter_pair.first, iter_pair.second);
-    return true;
+    return ans;
 }
 
-bool disjoint_intvs::subtract(const key_type &key) {
+std::vector<disjoint_intvs::value_pointer> disjoint_intvs::subtract(const key_type &key) {
     auto iter_pair = table.equal_range(key);
     auto overlap_size = iter_pair.second - iter_pair.first;
     if (overlap_size == 0)
-        return false;
+        return {};
 
     coord_t test = iter_pair.first->first.first;
     if (test < key.first) {
@@ -163,7 +185,7 @@ bool disjoint_intvs::subtract(const key_type &key) {
         ++iter_pair.first;
         // we're done if there's no more interval
         if ((--overlap_size) == 0)
-            return true;
+            return {};
     }
 
     auto last_iter = iter_pair.second - 1;
@@ -173,12 +195,13 @@ bool disjoint_intvs::subtract(const key_type &key) {
         last_iter->first.first = key.second;
         iter_pair.second = last_iter;
         if ((--overlap_size) == 0)
-            return true;
+            return {};
     }
 
     // erase all completely overlapped intervals
+    auto ans = get_values(iter_pair.first, iter_pair.second);
     table.erase(iter_pair.first, iter_pair.second);
-    return true;
+    return ans;
 }
 
 bool disjoint_intvs::add(const key_type &key, value_pointer value, bool merge, bool abut) {

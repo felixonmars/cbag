@@ -45,14 +45,12 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
         }
 
         WHEN("removing overlaps") {
-            success = iset.remove_overlaps(key_type(2, 9));
-            REQUIRE(success == true);
+            iset.remove_overlaps(key_type(2, 9));
             REQUIRE(iset.empty() == true);
         }
 
         WHEN("subtract overlaps") {
-            success = iset.subtract(key_type(2, 9));
-            REQUIRE(success == true);
+            iset.subtract(key_type(2, 9));
             REQUIRE(iset.size() == 2);
             REQUIRE(iset.begin()->first == key_type(1, 2));
             REQUIRE((iset.begin() + 1)->first == key_type(9, 10));
