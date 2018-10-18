@@ -10,43 +10,60 @@
 namespace cbag {
 namespace util {
 
-template <class Key, class T, class Compare = std::less<Key>> class vector_map {
-  private:
-    class KeyCompare;
+namespace detail {
+template <class Key, class T, typename Comp> class KeyCompareBase {
+  public:
+    using value_type = std::pair<Key, T>;
 
+    Comp comp_;
+
+    constexpr bool operator()(const value_type &lhs, const value_type &rhs) const {
+        return comp_(lhs.first, rhs.first);
+    }
+
+    constexpr bool operator()(const Key &lhs, const value_type &rhs) const {
+        return comp_(lhs, rhs.first);
+    }
+
+    constexpr bool operator()(const value_type &lhs, const Key &rhs) const {
+        return comp_(lhs.first, rhs);
+    }
+};
+
+template <class Key, class T, typename Comp, typename = void>
+class KeyCompare : public KeyCompareBase<Key, T, Comp> {};
+
+template <class Key, class T, typename Comp>
+class KeyCompare<Key, T, Comp, typename Comp::is_transparent>
+    : public KeyCompareBase<Key, T, Comp> {
+  public:
+    using value_type = typename KeyCompareBase<Key, T, Comp>::value_type;
+
+    template <class K> constexpr bool operator()(const K &lhs, const value_type &rhs) const {
+        return comp_(lhs, rhs.first);
+    }
+
+    template <class K> constexpr bool operator()(const value_type &lhs, const K &rhs) const {
+        return comp_(lhs.first, rhs);
+    }
+};
+
+} // namespace detail
+
+template <class Key, class T, class Compare = std::less<Key>> class vector_map {
   public:
     using value_type = std::pair<Key, T>;
     using reference = value_type &;
     using const_reference = const value_type &;
-    using vector_type = sorted_vector<value_type, KeyCompare>;
+    using compare_type = detail::KeyCompare<Key, T, Compare>;
+    using vector_type = sorted_vector<value_type, compare_type>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
     using const_iterator = typename vector_type::const_iterator;
     using difference_type = typename vector_type::difference_type;
-    using compare_type = KeyCompare;
 
   private:
-    sorted_vector<value_type, KeyCompare> data_;
-
-    class KeyCompare {
-      private:
-        Compare comp_;
-
-      public:
-        constexpr bool operator()(const value_type &lhs, const value_type &rhs) const {
-            return comp_(lhs.first, rhs.first);
-        }
-
-        template <class K, typename = typename Compare::is_transparent>
-        constexpr bool operator()(const K &lhs, const value_type &rhs) const {
-            return comp_(lhs, rhs.first);
-        }
-
-        template <class K, typename = typename Compare::is_transparent>
-        constexpr bool operator()(const value_type &lhs, const K &rhs) const {
-            return comp_(lhs.first, rhs);
-        }
-    };
+    vector_type data_;
 
   public:
     vector_map() = default;
