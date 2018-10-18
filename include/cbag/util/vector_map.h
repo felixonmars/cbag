@@ -71,13 +71,17 @@ template <class Key, class T, class Compare = std::less<Key>> class vector_map {
         return (iter->first == x) ? iter : data_.end();
     }
 
+    template <class K> difference_type equal_size(const K &x) const {
+        auto iter_range = data_.equal_range(x);
+        return iter_range.second - iter_range.first;
+    }
+
     template <class K> std::pair<const_iterator, const_iterator> equal_range(const K &x) const {
         return data_.equal_range(x);
     }
 
-    template <class K> difference_type equal_size(const K &x) const {
-        auto iter_range = data_.equal_range(x);
-        return iter_range.second - iter_range.first;
+    template <class K> std::pair<iterator, iterator> equal_range(const K &x) {
+        return data_.equal_range(x);
     }
 
     template <class... Args> std::pair<iterator, bool> emplace(Args &&... args) {

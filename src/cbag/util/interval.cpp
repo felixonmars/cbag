@@ -144,7 +144,7 @@ bool disjoint_intvs::remove(const key_type &key) {
 
 bool disjoint_intvs::remove_overlaps(const key_type &key) {
     auto iter_pair = table.equal_range(key);
-    if (iter_pair.first == table.end())
+    if (iter_pair.first == iter_pair.second)
         return false;
     table.erase(iter_pair.first, iter_pair.second);
     return true;
@@ -152,44 +152,32 @@ bool disjoint_intvs::remove_overlaps(const key_type &key) {
 
 bool disjoint_intvs::substract(const key_type &key) {
     auto iter_pair = table.equal_range(key);
-    if (iter_pair.first == table.end())
+    auto overlap_size = iter_pair.second - iter_pair.first;
+    if (overlap_size == 0)
         return false;
 
-    // get intervals we need to add back
-    uint8_t add_mode = 0;
-    std::pair<key_type, value_pointer> val0;
-    std::pair<key_type, value_pointer> val1;
     coord_t test = iter_pair.first->first.first;
     if (test < key.first) {
-        val0.first = std::make_pair(test, key.first);
-        val0.second = iter_pair.first->second;
-        add_mode = 0b01;
-    }
-    auto last_iter = iter_pair.second;
-    test = (--last_iter)->first.second;
-    if (key.second < test) {
-        val1.first = std::make_pair(key.second, test);
-        val1.second = last_iter->second;
-        add_mode |= 0b10;
+        // perform substraction on first interval
+        iter_pair.first->first.second = key.first;
+        ++iter_pair.first;
+        // we're done if there's no more interval
+        if ((--overlap_size) == 0)
+            return true;
     }
 
-    // remove intervals
-    table.erase(iter_pair.first, iter_pair.second);
-    // add back intervals
-    switch (add_mode) {
-    case 0b01:
-        table.insert(std::move(val0));
-        break;
-    case 0b10:
-        table.insert(std::move(val1));
-        break;
-    case 0b11:
-        table.insert(std::move(val0));
-        table.insert(std::move(val1));
-        break;
-    default:
-        break;
+    auto last_iter = iter_pair.second - 1;
+    test = last_iter->first.second;
+    if (key.second < test) {
+        // perform substraction on last interval
+        last_iter->first.first = key.second;
+        iter_pair.second = last_iter;
+        if ((--overlap_size) == 0)
+            return true;
     }
+
+    // erase all completely overlapped intervals
+    table.erase(iter_pair.first, iter_pair.second);
     return true;
 }
 
@@ -197,19 +185,23 @@ bool disjoint_intvs::add(const key_type &key, value_pointer value, bool merge, b
     abut = abut && merge;
     auto iter_pair = (abut) ? table.equal_range(key_type(key.first - 1, key.second + 1))
                             : table.equal_range(key);
-    if (iter_pair.first == table.end()) {
+    if (iter_pair.first == iter_pair.second) {
         // no overlapping or abutting intervals
         table.emplace(key, value);
         return true;
     } else if (merge) {
         // have overlapping/abutting intervals, and we want to merge
-        auto last_iter = iter_pair.second;
-
         coord_t lower = std::min(key.first, iter_pair.first->first.first);
-        coord_t upper = std::max(key.second, (--last_iter)->first.second);
-        table.erase(iter_pair.first, iter_pair.second);
-        table.emplace(key_type(lower, upper), value);
+        coord_t upper = std::max(key.second, (iter_pair.second - 1)->first.second);
+        // modify the first overlapping interval
+        iter_pair.first->first.first = lower;
+        iter_pair.first->first.second = upper;
+        iter_pair.first->second = value;
+        // erase the rest
+        table.erase(iter_pair.first + 1, iter_pair.second);
+        return true;
     }
+    // has overlap, and not merging; adding failed.
     return false;
 }
 
