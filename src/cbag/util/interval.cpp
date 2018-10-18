@@ -150,7 +150,7 @@ bool disjoint_intvs::remove_overlaps(const key_type &key) {
     return true;
 }
 
-bool disjoint_intvs::substract(const key_type &key) {
+bool disjoint_intvs::subtract(const key_type &key) {
     auto iter_pair = table.equal_range(key);
     auto overlap_size = iter_pair.second - iter_pair.first;
     if (overlap_size == 0)
@@ -158,7 +158,7 @@ bool disjoint_intvs::substract(const key_type &key) {
 
     coord_t test = iter_pair.first->first.first;
     if (test < key.first) {
-        // perform substraction on first interval
+        // perform subtraction on first interval
         iter_pair.first->first.second = key.first;
         ++iter_pair.first;
         // we're done if there's no more interval
@@ -169,7 +169,7 @@ bool disjoint_intvs::substract(const key_type &key) {
     auto last_iter = iter_pair.second - 1;
     test = last_iter->first.second;
     if (key.second < test) {
-        // perform substraction on last interval
+        // perform subtraction on last interval
         last_iter->first.first = key.second;
         iter_pair.second = last_iter;
         if ((--overlap_size) == 0)

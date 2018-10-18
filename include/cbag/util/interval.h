@@ -67,7 +67,7 @@ class disjoint_intvs {
 
     bool remove_overlaps(const key_type &key);
 
-    bool substract(const key_type &key);
+    bool subtract(const key_type &key);
 
     bool add(const key_type &key, value_pointer value = nullptr, bool merge = false,
              bool abut = false);

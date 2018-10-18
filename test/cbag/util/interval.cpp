@@ -51,7 +51,7 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
         }
 
         WHEN("subtract overlaps") {
-            success = iset.substract(key_type(2, 9));
+            success = iset.subtract(key_type(2, 9));
             REQUIRE(success == true);
             REQUIRE(iset.size() == 2);
             REQUIRE(iset.begin()->first == key_type(1, 2));
