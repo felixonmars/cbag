@@ -40,6 +40,7 @@ extra_link_args = ['-std=c++17',
 
 setup(
     install_requires=['cython'],
+    tests_require=['pytest'],
     packages=[pkg_name,
               pkg_name + '.util',
               pkg_name + '.layout',

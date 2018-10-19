@@ -6,37 +6,73 @@ import pytest
 
 from pybag.util import PyDisjointIntervals
 
-
-@pytest.fixture
-def empty_intvs():
-    """An empty interval object."""
-    return PyDisjointIntervals()
-
-
-@pytest.fixture
-def intvs_no_val():
-    """Some intervals with no values"""
-    return PyDisjointIntervals(intv_list=[(1, 3), (4, 7), (7, 9), (11, 15), (16, 20)])
-
-
-@pytest.fixture
-def intvs_val():
-    """Some intervals with values"""
-    return PyDisjointIntervals(intv_list=[(1, 3), (4, 7), (7, 9), (11, 15), (16, 20)],
-                               val_list=['A', 'B', 'C', 'D', 'E'])
-
-
-@pytest.mark.parametrize("intvs,vals", [
+# test data for PyDisjointIntervals
+intvs_vals_data = [
+    ([], []),
     ([(1, 2), (3, 5)], ['A', 'B']),
     ([(1, 2), (4, 5), (6, 8)], [1, 2, 3]),
-])
+]
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
 def test_constructor_refcount(intvs, vals):
     """Check Cython increment reference count of value objects."""
-    before_count = [sys.getrefcount(v) for v in vals]
+    bc_list = [sys.getrefcount(v) for v in vals]
     # keep reference to PyDisjointInterval to avoid garbage collection
     # noinspection PyUnusedLocal
     dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
-    after_count = [sys.getrefcount(v) for v in vals]
-    for bc, ac in zip(before_count, after_count):
-        print(bc, ac)
+    ac_list = [sys.getrefcount(v) for v in vals]
+    for bc, ac in zip(bc_list, ac_list):
         assert ac == bc + 1
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_destructor_refcount(intvs, vals):
+    """Check Cython increment reference count of value objects."""
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    bc_list = [sys.getrefcount(v) for v in vals]
+    del dis_intvs
+    ac_list = [sys.getrefcount(v) for v in vals]
+    for bc, ac in zip(bc_list, ac_list):
+        assert ac == bc - 1
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_contains(intvs, vals):
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    for intv in intvs:
+        assert intv in dis_intvs
+        assert (intv[0], intv[1] + 1) not in dis_intvs
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_iter(intvs, vals):
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    for a, b in zip(intvs, dis_intvs):
+        assert a == b
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_len(intvs, vals):
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    assert len(intvs) == len(dis_intvs)
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_get_start(intvs, vals):
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    if intvs:
+        assert intvs[0][0] == dis_intvs.get_start()
+    else:
+        with pytest.raises(IndexError):
+            dis_intvs.get_start()
+
+
+@pytest.mark.parametrize("intvs,vals", intvs_vals_data)
+def test_get_end(intvs, vals):
+    dis_intvs = PyDisjointIntervals(intv_list=intvs, val_list=vals)
+    if intvs:
+        assert intvs[-1][-1] == dis_intvs.get_end()
+    else:
+        with pytest.raises(IndexError):
+            dis_intvs.get_end()
