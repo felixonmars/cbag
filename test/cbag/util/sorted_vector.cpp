@@ -150,13 +150,13 @@ SCENARIO("sorted_vector deletion", "[sorted_vector]") {
 
         std::size_t start = GENERATE(range(0, 4));
 
-        WHEN("deleting single element") {
+        THEN("deleting single element works") {
             auto iter1 = v.erase(v.begin() + start);
             auto iter2 = expected.erase(expected.begin() + start);
             REQUIRE(iter1 - v.begin() == iter2 - expected.begin());
             check_equal(v, expected);
         }
-        WHEN("deleting range") {
+        THEN("deleting range works") {
             for (std::size_t stop = start; stop <= expected.size(); ++stop) {
                 auto iter1 = v.erase(v.begin() + start, v.begin() + stop);
                 auto iter2 = expected.erase(expected.begin() + start, expected.begin() + stop);
