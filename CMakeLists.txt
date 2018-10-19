@@ -66,6 +66,13 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
+# setup install location
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "CMake install prefix" FORCE)
+endif()
+
+message("install prefix: " ${CMAKE_INSTALL_PREFIX})
+
 set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/boundary.cpp
@@ -179,6 +186,10 @@ target_link_libraries(cbagoa
   ${CMAKE_DL_LIBS}
   )
 
+# set variable storing binary/library location
+set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
+set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
+
 add_subdirectory(util)
 add_subdirectory(test)
 
@@ -186,6 +197,6 @@ install(TARGETS
   cbag
   cbagyaml
   cbagoa
-  RUNTIME DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/bin
-  LIBRARY DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/lib
+  RUNTIME DESTINATION ${CBAG_BINARY_DIR}
+  LIBRARY DESTINATION ${CBAG_LIBRARY_DIR}
   )
