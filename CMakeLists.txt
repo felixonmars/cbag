@@ -73,6 +73,15 @@ endif()
 
 message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 
+# set variable storing binary/library location
+set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
+set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
+
+# setup RPATH
+set(CMAKE_INSTALL_RPATH "${CBAG_LIBRARY_DIR}:${Boost_LIBRARY_DIRS}")
+
+message("install rpath: " ${CMAKE_INSTALL_RPATH})
+
 set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/layout/boundary.cpp
@@ -185,10 +194,6 @@ target_link_libraries(cbagoa
   m
   ${CMAKE_DL_LIBS}
   )
-
-# set variable storing binary/library location
-set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
-set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
 
 add_subdirectory(util)
 add_subdirectory(test)
