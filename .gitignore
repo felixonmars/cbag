@@ -9,6 +9,10 @@ TAGS
 # C++ related files
 *.so
 
+# Python related files
+__pycache__
+*.pyc
+
 # CMake related files
 _build
 CMakeCache.txt

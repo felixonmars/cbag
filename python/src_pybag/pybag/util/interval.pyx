@@ -6,7 +6,7 @@ from cpython.ref cimport PyObject, Py_XINCREF, Py_XDECREF
 from cython.operator import dereference as deref
 from cython.operator import preincrement as preinc
 
-from typing import Tuple, Iterable, Any, Optional
+from typing import Tuple, Iterable, Any, Optional, Sequence
 
 from .interval cimport *
 
@@ -23,8 +23,15 @@ cdef _decrement_references(const vector[void_ptr] &vec):
 cdef class PyDisjointIntervals:
     """A data structure that keeps track of disjoint intervals.
     """
-    def __init__(self):
-        pass
+    def __init__(self, intv_list=None, val_list=None):
+        # type: (Optional[Sequence[Tuple[int, int]]], Optional[Sequence[Any]]) -> None
+        if intv_list is not None:
+            if val_list is None:
+                for intv in intv_list:
+                    self.add(intv)
+            else:
+                for intv, val in zip(intv_list, val_list):
+                    self.add(intv, val=val)
 
     def __dealloc__(self):
         # decrement all Python pointer counters
