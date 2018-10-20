@@ -41,6 +41,7 @@ message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # Include fmt library
+# use add_subdirectory, as they do not support find_package
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # Include spdlog
@@ -164,8 +165,8 @@ target_link_libraries(cbagyaml
   boost_filesystem
   yaml-cpp
   PRIVATE
-  boost_system
   fmt-header-only
+  boost_system
   )
 
 
@@ -185,11 +186,11 @@ target_link_libraries(cbagoa
   boost_system
   yaml-cpp
   PRIVATE
+  fmt-header-only
   oaDM
   oaDMFileSysBase
   oaTech
   oaDesign
-  fmt-header-only
   m
   ${CMAKE_DL_LIBS}
   )
