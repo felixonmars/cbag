@@ -56,11 +56,6 @@ message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
 # Include Catch2
 find_package(Catch2 REQUIRED)
 
-# Include pybind11
-# enable C++17 support for variant/optional wrapping
-set(PYBIND11_CPP_STANDARD --std=c++1z)
-find_package(pybind11 REQUIRED)
-
 # setup global include directories and link libraries
 include_directories(${CMAKE_SOURCE_DIR}/include
   $ENV{OA_INCLUDE_DIR}
@@ -205,27 +200,10 @@ add_subdirectory(util)
 # add test binaries
 add_subdirectory(test)
 
-# add python bindings for cbag
-set(SRC_FILES_PYBAG
-  ${CMAKE_SOURCE_DIR}/src/pybag/module.cpp
-  ${CMAKE_SOURCE_DIR}/src/pybag/util/module.cpp
-  ${CMAKE_SOURCE_DIR}/src/pybag/util/interval.cpp
-  )
-
-pybind11_add_module(pybag ${SRC_FILES_PYBAG})
-
-target_link_libraries(pybag
-  PUBLIC
-  cbag
-  PRIVATE
-  fmt-header-only
-  )
-
 install(TARGETS
   cbag
   cbagyaml
   cbagoa
-  pybag
   RUNTIME DESTINATION ${CBAG_BINARY_DIR}
   LIBRARY DESTINATION ${CBAG_LIBRARY_DIR}
   )
