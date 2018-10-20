@@ -1,5 +1,5 @@
 add_executable(write_tech_info
-  ${CMAKE_SOURCE_DIR}/util/write_tech_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/write_tech_info.cpp
   )
 
 # shared library dependencies
