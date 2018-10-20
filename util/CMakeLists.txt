@@ -4,8 +4,11 @@ add_executable(write_tech_info
 
 # shared library dependencies
 target_link_libraries(write_tech_info
+  PUBLIC
   cbag
   cbagoa
+  PRIVATE
+  fmt-header-only
   )
 
 install(TARGETS

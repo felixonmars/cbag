@@ -128,7 +128,6 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/util/interval.cpp
   ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
   )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
@@ -218,6 +217,8 @@ pybind11_add_module(pybag ${SRC_FILES_PYBAG})
 target_link_libraries(pybag
   PUBLIC
   cbag
+  PRIVATE
+  fmt-header-only
   )
 
 install(TARGETS

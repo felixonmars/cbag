@@ -11,6 +11,8 @@ namespace cu = cbag::util;
 using sorted_vector = cu::sorted_vector<int>;
 using model_vector = std::vector<int>;
 
+// TODO: untested methods: find, find_exact, insert_back
+
 void check_equal(const sorted_vector &v, const model_vector &expected, bool deep = false) {
     REQUIRE(v == expected);
     if (deep) {
@@ -19,11 +21,13 @@ void check_equal(const sorted_vector &v, const model_vector &expected, bool deep
         REQUIRE(v.capacity() == expected.capacity());
         REQUIRE(v.empty() == expected.empty());
         REQUIRE(v.end() - v.begin() == expected.end() - expected.begin());
+        REQUIRE(v.rend() - v.rbegin() == expected.rend() - expected.rbegin());
         if (v.empty()) {
             REQUIRE_THROWS_AS(v.at_front(), std::out_of_range);
             REQUIRE_THROWS_AS(v.at_back(), std::out_of_range);
         } else {
             REQUIRE(*v.begin() == *expected.begin());
+            REQUIRE(*v.rbegin() == *expected.rbegin());
             REQUIRE(v.at_front() == expected.front());
             REQUIRE(v.at_back() == expected.back());
         }
@@ -64,6 +68,7 @@ SCENARIO("constructors and accessors", "[sorted_vector]") {
             REQUIRE(v.lower_bound(0) == v.end());
             REQUIRE(iter_range.first == v.end());
             REQUIRE(iter_range.second == v.end());
+            REQUIRE(v.equal_size(0) == 0);
         }
     }
 
@@ -104,13 +109,14 @@ SCENARIO("constructors and accessors", "[sorted_vector]") {
                     auto pair2 = std::equal_range(expected.begin(), expected.end(), val);
                     REQUIRE(pair1.first - v.begin() == pair2.first - expected.begin());
                     REQUIRE(pair1.second - v.begin() == pair2.second - expected.begin());
+                    REQUIRE(v.equal_size(val) == pair2.second - pair2.first);
                 }
             }
         }
     }
 }
 
-SCENARIO("insert_unique/emplace_unique test", "[sorted_vector]") {
+SCENARIO("insert_unique/emplace_unique/emplace_back test", "[sorted_vector]") {
     model_vector data = GENERATE(values<model_vector>({
         {6, 2, 4},
         {6, 6, 2, 4, 4, 4},
@@ -139,6 +145,19 @@ SCENARIO("insert_unique/emplace_unique test", "[sorted_vector]") {
         REQUIRE(*(ans.first) == val);
         REQUIRE(ans.second == success);
         check_equal(v, model_vector(model.begin(), model.end()));
+    }
+
+    auto cur_size = v.size();
+    auto last_val = v.at_back();
+    THEN("emplace back works for larger and equal item") {
+        int offset = GENERATE(range(0, 2));
+        v.emplace_back(last_val + offset);
+        REQUIRE(v.at_back() == last_val + offset);
+        REQUIRE(v.size() == cur_size + 1);
+    }
+
+    THEN("emplace back fails for smaller item") {
+        REQUIRE_THROWS_AS(v.emplace_back(last_val - 1), std::invalid_argument);
     }
 }
 

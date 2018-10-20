@@ -4,8 +4,7 @@
 
 namespace cu = cbag::util;
 
-using coord_t = cu::disjoint_intvs::coord_t;
-using key_type = cu::disjoint_intvs::key_type;
+using coord_t = cbag::offset_t;
 
 SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
     cu::disjoint_intvs iset;
@@ -27,33 +26,33 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
     }
 
     WHEN("adding values") {
-        bool success = iset.add(key_type(8, 10), nullptr);
+        bool success = iset.emplace(false, false, 8, 10);
         REQUIRE(success == true);
-        success = iset.add(key_type(4, 6), nullptr);
+        success = iset.emplace(false, false, 4, 6);
         REQUIRE(success == true);
-        success = iset.add(key_type(1, 3), nullptr);
+        success = iset.emplace(false, false, 1, 3);
         REQUIRE(success == true);
 
         WHEN("adding overlap interval") {
-            success = iset.add(key_type(2, 5), nullptr);
+            success = iset.emplace(false, false, 2, 5);
             REQUIRE(success == false);
 
-            success = iset.add(key_type(2, 5), nullptr, true);
+            success = iset.emplace(true, false, 2, 5);
             REQUIRE(success == true);
             REQUIRE(iset.size() == 2);
-            REQUIRE(iset.begin()->first == key_type(1, 6));
+            REQUIRE(*iset.begin() == cu::intv_type(1, 6));
         }
 
         WHEN("removing overlaps") {
-            iset.remove_overlaps(key_type(2, 9));
+            iset.remove_overlaps(cu::intv_type(2, 9));
             REQUIRE(iset.empty() == true);
         }
 
         WHEN("subtract overlaps") {
-            iset.subtract(key_type(2, 9));
+            iset.subtract(cu::intv_type(2, 9));
             REQUIRE(iset.size() == 2);
-            REQUIRE(iset.begin()->first == key_type(1, 2));
-            REQUIRE((iset.begin() + 1)->first == key_type(9, 10));
+            REQUIRE(*iset.begin() == cu::intv_type(1, 2));
+            REQUIRE(*(iset.begin() + 1) == cu::intv_type(9, 10));
         }
     }
 }
