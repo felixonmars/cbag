@@ -14,12 +14,16 @@ namespace util {
 
 // a subclass of std::pair representing an interval; it knows how to
 // compare with a scalar.
-using intv_base_type = std::pair<offset_t, offset_t>;
-
-class intv_type : public intv_base_type {
+class interval {
   public:
-    using intv_base_type::intv_base_type;
+    using coord_type = offset_t;
 
+    coord_type first = 0;
+    coord_type second = 0;
+
+    interval() = default;
+
+    interval(coord_type first, coord_type second) : first(first), second(second) {}
     void transform(offset_t scale, offset_t shift) {
         if (scale >= 0) {
             first = scale * first + shift;
@@ -31,36 +35,56 @@ class intv_type : public intv_base_type {
         }
     }
 
-    friend bool operator==(const intv_type &lhs, offset_t rhs) {
-        return rhs == lhs.first && rhs + 1 == lhs.second;
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    friend bool operator==(interval::coord_type lhs, const T &rhs) {
+        return lhs == rhs.first && lhs + 1 == rhs.second;
     }
-    friend bool operator==(offset_t lhs, const intv_type &rhs) { return rhs == lhs; }
+
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    friend bool operator==(const T &lhs, interval::coord_type rhs) {
+        return rhs == lhs;
+    }
+
+    template <class T1, class T2,
+              std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
+                  * = nullptr>
+    friend bool operator==(const T1 &lhs, const T2 &rhs) {
+        return lhs.first == rhs.first && lhs.second == rhs.second;
+    }
 };
 
-template <class T = intv_type, std::enable_if_t<std::is_base_of_v<intv_type, T>> * = nullptr>
-class disjoint_intvs {
-  private:
-    struct intv_comp;
+struct intv_comp {
+    using is_transparent = interval::coord_type;
 
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    bool operator()(interval::coord_type lhs, const T &rhs) const {
+        return lhs < rhs.first;
+    }
+
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    bool operator()(const T &lhs, interval::coord_type rhs) const {
+        return lhs.second <= rhs;
+    }
+
+    template <class T1, class T2,
+              std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
+                  * = nullptr>
+    bool operator()(const T1 &lhs, const T2 &rhs) const {
+        return lhs.second <= rhs.first;
+    }
+};
+
+template <class T = interval, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+class disjoint_intvs {
   public:
     using value_type = T;
+    using coord_type = typename T::coord_type;
     using vector_type = sorted_vector<value_type, intv_comp>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
     using const_iterator = typename vector_type::const_iterator;
 
   private:
-    struct intv_comp {
-        using is_transparent = offset_t;
-        using value_type = offset_t;
-
-        bool operator()(value_type lhs, const intv_type &rhs) const { return lhs < rhs.first; }
-        bool operator()(const intv_type &lhs, value_type rhs) const { return lhs.second <= rhs; }
-        bool operator()(const intv_type &lhs, const intv_type &rhs) const {
-            return lhs.second <= rhs.first;
-        }
-    };
-
     vector_type data_;
 
   public:
@@ -226,8 +250,8 @@ class disjoint_intvs {
             throw std::invalid_argument(
                 fmt::format("Cannot add invalid interval [{:d}, {:d})", item.first, item.second));
         abut = abut && merge;
-        auto iter_pair = (abut) ? overlap_range(intv_type(item.first - 1, item.second + 1))
-                                : overlap_range(item);
+        auto iter_pair =
+            (abut) ? overlap_range(interval(item.first - 1, item.second + 1)) : overlap_range(item);
         if (iter_pair.first == iter_pair.second) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));
