@@ -41,6 +41,7 @@ message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # Include fmt library
+# use add_subdirectory, as they do not support find_package
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # Include spdlog
@@ -56,13 +57,8 @@ message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
 # Include Catch2
 find_package(Catch2 REQUIRED)
 
-# Include pybind11
-# enable C++17 support for variant/optional wrapping
-set(PYBIND11_CPP_STANDARD --std=c++1z)
-find_package(pybind11 REQUIRED)
-
 # setup global include directories and link libraries
-include_directories(${CMAKE_SOURCE_DIR}/include
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
   $ENV{OA_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIR}
@@ -71,64 +67,56 @@ include_directories(${CMAKE_SOURCE_DIR}/include
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
-# setup install location
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "CMake install prefix" FORCE)
-endif()
-
 message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 
 # set variable storing binary/library location
 set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
 set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
 
-# setup RPATH
-set(CMAKE_INSTALL_RPATH "${CBAG_LIBRARY_DIR}:${Boost_LIBRARY_DIRS}")
-
 message("install rpath: " ${CMAKE_INSTALL_RPATH})
 
 set(SRC_FILES_LIB_CBAG
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/blockage.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/boundary.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/cellview.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_index.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_instance.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/geometry.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/instance.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/pin.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/tech.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/transformation.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/vector45.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/layout/via.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/arc.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellview.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/cellview_info.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/donut.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/ellipse.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/eval_text.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/instance.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/line.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/path.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/pin_figure.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/pin_object.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/polygon.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/rectangle.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/shape_base.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/term_attr.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_base.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/ast.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/range.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbag/cbag.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_index.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/transformation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/arc.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/donut.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/ellipse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/eval_text.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/line.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/path.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/pin_figure.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/pin_object.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/polygon.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/rectangle.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/shape_base.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/term_attr.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/text_base.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/ast.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/cbag.cpp
   )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
@@ -150,16 +138,16 @@ target_link_libraries(cbag
   )
 
 set(SRC_FILES_LIB_CBAGYAML
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/box_t.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/point.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/point_array.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/transform.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/datatypes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/shapes.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/figures.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagyaml/cbagyaml.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/box_t.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/point.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/point_array.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/transform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/datatypes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/shapes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/figures.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/cbagyaml.cpp
   )
-add_library(cbagyaml SHARED ${SRC_FILES_LIB_CBAGYAML})
+add_library(cbagyaml SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGYAML})
 
 # shared library dependencies
 target_link_libraries(cbagyaml
@@ -169,17 +157,17 @@ target_link_libraries(cbagyaml
   boost_filesystem
   yaml-cpp
   PRIVATE
-  boost_system
   fmt-header-only
+  boost_system
   )
 
 
 set(SRC_FILES_LIB_CBAGOA
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_reader.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_writer.cpp
-  ${CMAKE_SOURCE_DIR}/src/cbagoa/oa_database.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_reader.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_writer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
   )
-add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
+add_library(cbagoa SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies
 target_link_libraries(cbagoa
@@ -190,42 +178,17 @@ target_link_libraries(cbagoa
   boost_system
   yaml-cpp
   PRIVATE
+  fmt-header-only
   oaDM
   oaDMFileSysBase
   oaTech
   oaDesign
-  fmt-header-only
   m
   ${CMAKE_DL_LIBS}
   )
 
 # add utility binaries
-add_subdirectory(util)
+add_subdirectory(util EXCLUDE_FROM_ALL)
 
 # add test binaries
-add_subdirectory(test)
-
-# add python bindings for cbag
-set(SRC_FILES_PYBAG
-  ${CMAKE_SOURCE_DIR}/src/pybag/module.cpp
-  ${CMAKE_SOURCE_DIR}/src/pybag/util/module.cpp
-  ${CMAKE_SOURCE_DIR}/src/pybag/util/interval.cpp
-  )
-
-pybind11_add_module(pybag ${SRC_FILES_PYBAG})
-
-target_link_libraries(pybag
-  PUBLIC
-  cbag
-  PRIVATE
-  fmt-header-only
-  )
-
-install(TARGETS
-  cbag
-  cbagyaml
-  cbagoa
-  pybag
-  RUNTIME DESTINATION ${CBAG_BINARY_DIR}
-  LIBRARY DESTINATION ${CBAG_LIBRARY_DIR}
-  )
+add_subdirectory(test EXCLUDE_FROM_ALL)
