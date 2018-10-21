@@ -78,7 +78,7 @@ template <class T = interval, std::enable_if_t<std::is_base_of_v<interval, T>> *
 class disjoint_intvs {
   public:
     using value_type = T;
-    using coord_type = typename T::coord_type;
+    using coord_type = interval::coord_type;
     using vector_type = sorted_vector<value_type, intv_comp>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
