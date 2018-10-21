@@ -67,19 +67,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
-# setup install location
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "CMake install prefix" FORCE)
-endif()
-
 message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 
 # set variable storing binary/library location
 set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
 set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
-
-# setup RPATH
-set(CMAKE_INSTALL_RPATH "${CBAG_LIBRARY_DIR}:${Boost_LIBRARY_DIRS}")
 
 message("install rpath: " ${CMAKE_INSTALL_RPATH})
 
@@ -155,7 +147,7 @@ set(SRC_FILES_LIB_CBAGYAML
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/figures.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/cbagyaml.cpp
   )
-add_library(cbagyaml SHARED ${SRC_FILES_LIB_CBAGYAML})
+add_library(cbagyaml SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGYAML})
 
 # shared library dependencies
 target_link_libraries(cbagyaml
@@ -175,7 +167,7 @@ set(SRC_FILES_LIB_CBAGOA
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_writer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
   )
-add_library(cbagoa SHARED ${SRC_FILES_LIB_CBAGOA})
+add_library(cbagoa SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGOA})
 
 # shared library dependencies
 target_link_libraries(cbagoa
@@ -196,15 +188,7 @@ target_link_libraries(cbagoa
   )
 
 # add utility binaries
-add_subdirectory(util)
+add_subdirectory(util EXCLUDE_FROM_ALL)
 
 # add test binaries
-add_subdirectory(test)
-
-install(TARGETS
-  cbag
-  cbagyaml
-  cbagoa
-  RUNTIME DESTINATION ${CBAG_BINARY_DIR}
-  LIBRARY DESTINATION ${CBAG_LIBRARY_DIR}
-  )
+add_subdirectory(test EXCLUDE_FROM_ALL)
