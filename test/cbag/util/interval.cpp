@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <catch2/catch.hpp>
 
 #include <cbag/util/interval.h>
@@ -19,7 +21,7 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
     THEN("complement works") {
         coord_t lower = 0;
         coord_t upper = 6;
-        auto comp = iset.get_complement(lower, upper);
+        auto comp = iset.get_complement(std::make_pair(lower, upper));
         REQUIRE(comp.start() == lower);
         REQUIRE(comp.stop() == upper);
         REQUIRE(comp.size() == 1);
@@ -49,7 +51,7 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
         }
 
         WHEN("subtract overlaps") {
-            iset.subtract(cu::interval(2, 9));
+            iset.subtract(std::make_pair(2, 9));
             REQUIRE(iset.size() == 2);
             REQUIRE(*iset.begin() == cu::interval(1, 2));
             REQUIRE(*(iset.begin() + 1) == cu::interval(9, 10));
