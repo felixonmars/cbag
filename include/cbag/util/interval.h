@@ -26,6 +26,10 @@ template <> struct interval<std::pair<offset_t, offset_t>> {
     intv(std::pair<coordinate_type, coordinate_type> &i) {
         return i;
     }
+    static const std::pair<coordinate_type, coordinate_type> &
+    intv(const std::pair<coordinate_type, coordinate_type> &i) {
+        return i;
+    }
     static coordinate_type start(const std::pair<coordinate_type, coordinate_type> &i) {
         return i.first;
     }
@@ -73,8 +77,8 @@ void transform(T &i, typename traits::coordinate_type<T>::type scale,
 }
 
 template <typename T1, typename T2> bool operator==(const T1 &lhs, const T2 &rhs) {
-    return traits::interval<T1>::start(lhs) == traits::interval<T1>::start(rhs) &&
-           traits::interval<T2>::stop(lhs) == traits::interval<T2>::stop(rhs);
+    return traits::interval<T1>::start(lhs) == traits::interval<T2>::start(rhs) &&
+           traits::interval<T1>::stop(lhs) == traits::interval<T2>::stop(rhs);
 }
 
 struct intv_comp {
