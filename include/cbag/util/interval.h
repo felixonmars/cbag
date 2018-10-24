@@ -228,13 +228,13 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         if (scale > 0) {
             for (auto first = data_.begin(); first != data_.end(); ++first) {
                 value_type item(*first);
-                traits::interval<T>::transform(item, scale, shift);
+                transform(item, scale, shift);
                 ans.insert_back(std::move(item));
             }
         } else if (scale < 0) {
             for (auto first = data_.rbegin(); first != data_.rend(); ++first) {
                 value_type item(*first);
-                traits::interval<T>::transform(item, scale, shift);
+                transform(item, scale, shift);
                 ans.insert_back(std::move(item));
             }
         } else {
