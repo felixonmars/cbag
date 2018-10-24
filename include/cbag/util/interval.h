@@ -30,6 +30,9 @@ class interval {
     bool valid() const { return intv.first <= intv.second; }
     bool nonempty() const { return intv.first < intv.second; }
 
+    coord_type &start() { return intv.first; }
+    coord_type &stop() { return intv.second; }
+
     void transform(offset_t scale, offset_t shift) {
         if (scale >= 0) {
             intv.first = scale * intv.first + shift;
@@ -159,9 +162,10 @@ class disjoint_intvs {
         auto iter_pair = std::equal_range(first, last, intv, comp);
         first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
         for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
-            coord_t start = std::max(intv.start(), iter_pair.first->first.start());
-            coord_t stop = std::min(intv.stop(), iter_pair.first->first.stop());
-            ans.emplace(std::make_pair(start, stop), nullptr);
+            coord_t start = std::max(intv.start(), iter_pair.first->start());
+            coord_t stop = std::min(intv.stop(), iter_pair.first->stop());
+            if (start < stop)
+                ans.emplace_back(start, stop);
         }
     }
 
@@ -199,10 +203,10 @@ class disjoint_intvs {
         auto size2 = end2 - iter2;
         while (size1 > 0 && size2 > 0) {
             if (size1 <= size2) {
-                intersect_helper(ans, iter1->first, iter2, end2, comp);
+                intersect_helper(ans, *iter1, iter2, end2, comp);
                 ++iter1;
             } else {
-                intersect_helper(ans, iter2->first, iter1, end1, comp);
+                intersect_helper(ans, *iter2, iter1, end1, comp);
                 ++iter2;
             }
             size1 = end1 - iter1;
@@ -210,7 +214,9 @@ class disjoint_intvs {
         }
         return disjoint_intvs(std::move(ans));
     }
-    disjoint_intvs get_complement(coord_t lower, coord_t upper) const {
+    template <class K> disjoint_intvs get_complement(const K &key) const {
+        coord_t lower = key.first;
+        coord_t upper = key.second;
         vector_type ans;
         if (data_.empty()) {
             ans.emplace_back(lower, upper);
@@ -254,6 +260,8 @@ class disjoint_intvs {
         return disjoint_intvs(std::move(ans));
     }
 
+    disjoint_intvs get_copy() const { return disjoint_intvs(*this); }
+
     template <class K> std::pair<iterator, iterator> overlap_range(const K &key) {
         return data_.equal_range(key);
     }
@@ -283,9 +291,9 @@ class disjoint_intvs {
             return false;
 
         coord_t test = iter_pair.first->start();
-        if (test < key.start()) {
+        if (test < key.first) {
             // perform subtraction on first interval
-            iter_pair.first->stop() = key.start();
+            iter_pair.first->stop() = key.first;
             ++iter_pair.first;
             // we're done if there's no more interval
             if ((--overlap_size) == 0)
@@ -296,7 +304,7 @@ class disjoint_intvs {
         test = last_iter->stop();
         if (key.second < test) {
             // perform subtraction on last interval
-            last_iter->start() = key.stop();
+            last_iter->start() = key.second;
             iter_pair.second = last_iter;
             if ((--overlap_size) == 0)
                 return true;
