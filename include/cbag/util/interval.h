@@ -17,27 +17,32 @@ namespace util {
 class interval {
   public:
     using coord_type = offset_t;
-
-    coord_type first = 0;
-    coord_type second = 0;
+    using intv_type = std::pair<coord_type, coord_type>;
+    intv_type intv;
 
     interval() = default;
 
-    interval(coord_type first, coord_type second) : first(first), second(second) {}
+    interval(coord_type first, coord_type second) : intv(first, second) {}
+
+    coord_type start() const { return intv.first; }
+    coord_type stop() const { return intv.second; }
+    bool valid() const { return intv.first <= intv.second; }
+    bool nonempty() const { return intv.first < intv.second; }
+
     void transform(offset_t scale, offset_t shift) {
         if (scale >= 0) {
-            first = scale * first + shift;
-            second = scale * second + shift;
+            intv.first = scale * intv.first + shift;
+            intv.second = scale * intv.second + shift;
         } else {
-            offset_t temp = scale * second + shift;
-            second = scale * first + shift;
-            first = temp;
+            offset_t temp = scale * intv.second + shift;
+            intv.second = scale * intv.first + shift;
+            intv.first = temp;
         }
     }
 
     template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
     friend bool operator==(interval::coord_type lhs, const T &rhs) {
-        return lhs == rhs.first && lhs + 1 == rhs.second;
+        return lhs == rhs.start() && lhs + 1 == rhs.stop();
     }
 
     template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
@@ -45,11 +50,21 @@ class interval {
         return rhs == lhs;
     }
 
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    friend bool operator==(const interval::intv_type &lhs, const T &rhs) {
+        return lhs == rhs.intv;
+    }
+
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    friend bool operator==(const T &lhs, const interval::intv_type &rhs) {
+        return rhs == lhs;
+    }
+
     template <class T1, class T2,
               std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
                   * = nullptr>
     friend bool operator==(const T1 &lhs, const T2 &rhs) {
-        return lhs.first == rhs.first && lhs.second == rhs.second;
+        return lhs.intv == rhs.intv;
     }
 };
 
@@ -58,19 +73,29 @@ struct intv_comp {
 
     template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
     bool operator()(interval::coord_type lhs, const T &rhs) const {
-        return lhs < rhs.first;
+        return lhs < rhs.start();
     }
 
     template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
     bool operator()(const T &lhs, interval::coord_type rhs) const {
-        return lhs.second <= rhs;
+        return lhs.stop() <= rhs;
+    }
+
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    bool operator()(const interval::intv_type &lhs, const T &rhs) const {
+        return lhs.second <= rhs.start();
+    }
+
+    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
+    bool operator()(const T &lhs, const interval::intv_type &rhs) const {
+        return lhs.stop() <= rhs.first;
     }
 
     template <class T1, class T2,
               std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
                   * = nullptr>
     bool operator()(const T1 &lhs, const T2 &rhs) const {
-        return lhs.second <= rhs.first;
+        return lhs.stop() <= rhs.start();
     }
 };
 
@@ -79,6 +104,7 @@ class disjoint_intvs {
   public:
     using value_type = T;
     using coord_type = interval::coord_type;
+    using intv_type = interval::intv_type;
     using vector_type = sorted_vector<value_type, intv_comp>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
@@ -100,8 +126,8 @@ class disjoint_intvs {
         auto iter_pair = std::equal_range(first, last, intv, comp);
         first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
         for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
-            coord_t start = std::max(intv.first, iter_pair.first->first.first);
-            coord_t stop = std::min(intv.second, iter_pair.first->first.second);
+            coord_t start = std::max(intv.start(), iter_pair.first->first.start());
+            coord_t stop = std::min(intv.stop(), iter_pair.first->first.stop());
             ans.emplace(std::make_pair(start, stop), nullptr);
         }
     }
@@ -109,13 +135,14 @@ class disjoint_intvs {
   public:
     const_iterator begin() const { return data_.begin(); }
     const_iterator end() const { return data_.end(); }
+
     template <class K> std::pair<const_iterator, const_iterator> overlap_range(const K &key) const {
         return data_.equal_range(key);
     }
     bool empty() const { return data_.empty(); }
     size_type size() const { return data_.size(); }
-    coord_t start() const { return data_.at_front().first; }
-    coord_t stop() const { return data_.at_back().second; }
+    coord_t start() const { return data_.at_front().start(); }
+    coord_t stop() const { return data_.at_back().stop(); }
     template <class K> const_iterator find_exact(const K &key) const {
         return data_.find_exact(key);
     }
@@ -160,9 +187,9 @@ class disjoint_intvs {
                                 a, b, lower, upper));
             }
             for (const auto &item : data_) {
-                if (lower < item.first)
-                    ans.emplace_back(lower, item.first);
-                lower = item.second;
+                if (lower < item.start())
+                    ans.emplace_back(lower, item.start());
+                lower = item.stop();
             }
             if (lower < upper)
                 ans.emplace_back(lower, upper);
@@ -219,10 +246,10 @@ class disjoint_intvs {
         if (overlap_size == 0)
             return false;
 
-        coord_t test = iter_pair.first->first;
-        if (test < key.first) {
+        coord_t test = iter_pair.first->start();
+        if (test < key.start()) {
             // perform subtraction on first interval
-            iter_pair.first->second = key.first;
+            iter_pair.first->stop() = key.start();
             ++iter_pair.first;
             // we're done if there's no more interval
             if ((--overlap_size) == 0)
@@ -230,10 +257,10 @@ class disjoint_intvs {
         }
 
         auto last_iter = iter_pair.second - 1;
-        test = last_iter->second;
+        test = last_iter->stop();
         if (key.second < test) {
             // perform subtraction on last interval
-            last_iter->first = key.second;
+            last_iter->start() = key.stop();
             iter_pair.second = last_iter;
             if ((--overlap_size) == 0)
                 return true;
@@ -246,20 +273,20 @@ class disjoint_intvs {
 
     template <class... Args> bool emplace(bool merge, bool abut, Args &&... args) {
         value_type item(std::forward<Args>(args)...);
-        if (item.first >= item.second)
-            throw std::invalid_argument(
-                fmt::format("Cannot add invalid interval [{:d}, {:d})", item.first, item.second));
+        if (!item.nonempty())
+            throw std::invalid_argument(fmt::format("Cannot add nonempty interval [{:d}, {:d})",
+                                                    item.start(), item.stop()));
         abut = abut && merge;
-        auto iter_pair =
-            (abut) ? overlap_range(interval(item.first - 1, item.second + 1)) : overlap_range(item);
+        auto iter_pair = (abut) ? overlap_range(interval(item.start() - 1, item.stop() + 1))
+                                : overlap_range(item);
         if (iter_pair.first == iter_pair.second) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));
             return true;
         } else if (merge) {
             // have overlapping/abutting intervals, and we want to merge
-            item.first = std::min(item.first, iter_pair.first->first);
-            item.second = std::max(item.second, (iter_pair.second - 1)->second);
+            item.intv.first = std::min(item.start(), iter_pair.first->start());
+            item.intv.second = std::max(item.stop(), (iter_pair.second - 1)->stop());
             // modify the first overlapping interval
             *(iter_pair.first) = item;
             // erase the rest
