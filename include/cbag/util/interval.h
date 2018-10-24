@@ -13,102 +13,82 @@
 namespace cbag {
 namespace util {
 
-// a subclass of std::pair representing an interval; it knows how to
-// compare with a scalar.
-class interval {
-  public:
-    using coord_type = offset_t;
-    using intv_type = std::pair<coord_type, coord_type>;
-    intv_type intv;
+namespace traits {
 
-    interval() = default;
+template <typename T> struct coordinate_type {};
+template <typename T> struct interval {};
 
-    interval(coord_type first, coord_type second) : intv(first, second) {}
+template <> struct coordinate_type<std::pair<offset_t, offset_t>> { using type = offset_t; };
+template <> struct interval<std::pair<offset_t, offset_t>> {
+    using coordinate_type = coordinate_type<std::pair<offset_t, offset_t>>::type;
 
-    coord_type start() const { return intv.first; }
-    coord_type stop() const { return intv.second; }
-    bool valid() const { return intv.first <= intv.second; }
-    bool nonempty() const { return intv.first < intv.second; }
-
-    coord_type &start() { return intv.first; }
-    coord_type &stop() { return intv.second; }
-
-    void transform(offset_t scale, offset_t shift) {
-        if (scale >= 0) {
-            intv.first = scale * intv.first + shift;
-            intv.second = scale * intv.second + shift;
-        } else {
-            offset_t temp = scale * intv.second + shift;
-            intv.second = scale * intv.first + shift;
-            intv.first = temp;
-        }
+    static std::pair<coordinate_type, coordinate_type> &
+    intv(std::pair<coordinate_type, coordinate_type> &i) {
+        return i;
     }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    friend bool operator==(interval::coord_type lhs, const T &rhs) {
-        return lhs == rhs.start() && lhs + 1 == rhs.stop();
+    static coordinate_type start(const std::pair<coordinate_type, coordinate_type> &i) {
+        return i.first;
     }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    friend bool operator==(const T &lhs, interval::coord_type rhs) {
-        return rhs == lhs;
+    static coordinate_type stop(const std::pair<coordinate_type, coordinate_type> &i) {
+        return i.second;
     }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    friend bool operator==(const interval::intv_type &lhs, const T &rhs) {
-        return lhs == rhs.intv;
+    static void set_start(std::pair<coordinate_type, coordinate_type> &i, coordinate_type val) {
+        i.first = val;
     }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    friend bool operator==(const T &lhs, const interval::intv_type &rhs) {
-        return rhs == lhs;
+    static void set_stop(std::pair<coordinate_type, coordinate_type> &i, coordinate_type val) {
+        i.second = val;
     }
-
-    template <class T1, class T2,
-              std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
-                  * = nullptr>
-    friend bool operator==(const T1 &lhs, const T2 &rhs) {
-        return lhs.intv == rhs.intv;
+    static std::pair<coordinate_type, coordinate_type> construct(coordinate_type start,
+                                                                 coordinate_type stop) {
+        return std::make_pair(start, stop);
     }
 };
+
+template <> struct coordinate_type<offset_t> { using type = offset_t; };
+template <> struct interval<offset_t> {
+    using coordinate_type = coordinate_type<offset_t>::type;
+
+    coordinate_type start(coordinate_type i) { return i; }
+    coordinate_type stop(coordinate_type i) { return i + 1; }
+};
+
+} // namespace traits
+
+template <typename T> bool nonempty(const T &i) {
+    return traits::interval<T>::start(i) < traits::interval<T>::stop(i);
+}
+
+template <typename T>
+void transform(T &i, typename traits::coordinate_type<T>::type scale,
+               typename traits::coordinate_type<T>::type shift) {
+    auto start = traits::interval<T>::start(i);
+    auto stop = traits::interval<T>::stop(i);
+    if (scale >= 0) {
+        traits::interval<T>::set_start(i, scale * start + shift);
+        traits::interval<T>::set_stop(i, scale * stop + shift);
+    } else {
+        traits::interval<T>::set_start(i, scale * stop + shift);
+        traits::interval<T>::set_stop(i, scale * start + shift);
+    }
+}
+
+template <typename T1, typename T2> bool operator==(const T1 &lhs, const T2 &rhs) {
+    return traits::interval<T1>::start(lhs) == traits::interval<T1>::start(rhs) &&
+           traits::interval<T2>::stop(lhs) == traits::interval<T2>::stop(rhs);
+}
 
 struct intv_comp {
-    using is_transparent = interval::coord_type;
+    using is_transparent = void;
 
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    bool operator()(interval::coord_type lhs, const T &rhs) const {
-        return lhs < rhs.start();
-    }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    bool operator()(const T &lhs, interval::coord_type rhs) const {
-        return lhs.stop() <= rhs;
-    }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    bool operator()(const interval::intv_type &lhs, const T &rhs) const {
-        return lhs.second <= rhs.start();
-    }
-
-    template <class T, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-    bool operator()(const T &lhs, const interval::intv_type &rhs) const {
-        return lhs.stop() <= rhs.first;
-    }
-
-    template <class T1, class T2,
-              std::enable_if_t<std::is_base_of_v<interval, T1> && std::is_base_of_v<interval, T2>>
-                  * = nullptr>
-    bool operator()(const T1 &lhs, const T2 &rhs) const {
-        return lhs.stop() <= rhs.start();
+    template <typename T1, typename T2> bool operator()(const T1 &lhs, const T2 &rhs) const {
+        return traits::interval<T1>::stop(lhs) <= traits::interval<T2>::start(rhs);
     }
 };
 
-template <class T = interval, std::enable_if_t<std::is_base_of_v<interval, T>> * = nullptr>
-class disjoint_intvs {
+template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
   public:
     using value_type = T;
-    using coord_type = interval::coord_type;
-    using intv_type = interval::intv_type;
+    using coord_type = typename traits::coordinate_type<T>::type;
     using vector_type = sorted_vector<value_type, intv_comp>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
@@ -117,7 +97,7 @@ class disjoint_intvs {
     class const_intv_iterator {
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = const intv_type;
+        using value_type = const std::pair<coord_type, coord_type>;
         using difference_type = typename const_iterator::difference_type;
         using pointer = value_type *;
         using reference = value_type &;
@@ -132,8 +112,8 @@ class disjoint_intvs {
         bool operator==(const const_intv_iterator &other) const { return iter_ == other.iter_; }
         bool operator!=(const const_intv_iterator &other) const { return iter_ != other.iter_; }
 
-        reference operator*() const { return iter_->intv; }
-        pointer operator->() const { return &(iter_->intv); }
+        reference operator*() const { return traits::interval<T>::intv(*iter_); }
+        pointer operator->() const { return &operator*(); }
 
         const_intv_iterator &operator++() {
             ++iter_;
@@ -162,10 +142,12 @@ class disjoint_intvs {
         auto iter_pair = std::equal_range(first, last, intv, comp);
         first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
         for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
-            coord_t start = std::max(intv.start(), iter_pair.first->start());
-            coord_t stop = std::min(intv.stop(), iter_pair.first->stop());
+            coord_type start = std::max(traits::interval<T>::start(intv),
+                                        traits::interval<T>::start(*(iter_pair.first)));
+            coord_type stop = std::min(traits::interval<T>::stop(intv),
+                                       traits::interval<T>::stop(*(iter_pair.first)));
             if (start < stop)
-                ans.emplace_back(start, stop);
+                ans.insert_back(traits::interval<T>::construct(start, stop));
         }
     }
 
@@ -181,8 +163,8 @@ class disjoint_intvs {
     }
     bool empty() const { return data_.empty(); }
     size_type size() const { return data_.size(); }
-    coord_t start() const { return data_.at_front().start(); }
-    coord_t stop() const { return data_.at_back().stop(); }
+    coord_type start() const { return traits::interval<T>::start(data_.at_front()); }
+    coord_type stop() const { return traits::interval<T>::stop(data_.at_back()); }
     template <class K> const_iterator find_exact(const K &key) const {
         return data_.find_exact(key);
     }
@@ -215,43 +197,44 @@ class disjoint_intvs {
         return disjoint_intvs(std::move(ans));
     }
     template <class K> disjoint_intvs get_complement(const K &key) const {
-        coord_t lower = key.first;
-        coord_t upper = key.second;
+        coord_type lower = traits::interval<K>::start(key);
+        coord_type upper = traits::interval<K>::stop(key);
         vector_type ans;
         if (data_.empty()) {
-            ans.emplace_back(lower, upper);
+            ans.insert_back(traits::interval<T>::construct(lower, upper));
         } else {
-            coord_t a = start();
-            coord_t b = stop();
+            coord_type a = start();
+            coord_type b = stop();
             if (a < lower || upper < b) {
                 throw std::out_of_range(
                     fmt::format("disjoint_intvs interval [{:d}, {:d}) not covered by [{:d}, {:d})",
                                 a, b, lower, upper));
             }
             for (const auto &item : data_) {
-                if (lower < item.start())
-                    ans.emplace_back(lower, item.start());
-                lower = item.stop();
+                coord_t i_start = traits::interval<T>::start(item);
+                if (lower < i_start)
+                    ans.insert_back(traits::interval<T>::construct(lower, i_start));
+                lower = traits::interval<T>::stop(item);
             }
             if (lower < upper)
-                ans.emplace_back(lower, upper);
+                ans.insert_back(traits::interval<T>::construct(lower, upper));
         }
         return disjoint_intvs(std::move(ans));
     }
 
-    disjoint_intvs get_transform(coord_t scale, coord_t shift) const {
+    disjoint_intvs get_transform(coord_type scale, coord_type shift) const {
         vector_type ans;
         const_iterator first, last;
         if (scale > 0) {
             for (auto first = data_.begin(); first != data_.end(); ++first) {
                 value_type item(*first);
-                item.transform(scale, shift);
+                traits::interval<T>::transform(item, scale, shift);
                 ans.insert_back(std::move(item));
             }
         } else if (scale < 0) {
             for (auto first = data_.rbegin(); first != data_.rend(); ++first) {
                 value_type item(*first);
-                item.transform(scale, shift);
+                traits::interval<T>::transform(item, scale, shift);
                 ans.insert_back(std::move(item));
             }
         } else {
@@ -290,10 +273,12 @@ class disjoint_intvs {
         if (overlap_size == 0)
             return false;
 
-        coord_t test = iter_pair.first->start();
-        if (test < key.first) {
+        auto k_start = traits::interval<K>::start(key);
+        auto k_stop = traits::interval<K>::stop(key);
+        coord_type test = traits::interval<T>::start(*(iter_pair.first));
+        if (test < k_start) {
             // perform subtraction on first interval
-            iter_pair.first->stop() = key.first;
+            traits::interval<T>::set_stop(*(iter_pair.first), k_start);
             ++iter_pair.first;
             // we're done if there's no more interval
             if ((--overlap_size) == 0)
@@ -301,10 +286,10 @@ class disjoint_intvs {
         }
 
         auto last_iter = iter_pair.second - 1;
-        test = last_iter->stop();
-        if (key.second < test) {
+        test = traits::interval<T>::stop(*last_iter);
+        if (k_stop < test) {
             // perform subtraction on last interval
-            last_iter->start() = key.second;
+            traits::interval<T>::set_start(*last_iter, k_stop);
             iter_pair.second = last_iter;
             if ((--overlap_size) == 0)
                 return true;
@@ -317,20 +302,24 @@ class disjoint_intvs {
 
     template <class... Args> bool emplace(bool merge, bool abut, Args &&... args) {
         value_type item(std::forward<Args>(args)...);
-        if (!item.nonempty())
-            throw std::invalid_argument(fmt::format("Cannot add nonempty interval [{:d}, {:d})",
-                                                    item.start(), item.stop()));
+        auto i_start = traits::interval<T>::start(item);
+        auto i_stop = traits::interval<T>::stop(item);
+        if (!nonempty(item))
+            throw std::invalid_argument(
+                fmt::format("Cannot add nonempty interval [{:d}, {:d})", i_start, i_stop));
         abut = abut && merge;
-        auto iter_pair = (abut) ? overlap_range(interval(item.start() - 1, item.stop() + 1))
-                                : overlap_range(item);
+        auto iter_pair =
+            (abut) ? overlap_range(std::make_pair(i_start - 1, i_stop + 1)) : overlap_range(item);
         if (iter_pair.first == iter_pair.second) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));
             return true;
         } else if (merge) {
             // have overlapping/abutting intervals, and we want to merge
-            item.intv.first = std::min(item.start(), iter_pair.first->start());
-            item.intv.second = std::max(item.stop(), (iter_pair.second - 1)->stop());
+            auto ovl_start = traits::interval<T>::start(*(iter_pair.first));
+            auto ovl_stop = traits::interval<T>::stop(*(iter_pair.second - 1));
+            traits::interval<T>::set_start(item, std::min(i_start, ovl_start));
+            traits::interval<T>::set_stop(item, std::max(i_stop, ovl_stop));
             // modify the first overlapping interval
             *(iter_pair.first) = item;
             // erase the rest

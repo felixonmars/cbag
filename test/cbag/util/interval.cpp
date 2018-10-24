@@ -42,19 +42,19 @@ SCENARIO("disjoint_intvs is empty", "[disjoint_intvs]") {
             success = iset.emplace(true, false, 2, 5);
             REQUIRE(success == true);
             REQUIRE(iset.size() == 2);
-            REQUIRE(*iset.begin() == cu::interval(1, 6));
+            REQUIRE(*iset.begin() == std::make_pair(1, 6));
         }
 
         WHEN("removing overlaps") {
-            iset.remove_overlaps(cu::interval(2, 9));
+            iset.remove_overlaps(std::make_pair(2, 9));
             REQUIRE(iset.empty() == true);
         }
 
         WHEN("subtract overlaps") {
             iset.subtract(std::make_pair(2, 9));
             REQUIRE(iset.size() == 2);
-            REQUIRE(*iset.begin() == cu::interval(1, 2));
-            REQUIRE(*(iset.begin() + 1) == cu::interval(9, 10));
+            REQUIRE(*iset.begin() == std::make_pair(1, 2));
+            REQUIRE(*(iset.begin() + 1) == std::make_pair(9, 10));
         }
     }
 }
