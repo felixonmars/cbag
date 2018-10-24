@@ -226,7 +226,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         return disjoint_intvs(std::move(ans));
     }
 
-    disjoint_intvs get_transform(coord_type scale, coord_type shift) const {
+    disjoint_intvs get_transform(coord_type scale = 1, coord_type shift = 0) const {
         vector_type ans;
         const_iterator first, last;
         if (scale > 0) {
