@@ -177,7 +177,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
     }
     template <class K> bool overlaps(const K &key) const { return data_.equal_size(key) > 0; }
     template <class K> bool covers(const K &key) const { return data_.equal_size(key) == 1; }
-    disjoint_intvs get_intersect(const disjoint_intvs &other) const {
+    disjoint_intvs get_intersection(const disjoint_intvs &other) const {
         auto iter1 = data_.begin();
         auto iter2 = other.data_.begin();
         auto end1 = data_.end();
