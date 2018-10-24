@@ -1,6 +1,7 @@
 #ifndef CBAG_UTIL_INTERVAL_H
 #define CBAG_UTIL_INTERVAL_H
 
+#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -110,6 +111,38 @@ class disjoint_intvs {
     using iterator = typename vector_type::iterator;
     using const_iterator = typename vector_type::const_iterator;
 
+    class const_intv_iterator {
+      public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = const intv_type;
+        using difference_type = typename const_iterator::difference_type;
+        using pointer = value_type *;
+        using reference = value_type &;
+
+      private:
+        const_iterator iter_;
+
+      public:
+        const_intv_iterator() = default;
+        const_intv_iterator(const_iterator val) : iter_(std::move(val)) {}
+
+        bool operator==(const const_intv_iterator &other) const { return iter_ == other.iter_; }
+        bool operator!=(const const_intv_iterator &other) const { return iter_ != other.iter_; }
+
+        reference operator*() const { return iter_->intv; }
+        pointer operator->() const { return &(iter_->intv); }
+
+        const_intv_iterator &operator++() {
+            ++iter_;
+            return *this;
+        }
+        const_intv_iterator operator++(int) {
+            const_intv_iterator ans(iter_);
+            operator++();
+            return ans;
+        }
+    };
+
   private:
     vector_type data_;
 
@@ -135,6 +168,9 @@ class disjoint_intvs {
   public:
     const_iterator begin() const { return data_.begin(); }
     const_iterator end() const { return data_.end(); }
+
+    const_intv_iterator intv_begin() const { return const_intv_iterator(begin()); }
+    const_intv_iterator intv_end() const { return const_intv_iterator(end()); }
 
     template <class K> std::pair<const_iterator, const_iterator> overlap_range(const K &key) const {
         return data_.equal_range(key);
