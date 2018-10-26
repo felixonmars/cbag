@@ -28,7 +28,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
   public:
     sorted_vector() noexcept = default;
 
-    sorted_vector(std::vector<T> data) : data_(std::move(data)) {
+    template <class... Args> sorted_vector(Args &&... args) : data_(std::forward<Args>(args)...) {
         std::sort(data_.begin(), data_.end(), comp_);
     }
 
@@ -92,24 +92,17 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     }
 
     template <class... Args> void emplace_back(Args &&... args) {
-        insert_back(value_type(std::forward<Args>(args)...));
+        push_back(value_type(std::forward<Args>(args)...));
     }
 
-    void insert_back(value_type &&item) {
+    void push_back(value_type item) {
         if (empty() || !comp_(item, data_.back()))
             data_.emplace_back(std::move(item));
         else
             throw std::invalid_argument("Cannot insert given element at back.");
     }
 
-    std::pair<iterator, bool> insert_unique(const value_type &item) {
-        auto iter_range = equal_range(item);
-        if (iter_range.first != iter_range.second)
-            return {iter_range.first, false};
-        return {data_.insert(iter_range.second, item), true};
-    }
-
-    std::pair<iterator, bool> insert_unique(value_type &&item) {
+    std::pair<iterator, bool> insert_unique(value_type item) {
         auto iter_range = equal_range(item);
         if (iter_range.first != iter_range.second)
             return {iter_range.first, false};

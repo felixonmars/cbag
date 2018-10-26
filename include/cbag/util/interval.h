@@ -151,7 +151,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
             coord_type stop = std::min(traits::interval<T>::stop(intv),
                                        traits::interval<T>::stop(*(iter_pair.first)));
             if (start < stop)
-                ans.insert_back(traits::interval<T>::construct(start, stop));
+                ans.push_back(traits::interval<T>::construct(start, stop));
         }
     }
 
@@ -205,7 +205,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         coord_type upper = traits::interval<K>::stop(key);
         vector_type ans;
         if (data_.empty()) {
-            ans.insert_back(traits::interval<T>::construct(lower, upper));
+            ans.push_back(traits::interval<T>::construct(lower, upper));
         } else {
             coord_type a = start();
             coord_type b = stop();
@@ -217,11 +217,11 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
             for (const auto &item : data_) {
                 coord_t i_start = traits::interval<T>::start(item);
                 if (lower < i_start)
-                    ans.insert_back(traits::interval<T>::construct(lower, i_start));
+                    ans.push_back(traits::interval<T>::construct(lower, i_start));
                 lower = traits::interval<T>::stop(item);
             }
             if (lower < upper)
-                ans.insert_back(traits::interval<T>::construct(lower, upper));
+                ans.push_back(traits::interval<T>::construct(lower, upper));
         }
         return disjoint_intvs(std::move(ans));
     }
@@ -233,13 +233,13 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
             for (auto first = data_.begin(); first != data_.end(); ++first) {
                 value_type item(*first);
                 transform(item, scale, shift);
-                ans.insert_back(std::move(item));
+                ans.push_back(std::move(item));
             }
         } else if (scale < 0) {
             for (auto first = data_.rbegin(); first != data_.rend(); ++first) {
                 value_type item(*first);
                 transform(item, scale, shift);
-                ans.insert_back(std::move(item));
+                ans.push_back(std::move(item));
             }
         } else {
             return {};
