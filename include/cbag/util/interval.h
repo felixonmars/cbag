@@ -89,10 +89,10 @@ struct intv_comp {
     }
 };
 
-template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
+template <class Interval = std::pair<offset_t, offset_t>> class disjoint_intvs {
   public:
-    using value_type = T;
-    using coord_type = typename traits::coordinate_type<T>::type;
+    using value_type = Interval;
+    using coord_type = typename traits::coordinate_type<Interval>::type;
     using vector_type = sorted_vector<value_type, intv_comp>;
     using size_type = typename vector_type::size_type;
     using iterator = typename vector_type::iterator;
@@ -116,7 +116,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         bool operator==(const const_intv_iterator &other) const { return iter_ == other.iter_; }
         bool operator!=(const const_intv_iterator &other) const { return iter_ != other.iter_; }
 
-        reference operator*() const { return traits::interval<T>::intv(*iter_); }
+        reference operator*() const { return traits::interval<Interval>::intv(*iter_); }
         pointer operator->() const { return &operator*(); }
 
         const_intv_iterator &operator++() {
@@ -146,12 +146,12 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         auto iter_pair = std::equal_range(first, last, intv, comp);
         first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
         for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
-            coord_type start = std::max(traits::interval<T>::start(intv),
-                                        traits::interval<T>::start(*(iter_pair.first)));
-            coord_type stop = std::min(traits::interval<T>::stop(intv),
-                                       traits::interval<T>::stop(*(iter_pair.first)));
+            coord_type start = std::max(traits::interval<Interval>::start(intv),
+                                        traits::interval<Interval>::start(*(iter_pair.first)));
+            coord_type stop = std::min(traits::interval<Interval>::stop(intv),
+                                       traits::interval<Interval>::stop(*(iter_pair.first)));
             if (start < stop)
-                ans.push_back(traits::interval<T>::construct(start, stop));
+                ans.push_back(traits::interval<Interval>::construct(start, stop));
         }
     }
 
@@ -167,8 +167,8 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
     }
     bool empty() const { return data_.empty(); }
     size_type size() const { return data_.size(); }
-    coord_type start() const { return traits::interval<T>::start(data_.at_front()); }
-    coord_type stop() const { return traits::interval<T>::stop(data_.at_back()); }
+    coord_type start() const { return traits::interval<Interval>::start(data_.at_front()); }
+    coord_type stop() const { return traits::interval<Interval>::stop(data_.at_back()); }
     template <class K> const_iterator find_exact(const K &key) const {
         return data_.find_exact(key);
     }
@@ -205,7 +205,7 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         coord_type upper = traits::interval<K>::stop(key);
         vector_type ans;
         if (data_.empty()) {
-            ans.push_back(traits::interval<T>::construct(lower, upper));
+            ans.push_back(traits::interval<Interval>::construct(lower, upper));
         } else {
             coord_type a = start();
             coord_type b = stop();
@@ -215,13 +215,13 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
                                 a, b, lower, upper));
             }
             for (const auto &item : data_) {
-                coord_t i_start = traits::interval<T>::start(item);
+                coord_t i_start = traits::interval<Interval>::start(item);
                 if (lower < i_start)
-                    ans.push_back(traits::interval<T>::construct(lower, i_start));
-                lower = traits::interval<T>::stop(item);
+                    ans.push_back(traits::interval<Interval>::construct(lower, i_start));
+                lower = traits::interval<Interval>::stop(item);
             }
             if (lower < upper)
-                ans.push_back(traits::interval<T>::construct(lower, upper));
+                ans.push_back(traits::interval<Interval>::construct(lower, upper));
         }
         return disjoint_intvs(std::move(ans));
     }
@@ -279,10 +279,10 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
 
         auto k_start = traits::interval<K>::start(key);
         auto k_stop = traits::interval<K>::stop(key);
-        coord_type test = traits::interval<T>::start(*(iter_pair.first));
+        coord_type test = traits::interval<Interval>::start(*(iter_pair.first));
         if (test < k_start) {
             // perform subtraction on first interval
-            traits::interval<T>::set_stop(*(iter_pair.first), k_start);
+            traits::interval<Interval>::set_stop(*(iter_pair.first), k_start);
             ++iter_pair.first;
             // we're done if there's no more interval
             if ((--overlap_size) == 0)
@@ -290,10 +290,10 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
         }
 
         auto last_iter = iter_pair.second - 1;
-        test = traits::interval<T>::stop(*last_iter);
+        test = traits::interval<Interval>::stop(*last_iter);
         if (k_stop < test) {
             // perform subtraction on last interval
-            traits::interval<T>::set_start(*last_iter, k_stop);
+            traits::interval<Interval>::set_start(*last_iter, k_stop);
             iter_pair.second = last_iter;
             if ((--overlap_size) == 0)
                 return true;
@@ -306,8 +306,8 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
 
     template <class... Args> bool emplace(bool merge, bool abut, Args &&... args) {
         value_type item(std::forward<Args>(args)...);
-        auto i_start = traits::interval<T>::start(item);
-        auto i_stop = traits::interval<T>::stop(item);
+        auto i_start = traits::interval<Interval>::start(item);
+        auto i_stop = traits::interval<Interval>::stop(item);
         if (!nonempty(item))
             throw std::invalid_argument(
                 fmt::format("Cannot add nonempty interval [{:d}, {:d})", i_start, i_stop));
@@ -320,10 +320,10 @@ template <class T = std::pair<offset_t, offset_t>> class disjoint_intvs {
             return true;
         } else if (merge) {
             // have overlapping/abutting intervals, and we want to merge
-            auto ovl_start = traits::interval<T>::start(*(iter_pair.first));
-            auto ovl_stop = traits::interval<T>::stop(*(iter_pair.second - 1));
-            traits::interval<T>::set_start(item, std::min(i_start, ovl_start));
-            traits::interval<T>::set_stop(item, std::max(i_stop, ovl_stop));
+            auto ovl_start = traits::interval<Interval>::start(*(iter_pair.first));
+            auto ovl_stop = traits::interval<Interval>::stop(*(iter_pair.second - 1));
+            traits::interval<Interval>::set_start(item, std::min(i_start, ovl_start));
+            traits::interval<Interval>::set_stop(item, std::max(i_stop, ovl_stop));
             // modify the first overlapping interval
             *(iter_pair.first) = item;
             // erase the rest
