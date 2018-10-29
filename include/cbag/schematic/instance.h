@@ -38,29 +38,20 @@ struct instance {
      */
     instance(std::string lib, std::string cell, std::string view, transform xform, box_t bbox);
 
-    // methods to manipulate parameters, so Cython doesn't have to worry about
-    // variants
+    uint32_t width() const;
+
+    uint32_t height() const;
 
     void clear_params();
 
-    void set_int_param(const char *name, int value);
+    void set_param(std::string &&name, const std::variant<int32_t, double, bool, std::string> &val);
 
-    void set_double_param(const char *name, double value);
+    void update_connection(const std::string &inst_name, uint32_t inst_size, std::string term_str,
+                           std::string net_str);
 
-    void set_bool_param(const char *name, bool value);
-
-    void set_string_param(const char *name, const char *value);
-
-    void update_connection(const std::string &inst_name, uint32_t inst_size, const char *term,
-                           const char *net);
-
-    void update_connection(const std::string &inst_name, const char *term, const char *net);
+    void update_connection(const std::string &inst_name, std::string &&term, std::string &&net);
 
     void resize_nets(uint32_t old_size, uint32_t new_size);
-
-    uint32_t width() const { return bbox.getWidth(); }
-
-    uint32_t height() const { return bbox.getHeight(); }
 };
 
 } // namespace sch

@@ -178,8 +178,7 @@ inst_iter_t cellview::copy_instance(const instance &inst, uint32_t old_size,
     emp_iter.first->second.xform.xOffset() += dx;
     emp_iter.first->second.xform.xOffset() += dy;
     for (auto const &p : conns) {
-        emp_iter.first->second.update_connection(new_name, new_ast.size(), p.first.c_str(),
-                                                 p.second.c_str());
+        emp_iter.first->second.update_connection(new_name, new_ast.size(), p.first, p.second);
     }
     return emp_iter.first;
 }
