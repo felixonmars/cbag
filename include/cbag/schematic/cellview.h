@@ -26,7 +26,6 @@ struct instance;
 struct cellview_info;
 
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
-using inst_iter_t = std::map<std::string, instance>::iterator;
 
 /** A schematic or symbol cell view
  */
@@ -64,12 +63,6 @@ struct cellview {
     void rename_instance(const std::string &old_name, std::string new_name);
 
     bool remove_instance(const std::string &name);
-
-    void copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
-                       coord_t dx, coord_t dy, const conn_list_t &conns);
-
-    void array_instance(const std::string &old_name, const std::vector<std::string> &name_list,
-                        coord_t dx, coord_t dy, const std::vector<conn_list_t> &conns_list);
 };
 
 } // namespace sch
