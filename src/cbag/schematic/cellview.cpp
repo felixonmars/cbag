@@ -46,39 +46,37 @@ cellview_info cellview::get_info(const std::string &name) const {
 
 void cellview::clear_params() { props.clear(); }
 
-void cellview::set_param(std::string &&name,
+void cellview::set_param(std::string name,
                          const std::variant<int32_t, double, bool, std::string> &val) {
     cbag::set_param(props, std::move(name), val);
 }
 
-void cellview::rename_pin(const char *old_name, const char *new_name) {
+void cellview::rename_pin(const std::string &old_name, const std::string &new_name) {
     // check the new pin name does not exist already
-    std::string nkey(new_name);
-    if (in_terms.find(nkey) != in_terms.end() || out_terms.find(nkey) != out_terms.end() ||
-        io_terms.find(nkey) != io_terms.end()) {
-        throw std::invalid_argument(fmt::format("Terminal {} already exists.", nkey));
+    if (in_terms.find(new_name) != in_terms.end() || out_terms.find(new_name) != out_terms.end() ||
+        io_terms.find(new_name) != io_terms.end()) {
+        throw std::invalid_argument(fmt::format("Terminal {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
-    parse(new_name, nkey.size(), spirit::name(), ast);
+    parse(new_name, spirit::name(), ast);
 
-    std::string key(old_name);
-    auto nh = in_terms.extract(key);
+    auto nh = in_terms.extract(old_name);
     if (nh.empty()) {
-        nh = out_terms.extract(key);
+        nh = out_terms.extract(old_name);
         if (nh.empty()) {
-            nh = io_terms.extract(key);
+            nh = io_terms.extract(old_name);
             if (nh.empty()) {
-                throw std::invalid_argument("Cannot find terminal: " + key);
+                throw std::invalid_argument("Cannot find terminal: " + old_name);
             }
-            nh.key() = std::string(new_name);
+            nh.key() = new_name;
             io_terms.insert(std::move(nh));
         } else {
-            nh.key() = std::string(new_name);
+            nh.key() = new_name;
             out_terms.insert(std::move(nh));
         }
     } else {
-        nh.key() = std::string(new_name);
+        nh.key() = new_name;
         in_terms.insert(std::move(nh));
     }
 
@@ -88,16 +86,15 @@ void cellview::rename_pin(const char *old_name, const char *new_name) {
     }
 }
 
-void cellview::add_pin(const char *new_name, uint32_t term_type) {
-    std::string key(new_name);
+void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
     // check the pin name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
-    parse(new_name, key.size(), spirit::name(), ast);
+    parse(new_name, spirit::name(), ast);
 
     // check the pin name does not exist already
-    if (in_terms.find(key) != in_terms.end() || out_terms.find(key) != out_terms.end() ||
-        io_terms.find(key) != io_terms.end()) {
-        throw std::invalid_argument(fmt::format("Terminal {} already exists.", key));
+    if (in_terms.find(new_name) != in_terms.end() || out_terms.find(new_name) != out_terms.end() ||
+        io_terms.find(new_name) != io_terms.end()) {
+        throw std::invalid_argument(fmt::format("Terminal {} already exists.", new_name));
     }
     /*
     // get the map to insert
@@ -124,9 +121,9 @@ void cellview::add_pin(const char *new_name, uint32_t term_type) {
     throw std::runtime_error("add_pin functionality not implemented yet.  See developer.");
 }
 
-bool cellview::remove_pin(const char *name) {
-    std::string key(name);
-    bool success = in_terms.erase(key) > 0 || out_terms.erase(key) > 0 || io_terms.erase(key) > 0;
+bool cellview::remove_pin(const std::string &name) {
+    bool success =
+        in_terms.erase(name) > 0 || out_terms.erase(name) > 0 || io_terms.erase(name) > 0;
     // remove symbol pin
     if (success && sym_ptr != nullptr) {
         sym_ptr->remove_pin(name);
@@ -134,25 +131,23 @@ bool cellview::remove_pin(const char *name) {
     return success;
 }
 
-void cellview::rename_instance(const char *old_name, const char *new_name) {
+void cellview::rename_instance(const std::string &old_name, std::string new_name) {
     // check the new name does not exist
-    std::string nkey(new_name);
-    if (instances.find(nkey) != instances.end()) {
-        throw std::invalid_argument(fmt::format("instance {} already exists.", nkey));
+    if (instances.find(new_name) != instances.end()) {
+        throw std::invalid_argument(fmt::format("instance {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
-    parse(new_name, nkey.size(), spirit::name_unit(), new_ast);
+    parse(new_name, spirit::name_unit(), new_ast);
 
     // do the swap
-    std::string key(old_name);
-    auto nh = instances.extract(key);
+    auto nh = instances.extract(old_name);
     if (nh.empty()) {
-        throw std::invalid_argument("Cannot find instance: " + key);
+        throw std::invalid_argument("Cannot find instance: " + old_name);
     } else {
         // resize nets
         spirit::ast::name_unit old_ast;
-        parse(old_name, key.size(), spirit::name_unit(), old_ast);
+        parse(old_name, spirit::name_unit(), old_ast);
         uint32_t old_size = old_ast.size();
         uint32_t new_size = new_ast.size();
         if (old_size != new_size) {
@@ -160,21 +155,18 @@ void cellview::rename_instance(const char *old_name, const char *new_name) {
         }
 
         // update instance name
-        nh.key() = std::string(new_name);
+        nh.key() = std::move(new_name);
         instances.insert(std::move(nh));
     }
 }
 
-bool cellview::remove_instance(const char *name) {
-    std::string key(name);
-    return instances.erase(key) > 0;
-}
+bool cellview::remove_instance(const std::string &name) { return instances.erase(name) > 0; }
 
 void cellview::copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
                              coord_t dx, coord_t dy, const conn_list_t &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
-    parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_ast);
+    parse(new_name, spirit::name_unit(), new_ast);
 
     // create new copy
     auto emp_iter = instances.emplace(new_name, inst);
@@ -197,17 +189,17 @@ void cellview::copy_instance(const instance &inst, uint32_t old_size, const std:
     }
 }
 
-void cellview::array_instance(const char *old_name, const std::vector<std::string> &name_list,
-                              coord_t dx, coord_t dy, const std::vector<conn_list_t> &conns_list) {
+void cellview::array_instance(const std::string &old_name,
+                              const std::vector<std::string> &name_list, coord_t dx, coord_t dy,
+                              const std::vector<conn_list_t> &conns_list) {
     // find the instance to copy
-    std::string key(old_name);
-    std::map<std::string, instance>::const_iterator iter = instances.find(key);
+    std::map<std::string, instance>::const_iterator iter = instances.find(old_name);
     if (iter == instances.end()) {
-        throw std::invalid_argument("Cannot find instance: " + key);
+        throw std::invalid_argument("Cannot find instance: " + old_name);
     }
     // get old instance name and size
     spirit::ast::name_unit old_ast;
-    parse(old_name, key.size(), spirit::name_unit(), old_ast);
+    parse(old_name, spirit::name_unit(), old_ast);
     uint32_t old_size = old_ast.size();
 
     if (dx == 0 && dy == 0) {

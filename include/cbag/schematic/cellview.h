@@ -53,23 +53,23 @@ struct cellview {
 
     void clear_params();
 
-    void set_param(std::string &&name, const std::variant<int32_t, double, bool, std::string> &val);
+    void set_param(std::string name, const std::variant<int32_t, double, bool, std::string> &val);
 
-    void rename_pin(const char *old_name, const char *new_name);
+    void rename_pin(const std::string &old_name, const std::string &new_name);
 
-    void add_pin(const char *new_name, uint32_t term_type);
+    void add_pin(const std::string &new_name, uint32_t term_type);
 
-    bool remove_pin(const char *name);
+    bool remove_pin(const std::string &name);
 
-    void rename_instance(const char *old_name, const char *new_name);
+    void rename_instance(const std::string &old_name, std::string new_name);
 
-    bool remove_instance(const char *name);
+    bool remove_instance(const std::string &name);
 
     void copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
                        coord_t dx, coord_t dy, const conn_list_t &conns);
 
-    void array_instance(const char *old_name, const std::vector<std::string> &name_list, coord_t dx,
-                        coord_t dy, const std::vector<conn_list_t> &conns_list);
+    void array_instance(const std::string &old_name, const std::vector<std::string> &name_list,
+                        coord_t dx, coord_t dy, const std::vector<conn_list_t> &conns_list);
 };
 
 } // namespace sch

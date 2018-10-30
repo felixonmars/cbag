@@ -67,6 +67,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
 # setup link library path.  Must call before defining target.
 link_directories($ENV{OA_LINK_DIR})
 
+message("OA include directory: " $ENV{OA_INCLUDE_DIR})
+message("OA link directory: " $ENV{OA_LINK_DIR})
+
 message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 
 # set variable storing binary/library location
