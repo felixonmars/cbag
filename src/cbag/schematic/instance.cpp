@@ -14,7 +14,6 @@
 #include <cbag/netlist/name_convert.h>
 
 #include <cbag/schematic/instance.h>
-#include <cbag/util/overload.h>
 
 namespace cbag {
 namespace sch {
@@ -33,14 +32,7 @@ void instance::clear_params() { params.clear(); }
 
 void instance::set_param(std::string &&name,
                          const std::variant<int32_t, double, bool, std::string> &val) {
-    std::visit(
-        overload{
-            [&](const int32_t v) { params[std::move(name)] = v; },
-            [&](const double v) { params[std::move(name)] = v; },
-            [&](const bool v) { params[std::move(name)] = v; },
-            [&](const std::string &v) { params[std::move(name)] = v; },
-        },
-        val);
+    cbag::set_param(params, std::move(name), val);
 }
 
 void instance::update_connection(const std::string &inst_name, uint32_t inst_size,

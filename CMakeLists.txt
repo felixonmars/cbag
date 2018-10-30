@@ -76,6 +76,7 @@ set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
 message("install rpath: " ${CMAKE_INSTALL_RPATH})
 
 set(SRC_FILES_LIB_CBAG
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/datatypes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp

@@ -47,20 +47,13 @@ struct cellview {
 
     cellview();
 
-    cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox);
+    cellview(std::string lib_name, std::string cell_name, std::string view_name, box_t bbox);
 
-    // methods to manipulate parameters, so Cython doesn't have to worry about
-    // variants
+    cellview_info get_info(const std::string &cell_name) const;
 
     void clear_params();
 
-    void set_int_param(const char *name, int value);
-
-    void set_double_param(const char *name, double value);
-
-    void set_bool_param(const char *name, bool value);
-
-    void set_string_param(const char *name, const char *value);
+    void set_param(std::string &&name, const std::variant<int32_t, double, bool, std::string> &val);
 
     void rename_pin(const char *old_name, const char *new_name);
 
@@ -72,14 +65,11 @@ struct cellview {
 
     bool remove_instance(const char *name);
 
-    inst_iter_t copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
-                              coord_t dx, coord_t dy, const conn_list_t &conns);
+    void copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
+                       coord_t dx, coord_t dy, const conn_list_t &conns);
 
-    std::vector<inst_iter_t> array_instance(const char *old_name,
-                                            const std::vector<std::string> &name_list, coord_t dx,
-                                            coord_t dy, const std::vector<conn_list_t> &conns_list);
-
-    cellview_info get_info(const std::string &cell_name) const;
+    void array_instance(const char *old_name, const std::vector<std::string> &name_list, coord_t dx,
+                        coord_t dy, const std::vector<conn_list_t> &conns_list);
 };
 
 } // namespace sch

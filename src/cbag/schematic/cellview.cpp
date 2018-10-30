@@ -22,18 +22,34 @@ namespace sch {
 
 cellview::cellview() = default;
 
-cellview::cellview(const char *lib_name, const char *cell_name, const char *view_name, box_t bbox)
-    : lib_name(lib_name), cell_name(cell_name), view_name(view_name), bbox(std::move(bbox)) {}
+cellview::cellview(std::string lib_name, std::string cell_name, std::string view_name, box_t bbox)
+    : lib_name(std::move(lib_name)), cell_name(std::move(cell_name)),
+      view_name(std::move(view_name)), bbox(std::move(bbox)) {}
+
+cellview_info cellview::get_info(const std::string &name) const {
+    cellview_info ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
+
+    for (auto const &pair : in_terms) {
+        ans.in_terms.push_back(pair.first);
+    }
+
+    for (auto const &pair : out_terms) {
+        ans.out_terms.push_back(pair.first);
+    }
+
+    for (auto const &pair : io_terms) {
+        ans.io_terms.push_back(pair.first);
+    }
+
+    return ans;
+}
 
 void cellview::clear_params() { props.clear(); }
 
-void cellview::set_int_param(const char *name, int value) { props[name] = value; }
-
-void cellview::set_double_param(const char *name, double value) { props[name] = value; }
-
-void cellview::set_bool_param(const char *name, bool value) { props[name] = value; }
-
-void cellview::set_string_param(const char *name, const char *value) { props[name] = value; }
+void cellview::set_param(std::string &&name,
+                         const std::variant<int32_t, double, bool, std::string> &val) {
+    cbag::set_param(props, std::move(name), val);
+}
 
 void cellview::rename_pin(const char *old_name, const char *new_name) {
     // check the new pin name does not exist already
@@ -154,9 +170,8 @@ bool cellview::remove_instance(const char *name) {
     return instances.erase(key) > 0;
 }
 
-inst_iter_t cellview::copy_instance(const instance &inst, uint32_t old_size,
-                                    const std::string &new_name, coord_t dx, coord_t dy,
-                                    const conn_list_t &conns) {
+void cellview::copy_instance(const instance &inst, uint32_t old_size, const std::string &new_name,
+                             coord_t dx, coord_t dy, const conn_list_t &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name_unit new_ast;
     parse(new_name.c_str(), new_name.size(), spirit::name_unit(), new_ast);
@@ -180,13 +195,10 @@ inst_iter_t cellview::copy_instance(const instance &inst, uint32_t old_size,
     for (auto const &p : conns) {
         emp_iter.first->second.update_connection(new_name, new_ast.size(), p.first, p.second);
     }
-    return emp_iter.first;
 }
 
-std::vector<inst_iter_t> cellview::array_instance(const char *old_name,
-                                                  const std::vector<std::string> &name_list,
-                                                  coord_t dx, coord_t dy,
-                                                  const std::vector<conn_list_t> &conns_list) {
+void cellview::array_instance(const char *old_name, const std::vector<std::string> &name_list,
+                              coord_t dx, coord_t dy, const std::vector<conn_list_t> &conns_list) {
     // find the instance to copy
     std::string key(old_name);
     std::map<std::string, instance>::const_iterator iter = instances.find(key);
@@ -204,34 +216,13 @@ std::vector<inst_iter_t> cellview::array_instance(const char *old_name,
     }
 
     size_t num = name_list.size();
-    std::vector<inst_iter_t> ans(num);
     auto num_inst = static_cast<coord_t>(num);
     for (coord_t idx = 0; idx < num_inst; ++idx) {
-        ans[idx] = copy_instance(iter->second, old_size, name_list[idx], dx * idx, dy * idx,
-                                 conns_list[idx]);
+        copy_instance(iter->second, old_size, name_list[idx], dx * idx, dy * idx, conns_list[idx]);
     }
 
     // remove original instance
     remove_instance(old_name);
-    return ans;
-}
-
-cellview_info cellview::get_info(const std::string &name) const {
-    cellview_info ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
-
-    for (auto const &pair : in_terms) {
-        ans.in_terms.push_back(pair.first);
-    }
-
-    for (auto const &pair : out_terms) {
-        ans.out_terms.push_back(pair.first);
-    }
-
-    for (auto const &pair : io_terms) {
-        ans.io_terms.push_back(pair.first);
-    }
-
-    return ans;
 }
 
 } // namespace sch

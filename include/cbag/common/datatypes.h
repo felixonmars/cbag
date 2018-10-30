@@ -42,6 +42,9 @@ using value_t = std::variant<int32_t, double, bool, std::string, time_struct, bi
  */
 using param_map = std::map<std::string, value_t>;
 
+void set_param(param_map &params, std::string &&name,
+               const std::variant<int32_t, double, bool, std::string> &val);
+
 } // namespace cbag
 
 #endif // CBAG_COMMON_DATATYPES_H
