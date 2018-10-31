@@ -180,9 +180,6 @@ oa_database::oa_database(const std::string &lib_def_file) : oa_database(lib_def_
 oa_database::oa_database(const char *lib_def_file)
     : lib_def_file(lib_def_file), logger(spdlog::get("cbag")) {
     try {
-
-        writer = std::make_unique<oa_writer>(ns_cdba, logger);
-
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         logger->info("Creating new oa_database with file: {}", lib_def_file);
@@ -345,7 +342,7 @@ void oa_database::write_sch_cellview(const char *lib_name, const char *cell_name
             helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w',
                                 is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        writer->write_sch_cellview(cv, dsn_ptr, is_sch, rename_map);
+        cbagoa::write_sch_cellview(ns_cdba, *logger, cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
     } catch (...) {
         helper::handle_oa_exceptions(logger);
@@ -385,7 +382,7 @@ void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name
         oa::oaDesign *dsn_ptr =
             helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        writer->write_lay_cellview(cv, dsn_ptr, tech_ptr, rename_map);
+        cbagoa::write_lay_cellview(ns_cdba, *logger, cv, dsn_ptr, tech_ptr, rename_map);
         dsn_ptr->close();
     } catch (...) {
         helper::handle_oa_exceptions(logger);

@@ -37,18 +37,65 @@
 
 namespace cbagoa {
 
+// TODO: find ways to not hard code these values
+constexpr oa::oaLayerNum sch_conn_layer = 228;
+constexpr oa::oaPurposeNum sch_conn_purpose = 4294967295;
+constexpr oa::oaPurposeNum sch_net_purpose = 237;
+constexpr oa::oaCoord sch_stub_len2 = 5;
+constexpr oa::oaTextAlignEnum sch_net_align = oa::oacCenterCenterTextAlign;
+constexpr oa::oaOrientEnum sch_net_orient = oa::oacR0;
+constexpr oa::oaFontEnum sch_net_font = oa::oacStickFont;
+constexpr oa::oaDist sch_net_height = 10;
+
+constexpr auto prop_app_type = "ILList";
+constexpr auto cell_data_name = "cdfData";
+constexpr auto sch_data_parent_name = "dependency";
+constexpr auto sch_data_name = "children";
+// clang-format off
+constexpr auto cell_data = "(promptWidth nil "
+                            "fieldHeight nil "
+                            "fieldWidth nil "
+                            "buttonFieldWidth nil "
+                            "formInitProc nil "
+                            "doneProc nil "
+                            "parameters nil "
+                            "propList (modelLabelSet \"\" "
+                                      "opPointLabelSet \"\" "
+                                      "paramLabelSet \"\" "
+                                      "simInfo (nil "
+                                                "auLvs (nil "
+                                                       "namePrefix \"X\" "
+                                                       "termOrder {0} "
+                                                       "componentName \"subcircuit\" "
+                                                       "netlistProcedure ansLvsCompPrim) "
+                                                "auCdl (nil "
+                                                       "namePrefix \"X\" "
+                                                       "termOrder {0} "
+                                                       "componentName \"subcircuit\" "
+                                                       "netlistProcedure ansCdlSubcktCall) "
+                                                "spectre (nil "
+                                                         "termOrder {0} "
+                                                         "componentName \"subcircuit\" "
+                                                         "netlistProcedure nil) "
+                                                "hspiceD (nil "
+                                                         "namePrefix \"X\" "
+                                                         "termOrder {0} "
+                                                         "componentName \"subcircuit\" "
+                                                         "netlistProcedure nil))))";
+// clang-format on
+
 constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
 class make_pin_fig_visitor {
   private:
-    const oa::oaCdbaNS *ns;
+    const oa::oaCdbaNS &ns;
     oa::oaBlock *block;
     oa::oaPin *pin;
     oa::oaTerm *term;
     int *cnt;
 
   public:
-    make_pin_fig_visitor(const oa::oaCdbaNS *ns, oa::oaBlock *block, oa::oaPin *pin,
+    make_pin_fig_visitor(const oa::oaCdbaNS &ns, oa::oaBlock *block, oa::oaPin *pin,
                          oa::oaTerm *term, int *cnt)
         : ns(ns), block(block), pin(pin), term(term), cnt(cnt) {}
 
@@ -58,10 +105,10 @@ class make_pin_fig_visitor {
     }
 
     void operator()(const cbag::sch::pin_object &obj) const {
-        oa::oaScalarName lib(*ns, obj.inst.lib_name.c_str());
-        oa::oaScalarName cell(*ns, obj.inst.cell_name.c_str());
-        oa::oaScalarName view(*ns, obj.inst.view_name.c_str());
-        oa::oaScalarName name(*ns, fmt::format("P__{}", (*cnt)++).c_str());
+        oa::oaScalarName lib(ns, obj.inst.lib_name.c_str());
+        oa::oaScalarName cell(ns, obj.inst.cell_name.c_str());
+        oa::oaScalarName view(ns, obj.inst.view_name.c_str());
+        oa::oaScalarName name(ns, fmt::format("P__{}", (*cnt)++).c_str());
 
         oa::oaScalarInst *inst =
             oa::oaScalarInst::create(block, lib, cell, view, name, obj.inst.xform);
@@ -77,10 +124,10 @@ class make_pin_fig_visitor {
 class make_shape_visitor {
   private:
     oa::oaBlock *block;
-    const oa::oaCdbaNS *ns;
+    const oa::oaCdbaNS &ns;
 
   public:
-    explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS *ns)
+    explicit make_shape_visitor(oa::oaBlock *block, const oa::oaCdbaNS &ns)
         : block(block), ns(ns) {}
 
     void operator()(const cbag::sch::rectangle &v) const {
@@ -138,7 +185,7 @@ class make_shape_visitor {
   private:
     void add_shape_to_net(oa::oaShape *ptr, const std::string &net) const {
         if (!net.empty()) {
-            oa::oaName net_name(*ns, net.c_str());
+            oa::oaName net_name(ns, net.c_str());
             oa::oaNet *np = oa::oaNet::find(block, net_name);
             if (np == nullptr || np->isImplicit()) {
                 np = oa::oaNet::create(block, net_name);
@@ -217,85 +264,78 @@ class make_app_def_visitor {
     }
 };
 
-struct oa_writer::helper {
-    static void create_terminal_pin(const oa_writer &self, oa::oaBlock *block, int &pin_cnt,
-                                    const std::map<std::string, cbag::sch::pin_figure> &map,
-                                    oa::oaTermTypeEnum term_type) {
-        oa::oaName term_name;
-        for (auto const &pair : map) {
-            // create terminal, net, and pin
-            self.logger->info("Creating terminal {}", pair.first);
-            term_name.init(self.ns, pair.first.c_str());
-            self.logger->info("Creating terminal net");
-            oa::oaNet *term_net = oa::oaNet::find(block, term_name);
-            if (term_net == nullptr || term_net->isImplicit()) {
-                term_net = oa::oaNet::create(block, term_name, pair.second.stype);
-            }
-            self.logger->info("Creating terminal");
-            oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
-            self.logger->info("Creating terminal pin");
-            oa::oaPin *pin = oa::oaPin::create(term);
-            self.logger->info("Creating terminal shape");
-            std::visit(make_pin_fig_visitor(&self.ns, block, pin, term, &pin_cnt), pair.second.obj);
-            self.logger->info("Create terminal done");
+void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaBlock *block,
+                         int &pin_cnt, const std::map<std::string, cbag::sch::pin_figure> &map,
+                         oa::oaTermTypeEnum term_type) {
+    oa::oaName term_name;
+    for (auto const &pair : map) {
+        // create terminal, net, and pin
+        logger.info("Creating terminal {}", pair.first);
+        term_name.init(ns, pair.first.c_str());
+        logger.info("Creating terminal net");
+        oa::oaNet *term_net = oa::oaNet::find(block, term_name);
+        if (term_net == nullptr || term_net->isImplicit()) {
+            term_net = oa::oaNet::create(block, term_name, pair.second.stype);
         }
+        logger.info("Creating terminal");
+        oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
+        logger.info("Creating terminal pin");
+        oa::oaPin *pin = oa::oaPin::create(term);
+        logger.info("Creating terminal shape");
+        std::visit(make_pin_fig_visitor(ns, block, pin, term, &pin_cnt), pair.second.obj);
+        logger.info("Create terminal done");
+    }
+}
+
+void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
+                         const oa::oaScalarName &cell_name, const oa::oaScalarName &view_name,
+                         const std::string &term_order) {
+
+    // get dependencies
+    std::set<std::tuple<std::string, std::string, std::string>> dep_set;
+    for (auto const &inst : cv.instances) {
+        dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
     }
 
-    static void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &lib_name,
-                                    const oa::oaScalarName &cell_name,
-                                    const oa::oaScalarName &view_name,
-                                    const std::string &term_order) {
-
-        // get dependencies
-        std::set<std::tuple<std::string, std::string, std::string>> dep_set;
-        for (auto const &inst : cv.instances) {
-            dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
-        }
-
-        // build dependencies
-        std::stringstream dependencies;
-        auto dep_cursor = dep_set.cbegin();
-        auto dep_end = dep_set.cend();
-        dependencies << '(';
-        if (dep_cursor != dep_end) {
-            dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
-                         << "\" \"" << std::get<2>(*dep_cursor) << "\")";
-            ++dep_cursor;
-        }
-        for (; dep_cursor != dep_end; ++dep_cursor) {
-            dependencies << " (\"" << std::get<0>(*dep_cursor) << "\" \""
-                         << std::get<1>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
-                         << "\")";
-        }
-        dependencies << ')';
-
-        // create cell data
-        std::string cdf_data_str = fmt::format(cell_data, term_order);
-        oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
-                                 cdf_data_str.size());
-        oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
-        oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
-        data->save();
-        data->close();
-
-        // create cellview data
-        std::string cv_cdf_data_str = dependencies.str();
-        oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
-                                    cv_cdf_data_str.size());
-        oa::oaCellViewDMData *cv_data =
-            oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
-        oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
-        oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
-        cv_data->save();
-        cv_data->close();
+    // build dependencies
+    std::stringstream dependencies;
+    auto dep_cursor = dep_set.cbegin();
+    auto dep_end = dep_set.cend();
+    dependencies << '(';
+    if (dep_cursor != dep_end) {
+        dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                     << "\" \"" << std::get<2>(*dep_cursor) << "\")";
+        ++dep_cursor;
     }
-};
+    for (; dep_cursor != dep_end; ++dep_cursor) {
+        dependencies << " (\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)
+                     << "\" \"" << std::get<1>(*dep_cursor) << "\")";
+    }
+    dependencies << ')';
 
-oa_writer::oa_writer(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-    : ns(std::move(ns)), logger(std::move(logger)){};
+    // create cell data
+    std::string cdf_data_str = fmt::format(cell_data, term_order);
+    oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
+                             cdf_data_str.size());
+    oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
+    oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
+    data->save();
+    data->close();
 
-void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
-                                   const str_map_t *rename_map) {
+    // create cellview data
+    std::string cv_cdf_data_str = dependencies.str();
+    oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
+                                cv_cdf_data_str.size());
+    oa::oaCellViewDMData *cv_data = oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
+    oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
+    oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
+    cv_data->save();
+    cv_data->close();
+}
+
+void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
+                        const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
+                        const str_map_t *rename_map) {
     oa::oaScalarName dsn_lib;
     dsn->getLibName(dsn_lib);
 
@@ -319,27 +359,27 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
     std::string term_order_str = term_order.str();
 
     int pin_cnt = 0;
-    logger->info("Writing input terminals");
-    helper::create_terminal_pin(*this, block, pin_cnt, cv.in_terms, oa::oacInputTermType);
-    logger->info("Writing output terminals");
-    helper::create_terminal_pin(*this, block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
-    logger->info("Writing inout terminals");
-    helper::create_terminal_pin(*this, block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
+    logger.info("Writing input terminals");
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.in_terms, oa::oacInputTermType);
+    logger.info("Writing output terminals");
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
+    logger.info("Writing inout terminals");
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
 
     // TODO: add shape support for schematic
     if (!is_sch) {
-        logger->info("Writing shapes");
-        make_shape_visitor shape_visitor(block, &ns);
+        logger.info("Writing shapes");
+        make_shape_visitor shape_visitor(block, ns);
         for (auto const &shape : cv.shapes) {
             std::visit(shape_visitor, shape);
         }
     }
 
-    logger->info("Writing instances");
+    logger.info("Writing instances");
     oa::oaScalarName lib, cell, view, name;
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
-        logger->info("Writing instance {}", pair.first);
+        logger.info("Writing instance {}", pair.first);
         cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
         if (pair.second.is_primitive) {
             lib.init(ns, pair.second.lib_name.c_str());
@@ -359,8 +399,8 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
             ptr = oa::oaScalarInst::create(block, lib, cell, view, name, pair.second.xform);
         }
         for (auto const &term_net_pair : pair.second.connections) {
-            logger->info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
-                         term_net_pair.second);
+            logger.info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
+                        term_net_pair.second);
             term_name.init(ns, term_net_pair.first.c_str());
             net_name.init(ns, term_net_pair.second.c_str());
             oa::oaNet *term_net = oa::oaNet::find(block, net_name);
@@ -393,14 +433,14 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
             text->addToNet(term_net);
         }
 
-        logger->info("Writing instance {} params", pair.first);
+        logger.info("Writing instance {} params", pair.first);
         for (auto const &prop_pair : pair.second.params) {
             std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
         }
-        logger->info("Writing instance {} done", pair.first);
+        logger.info("Writing instance {} done", pair.first);
     }
 
-    logger->info("Writing properties");
+    logger.info("Writing properties");
     for (auto const &prop_pair : cv.props) {
         // skip last extraction timestamp
         if (prop_pair.first == "portOrder") {
@@ -415,7 +455,7 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
         }
     }
 
-    logger->info("Writing AppDefs");
+    logger.info("Writing AppDefs");
     for (auto const &prop_pair : cv.app_defs) {
         std::visit(make_app_def_visitor(dsn, prop_pair.first), prop_pair.second);
     }
@@ -430,7 +470,7 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
         dsn->getViewName(dsn_view);
 
         // write cellview data
-        helper::write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
+        write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
 
         // update extraction timestamp
         uint32_t num_op = 2;
@@ -442,7 +482,7 @@ void oa_writer::write_sch_cellview(const cbag::sch::cellview &cv, oa::oaDesign *
     }
     dsn->save();
 
-    logger->info("Finish writing schematic/symbol cellview");
+    logger.info("Finish writing schematic/symbol cellview");
 }
 
 void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string &name,
@@ -482,27 +522,27 @@ void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpos
     oa::oaPolygon::create(blk, layer, purpose, arr);
 }
 
-void create_lay_geometry(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk,
-                         cbag::lay_t layer, cbag::purp_t purpose,
-                         const cbag::layout::geometry &geo) {
+void create_lay_geometry(spdlog::logger &logger, oa::oaBlock *blk, cbag::lay_t layer,
+                         cbag::purp_t purpose, const cbag::layout::geometry &geo) {
     polygon_writer w(blk, layer, purpose, logger);
     geo.write_geometry(w);
     w.record_last();
 }
 
-void create_lay_via(std::shared_ptr<spdlog::logger> &logger, oa::oaBlock *blk, oa::oaTech *tech,
+void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
                     const cbag::layout::via &v) {
     auto *via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, v.via_id.c_str()));
     if (via_def == nullptr) {
-        logger->warn("unknown via ID {}, skipping.", v.via_id);
+        logger.warn("unknown via ID {}, skipping.", v.via_id);
         return;
     }
 
     oa::oaStdVia::create(blk, via_def, v.xform.to_transform(), &v.params);
 }
 
-void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesign *dsn,
-                                   oa::oaTech *tech, const str_map_t *rename_map) {
+void write_lay_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
+                        const cbag::layout::cellview &cv, oa::oaDesign *dsn, oa::oaTech *tech,
+                        const str_map_t *rename_map) {
 
     // get library/view
     oa::oaString lib_name, view_name;
@@ -514,24 +554,24 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
     // create top block
     oa::oaBlock *blk = oa::oaBlock::create(dsn);
 
-    logger->info("Making layout instances.");
+    logger.info("Making layout instances.");
     for (auto const &inst_pair : cv.inst_map) {
         create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name, view_name,
                         rename_map);
     }
 
-    logger->info("Making layout geometries.");
+    logger.info("Making layout geometries.");
     for (auto const &geo_pair : cv.geo_map) {
         create_lay_geometry(logger, blk, geo_pair.first.first, geo_pair.first.second,
                             geo_pair.second);
     }
 
-    logger->info("Making layout vias.");
+    logger.info("Making layout vias.");
     for (auto const &via : cv.via_list) {
         create_lay_via(logger, blk, tech, via);
     }
 
-    logger->info("Making layout blockages.");
+    logger.info("Making layout blockages.");
     oa::oaPointArray pt_arr;
     for (auto const &block_pair : cv.lay_block_map) {
         for (auto const &block : block_pair.second) {
@@ -539,13 +579,13 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
             oa::oaLayerBlockage::create(blk, block.type, block_pair.first, pt_arr);
         }
     }
-    logger->info("Making layout area blockages.");
+    logger.info("Making layout area blockages.");
     for (auto const &block : cv.area_block_list) {
         set_point_array(block, pt_arr);
         oa::oaAreaBlockage::create(blk, pt_arr);
     }
 
-    logger->info("Making layout boundaries.");
+    logger.info("Making layout boundaries.");
     for (auto const &bndry : cv.boundary_list) {
         set_point_array(bndry, pt_arr);
         switch (bndry.type) {
@@ -556,15 +596,15 @@ void oa_writer::write_lay_cellview(const cbag::layout::cellview &cv, oa::oaDesig
         }
     }
 
-    logger->info("Making layout pins.");
+    logger.info("Making layout pins.");
     cbag::purp_t purp = cv.tech_ptr->pin_purpose;
     bool make_pin_obj = cv.tech_ptr->make_pin_obj;
     for (auto const &pin_pair : cv.pin_map) {
         cbag::lay_t lay = pin_pair.first;
         for (auto const &pin : pin_pair.second) {
             if (!pin.is_physical()) {
-                logger->warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
-                             pin.xl, pin.yl, pin.xh, pin.yh, lay, purp);
+                logger.warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
+                            pin.xl, pin.yl, pin.xh, pin.yh, lay, purp);
             }
             oa::oaPoint center(pin.xm(), pin.ym());
             cbag::offset_t w = pin.w();

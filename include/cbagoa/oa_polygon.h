@@ -31,13 +31,13 @@ class polygon_writer {
     oa::oaBlock *block;
     oa::oaLayerNum layer;
     oa::oaPurposeNum purpose;
-    std::shared_ptr<spdlog::logger> logger;
+    spdlog::logger &logger;
     value_type last;
 
   public:
     polygon_writer(oa::oaBlock *blk, oa::oaLayerNum lay, oa::oaPurposeNum purp,
-                   std::shared_ptr<spdlog::logger> logger)
-        : block(blk), layer(lay), purpose(purp), logger(std::move(logger)) {}
+                   spdlog::logger &logger)
+        : block(blk), layer(lay), purpose(purp), logger(logger) {}
 
     void push_back(value_type &&v) {
         record_last();

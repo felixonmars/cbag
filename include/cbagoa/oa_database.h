@@ -65,7 +65,6 @@ class oa_database {
 
     const std::string lib_def_file;
     const LibDefObserver lib_def_obs{1};
-    std::unique_ptr<oa_writer> writer;
     std::shared_ptr<spdlog::logger> logger;
     struct helper;
 
