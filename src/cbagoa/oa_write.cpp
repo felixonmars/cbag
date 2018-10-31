@@ -33,7 +33,7 @@
 #include <cbag/spirit/ast.h>
 
 #include <cbagoa/oa_polygon.h>
-#include <cbagoa/oa_writer.h>
+#include <cbagoa/oa_write.h>
 
 namespace cbagoa {
 

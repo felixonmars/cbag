@@ -17,16 +17,13 @@
 #include <cbag/schematic/pin_object.h>
 #include <cbag/schematic/shape_t_def.h>
 
-#include <cbagoa/oa_reader.h>
+#include <cbagoa/oa_read.h>
 
 namespace cbagoa {
 
-oa_reader::oa_reader(oa::oaCdbaNS ns, std::shared_ptr<spdlog::logger> logger)
-    : ns(std::move(ns)), logger(std::move(logger)){};
-
 // Read method for properties
 
-std::pair<std::string, cbag::value_t> oa_reader::read_prop(oa::oaProp *p) {
+std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p) {
     oa::oaString tmp_str;
     p->getName(tmp_str);
     std::string key(tmp_str);
@@ -67,7 +64,7 @@ std::pair<std::string, cbag::value_t> oa_reader::read_prop(oa::oaProp *p) {
     }
 }
 
-std::pair<std::string, cbag::value_t> oa_reader::read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
+std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
     oa::oaString tmp_str;
     p->getName(tmp_str);
     std::string key(tmp_str);
@@ -90,52 +87,52 @@ std::pair<std::string, cbag::value_t> oa_reader::read_app_def(oa::oaDesign *dsn,
 
 // Read methods for shapes
 
-cbag::sch::rectangle oa_reader::read_rect(oa::oaRect *p, std::string &&net) {
+cbag::sch::rectangle read_rect(oa::oaRect *p, std::string &&net) {
     cbag::sch::rectangle ans(p->getLayerNum(), p->getPurposeNum(), net);
     p->getBBox(ans.bbox);
     return ans;
 }
 
-cbag::sch::polygon oa_reader::read_poly(oa::oaPolygon *p, std::string &&net) {
+cbag::sch::polygon read_poly(oa::oaPolygon *p, std::string &&net) {
     cbag::sch::polygon ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::sch::arc oa_reader::read_arc(oa::oaArc *p, std::string &&net) {
+cbag::sch::arc read_arc(oa::oaArc *p, std::string &&net) {
     cbag::sch::arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(),
                        p->getStopAngle());
     p->getEllipseBBox(ans.bbox);
     return ans;
 }
 
-cbag::sch::donut oa_reader::read_donut(oa::oaDonut *p, std::string &&net) {
+cbag::sch::donut read_donut(oa::oaDonut *p, std::string &&net) {
     cbag::sch::donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(),
                          p->getHoleRadius());
     p->getCenter(ans.center);
     return ans;
 }
 
-cbag::sch::ellipse oa_reader::read_ellipse(oa::oaEllipse *p, std::string &&net) {
+cbag::sch::ellipse read_ellipse(oa::oaEllipse *p, std::string &&net) {
     cbag::sch::ellipse ans(p->getLayerNum(), p->getPurposeNum(), net);
     p->getBBox(ans.bbox);
     return ans;
 }
 
-cbag::sch::line oa_reader::read_line(oa::oaLine *p, std::string &&net) {
+cbag::sch::line read_line(oa::oaLine *p, std::string &&net) {
     cbag::sch::line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::sch::path oa_reader::read_path(oa::oaPath *p, std::string &&net) {
+cbag::sch::path read_path(oa::oaPath *p, std::string &&net) {
     cbag::sch::path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
                         p->getStyle(), p->getBeginExt(), p->getEndExt());
     p->getPoints(ans.points);
     return ans;
 }
 
-cbag::sch::text_t oa_reader::read_text(oa::oaText *p, std::string &&net) {
+cbag::sch::text_t read_text(oa::oaText *p, std::string &&net) {
     oa::oaString text;
     p->getText(text);
     bool overbar = (p->hasOverbar() != 0);
@@ -148,7 +145,7 @@ cbag::sch::text_t oa_reader::read_text(oa::oaText *p, std::string &&net) {
     return ans;
 }
 
-cbag::sch::eval_text oa_reader::read_eval_text(oa::oaEvalText *p, std::string &&net) {
+cbag::sch::eval_text read_eval_text(oa::oaEvalText *p, std::string &&net) {
     oa::oaString text, eval;
     p->getText(text);
     p->getEvaluatorName(eval);
@@ -192,15 +189,15 @@ bool include_shape(oa::oaShape *p) {
     }
 }
 
-cbag::sch::shape_t oa_reader::read_shape(oa::oaShape *p) {
+cbag::sch::shape_t read_shape(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaShape *p) {
     std::string net;
     if (p->hasNet()) {
         oa::oaString net_name;
         p->getNet()->getName(ns, net_name);
         net = std::string(net_name);
-        logger->info("Shape associated with net: {}", net);
+        logger.info("Shape associated with net: {}", net);
     } else {
-        logger->info("Shape has no net");
+        logger.info("Shape has no net");
     }
 
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
@@ -232,7 +229,7 @@ cbag::sch::shape_t oa_reader::read_shape(oa::oaShape *p) {
 
 // Read method for references
 
-cbag::sch::instance oa_reader::read_instance(oa::oaInst *p) {
+cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
     // read cellview name
     oa::oaString inst_lib_oa, inst_cell_oa, inst_view_oa;
     p->getLibName(ns, inst_lib_oa);
@@ -259,7 +256,7 @@ cbag::sch::instance oa_reader::read_instance(oa::oaInst *p) {
     }
 
     // read instance connections
-    logger->info("Reading connections");
+    logger.info("Reading connections");
     oa::oaIter<oa::oaInstTerm> iterm_iter(p->getInstTerms(oacInstTermIterNotImplicit));
     oa::oaInstTerm *iterm_ptr;
     oa::oaString term_name_oa, net_name_oa;
@@ -267,27 +264,29 @@ cbag::sch::instance oa_reader::read_instance(oa::oaInst *p) {
         // get terminal and net names
         iterm_ptr->getTermName(ns, term_name_oa);
         iterm_ptr->getNet()->getName(ns, net_name_oa);
-        logger->info("Terminal {} connected to net {}", (const char *)term_name_oa,
-                     (const char *)net_name_oa);
+        logger.info("Terminal {} connected to net {}", (const char *)term_name_oa,
+                    (const char *)net_name_oa);
         inst.connections.emplace(std::string(term_name_oa), std::string(net_name_oa));
     }
 
     return inst;
 }
 
-std::pair<std::string, cbag::sch::instance> oa_reader::read_instance_pair(oa::oaInst *p) {
+std::pair<std::string, cbag::sch::instance>
+read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
-    logger->info("Reading instance {}", (const char *)inst_name_oa);
-    return {std::string(inst_name_oa), read_instance(p)};
+    logger.info("Reading instance {}", (const char *)inst_name_oa);
+    return {std::string(inst_name_oa), read_instance(ns, logger, p)};
 }
 
 // Read method for pin figures
 
-cbag::sch::pin_figure oa_reader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p) {
+cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *t,
+                                      oa::oaPinFig *p) {
     oa::oaSigType sig = t->getNet()->getSigType();
     if (p->isInst()) {
-        cbag::sch::instance inst = read_instance(static_cast<oa::oaInst *>(p));
+        cbag::sch::instance inst = read_instance(ns, logger, static_cast<oa::oaInst *>(p));
 
         oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
         auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext());
@@ -333,7 +332,8 @@ cbag::sch::pin_figure oa_reader::read_pin_figure(oa::oaTerm *t, oa::oaPinFig *p)
 
 // Read method for terminals
 
-std::pair<std::string, cbag::sch::pin_figure> oa_reader::read_terminal_single(oa::oaTerm *term) {
+std::pair<std::string, cbag::sch::pin_figure>
+read_terminal_single(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *term) {
     // parse terminal name
     oa::oaString term_name_oa;
     term->getName(ns, term_name_oa);
@@ -362,12 +362,13 @@ std::pair<std::string, cbag::sch::pin_figure> oa_reader::read_terminal_single(oa
             fmt::format("Terminal {} has more than one figures.", (const char *)term_name_oa));
     }
 
-    return {std::string(term_name_oa), read_pin_figure(term, fig_ptr)};
+    return {std::string(term_name_oa), read_pin_figure(ns, logger, term, fig_ptr)};
 };
 
 // Read method for schematic/symbol cell view
 
-cbag::sch::cellview oa_reader::read_sch_cellview(oa::oaDesign *p) {
+cbag::sch::cellview read_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
+                                      oa::oaDesign *p) {
     oa::oaBlock *block = p->getTopBlock();
     oa::oaString lib_oa;
     oa::oaString cell_oa;
@@ -381,20 +382,20 @@ cbag::sch::cellview oa_reader::read_sch_cellview(oa::oaDesign *p) {
     cbag::sch::cellview ans(std::string(lib_oa), std::string(cell_oa), std::string(tmp), bbox);
 
     // read terminals
-    logger->info("Reading terminals");
+    logger.info("Reading terminals");
     oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
     oa::oaTerm *term_ptr;
     while ((term_ptr = term_iter.getNext()) != nullptr) {
         term_ptr->getName(ns, tmp);
         switch (term_ptr->getTermType()) {
         case oa::oacInputTermType:
-            ans.in_terms.insert(read_terminal_single(term_ptr));
+            ans.in_terms.insert(read_terminal_single(ns, logger, term_ptr));
             break;
         case oa::oacOutputTermType:
-            ans.out_terms.insert(read_terminal_single(term_ptr));
+            ans.out_terms.insert(read_terminal_single(ns, logger, term_ptr));
             break;
         case oa::oacInputOutputTermType:
-            ans.io_terms.insert(read_terminal_single(term_ptr));
+            ans.io_terms.insert(read_terminal_single(ns, logger, term_ptr));
             break;
         default:
             throw std::invalid_argument(
@@ -404,46 +405,46 @@ cbag::sch::cellview oa_reader::read_sch_cellview(oa::oaDesign *p) {
     }
 
     // read shapes
-    logger->info("Reading shapes");
+    logger.info("Reading shapes");
     oa::oaIter<oa::oaShape> shape_iter(block->getShapes());
     oa::oaShape *shape_ptr;
     while ((shape_ptr = shape_iter.getNext()) != nullptr) {
-        logger->info("shape type: {}", (const char *)shape_ptr->getType().getName());
+        logger.info("shape type: {}", (const char *)shape_ptr->getType().getName());
         // skip shapes associated with pins.  We got those already.
         if (include_shape(shape_ptr)) {
-            ans.shapes.push_back(read_shape(shape_ptr));
+            ans.shapes.push_back(read_shape(ns, logger, shape_ptr));
         } else {
-            logger->info("Skipping this shape");
+            logger.info("Skipping this shape");
         }
     }
 
     // read instances
-    logger->info("Reading instances");
+    logger.info("Reading instances");
     oa::oaIter<oa::oaInst> inst_iter(block->getInsts());
     oa::oaInst *inst_ptr;
     while ((inst_ptr = inst_iter.getNext()) != nullptr) {
         // skip instances associated with pins.  We got those already.
         if (!inst_ptr->hasPin()) {
-            ans.instances.insert(read_instance_pair(inst_ptr));
+            ans.instances.insert(read_instance_pair(ns, logger, inst_ptr));
         }
     }
 
     // read properties
-    logger->info("Reading properties");
+    logger.info("Reading properties");
     oa::oaIter<oa::oaProp> prop_iter(p->getProps());
     oa::oaProp *prop_ptr;
     while ((prop_ptr = prop_iter.getNext()) != nullptr) {
         ans.props.insert(read_prop(prop_ptr));
     }
-    logger->info("properties end");
+    logger.info("properties end");
 
-    logger->info("Reading AppDefs");
+    logger.info("Reading AppDefs");
     oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
     oa::oaAppDef *appdef_ptr;
     while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
         ans.app_defs.insert(read_app_def(p, appdef_ptr));
     }
-    logger->info("AppDefs end");
+    logger.info("AppDefs end");
 
     /*
     logger->info("Reading design groups");
@@ -486,50 +487,50 @@ cbag::sch::cellview oa_reader::read_sch_cellview(oa::oaDesign *p) {
     }
     */
 
-    logger->info("Finish reading schematic/symbol cellview");
+    logger.info("Finish reading schematic/symbol cellview");
     return ans;
 }
 
-void oa_reader::print_prop(oa::oaObject *obj) {
+void print_prop(spdlog::logger &logger, oa::oaObject *obj) {
     if (obj->hasProp()) {
         oa::oaIter<oa::oaProp> prop_iter(obj->getProps());
         oa::oaProp *p;
-        logger->info("Reading properties");
+        logger.info("Reading properties");
         while ((p = prop_iter.getNext()) != nullptr) {
             oa::oaString name;
             oa::oaString val;
             p->getName(name);
             p->getValue(val);
-            logger->info("Property name = {}, value = {}, type = {}", (const char *)name,
-                         (const char *)val, (const char *)p->getType().getName());
+            logger.info("Property name = {}, value = {}, type = {}", (const char *)name,
+                        (const char *)val, (const char *)p->getType().getName());
             if (val == "oaHierProp") {
-                logger->info("Hierarchical properties:");
-                print_prop(p);
+                logger.info("Hierarchical properties:");
+                print_prop(logger, p);
             } else if (p->getType().getName() == "AppProp") {
                 static_cast<oa::oaAppProp *>(p)->getAppType(val);
-                logger->info("AppProp type: {}", (const char *)val);
+                logger.info("AppProp type: {}", (const char *)val);
             }
         }
-        logger->info("properties end");
+        logger.info("properties end");
     } else {
-        logger->info("No properties");
+        logger.info("No properties");
     }
 }
 
-void oa_reader::print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
+void print_app_def(spdlog::logger &logger, oa::oaDesign *dsn, oa::oaAppDef *p) {
     oa::oaString name;
     p->getName(name);
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
     switch (p->getType()) {
     case oa::oacIntAppDefType: {
-        logger->info("AppDef name: {}, AppDef value: {}", (const char *)name,
-                     (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn));
+        logger.info("AppDef name: {}, AppDef value: {}", (const char *)name,
+                    (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn));
         break;
     }
     case oa::oacStringAppDefType: {
         oa::oaString val;
         (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, val);
-        logger->info("AppDef name: {}, AppDef value: {}", (const char *)name, (const char *)val);
+        logger.info("AppDef name: {}, AppDef value: {}", (const char *)name, (const char *)val);
         break;
     }
     default: {
@@ -538,52 +539,52 @@ void oa_reader::print_app_def(oa::oaDesign *dsn, oa::oaAppDef *p) {
                         (const char *)name, (const char *)p->getType().getName()));
     }
     }
-    print_prop(p);
+    print_prop(logger, p);
 }
 
-void oa_reader::print_group(oa::oaGroup *p) {
+void print_group(spdlog::logger &logger, oa::oaGroup *p) {
     oa::oaString grp_str;
     p->getName(grp_str);
-    logger->info("group name: {}, domain: {}", (const char *)grp_str,
-                 (const char *)p->getGroupDomain().getName());
-    logger->info("group has prop: {}, has appdef: {}", p->hasProp(), p->hasAppDef());
+    logger.info("group name: {}, domain: {}", (const char *)grp_str,
+                (const char *)p->getGroupDomain().getName());
+    logger.info("group has prop: {}, has appdef: {}", p->hasProp(), p->hasAppDef());
     p->getDef()->getName(grp_str);
-    logger->info("group def name: {}", (const char *)grp_str);
+    logger.info("group def name: {}", (const char *)grp_str);
     oa::oaIter<oa::oaGroupMember> mem_iter(p->getMembers());
     oa::oaGroupMember *mem_ptr;
     while ((mem_ptr = mem_iter.getNext()) != nullptr) {
-        logger->info("group object type: {}",
-                     (const char *)mem_ptr->getObject()->getType().getName());
+        logger.info("group object type: {}",
+                    (const char *)mem_ptr->getObject()->getType().getName());
     }
 }
 
-void oa_reader::print_dm_data(oa::oaDMData *data) {
-    logger->info("Has app def: {}", data->hasAppDef());
-    print_prop(data);
-    logger->info("Reading groups");
+void print_dm_data(spdlog::logger &logger, oa::oaDMData *data) {
+    logger.info("Has app def: {}", data->hasAppDef());
+    print_prop(logger, data);
+    logger.info("Reading groups");
     oa::oaIter<oa::oaGroup> grp_iter(data->getGroups());
     oa::oaGroup *grp_ptr;
     while ((grp_ptr = grp_iter.getNext()) != nullptr) {
-        print_group(grp_ptr);
+        print_group(logger, grp_ptr);
     }
-    logger->info("Groups end");
+    logger.info("Groups end");
 
-    logger->info("Reading AppObjects");
+    logger.info("Reading AppObjects");
     oa::oaIter<oa::oaAppObjectDef> odef_iter(data->getAppObjectDefs());
     oa::oaAppObjectDef *odef_ptr;
     while ((odef_ptr = odef_iter.getNext()) != nullptr) {
-        logger->info("has object def");
+        logger.info("has object def");
     }
-    logger->info("AppObjects end");
+    logger.info("AppObjects end");
 
-    logger->info("Reading time stamps");
+    logger.info("Reading time stamps");
     for (unsigned int idx = 0; idx < 15; ++idx) {
         try {
             oa::oaDMDataType data_type(static_cast<oa::oaDMDataTypeEnum>(idx));
-            logger->info("{} timestamp = {}", (const char *)data_type.getName(),
-                         data->getTimeStamp(data_type));
+            logger.info("{} timestamp = {}", (const char *)data_type.getName(),
+                        data->getTimeStamp(data_type));
         } catch (...) {
-            logger->info("error on idx = {}", idx);
+            logger.info("error on idx = {}", idx);
         }
     }
 }

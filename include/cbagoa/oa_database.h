@@ -65,7 +65,6 @@ class oa_database {
 
     const std::string lib_def_file;
     const LibDefObserver lib_def_obs{1};
-    std::unique_ptr<oa_reader> reader;
     std::unique_ptr<oa_writer> writer;
     std::shared_ptr<spdlog::logger> logger;
     struct helper;
@@ -77,10 +76,6 @@ class oa_database {
      */
     explicit oa_database(const char *lib_def_file);
     ~oa_database();
-    oa_database(const oa_database &) = delete;
-    oa_database &operator=(const oa_database &) = delete;
-    oa_database(oa_database &&) = delete;
-    oa_database &operator=(oa_database &&) = delete;
 
     explicit oa_database(const std::string &lib_def_file);
 

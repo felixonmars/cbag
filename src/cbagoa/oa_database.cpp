@@ -21,8 +21,8 @@
 #include <cbagyaml/cbagyaml.h>
 
 #include <cbagoa/oa_database.h>
-#include <cbagoa/oa_reader.h>
-#include <cbagoa/oa_writer.h>
+#include <cbagoa/oa_read.h>
+#include <cbagoa/oa_write.h>
 
 namespace fs = boost::filesystem;
 
@@ -181,7 +181,6 @@ oa_database::oa_database(const char *lib_def_file)
     : lib_def_file(lib_def_file), logger(spdlog::get("cbag")) {
     try {
 
-        reader = std::make_unique<oa_reader>(ns_cdba, logger);
         writer = std::make_unique<oa_writer>(ns_cdba, logger);
 
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
@@ -302,7 +301,7 @@ cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const c
         oa::oaDesign *dsn_ptr =
             helper::open_design(ns, logger, lib_name, cell_name, view_name, 'r', oa::oacSchematic);
         logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbag::sch::cellview ans = reader->read_sch_cellview(dsn_ptr);
+        cbag::sch::cellview ans = cbagoa::read_sch_cellview(ns_cdba, *logger, dsn_ptr);
         dsn_ptr->close();
         return ans;
     } catch (...) {
