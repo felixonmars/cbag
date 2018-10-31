@@ -22,6 +22,8 @@
 
 #include <cbagoa/oa_database.h>
 #include <cbagoa/oa_read.h>
+#include <cbagoa/oa_read_lib.h>
+#include <cbagoa/oa_util.h>
 #include <cbagoa/oa_write.h>
 
 namespace fs = boost::filesystem;
@@ -29,23 +31,6 @@ namespace fs = boost::filesystem;
 namespace cbagoa {
 
 struct oa_database::helper {
-    static void handle_oa_exceptions(const std::shared_ptr<spdlog::logger> &logger) {
-        logger->error("Exception caught, exiting");
-        try {
-            throw;
-        } catch (oa::oaCompatibilityError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA Compatibility Error: " + msg_std);
-        } catch (oa::oaDMError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA DM Error: " + msg_std);
-        } catch (oa::oaError &ex) {
-            std::string msg_std(ex.getMsg());
-            throw std::runtime_error("OA Error: " + msg_std);
-        } catch (oa::oaDesignError &ex) {
-            throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
-        }
-    }
 
     static oa::oaTech *read_tech(const oa::oaNativeNS &ns, const char *library) {
         // open technology file
@@ -109,11 +94,7 @@ struct oa_database::helper {
 
         // write all symbol views to file
         // get library read access
-        oa::oaLib *lib_ptr = oa::oaLib::find(oa::oaScalarName(self.ns_cdba, lib_name.c_str()));
-        if (!lib_ptr->getAccess(oa::oacReadLibAccess, LIB_ACCESS_TIMEOUT)) {
-            throw std::runtime_error(
-                fmt::format("Cannot obtain read access to library: {}", lib_name));
-        }
+        oa::oaLib *lib_ptr = open_library_read(self.ns_cdba, lib_name);
         // find all symbol views
         oa::oaScalarName cell_name_oa(self.ns_cdba, cell_name.c_str());
         oa::oaCell *cell_ptr = oa::oaCell::find(lib_ptr, cell_name_oa);
@@ -183,7 +164,7 @@ oa_database::oa_database(std::string lib_def_fname)
         logger->info("Creating new oa_database with file: {}", lib_def_file);
         oa::oaLibDefList::openLibs(lib_def_file.c_str());
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
@@ -198,33 +179,13 @@ oa_database::~oa_database() {
             lib_ptr->close();
         }
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
-std::vector<std::string> oa_database::get_cells_in_library(const char *library) const {
+std::vector<std::string> oa_database::get_cells_in_library(const std::string &lib_name) const {
     std::vector<std::string> ans;
-    try {
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
-        oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
-        if (lib_ptr == nullptr) {
-            throw std::invalid_argument(fmt::format("Cannot find library {}", library));
-        }
-        if (!lib_ptr->getAccess(oa::oacReadLibAccess, LIB_ACCESS_TIMEOUT)) {
-            throw std::runtime_error(
-                fmt::format("Cannot obtain read access to library: {}", library));
-        }
-        oa::oaIter<oa::oaCell> cell_iter(lib_ptr->getCells());
-        oa::oaCell *cell_ptr;
-        oa::oaString tmp_str;
-        while ((cell_ptr = cell_iter.getNext()) != nullptr) {
-            cell_ptr->getName(ns, tmp_str);
-            ans.emplace_back(tmp_str);
-        }
-        lib_ptr->releaseAccess();
-    } catch (...) {
-        helper::handle_oa_exceptions(logger);
-    }
+    cbagoa::get_cells(ns_cdba, *logger, lib_name, std::back_inserter(ans));
     return ans;
 }
 
@@ -240,7 +201,7 @@ std::string oa_database::get_lib_path(const char *library) const {
         lib_ptr->getFullPath(tmp_str);
         return {tmp_str};
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
     // should never get here
     return "";
@@ -286,7 +247,7 @@ void oa_database::create_lib(const char *library, const char *lib_path,
             logger->info("Library already exists, do nothing.");
         }
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
@@ -300,7 +261,7 @@ cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const c
         dsn_ptr->close();
         return ans;
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
         throw;
     }
 }
@@ -343,7 +304,7 @@ void oa_database::write_sch_cellview(const char *lib_name, const char *cell_name
         cbagoa::write_sch_cellview(ns_cdba, *logger, cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
@@ -365,7 +326,7 @@ void oa_database::implement_sch_list(const char *lib_name,
             rename_map[cv_list[idx]->cell_name] = cell_list[idx];
         }
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
@@ -383,7 +344,7 @@ void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name
         cbagoa::write_lay_cellview(ns_cdba, *logger, cv, dsn_ptr, tech_ptr, rename_map);
         dsn_ptr->close();
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 }
 
@@ -402,7 +363,7 @@ void oa_database::implement_lay_list(const char *lib_name,
             rename_map[cv_list[idx]->cell_name] = cell_list[idx];
         }
     } catch (...) {
-        helper::handle_oa_exceptions(logger);
+        handle_oa_exceptions(*logger);
     }
 } // namespace cbagoa
 

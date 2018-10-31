@@ -5,10 +5,9 @@
  *  \date   2018/07/14
  */
 
-#ifndef CBAGOA_WRITE_OA_H
-#define CBAGOA_WRITE_OA_H
+#ifndef CBAGOA_OA_WRITE_H
+#define CBAGOA_OA_WRITE_H
 
-#include <memory>
 #include <unordered_map>
 
 #include <oa/oaDesignDB.h>

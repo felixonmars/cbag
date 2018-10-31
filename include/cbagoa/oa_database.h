@@ -6,8 +6,8 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAGOA_DATABASE_H
-#define CBAGOA_DATABASE_H
+#ifndef CBAGOA_OA_DATABASE_H
+#define CBAGOA_OA_DATABASE_H
 
 #include <map>
 #include <string>
@@ -36,9 +36,6 @@ struct cellview;
 } // namespace cbag
 
 namespace cbagoa {
-
-// constants
-constexpr uint32_t LIB_ACCESS_TIMEOUT = 1;
 
 // forward declare structures to reduce dependencies
 class oa_reader;
@@ -76,7 +73,7 @@ class oa_database {
     explicit oa_database(std::string lib_def_fname);
     ~oa_database();
 
-    std::vector<std::string> get_cells_in_library(const char *library) const;
+    std::vector<std::string> get_cells_in_library(const std::string &lib_name) const;
 
     std::string get_lib_path(const char *library) const;
 
