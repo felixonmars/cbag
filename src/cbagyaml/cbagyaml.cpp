@@ -21,7 +21,7 @@ namespace fs = boost::filesystem;
 
 namespace cbag {
 
-void to_file(const sch::cellview &cv, const char *fname) {
+void to_file(const sch::cellview &cv, const std::string &fname) {
     std::ofstream outfile(fname, std::ios_base::out);
     YAML::Node node(cv);
     YAML::Emitter emitter;

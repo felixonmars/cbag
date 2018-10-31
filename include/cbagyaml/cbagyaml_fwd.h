@@ -14,7 +14,7 @@
 
 namespace cbag {
 
-void to_file(const sch::cellview &cv, const char *fname);
+void to_file(const sch::cellview &cv, const std::string &fname);
 
 sch::cellview cv_from_file(const std::string &yaml_fname, const std::string &sym_view = "");
 

@@ -378,7 +378,7 @@ cbag::sch::cellview oa_reader::read_sch_cellview(oa::oaDesign *p) {
     p->getViewName(ns, tmp);
     block->getBBox(bbox);
 
-    cbag::sch::cellview ans(lib_oa, cell_oa, tmp, bbox);
+    cbag::sch::cellview ans(std::string(lib_oa), std::string(cell_oa), std::string(tmp), bbox);
 
     // read terminals
     logger->info("Reading terminals");
