@@ -1,8 +1,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <cbag/schematic/instance.h>
-
 #include <cbagyaml/cbagyaml.h>
 
 #include <cbagoa/oa_read.h>
