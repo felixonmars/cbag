@@ -54,11 +54,12 @@ class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
 class oa_database {
   private:
     // OA namespace objects
-    oa::oaNativeNS ns;
-    oa::oaCdbaNS ns_cdba;
-
     std::string lib_def_file;
     LibDefObserver lib_def_obs{1};
+
+  public:
+    oa::oaNativeNS ns_native;
+    oa::oaCdbaNS ns;
     std::shared_ptr<spdlog::logger> logger;
 
   public:

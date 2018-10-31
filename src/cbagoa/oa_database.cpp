@@ -55,7 +55,7 @@ oa_database::~oa_database() {
         oa::oaLib *lib_ptr;
         while ((lib_ptr = lib_iter.getNext()) != nullptr) {
             oa::oaString tmp_str;
-            lib_ptr->getName(ns_cdba, tmp_str);
+            lib_ptr->getName(ns, tmp_str);
             lib_ptr->close();
         }
     } catch (...) {
@@ -65,14 +65,14 @@ oa_database::~oa_database() {
 
 std::vector<std::string> oa_database::get_cells_in_library(const std::string &lib_name) const {
     std::vector<std::string> ans;
-    cbagoa::get_cells(ns, *logger, lib_name, std::back_inserter(ans));
+    cbagoa::get_cells(ns_native, *logger, lib_name, std::back_inserter(ans));
     return ans;
 }
 
 std::string oa_database::get_lib_path(const std::string &lib_name) const {
     std::string ans;
     try {
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, lib_name.c_str());
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns_native, lib_name.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             throw std::invalid_argument(fmt::format("Cannot find library {}", lib_name));
@@ -93,7 +93,7 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
         logger->info("Creating OA library {}", lib_name);
 
         // open library
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, lib_name.c_str());
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns_native, lib_name.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // append library name to lib_path
@@ -107,7 +107,7 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
             logger->info("Creating library {} at path {}, with tech lib {}", lib_name,
                          new_lib_path.c_str(), tech_lib);
 
-            oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
+            oa::oaScalarName oa_tech_lib(ns_native, tech_lib.c_str());
             lib_ptr = oa::oaLib::create(lib_name_oa, new_lib_path.c_str());
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
@@ -135,7 +135,7 @@ cbag::sch::cellview oa_database::read_sch_cellview(const std::string &lib_name,
                                                    const std::string &cell_name,
                                                    const std::string &view_name) const {
     try {
-        return cbagoa::read_sch_cellview(ns, ns_cdba, *logger, lib_name, cell_name, view_name);
+        return cbagoa::read_sch_cellview(ns_native, ns, *logger, lib_name, cell_name, view_name);
     } catch (...) {
         handle_oa_exceptions(*logger);
         throw;
@@ -148,8 +148,8 @@ oa_database::read_sch_recursive(const std::string &lib_name, const std::string &
                                 const str_map_t &lib_map,
                                 const std::unordered_set<std::string> &exclude_libs) const {
     std::vector<cell_key_t> ans;
-    cbagoa::read_sch_recursive(ns, ns_cdba, *logger, lib_name, cell_name, view_name, new_root_path,
-                               lib_map, exclude_libs, std::back_inserter(ans));
+    cbagoa::read_sch_recursive(ns_native, ns, *logger, lib_name, cell_name, view_name,
+                               new_root_path, lib_map, exclude_libs, std::back_inserter(ans));
     return ans;
 }
 
@@ -158,7 +158,7 @@ oa_database::read_library(const std::string &lib_name, const std::string &view_n
                           const std::string &new_root_path, const str_map_t &lib_map,
                           const std::unordered_set<std::string> &exclude_libs) const {
     std::vector<cell_key_t> ans;
-    cbagoa::read_library(ns, ns_cdba, *logger, lib_name, view_name, new_root_path, lib_map,
+    cbagoa::read_library(ns_native, ns, *logger, lib_name, view_name, new_root_path, lib_map,
                          exclude_libs, std::back_inserter(ans));
     return ans;
 }
@@ -168,10 +168,10 @@ void oa_database::write_sch_cellview(const std::string &lib_name, const std::str
                                      const cbag::sch::cellview &cv,
                                      const str_map_t *rename_map) const {
     try {
-        oa::oaDesign *dsn_ptr = open_design(ns, *logger, lib_name, cell_name, view_name, 'w',
+        oa::oaDesign *dsn_ptr = open_design(ns_native, *logger, lib_name, cell_name, view_name, 'w',
                                             is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbagoa::write_sch_cellview(ns_cdba, *logger, cv, dsn_ptr, is_sch, rename_map);
+        cbagoa::write_sch_cellview(ns, *logger, cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
     } catch (...) {
         handle_oa_exceptions(*logger);
@@ -205,13 +205,13 @@ void oa_database::write_lay_cellview(const std::string &lib_name, const std::str
                                      const str_map_t *rename_map, oa::oaTech *tech_ptr) const {
     try {
         if (tech_ptr == nullptr) {
-            tech_ptr = read_tech(ns, lib_name);
+            tech_ptr = read_tech(ns_native, lib_name);
         }
 
         oa::oaDesign *dsn_ptr =
-            open_design(ns, *logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
+            open_design(ns_native, *logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbagoa::write_lay_cellview(ns_cdba, *logger, cv, dsn_ptr, tech_ptr, rename_map);
+        cbagoa::write_lay_cellview(ns, *logger, cv, dsn_ptr, tech_ptr, rename_map);
         dsn_ptr->close();
     } catch (...) {
         handle_oa_exceptions(*logger);
@@ -224,7 +224,7 @@ void oa_database::implement_lay_list(const std::string &lib_name,
                                      const std::vector<cbag::layout::cellview *> &cv_list) const {
     try {
         str_map_t rename_map;
-        auto *tech_ptr = read_tech(ns, lib_name);
+        auto *tech_ptr = read_tech(ns_native, lib_name);
 
         std::size_t num = cell_list.size();
         for (std::size_t idx = 0; idx < num; ++idx) {
@@ -240,7 +240,7 @@ void oa_database::implement_lay_list(const std::string &lib_name,
 
 void oa_database::write_tech_info_file(const std::string &fname, const std::string &tech_lib,
                                        const std::string &pin_purpose) {
-    oa::oaTech *tech_ptr = read_tech(ns, tech_lib);
+    oa::oaTech *tech_ptr = read_tech(ns_native, tech_lib);
 
     // read layer/purpose/via mappings
     std::map<oa::oaLayerNum, std::string> lay_map;
