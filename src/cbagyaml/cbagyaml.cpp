@@ -30,16 +30,17 @@ void to_file(const sch::cellview &cv, const char *fname) {
     outfile.close();
 }
 
-std::unique_ptr<sch::cellview> cv_from_file(const char *yaml_fname, const char *sym_view) {
+sch::cellview cv_from_file(const std::string &yaml_fname, const std::string &sym_view) {
     fs::path yaml_path(yaml_fname);
     YAML::Node n = YAML::LoadFile(yaml_path.string());
-    auto ans = std::make_unique<sch::cellview>(n.as<sch::cellview>());
-    if (sym_view != nullptr) {
+
+    auto ans = n.as<sch::cellview>();
+    if (!sym_view.empty()) {
         // load symbol cellview
-        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
+        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().string()));
         if (fs::exists(yaml_path)) {
             YAML::Node s = YAML::LoadFile(yaml_path.string());
-            ans->sym_ptr = std::make_unique<sch::cellview>(s.as<sch::cellview>());
+            ans.sym_ptr = std::make_unique<sch::cellview>(s.as<sch::cellview>());
         }
     }
     return ans;
