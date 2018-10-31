@@ -175,15 +175,13 @@ oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oa
     throw std::runtime_error("OA Error: " + std::string(msg));
 }
 
-oa_database::oa_database(const std::string &lib_def_file) : oa_database(lib_def_file.c_str()) {}
-
-oa_database::oa_database(const char *lib_def_file)
-    : lib_def_file(lib_def_file), logger(spdlog::get("cbag")) {
+oa_database::oa_database(std::string lib_def_fname)
+    : lib_def_file(std::move(lib_def_fname)), logger(spdlog::get("cbag")) {
     try {
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 
         logger->info("Creating new oa_database with file: {}", lib_def_file);
-        oa::oaLibDefList::openLibs(lib_def_file);
+        oa::oaLibDefList::openLibs(lib_def_file.c_str());
     } catch (...) {
         helper::handle_oa_exceptions(logger);
     }

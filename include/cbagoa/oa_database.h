@@ -60,11 +60,11 @@ class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
 class oa_database {
   private:
     // OA namespace objects
-    const oa::oaNativeNS ns;
-    const oa::oaCdbaNS ns_cdba;
+    oa::oaNativeNS ns;
+    oa::oaCdbaNS ns_cdba;
 
-    const std::string lib_def_file;
-    const LibDefObserver lib_def_obs{1};
+    std::string lib_def_file;
+    LibDefObserver lib_def_obs{1};
     std::shared_ptr<spdlog::logger> logger;
     struct helper;
 
@@ -73,10 +73,8 @@ class oa_database {
      *
      *  @param lib_def_file the library definition file.
      */
-    explicit oa_database(const char *lib_def_file);
+    explicit oa_database(std::string lib_def_fname);
     ~oa_database();
-
-    explicit oa_database(const std::string &lib_def_file);
 
     std::vector<std::string> get_cells_in_library(const char *library) const;
 
