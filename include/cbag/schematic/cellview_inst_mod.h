@@ -8,6 +8,8 @@
 #ifndef CBAG_SCHEMATIC_CELLVIEW_INST_MOD_H
 #define CBAG_SCHEMATIC_CELLVIEW_INST_MOD_H
 
+#include <fmt/format.h>
+
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
@@ -66,10 +68,8 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
         dx = iter->second.bbox.getWidth() + 10;
     }
 
-    size_t num = name_list.size();
-    auto num_inst = static_cast<coord_t>(num);
     coord_t x = 0;
-    coord_T y = 0;
+    coord_t y = 0;
     for (const auto &p : name_conn_range) {
         copy_instance(instances, iter->second, old_size, p.first, x, y, p.second);
         x += dx;
