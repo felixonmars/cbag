@@ -15,8 +15,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
-
 #include <oa/oaDesignDB.h>
 
 // forward declare structures to reduce dependencies
@@ -42,7 +40,6 @@ class oa_reader;
 class oa_writer;
 
 using cell_key_t = std::pair<std::string, std::string>;
-using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
 using str_map_t = std::unordered_map<std::string, std::string>;
 
 class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
@@ -63,7 +60,6 @@ class oa_database {
     std::string lib_def_file;
     LibDefObserver lib_def_obs{1};
     std::shared_ptr<spdlog::logger> logger;
-    struct helper;
 
   public:
     /** Open a OA database corresponding to the given library definition file.
@@ -75,39 +71,44 @@ class oa_database {
 
     std::vector<std::string> get_cells_in_library(const std::string &lib_name) const;
 
-    std::string get_lib_path(const char *library) const;
+    std::string get_lib_path(const std::string &lib_name) const;
 
-    void create_lib(const char *library, const char *lib_path, const char *tech_lib) const;
+    void create_lib(const std::string &lib_name, const std::string &lib_path,
+                    const std::string &tech_lib) const;
 
-    cbag::sch::cellview read_sch_cellview(const char *lib_name, const char *cell_name,
-                                          const char *view_name) const;
+    cbag::sch::cellview read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                          const std::string &view_name) const;
 
     std::vector<cell_key_t>
-    read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
-                       const char *new_root_path, const str_map_t &lib_map,
+    read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
+                       const std::string &view_name, const std::string &new_root_path,
+                       const str_map_t &lib_map,
                        const std::unordered_set<std::string> &exclude_libs) const;
 
-    std::vector<cell_key_t> read_library(const char *lib_name, const char *view_name,
-                                         const char *new_root_path, const str_map_t &lib_map,
+    std::vector<cell_key_t> read_library(const std::string &lib_name, const std::string &view_name,
+                                         const std::string &new_root_path, const str_map_t &lib_map,
                                          const std::unordered_set<std::string> &exclude_libs) const;
 
-    void write_sch_cellview(const char *lib_name, const char *cell_name, const char *view_name,
-                            bool is_sch, const cbag::sch::cellview &cv,
+    void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                            const std::string &view_name, bool is_sch,
+                            const cbag::sch::cellview &cv,
                             const str_map_t *rename_map = nullptr) const;
 
-    void implement_sch_list(const char *lib_name, const std::vector<std::string> &cell_list,
-                            const char *sch_view, const char *sym_view,
+    void implement_sch_list(const std::string &lib_name, const std::vector<std::string> &cell_list,
+                            const std::string &sch_view, const std::string &sym_view,
                             const std::vector<cbag::sch::cellview *> &cv_list) const;
 
-    void write_lay_cellview(const char *lib_name, const char *cell_name, const char *view_name,
-                            const cbag::layout::cellview &cv, const str_map_t *rename_map = nullptr,
+    void write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
+                            const std::string &view_name, const cbag::layout::cellview &cv,
+                            const str_map_t *rename_map = nullptr,
                             oa::oaTech *tech_ptr = nullptr) const;
 
-    void implement_lay_list(const char *lib_name, const std::vector<std::string> &cell_list,
-                            const char *view,
+    void implement_lay_list(const std::string &lib_name, const std::vector<std::string> &cell_list,
+                            const std::string &view,
                             const std::vector<cbag::layout::cellview *> &cv_list) const;
 
-    void write_tech_info_file(const char *fname, const char *tech_lib, const char *pin_purpose);
+    void write_tech_info_file(const std::string &fname, const std::string &tech_lib,
+                              const std::string &pin_purpose);
 };
 
 } // namespace cbagoa

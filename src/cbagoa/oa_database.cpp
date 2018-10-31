@@ -18,7 +18,8 @@
 #include <cbag/layout/cellview.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
-#include <cbagyaml/cbagyaml.h>
+#include <cbag/schematic/pin_figure.h>
+#include <cbag/schematic/shape_t_def.h>
 
 #include <cbagoa/oa_database.h>
 #include <cbagoa/oa_read.h>
@@ -29,127 +30,6 @@
 namespace fs = boost::filesystem;
 
 namespace cbagoa {
-
-struct oa_database::helper {
-
-    static oa::oaTech *read_tech(const oa::oaNativeNS &ns, const char *library) {
-        // open technology file
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
-        oa::oaTech *tech_ptr = oa::oaTech::find(lib_name_oa);
-        if (tech_ptr == nullptr) {
-            // opened tech not found, attempt to open
-            if (!oa::oaTech::exists(lib_name_oa)) {
-                throw std::runtime_error(
-                    fmt::format("Cannot find technology library: {}", library));
-            } else {
-                tech_ptr = oa::oaTech::open(lib_name_oa, 'r');
-                if (tech_ptr == nullptr) {
-                    throw std::runtime_error(
-                        fmt::format("Cannot open technology library: {}", library));
-                }
-            }
-        }
-        return tech_ptr;
-    }
-
-    static oa::oaDesign *open_design(const oa::oaNativeNS &ns,
-                                     const std::shared_ptr<spdlog::logger> logger,
-                                     const char *lib_name, const char *cell_name,
-                                     const char *view_name, char mode,
-                                     oa::oaReservedViewTypeEnum view_enum) {
-        oa::oaScalarName lib_oa(ns, lib_name);
-        oa::oaScalarName cell_oa(ns, cell_name);
-        oa::oaScalarName view_oa(ns, view_name);
-
-        logger->info("Opening design {}__{}({}) with mode {}", lib_name, cell_name, view_name,
-                     mode);
-        oa::oaDesign *dsn_ptr = nullptr;
-        if (mode == 'r') {
-            dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, mode);
-        } else {
-            oa::oaViewType *view_type = oa::oaViewType::get(view_enum);
-            dsn_ptr = oa::oaDesign::open(lib_oa, cell_oa, view_oa, view_type, mode);
-        }
-        if (dsn_ptr == nullptr) {
-            throw std::invalid_argument(fmt::format("Cannot open cell: {}__{}({}) with mode {}",
-                                                    lib_name, cell_name, view_name, mode));
-        }
-        return dsn_ptr;
-    }
-
-    static cbag::sch::cellview cell_to_yaml(const oa_database &self, const std::string &lib_name,
-                                            const std::string &cell_name, const char *sch_view,
-                                            const std::string &root_path) {
-        // create directory if not exist, then compute output filename
-        fs::path root_dir(fs::path(root_path) / lib_name / "netlist_info");
-        fs::create_directories(root_dir);
-
-        // parse schematic
-        cbag::sch::cellview sch_cv =
-            self.read_sch_cellview(lib_name.c_str(), cell_name.c_str(), sch_view);
-
-        // write schematic to file
-        fs::path tmp_path = root_dir / fmt::format("{}.yaml", cell_name);
-        cbag::to_file(sch_cv, tmp_path.c_str());
-
-        // write all symbol views to file
-        // get library read access
-        oa::oaLib *lib_ptr = open_library_read(self.ns_cdba, lib_name);
-        // find all symbol views
-        oa::oaScalarName cell_name_oa(self.ns_cdba, cell_name.c_str());
-        oa::oaCell *cell_ptr = oa::oaCell::find(lib_ptr, cell_name_oa);
-        oa::oaIter<oa::oaCellView> cv_iter(cell_ptr->getCellViews());
-        oa::oaCellView *cv_ptr;
-        while ((cv_ptr = cv_iter.getNext()) != nullptr) {
-            oa::oaString tmp_name;
-            oa::oaView *view_ptr = cv_ptr->getView();
-            if (view_ptr->getViewType() == oa::oaViewType::get(oa::oacSchematicSymbol)) {
-                view_ptr->getName(self.ns_cdba, tmp_name);
-                tmp_path = root_dir / fmt::format("{}.{}.yaml", cell_name, (const char *)tmp_name);
-                cbag::to_file(self.read_sch_cellview(lib_name.c_str(), cell_name.c_str(), tmp_name),
-                              tmp_path.c_str());
-            }
-        }
-        // release read access
-        lib_ptr->releaseAccess();
-
-        return sch_cv;
-    }
-
-    static void read_sch_helper(const oa_database &self, std::pair<std::string, std::string> &key,
-                                const char *view_name, const char *new_root_path,
-                                const str_map_t &lib_map,
-                                const std::unordered_set<std::string> &exclude_libs,
-                                cell_set_t &exclude_cells, std::vector<cell_key_t> &cell_list) {
-        // find root_path
-        str_map_t::const_iterator map_iter;
-        map_iter = lib_map.find(key.first);
-        std::string root_path =
-            (map_iter != lib_map.cend()) ? map_iter->second : std::string(new_root_path);
-
-        // write cellviews to yaml files
-        cbag::sch::cellview sch_cv =
-            cell_to_yaml(self, key.first.c_str(), key.second.c_str(), view_name, root_path);
-
-        // update cell_list and exclude_cells
-        cell_list.push_back(key);
-        exclude_cells.insert(std::move(key));
-
-        // recurse
-        auto exc_lib_end = exclude_libs.end();
-        for (const auto &pair : sch_cv.instances) {
-            std::pair<std::string, std::string> ikey(pair.second.lib_name, pair.second.cell_name);
-            if (exclude_cells.find(ikey) == exclude_cells.end()) {
-                // did not see this schematic master before
-                if (exclude_libs.find(pair.second.lib_name) == exc_lib_end) {
-                    // non-primitive master, parse normally
-                    read_sch_helper(self, ikey, view_name, new_root_path, lib_map, exclude_libs,
-                                    exclude_cells, cell_list);
-                }
-            }
-        }
-    }
-};
 
 oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                              oa::oaLibDefListWarningTypeEnum type) {
@@ -185,17 +65,17 @@ oa_database::~oa_database() {
 
 std::vector<std::string> oa_database::get_cells_in_library(const std::string &lib_name) const {
     std::vector<std::string> ans;
-    cbagoa::get_cells(ns_cdba, *logger, lib_name, std::back_inserter(ans));
+    cbagoa::get_cells(ns, *logger, lib_name, std::back_inserter(ans));
     return ans;
 }
 
-std::string oa_database::get_lib_path(const char *library) const {
+std::string oa_database::get_lib_path(const std::string &lib_name) const {
     std::string ans;
     try {
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, lib_name.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
-            throw std::invalid_argument(fmt::format("Cannot find library {}", library));
+            throw std::invalid_argument(fmt::format("Cannot find library {}", lib_name));
         }
         oa::oaString tmp_str;
         lib_ptr->getFullPath(tmp_str);
@@ -207,27 +87,27 @@ std::string oa_database::get_lib_path(const char *library) const {
     return "";
 }
 
-void oa_database::create_lib(const char *library, const char *lib_path,
-                             const char *tech_lib) const {
+void oa_database::create_lib(const std::string &lib_name, const std::string &lib_path,
+                             const std::string &tech_lib) const {
     try {
-        logger->info("Creating OA library {}", library);
+        logger->info("Creating OA library {}", lib_name);
 
         // open library
-        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, library);
+        oa::oaScalarName lib_name_oa = oa::oaScalarName(ns, lib_name.c_str());
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // append library name to lib_path
             fs::path new_lib_path(lib_path);
-            new_lib_path /= library;
+            new_lib_path /= lib_name;
             if (new_lib_path.has_parent_path()) {
                 fs::create_directories(new_lib_path.parent_path());
             }
 
             // create new library
-            logger->info("Creating library {} at path {}, with tech lib {}", library,
+            logger->info("Creating library {} at path {}, with tech lib {}", lib_name,
                          new_lib_path.c_str(), tech_lib);
 
-            oa::oaScalarName oa_tech_lib(ns, tech_lib);
+            oa::oaScalarName oa_tech_lib(ns, tech_lib.c_str());
             lib_ptr = oa::oaLib::create(lib_name_oa, new_lib_path.c_str());
             oa::oaTech::attach(lib_ptr, oa_tech_lib);
 
@@ -235,7 +115,7 @@ void oa_database::create_lib(const char *library, const char *lib_path,
             // we just do it by hand.
             std::ofstream outfile;
             outfile.open(lib_def_file, std::ios_base::app);
-            outfile << "DEFINE " << library << " " << new_lib_path << std::endl;
+            outfile << "DEFINE " << lib_name << " " << new_lib_path << std::endl;
             outfile.close();
 
             // Create cdsinfo.tag file
@@ -251,15 +131,11 @@ void oa_database::create_lib(const char *library, const char *lib_path,
     }
 }
 
-cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const char *cell_name,
-                                                   const char *view_name) const {
+cbag::sch::cellview oa_database::read_sch_cellview(const std::string &lib_name,
+                                                   const std::string &cell_name,
+                                                   const std::string &view_name) const {
     try {
-        oa::oaDesign *dsn_ptr =
-            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'r', oa::oacSchematic);
-        logger->info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbag::sch::cellview ans = cbagoa::read_sch_cellview(ns_cdba, *logger, dsn_ptr);
-        dsn_ptr->close();
-        return ans;
+        return cbagoa::read_sch_cellview(ns, ns_cdba, *logger, lib_name, cell_name, view_name);
     } catch (...) {
         handle_oa_exceptions(*logger);
         throw;
@@ -267,39 +143,33 @@ cbag::sch::cellview oa_database::read_sch_cellview(const char *lib_name, const c
 }
 
 std::vector<cell_key_t>
-oa_database::read_sch_recursive(const char *lib_name, const char *cell_name, const char *view_name,
-                                const char *new_root_path, const str_map_t &lib_map,
+oa_database::read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
+                                const std::string &view_name, const std::string &new_root_path,
+                                const str_map_t &lib_map,
                                 const std::unordered_set<std::string> &exclude_libs) const {
-    std::pair<std::string, std::string> key(lib_name, cell_name);
-    cell_set_t exclude_cells;
     std::vector<cell_key_t> ans;
-    helper::read_sch_helper(*this, key, view_name, new_root_path, lib_map, exclude_libs,
-                            exclude_cells, ans);
+    cbagoa::read_sch_recursive(ns, ns_cdba, *logger, lib_name, cell_name, view_name, new_root_path,
+                               lib_map, exclude_libs, std::back_inserter(ans));
     return ans;
 }
 
 std::vector<cell_key_t>
-oa_database::read_library(const char *lib_name, const char *view_name, const char *new_root_path,
-                          const str_map_t &lib_map,
+oa_database::read_library(const std::string &lib_name, const std::string &view_name,
+                          const std::string &new_root_path, const str_map_t &lib_map,
                           const std::unordered_set<std::string> &exclude_libs) const {
-    cell_set_t exclude_cells;
     std::vector<cell_key_t> ans;
-    for (auto const &cell_name : get_cells_in_library(lib_name)) {
-        std::pair<std::string, std::string> key(lib_name, cell_name);
-        helper::read_sch_helper(*this, key, view_name, new_root_path, lib_map, exclude_libs,
-                                exclude_cells, ans);
-    }
+    cbagoa::read_library(ns, ns_cdba, *logger, lib_name, view_name, new_root_path, lib_map,
+                         exclude_libs, std::back_inserter(ans));
     return ans;
 }
 
-void oa_database::write_sch_cellview(const char *lib_name, const char *cell_name,
-                                     const char *view_name, bool is_sch,
+void oa_database::write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
+                                     const std::string &view_name, bool is_sch,
                                      const cbag::sch::cellview &cv,
                                      const str_map_t *rename_map) const {
     try {
-        oa::oaDesign *dsn_ptr =
-            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w',
-                                is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
+        oa::oaDesign *dsn_ptr = open_design(ns, *logger, lib_name, cell_name, view_name, 'w',
+                                            is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
         cbagoa::write_sch_cellview(ns_cdba, *logger, cv, dsn_ptr, is_sch, rename_map);
         dsn_ptr->close();
@@ -308,18 +178,18 @@ void oa_database::write_sch_cellview(const char *lib_name, const char *cell_name
     }
 }
 
-void oa_database::implement_sch_list(const char *lib_name,
+void oa_database::implement_sch_list(const std::string &lib_name,
                                      const std::vector<std::string> &cell_list,
-                                     const char *sch_view, const char *sym_view,
+                                     const std::string &sch_view, const std::string &sym_view,
                                      const std::vector<cbag::sch::cellview *> &cv_list) const {
     try {
         str_map_t rename_map;
 
         std::size_t num = cell_list.size();
         for (std::size_t idx = 0; idx < num; ++idx) {
-            const char *cell_name = cell_list[idx].c_str();
+            const std::string &cell_name = cell_list[idx].c_str();
             write_sch_cellview(lib_name, cell_name, sch_view, true, *(cv_list[idx]), &rename_map);
-            if (cv_list[idx]->sym_ptr != nullptr && sym_view != nullptr) {
+            if (cv_list[idx]->sym_ptr != nullptr && !sym_view.empty()) {
                 write_sch_cellview(lib_name, cell_name, sym_view, false, *(cv_list[idx]->sym_ptr));
             }
             logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
@@ -330,16 +200,16 @@ void oa_database::implement_sch_list(const char *lib_name,
     }
 }
 
-void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name,
-                                     const char *view_name, const cbag::layout::cellview &cv,
+void oa_database::write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
+                                     const std::string &view_name, const cbag::layout::cellview &cv,
                                      const str_map_t *rename_map, oa::oaTech *tech_ptr) const {
     try {
         if (tech_ptr == nullptr) {
-            tech_ptr = helper::read_tech(ns, lib_name);
+            tech_ptr = read_tech(ns, lib_name);
         }
 
         oa::oaDesign *dsn_ptr =
-            helper::open_design(ns, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
+            open_design(ns, *logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
         logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
         cbagoa::write_lay_cellview(ns_cdba, *logger, cv, dsn_ptr, tech_ptr, rename_map);
         dsn_ptr->close();
@@ -348,16 +218,17 @@ void oa_database::write_lay_cellview(const char *lib_name, const char *cell_name
     }
 }
 
-void oa_database::implement_lay_list(const char *lib_name,
-                                     const std::vector<std::string> &cell_list, const char *view,
+void oa_database::implement_lay_list(const std::string &lib_name,
+                                     const std::vector<std::string> &cell_list,
+                                     const std::string &view,
                                      const std::vector<cbag::layout::cellview *> &cv_list) const {
     try {
         str_map_t rename_map;
-        auto *tech_ptr = helper::read_tech(ns, lib_name);
+        auto *tech_ptr = read_tech(ns, lib_name);
 
         std::size_t num = cell_list.size();
         for (std::size_t idx = 0; idx < num; ++idx) {
-            const char *cell_name = cell_list[idx].c_str();
+            const std::string &cell_name = cell_list[idx].c_str();
             write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]), &rename_map, tech_ptr);
             logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
             rename_map[cv_list[idx]->cell_name] = cell_list[idx];
@@ -367,9 +238,9 @@ void oa_database::implement_lay_list(const char *lib_name,
     }
 } // namespace cbagoa
 
-void oa_database::write_tech_info_file(const char *fname, const char *tech_lib,
-                                       const char *pin_purpose) {
-    oa::oaTech *tech_ptr = helper::read_tech(ns, tech_lib);
+void oa_database::write_tech_info_file(const std::string &fname, const std::string &tech_lib,
+                                       const std::string &pin_purpose) {
+    oa::oaTech *tech_ptr = read_tech(ns, tech_lib);
 
     // read layer/purpose/via mappings
     std::map<oa::oaLayerNum, std::string> lay_map;

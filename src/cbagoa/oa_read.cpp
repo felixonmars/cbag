@@ -18,6 +18,7 @@
 #include <cbag/schematic/shape_t_def.h>
 
 #include <cbagoa/oa_read.h>
+#include <cbagoa/oa_util.h>
 
 namespace cbagoa {
 
@@ -367,24 +368,24 @@ read_terminal_single(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm 
 
 // Read method for schematic/symbol cell view
 
-cbag::sch::cellview read_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                                      oa::oaDesign *p) {
+cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                                      spdlog::logger &logger, const std::string &lib_name,
+                                      const std::string &cell_name, const std::string &view_name) {
+    oa::oaDesign *p =
+        open_design(ns_native, logger, lib_name, cell_name, view_name, 'r', oa::oacSchematic);
+
+    logger.info("Reading cellview {}__{}({})", lib_name, cell_name, view_name);
     oa::oaBlock *block = p->getTopBlock();
-    oa::oaString lib_oa;
-    oa::oaString cell_oa;
-    oa::oaString tmp;
     oa::oaBox bbox;
-    p->getLibName(ns, lib_oa);
-    p->getCellName(ns, cell_oa);
-    p->getViewName(ns, tmp);
     block->getBBox(bbox);
 
-    cbag::sch::cellview ans(std::string(lib_oa), std::string(cell_oa), std::string(tmp), bbox);
+    cbag::sch::cellview ans(lib_name, cell_name, view_name, bbox);
 
     // read terminals
     logger.info("Reading terminals");
     oa::oaIter<oa::oaTerm> term_iter(block->getTerms());
     oa::oaTerm *term_ptr;
+    oa::oaString tmp;
     while ((term_ptr = term_iter.getNext()) != nullptr) {
         term_ptr->getName(ns, tmp);
         switch (term_ptr->getTermType()) {
@@ -488,6 +489,8 @@ cbag::sch::cellview read_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &lo
     */
 
     logger.info("Finish reading schematic/symbol cellview");
+
+    p->close();
     return ans;
 }
 

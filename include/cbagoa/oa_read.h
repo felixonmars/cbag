@@ -23,8 +23,9 @@ class cellview;
 
 namespace cbagoa {
 
-cbag::sch::cellview read_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                                      oa::oaDesign *p);
+cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                                      spdlog::logger &logger, const std::string &lib_name,
+                                      const std::string &cell_name, const std::string &view_name);
 
 } // namespace cbagoa
 
