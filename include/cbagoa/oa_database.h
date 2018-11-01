@@ -55,6 +55,7 @@ class oa_database {
   private:
     // OA namespace objects
     std::string lib_def_file;
+    str_map_t sch_lib_path;
     LibDefObserver lib_def_obs{1};
 
   public:
@@ -70,7 +71,7 @@ class oa_database {
     explicit oa_database(std::string lib_def_fname);
     ~oa_database();
 
-    std::vector<std::string> get_cells_in_library(const std::string &lib_name) const;
+    std::vector<std::string> get_cells_in_lib(const std::string &lib_name) const;
 
     std::string get_lib_path(const std::string &lib_name) const;
 

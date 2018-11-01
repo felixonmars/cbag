@@ -63,7 +63,7 @@ oa_database::~oa_database() {
     }
 }
 
-std::vector<std::string> oa_database::get_cells_in_library(const std::string &lib_name) const {
+std::vector<std::string> oa_database::get_cells_in_lib(const std::string &lib_name) const {
     std::vector<std::string> ans;
     cbagoa::get_cells(ns_native, *logger, lib_name, std::back_inserter(ans));
     return ans;

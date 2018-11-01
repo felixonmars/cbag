@@ -50,8 +50,7 @@ void read_sch_helper(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                      const str_map_t &lib_map, const std::unordered_set<std::string> &exclude_libs,
                      cell_set_t &exclude_cells, OutIter &out_iter) {
     // find root_path
-    str_map_t::const_iterator map_iter;
-    map_iter = lib_map.find(key.first);
+    str_map_t::const_iterator map_iter = lib_map.find(key.first);
     std::string root_path = (map_iter != lib_map.cend()) ? map_iter->second : new_root_path;
 
     // write cellviews to yaml files
