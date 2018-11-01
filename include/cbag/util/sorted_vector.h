@@ -23,7 +23,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     using difference_type = typename std::vector<T>::difference_type;
 
   private:
-    std::vector<T> data_;
+    std::vector<value_type> data_;
     Compare comp_;
 
   public:
@@ -33,7 +33,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         std::sort(data_.begin(), data_.end(), comp_);
     }
 
-    sorted_vector(std::initializer_list<T> init) : data_(init) {
+    sorted_vector(std::initializer_list<value_type> init) : data_(init) {
         std::sort(data_.begin(), data_.end(), comp_);
     }
 
@@ -99,6 +99,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     }
 
     void clear() noexcept { data_.clear(); }
+    void reserve(size_type n) { data_.reserve(n); }
 
     template <class K> iterator find(const K &x) {
         auto iter_range = equal_range(x);
@@ -122,7 +123,14 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
             throw std::invalid_argument("Cannot insert given element at back.");
     }
 
-    std::pair<iterator, bool> insert_unique(value_type item) {
+    std::pair<iterator, bool> insert_unique(const value_type &item) {
+        auto iter_range = equal_range(item);
+        if (iter_range.first != iter_range.second)
+            return {iter_range.first, false};
+        return {data_.insert(iter_range.first, item), true};
+    }
+
+    std::pair<iterator, bool> insert_unique(value_type &&item) {
         auto iter_range = equal_range(item);
         if (iter_range.first != iter_range.second)
             return {iter_range.first, false};
@@ -170,7 +178,6 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
             return ans;
         }
     }
-
 };
 
 } // namespace util

@@ -1,6 +1,7 @@
 add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/interval.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_map.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_vector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbagyaml/cbagyaml.cpp
   )

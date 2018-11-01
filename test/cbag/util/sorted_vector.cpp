@@ -34,7 +34,7 @@ void check_equal(const sorted_vector &v, const model_vector &expected, bool deep
     }
 }
 
-SCENARIO("constructors and accessors", "[sorted_vector]") {
+SCENARIO("sorted_vector constructors and accessors", "[sorted_vector]") {
     GIVEN("empty") {
         model_vector expected;
 
@@ -116,7 +116,7 @@ SCENARIO("constructors and accessors", "[sorted_vector]") {
     }
 }
 
-SCENARIO("insert_unique/emplace_unique/emplace_back test", "[sorted_vector]") {
+SCENARIO("sorted_vector insert_unique/emplace_unique/emplace_back test", "[sorted_vector]") {
     model_vector data = GENERATE(values<model_vector>({
         {6, 2, 4},
         {6, 6, 2, 4, 4, 4},

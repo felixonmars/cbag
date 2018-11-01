@@ -50,13 +50,31 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
   public:
     sorted_map() = default;
 
+    sorted_map(std::initializer_list<value_type> init) : data_(init) {}
+
     size_type size() const noexcept { return data_.size(); }
     size_type capacity() const noexcept { return data_.capacity(); }
     bool empty() const noexcept { return data_.empty(); }
     const_iterator begin() const noexcept { return data_.begin(); }
     const_iterator end() const noexcept { return data_.end(); }
+    const_iterator cbegin() const noexcept { return data_.begin(); }
+    const_iterator cend() const noexcept { return data_.end(); }
     iterator begin() noexcept { return data_.begin(); }
     iterator end() noexcept { return data_.end(); }
+
+    template <class K> const_iterator lower_bound(const K &x) const { return data_.lower_bound(x); }
+
+    template <class K> iterator lower_bound(const K &x) { return data_.lower_bound(x); }
+
+    template <class K> const_iterator upper_bound(const K &x) const { return data_.upper_bound(x); }
+
+    template <class K> std::pair<const_iterator, const_iterator> equal_range(const K &x) const {
+        return data_.equal_range(x);
+    }
+
+    friend bool operator==(const sorted_map &lhs, const sorted_map &rhs) {
+        return lhs.data_ == rhs.data_;
+    }
 
     mapped_type operator[](const key_type &key) {
         auto iter_range = data_.equal_range(key);
@@ -82,6 +100,21 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
     template <class K> iterator find(const K &x) { return data_.find(x); }
 
     void clear() noexcept { data_.clear(); }
+    void reserve(size_type n) { data_.reserve(n); }
+
+    template <class... Args> std::pair<iterator, bool> emplace(Args &&... args) {
+        return data_.emplace_unique(std::forward<Args>(args)...);
+    }
+
+    std::pair<iterator, bool> insert(const value_type &val) { return data_.insert_unique(val); }
+    std::pair<iterator, bool> insert(value_type &&val) {
+        return data_.insert_unique(std::move(val));
+    }
+    template <class InputIt> void insert(InputIt first, InputIt last) {
+        for (; first != last; ++first) {
+            insert(*first);
+        }
+    }
 
     size_type erase(const key_type &key) {
         auto iter_range = data_.equal_range(key);
