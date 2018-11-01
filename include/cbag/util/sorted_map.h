@@ -135,15 +135,37 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
 
         auto &comp = data_.get_compare();
         if (comp(old_key, new_key)) {
+            // get replacement position
+            auto iter_inc = iter + 1;
+            auto pos = std::lower_bound(iter_inc, end_iter, new_key, comp);
+            if (pos != end_iter && pos->first == new_key) {
+                // new key is already in the map
+                return end_iter;
+            }
+            if (pos == iter_inc) {
+                // replacement position is the same
+                iter->first = new_key;
+                return iter;
+            }
             // circular shift [iter, pos) down
-            auto pos = std::lower_bound(iter + 1, end_iter, new_key, comp);
             auto ans = data_.circ_shift(iter, pos, false);
             ans->first = new_key;
             return ans;
         } else {
-            // circular shift [pos, iter) up
-            auto pos = std::upper_bound(data_.begin(), iter, new_key, comp);
-            auto ans = data_.circ_shift(pos, iter, true);
+            auto start_iter = data_.begin();
+            // get replacement position
+            auto pos = std::upper_bound(start_iter, iter, new_key, comp);
+            if (pos != start_iter && (pos - 1)->first == new_key) {
+                // new key is already in the map
+                return end_iter;
+            }
+            if (pos == iter) {
+                // replacement position is the same
+                iter->first = new_key;
+                return iter;
+            }
+            // circular shift [pos, iter + 1) up
+            auto ans = data_.circ_shift(pos, iter + 1, true);
             ans->first = new_key;
             return ans;
         }

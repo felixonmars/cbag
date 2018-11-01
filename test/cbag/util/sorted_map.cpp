@@ -1,3 +1,4 @@
+#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -22,6 +23,22 @@ void check_equal(const sorted_map &v, const model_map &m) {
         REQUIRE(b1->first == b2->first);
         REQUIRE(b1->second == b2->second);
     }
+}
+
+bool test_equal(const sorted_map &v, const model_map &m) {
+    if (v.size() != m.size())
+        return false;
+    auto b1 = v.begin();
+    auto b2 = m.begin();
+    auto e1 = v.end();
+    auto e2 = m.end();
+    for (; b1 != e1 && b2 != e2; ++b1, ++b2) {
+        if (b1->first != b2->first)
+            return false;
+        if (b1->second != b2->second)
+            return false;
+    }
+    return true;
 }
 
 template <class Iter1, class Iter2>
@@ -152,6 +169,41 @@ SCENARIO("sorted_map deletion", "[sorted_map]") {
 
         THEN("erase works") {
             REQUIRE(v.erase(del_key) == expected.erase(del_key));
+            check_equal(v, expected);
+        }
+    }
+}
+
+SCENARIO("sorted_map replace_key", "[sorted_map]") {
+
+    model_map expected{{-3, "abs"}, {17, "hi"}, {18, "bye"}, {1, "current"}};
+    sorted_map v;
+    v.reserve(expected.size());
+    v.insert(expected.begin(), expected.end());
+    check_equal(v, expected);
+
+    THEN("replace_key works") {
+        int from = GENERATE(range(-4, 20));
+        int to = GENERATE(range(-4, 20));
+
+        auto test_iter = v.replace_key(from, to);
+        auto find_iter = expected.find(from);
+        if (find_iter == expected.end() || (from != to && expected.find(to) != expected.end())) {
+            REQUIRE(test_iter == v.end());
+        } else {
+            if (from != to) {
+                expected[to] = find_iter->second;
+                expected.erase(find_iter);
+            }
+            if (!test_equal(v, expected)) {
+                std::cout << from << ", " << to << std::endl;
+                std::cout << "expected" << std::endl;
+                for (const auto &p : expected)
+                    std::cout << p.first << ": " << p.second << std::endl;
+                std::cout << "v" << std::endl;
+                for (const auto &p : v)
+                    std::cout << p.first << ": " << p.second << std::endl;
+            }
             check_equal(v, expected);
         }
     }
