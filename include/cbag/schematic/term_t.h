@@ -8,15 +8,17 @@
 #ifndef CBAG_SCHEMATIC_TERM_T_H
 #define CBAG_SCHEMATIC_TERM_T_H
 
-#include <map>
 #include <string>
+#include <utility>
+
+#include <cbag/util/sorted_map.h>
 
 namespace cbag {
 namespace sch {
 
 struct pin_figure;
 
-using term_t = std::map<std::string, pin_figure>;
+using term_t = cbag::util::sorted_map<std::string, pin_figure>;
 
 } // namespace sch
 } // namespace cbag

@@ -61,23 +61,10 @@ void cellview::rename_pin(const std::string &old_name, const std::string &new_na
     spirit::ast::name ast;
     parse(new_name, spirit::name(), ast);
 
-    auto nh = in_terms.extract(old_name);
-    if (nh.empty()) {
-        nh = out_terms.extract(old_name);
-        if (nh.empty()) {
-            nh = io_terms.extract(old_name);
-            if (nh.empty()) {
-                throw std::invalid_argument("Cannot find terminal: " + old_name);
-            }
-            nh.key() = new_name;
-            io_terms.insert(std::move(nh));
-        } else {
-            nh.key() = new_name;
-            out_terms.insert(std::move(nh));
-        }
-    } else {
-        nh.key() = new_name;
-        in_terms.insert(std::move(nh));
+    if (in_terms.replace_key(old_name, new_name) == in_terms.end() &&
+        out_terms.replace_key(old_name, new_name) == out_terms.end() &&
+        io_terms.replace_key(old_name, new_name) == io_terms.end()) {
+        throw std::invalid_argument("Cannot find terminal: " + old_name);
     }
 
     // rename the corresponding symbol pin
@@ -98,7 +85,7 @@ void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
     }
     /*
     // get the map to insert
-    std::map<std::string, PinFigure> *ptr = nullptr;
+    cbag::util::sorted_map<std::string, PinFigure> *ptr = nullptr;
     switch (term_type) {
     case trmInput:
         ptr = &in_terms;
@@ -140,23 +127,17 @@ void cellview::rename_instance(const std::string &old_name, std::string new_name
     spirit::ast::name_unit new_ast;
     parse(new_name, spirit::name_unit(), new_ast);
 
-    // do the swap
-    auto nh = instances.extract(old_name);
-    if (nh.empty()) {
+    auto iter = instances.replace_key(old_name, new_name);
+    if (iter == instances.end())
         throw std::invalid_argument("Cannot find instance: " + old_name);
-    } else {
-        // resize nets
-        spirit::ast::name_unit old_ast;
-        parse(old_name, spirit::name_unit(), old_ast);
-        uint32_t old_size = old_ast.size();
-        uint32_t new_size = new_ast.size();
-        if (old_size != new_size) {
-            nh.mapped().resize_nets(old_size, new_size);
-        }
 
-        // update instance name
-        nh.key() = std::move(new_name);
-        instances.insert(std::move(nh));
+    // resize nets if necessary
+    spirit::ast::name_unit old_ast;
+    parse(old_name, spirit::name_unit(), old_ast);
+    uint32_t old_size = old_ast.size();
+    uint32_t new_size = new_ast.size();
+    if (old_size != new_size) {
+        iter->second.resize_nets(old_size, new_size);
     }
 }
 

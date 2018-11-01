@@ -11,6 +11,8 @@
 #include <cbag/common/datatypes.h>
 #include <cbag/common/transform.h>
 
+#include <cbag/util/sorted_map.h>
+
 namespace cbag {
 namespace sch {
 
@@ -24,7 +26,7 @@ struct instance {
     transform xform;
     box_t bbox;
     bool is_primitive = false;
-    std::map<std::string, std::string> connections;
+    cbag::util::sorted_map<std::string, std::string> connections;
     param_map params;
 
     instance();

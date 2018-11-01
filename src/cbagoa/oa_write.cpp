@@ -6,7 +6,6 @@
  */
 
 #include <ctime>
-#include <set>
 #include <tuple>
 #include <utility>
 #include <variant>
@@ -16,6 +15,9 @@
 #include <fmt/format.h>
 
 #include <spdlog/spdlog.h>
+
+#include <cbag/util/sorted_map.h>
+#include <cbag/util/sorted_vector.h>
 
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
@@ -265,7 +267,8 @@ class make_app_def_visitor {
 };
 
 void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaBlock *block,
-                         int &pin_cnt, const std::map<std::string, cbag::sch::pin_figure> &map,
+                         int &pin_cnt,
+                         const cbag::util::sorted_map<std::string, cbag::sch::pin_figure> &map,
                          oa::oaTermTypeEnum term_type) {
     oa::oaName term_name;
     for (auto const &pair : map) {
@@ -292,15 +295,15 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
                          const std::string &term_order) {
 
     // get dependencies
-    std::set<std::tuple<std::string, std::string, std::string>> dep_set;
+    cbag::util::sorted_vector<std::tuple<std::string, std::string, std::string>> dep_set;
     for (auto const &inst : cv.instances) {
-        dep_set.emplace(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
+        dep_set.emplace_unique(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
     }
 
     // build dependencies
     std::stringstream dependencies;
-    auto dep_cursor = dep_set.cbegin();
-    auto dep_end = dep_set.cend();
+    auto dep_cursor = dep_set.begin();
+    auto dep_end = dep_set.end();
     dependencies << '(';
     if (dep_cursor != dep_end) {
         dependencies << "(\"" << std::get<0>(*dep_cursor) << "\" \"" << std::get<1>(*dep_cursor)

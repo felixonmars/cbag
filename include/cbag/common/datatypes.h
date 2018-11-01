@@ -10,9 +10,10 @@
 
 #include <cstdint>
 #include <ctime>
-#include <map>
 #include <string>
 #include <variant>
+
+#include <cbag/util/sorted_map.h>
 
 namespace cbag {
 /** A custom struct representing time data.
@@ -40,7 +41,7 @@ using value_t = std::variant<int32_t, double, bool, std::string, time_struct, bi
 
 /** Type definition for a parameter dictonary.
  */
-using param_map = std::map<std::string, value_t>;
+using param_map = util::sorted_map<std::string, value_t>;
 
 void set_param(param_map &params, std::string &&name,
                const std::variant<int32_t, double, bool, std::string> &val);

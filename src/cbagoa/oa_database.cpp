@@ -15,6 +15,8 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/util/sorted_map.h>
+
 #include <cbag/layout/cellview.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
@@ -243,9 +245,9 @@ void oa_database::write_tech_info_file(const std::string &fname, const std::stri
     oa::oaTech *tech_ptr = read_tech(ns_native, tech_lib);
 
     // read layer/purpose/via mappings
-    std::map<oa::oaLayerNum, std::string> lay_map;
-    std::map<oa::oaPurposeNum, std::string> pur_map;
-    std::map<std::pair<oa::oaLayerNum, oa::oaLayerNum>, std::string> via_map;
+    cbag::util::sorted_map<oa::oaLayerNum, std::string> lay_map;
+    cbag::util::sorted_map<oa::oaPurposeNum, std::string> pur_map;
+    cbag::util::sorted_map<std::pair<oa::oaLayerNum, oa::oaLayerNum>, std::string> via_map;
 
     oa::oaString tmp;
     oa::oaIter<oa::oaLayer> lay_iter(tech_ptr->getLayers());

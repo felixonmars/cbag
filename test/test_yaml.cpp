@@ -3,6 +3,8 @@
 
 #include <boost/fusion/adapted.hpp>
 
+#include <cbag/util/sorted_map.h>
+
 #include <cbagyaml/common.h>
 #include <cbagyaml/fusion.h>
 
@@ -17,7 +19,7 @@ struct One {
 };
 
 struct Five {
-    typedef std::map<int, One> Map_t;
+    typedef cbag::util::sorted_map<int, One> Map_t;
     Map_t six;
 
     typedef std::vector<One> Vector_t;

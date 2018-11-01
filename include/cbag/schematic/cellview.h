@@ -8,10 +8,10 @@
 #ifndef CBAG_SCHEMATIC_CELLVIEW_H
 #define CBAG_SCHEMATIC_CELLVIEW_H
 
-#include <map>
 #include <memory>
-#include <unordered_map>
 #include <vector>
+
+#include <cbag/util/sorted_map.h>
 
 #include <cbag/common/box_t.h>
 #include <cbag/common/datatypes.h>
@@ -25,6 +25,7 @@ namespace sch {
 struct instance;
 struct cellview_info;
 
+using inst_map_t = cbag::util::sorted_map<std::string, instance>;
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
 
 /** A schematic or symbol cell view
@@ -39,7 +40,7 @@ struct cellview {
     term_t out_terms;
     term_t io_terms;
     std::vector<shape_t> shapes;
-    std::map<std::string, instance> instances;
+    inst_map_t instances;
     param_map props;
     param_map app_defs;
     std::unique_ptr<cellview> sym_ptr;

@@ -20,8 +20,6 @@
 namespace cbag {
 namespace sch {
 
-using inst_map_t = std::map<std::string, instance>;
-
 template <class ConnRange>
 void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_size,
                    const std::string &new_name, coord_t dx, coord_t dy, const ConnRange &conns) {

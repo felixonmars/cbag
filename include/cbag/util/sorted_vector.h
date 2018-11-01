@@ -16,6 +16,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     using size_type = std::size_t;
     using reference = value_type &;
     using iterator = typename std::vector<T>::iterator;
+    using reverse_iterator = typename std::vector<T>::reverse_iterator;
     using const_reference = const value_type &;
     using const_iterator = typename std::vector<T>::const_iterator;
     using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
@@ -41,6 +42,10 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     bool empty() const noexcept { return data_.empty(); }
     const_iterator begin() const noexcept { return data_.begin(); }
     const_iterator end() const noexcept { return data_.end(); }
+    const_iterator cbegin() const noexcept { return data_.begin(); }
+    const_iterator cend() const noexcept { return data_.end(); }
+    iterator begin() noexcept { return data_.begin(); }
+    iterator end() noexcept { return data_.end(); }
     const_reverse_iterator rbegin() const noexcept { return data_.rbegin(); }
     const_reverse_iterator rend() const noexcept { return data_.rend(); }
     const_reference at_front() const {
@@ -57,6 +62,14 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
 
     template <class K> const_iterator lower_bound(const K &x) const {
         return std::lower_bound(data_.begin(), data_.end(), x, comp_);
+    }
+
+    template <class K> iterator lower_bound(const K &x) {
+        return std::lower_bound(data_.begin(), data_.end(), x, comp_);
+    }
+
+    template <class K> const_iterator upper_bound(const K &x) const {
+        return std::upper_bound(data_.begin(), data_.end(), x, comp_);
     }
 
     template <class K> std::pair<const_iterator, const_iterator> equal_range(const K &x) const {
@@ -87,6 +100,13 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
 
     void clear() noexcept { data_.clear(); }
 
+    template <class K> iterator find(const K &x) {
+        auto iter_range = equal_range(x);
+        if (iter_range.first == iter_range.second)
+            return data_.end();
+        return iter_range.first;
+    }
+
     template <class... Args> std::pair<iterator, bool> emplace_unique(Args &&... args) {
         return insert_unique(value_type(std::forward<Args>(args)...));
     }
@@ -106,10 +126,14 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         auto iter_range = equal_range(item);
         if (iter_range.first != iter_range.second)
             return {iter_range.first, false};
-        return {data_.insert(iter_range.second, std::move(item)), true};
+        return {data_.insert(iter_range.first, std::move(item)), true};
     }
 
     iterator erase(const_iterator pos) { return data_.erase(std::move(pos)); }
+
+    iterator erase(iterator first, iterator last) {
+        return data_.erase(std::move(first), std::move(last));
+    }
 
     iterator erase(const_iterator first, const_iterator last) {
         return data_.erase(std::move(first), std::move(last));
@@ -126,6 +150,27 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     friend bool operator==(const std::vector<T> &lhs, const sorted_vector &rhs) {
         return lhs == rhs.data_;
     }
+
+    iterator insert_force(const iterator &iter, value_type &&item) {
+        return data_.insert(iter, std::move(item));
+    }
+
+    iterator circ_shift(const iterator &start, const iterator &stop, bool up) {
+        if (up) {
+            auto last = stop - 1;
+            value_type tmp = std::move(*last);
+            std::copy_backward(start, last, stop);
+            *start = std::move(tmp);
+            return start;
+        } else {
+            value_type tmp = std::move(*start);
+            std::copy(start + 1, stop, start);
+            auto ans = stop - 1;
+            *ans = std::move(tmp);
+            return ans;
+        }
+    }
+
 };
 
 } // namespace util
