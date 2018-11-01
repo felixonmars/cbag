@@ -195,6 +195,7 @@ SCENARIO("sorted_map replace_key", "[sorted_map]") {
                 expected[to] = find_iter->second;
                 expected.erase(find_iter);
             }
+            /*
             if (!test_equal(v, expected)) {
                 std::cout << from << ", " << to << std::endl;
                 std::cout << "expected" << std::endl;
@@ -204,6 +205,7 @@ SCENARIO("sorted_map replace_key", "[sorted_map]") {
                 for (const auto &p : v)
                     std::cout << p.first << ": " << p.second << std::endl;
             }
+            */
             check_equal(v, expected);
         }
     }
