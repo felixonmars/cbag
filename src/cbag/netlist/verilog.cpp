@@ -11,6 +11,7 @@
 
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 
@@ -23,27 +24,26 @@ void verilog_builder::init(const std::vector<std::string> &inc_list, bool shell)
 
 void verilog_builder::write_end() {}
 
-void verilog_builder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                                      const sch::term_t &out_terms, const sch::term_t &io_terms) {
+void verilog_builder::write_cv_header(const std::string &name, const sch::cellview_info &info) {
     // write module declaration
     line_builder b(ncol, cnt_char, break_before, tab_size);
     b << "module";
     b << name;
     b << "(";
-    auto tmp_range1 = boost::join(in_terms, out_terms);
-    auto tmp_range2 = boost::join(tmp_range1, io_terms);
+    auto tmp_range1 = boost::join(info.in_terms, info.out_terms);
+    auto tmp_range2 = boost::join(tmp_range1, info.io_terms);
     auto ptr = tmp_range2.begin();
     auto const pend = tmp_range2.end();
     while (ptr != pend) {
         // has elements
-        const std::string *str_ptr = &(ptr->first);
+        const std::string &str_val = *ptr;
         ++ptr;
         if (ptr == pend) {
             // The current string is the last string
-            b << *str_ptr;
+            b << str_val;
         } else {
             // The current string is not the last string
-            b << ((*str_ptr) + std::string(","));
+            b << (str_val + std::string(","));
         }
     }
     b << ");";
@@ -52,14 +52,14 @@ void verilog_builder::write_cv_header(const std::string &name, const sch::term_t
     out_file << std::endl;
 
     // write io type
-    for (auto const &pair : in_terms) {
-        out_file << "    input " << pair.first << ";" << std::endl;
+    for (auto const &name : info.in_terms) {
+        out_file << "    input " << name << ";" << std::endl;
     }
-    for (auto const &pair : out_terms) {
-        out_file << "    output " << pair.first << ";" << std::endl;
+    for (auto const &name : info.out_terms) {
+        out_file << "    output " << name << ";" << std::endl;
     }
-    for (auto const &pair : io_terms) {
-        out_file << "    inout " << pair.first << ";" << std::endl;
+    for (auto const &name : info.io_terms) {
+        out_file << "    inout " << name << ";" << std::endl;
     }
     out_file << std::endl;
 }

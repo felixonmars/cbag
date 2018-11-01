@@ -389,21 +389,7 @@ cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa:
     oa::oaString tmp;
     while ((term_ptr = term_iter.getNext()) != nullptr) {
         term_ptr->getName(ns, tmp);
-        switch (term_ptr->getTermType()) {
-        case oa::oacInputTermType:
-            ans.in_terms.insert(read_terminal_single(ns, logger, term_ptr));
-            break;
-        case oa::oacOutputTermType:
-            ans.out_terms.insert(read_terminal_single(ns, logger, term_ptr));
-            break;
-        case oa::oacInputOutputTermType:
-            ans.io_terms.insert(read_terminal_single(ns, logger, term_ptr));
-            break;
-        default:
-            throw std::invalid_argument(
-                fmt::format("Terminal {} has invalid type: {}", (const char *)tmp,
-                            (const char *)term_ptr->getTermType().getName()));
-        }
+        ans.terminals.insert(read_terminal_single(ns, logger, term_ptr));
     }
 
     // read shapes

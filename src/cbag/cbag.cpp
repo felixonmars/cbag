@@ -67,11 +67,11 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
 
     size_t num = cv_list.size();
     for (size_t idx = 0; idx < num; ++idx) {
-        if (!shell) {
+        if (!shell || idx == num - 1) {
             // add this cellview to netlist
             logger->info("Netlisting cellview: {}", name_list[idx]);
-            builder_ptr->add_cellview(name_list[idx], cv_list[idx], netlist_map, false);
-
+            sch::cellview_info cv_info = cv_list[idx]->get_info(name_list[idx]);
+            builder_ptr->add_cellview(name_list[idx], cv_list[idx], cv_info, netlist_map, shell);
             // add this cellview to netlist map
             logger->info("Adding cellview to netlist cell map");
             auto lib_map_iter = netlist_map.find(cv_list[idx]->lib_name);
@@ -79,17 +79,11 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
                 logger->info("Cannot find library {}, creating lib cell map",
                              cv_list[idx]->lib_name);
                 lib_map_t new_lib_map;
-                new_lib_map.emplace(cv_list[idx]->cell_name,
-                                    cv_list[idx]->get_info(name_list[idx]));
+                new_lib_map.emplace(cv_list[idx]->cell_name, cv_info);
                 netlist_map.emplace(cv_list[idx]->lib_name, new_lib_map);
             } else {
-                lib_map_iter->second.emplace(cv_list[idx]->cell_name,
-                                             cv_list[idx]->get_info(name_list[idx]));
+                lib_map_iter->second.emplace(cv_list[idx]->cell_name, cv_info);
             }
-        } else if (idx == num - 1) {
-            // add this cellview to netlist
-            logger->info("Netlisting cellview: {}", name_list[idx]);
-            builder_ptr->add_cellview(name_list[idx], cv_list[idx], netlist_map, true);
         }
     }
 

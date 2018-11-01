@@ -27,18 +27,19 @@ cellview::cellview(std::string lib_name, std::string cell_name, std::string view
       view_name(std::move(view_name)), bbox(std::move(bbox)) {}
 
 cellview_info cellview::get_info(const std::string &name) const {
-    cellview_info ans(name, in_terms.size(), out_terms.size(), io_terms.size(), false);
+    cellview_info ans(name, false);
 
-    for (auto const &pair : in_terms) {
-        ans.in_terms.push_back(pair.first);
-    }
-
-    for (auto const &pair : out_terms) {
-        ans.out_terms.push_back(pair.first);
-    }
-
-    for (auto const &pair : io_terms) {
-        ans.io_terms.push_back(pair.first);
+    for (auto const &pair : terminals) {
+        switch (pair.second.ttype) {
+        case trmInput:
+            ans.in_terms.push_back(pair.first);
+            break;
+        case trmOutput:
+            ans.out_terms.push_back(pair.first);
+            break;
+        default:
+            ans.io_terms.push_back(pair.first);
+        }
     }
 
     return ans;
@@ -53,17 +54,14 @@ void cellview::set_param(std::string name,
 
 void cellview::rename_pin(const std::string &old_name, const std::string &new_name) {
     // check the new pin name does not exist already
-    if (in_terms.find(new_name) != in_terms.end() || out_terms.find(new_name) != out_terms.end() ||
-        io_terms.find(new_name) != io_terms.end()) {
+    if (terminals.find(new_name) != terminals.end()) {
         throw std::invalid_argument(fmt::format("Terminal {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
     parse(new_name, spirit::name(), ast);
 
-    if (in_terms.replace_key(old_name, new_name) == in_terms.end() &&
-        out_terms.replace_key(old_name, new_name) == out_terms.end() &&
-        io_terms.replace_key(old_name, new_name) == io_terms.end()) {
+    if (terminals.replace_key(old_name, new_name) == terminals.end()) {
         throw std::invalid_argument("Cannot find terminal: " + old_name);
     }
 
@@ -79,8 +77,7 @@ void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
     parse(new_name, spirit::name(), ast);
 
     // check the pin name does not exist already
-    if (in_terms.find(new_name) != in_terms.end() || out_terms.find(new_name) != out_terms.end() ||
-        io_terms.find(new_name) != io_terms.end()) {
+    if (terminals.find(new_name) != terminals.end()) {
         throw std::invalid_argument(fmt::format("Terminal {} already exists.", new_name));
     }
     /*
@@ -109,8 +106,7 @@ void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
 }
 
 bool cellview::remove_pin(const std::string &name) {
-    bool success =
-        in_terms.erase(name) > 0 || out_terms.erase(name) > 0 || io_terms.erase(name) > 0;
+    bool success = terminals.erase(name) > 0;
     // remove symbol pin
     if (success && sym_ptr != nullptr) {
         sym_ptr->remove_pin(name);

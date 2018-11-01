@@ -27,8 +27,7 @@ class cdl_builder : public netlist_builder {
   private:
     void write_end() override;
 
-    void write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                         const sch::term_t &out_terms, const sch::term_t &io_terms) override;
+    void write_cv_header(const std::string &name, const sch::cellview_info &info) override;
 
     void write_cv_end(const std::string &name) override;
 

@@ -28,6 +28,7 @@
 #include <cbag/layout/via.h>
 #include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/pin_object.h>
@@ -345,28 +346,25 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
 
     // build term order
     std::stringstream term_order;
-    auto tmp1 = boost::range::join(cv.in_terms, cv.out_terms);
-    auto tmp2 = boost::range::join(tmp1, cv.io_terms);
+    auto cv_info = cv.get_info(cv.cell_name);
+    auto tmp1 = boost::range::join(cv_info.in_terms, cv_info.out_terms);
+    auto tmp2 = boost::range::join(tmp1, cv_info.io_terms);
     auto cursor = tmp2.begin();
     auto stop = tmp2.end();
     term_order << '(';
     if (cursor != stop) {
-        term_order << '"' << (*cursor).first << '"';
+        term_order << '"' << *cursor << '"';
         ++cursor;
     }
     for (; cursor != stop; ++cursor) {
-        term_order << " \"" << (*cursor).first << '"';
+        term_order << " \"" << *cursor << '"';
     }
     term_order << ')';
     std::string term_order_str = term_order.str();
 
     int pin_cnt = 0;
-    logger.info("Writing input terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.in_terms);
-    logger.info("Writing output terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.out_terms);
-    logger.info("Writing inout terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.io_terms);
+    logger.info("Writing terminals");
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.terminals);
 
     // TODO: add shape support for schematic
     if (!is_sch) {

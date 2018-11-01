@@ -36,9 +36,7 @@ struct cellview {
     std::string cell_name;
     std::string view_name;
     box_t bbox;
-    term_t in_terms;
-    term_t out_terms;
-    term_t io_terms;
+    term_t terminals;
     std::vector<shape_t> shapes;
     inst_map_t instances;
     param_map props;

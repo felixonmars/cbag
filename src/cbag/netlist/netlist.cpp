@@ -82,8 +82,9 @@ void netlist_builder::build() {
 }
 
 void netlist_builder::add_cellview(const std::string &name, sch::cellview *cv,
-                                   const netlist_map_t &cell_map, bool shell) {
-    write_cv_header(name, cv->in_terms, cv->out_terms, cv->io_terms);
+                                   const sch::cellview_info &info, const netlist_map_t &cell_map,
+                                   bool shell) {
+    write_cv_header(name, info);
     if (!shell) {
         for (auto const &p : cv->instances) {
             write_instance(p.first, p.second, cell_map);

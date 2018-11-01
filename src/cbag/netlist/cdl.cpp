@@ -7,8 +7,6 @@
 
 #include <variant>
 
-#include <boost/range/join.hpp>
-
 #include <fmt/format.h>
 
 #include <cbag/spirit/ast.h>
@@ -38,23 +36,39 @@ void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
 
 void cdl_builder::write_end() {}
 
-void cdl_builder::write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                                  const sch::term_t &out_terms, const sch::term_t &io_terms) {
-    line_builder b(ncol, cnt_char, break_before, tab_size);
-    b << ".SUBCKT";
-    b << name;
-    auto tmp_range = boost::join(in_terms, out_terms);
-    for (auto const &pair : boost::join(tmp_range, io_terms)) {
-        spirit::ast::name ast = parse_cdba_name(pair.first);
+void append_name(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
+    for (auto const &name : names) {
+        spirit::ast::name ast = parse_cdba_name(name);
         for (auto const &bit : ast) {
             b << to_string_cdba(bit);
         }
     }
+}
+
+void cdl_builder::write_cv_header(const std::string &name, const sch::cellview_info &info) {
+    line_builder b(ncol, cnt_char, break_before, tab_size);
+    b << ".SUBCKT";
+    b << name;
+    append_name(b, info.in_terms);
+    append_name(b, info.out_terms);
+    append_name(b, info.io_terms);
 
     out_file << b;
 }
 
 void cdl_builder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
+
+void append_nets(cdl_builder::line_builder &b, const sch::instance &inst,
+                 const std::vector<std::string> &terms) {
+    for (auto const &term : terms) {
+        auto term_iter = inst.connections.find(term);
+        if (term_iter == inst.connections.end()) {
+            throw std::invalid_argument(fmt::format("Cannot find net {} in cellview {}__{}", term,
+                                                    inst.lib_name, inst.cell_name));
+        }
+        b << term_iter->second;
+    }
+}
 
 void cdl_builder::write_instance_helper(const std::string &name, const sch::instance &inst,
                                         const sch::cellview_info &info) {
@@ -65,15 +79,9 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
     b << name;
 
     // write instance connections
-    auto tmp_range = boost::join(info.in_terms, info.out_terms);
-    for (auto const &term : boost::join(tmp_range, info.io_terms)) {
-        auto term_iter = inst.connections.find(term);
-        if (term_iter == inst.connections.end()) {
-            throw std::invalid_argument(fmt::format("Cannot find net {} in cellview {}__{}", term,
-                                                    inst.lib_name, inst.cell_name));
-        }
-        b << term_iter->second;
-    }
+    append_nets(b, inst, info.in_terms);
+    append_nets(b, inst, info.out_terms);
+    append_nets(b, inst, info.io_terms);
 
     // write instance cell name
     if (!info.is_prim) {

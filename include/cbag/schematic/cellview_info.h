@@ -29,7 +29,7 @@ struct cellview_info {
 
     cellview_info();
 
-    cellview_info(std::string name, size_t num_in, size_t num_out, size_t num_inout, bool is_prim);
+    cellview_info(std::string name, bool is_prim);
 };
 
 } // namespace sch

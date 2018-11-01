@@ -60,8 +60,8 @@ class netlist_builder {
 
     void build();
 
-    void add_cellview(const std::string &name, sch::cellview *cv, const netlist_map_t &cell_map,
-                      bool shell);
+    void add_cellview(const std::string &name, sch::cellview *cv, const sch::cellview_info &info,
+                      const netlist_map_t &cell_map, bool shell);
 
   protected:
     void write_instance(const std::string &name, const sch::instance &inst,
@@ -70,8 +70,7 @@ class netlist_builder {
   private:
     virtual void write_end() = 0;
 
-    virtual void write_cv_header(const std::string &name, const sch::term_t &in_terms,
-                                 const sch::term_t &out_terms, const sch::term_t &io_terms) = 0;
+    virtual void write_cv_header(const std::string &name, const sch::cellview_info &info) = 0;
 
     virtual void write_cv_end(const std::string &name) = 0;
 
