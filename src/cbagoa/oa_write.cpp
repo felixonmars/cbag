@@ -268,8 +268,7 @@ class make_app_def_visitor {
 
 void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaBlock *block,
                          int &pin_cnt,
-                         const cbag::util::sorted_map<std::string, cbag::sch::pin_figure> &map,
-                         oa::oaTermTypeEnum term_type) {
+                         const cbag::util::sorted_map<std::string, cbag::sch::pin_figure> &map) {
     oa::oaName term_name;
     for (auto const &pair : map) {
         // create terminal, net, and pin
@@ -281,7 +280,7 @@ void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaB
             term_net = oa::oaNet::create(block, term_name, pair.second.stype);
         }
         logger.info("Creating terminal");
-        oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, term_type);
+        oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, pair.second.ttype);
         logger.info("Creating terminal pin");
         oa::oaPin *pin = oa::oaPin::create(term);
         logger.info("Creating terminal shape");
@@ -363,11 +362,11 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
 
     int pin_cnt = 0;
     logger.info("Writing input terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.in_terms, oa::oacInputTermType);
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.in_terms);
     logger.info("Writing output terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.out_terms, oa::oacOutputTermType);
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.out_terms);
     logger.info("Writing inout terminals");
-    create_terminal_pin(ns, logger, block, pin_cnt, cv.io_terms, oa::oacInputOutputTermType);
+    create_terminal_pin(ns, logger, block, pin_cnt, cv.io_terms);
 
     // TODO: add shape support for schematic
     if (!is_sch) {

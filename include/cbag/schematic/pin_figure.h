@@ -10,6 +10,7 @@
 #include <variant>
 
 #include <cbag/common/sig_type.h>
+#include <cbag/common/term_type.h>
 #include <cbag/schematic/pin_object.h>
 #include <cbag/schematic/rectangle.h>
 
@@ -22,12 +23,13 @@ struct pin_figure {
   public:
     pin_fig_t obj;
     sig_type stype = stSignal;
+    term_type ttype = trmInout;
 
     pin_figure();
 
-    pin_figure(rectangle &&obj, sig_type stype);
+    pin_figure(rectangle &&obj, sig_type stype, term_type ttype);
 
-    pin_figure(pin_object &&obj, sig_type stype);
+    pin_figure(pin_object &&obj, sig_type stype, term_type ttype);
 };
 
 } // namespace sch

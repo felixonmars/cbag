@@ -285,7 +285,8 @@ read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p
 
 cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *t,
                                       oa::oaPinFig *p) {
-    oa::oaSigType sig = t->getNet()->getSigType();
+    oa::oaSigType stype = t->getNet()->getSigType();
+    oa::oaTermType ttype = t->getTermType();
     if (p->isInst()) {
         cbag::sch::instance inst = read_instance(ns, logger, static_cast<oa::oaInst *>(p));
 
@@ -314,7 +315,7 @@ cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &lo
             disp_ptr->getFormat(), overbar, visible, drafting);
         disp_ptr->getOrigin(attr.origin);
 
-        return {cbag::sch::pin_object(std::move(inst), std::move(attr)), sig};
+        return {cbag::sch::pin_object(std::move(inst), std::move(attr)), stype, ttype};
     } else if (p->getType() == oa::oacRectType) {
         oa::oaRect *r = static_cast<oa::oaRect *>(p);
         std::string net;
@@ -323,7 +324,7 @@ cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &lo
             r->getNet()->getName(ns, tmp);
             net = std::string(tmp);
         }
-        return {read_rect(r, std::move(net)), sig};
+        return {read_rect(r, std::move(net)), stype, ttype};
     } else {
         throw std::invalid_argument(
             fmt::format("Unsupported OA pin figure type: {}, see developer.",
