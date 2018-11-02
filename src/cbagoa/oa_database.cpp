@@ -65,6 +65,18 @@ oa_database::~oa_database() {
     }
 }
 
+void oa_database::add_yaml_path(const std::string &lib_name, std::string yaml_path) {
+    yaml_path_map.insert_or_assign(lib_name, std::move(yaml_path));
+}
+
+void oa_database::add_primitive_lib(std::string lib_name) {
+    primitive_libs.insert(std::move(lib_name));
+}
+
+bool oa_database::is_primitive_lib(const std::string &lib_name) const {
+    return primitive_libs.find(lib_name) != primitive_libs.end();
+}
+
 std::vector<std::string> oa_database::get_cells_in_lib(const std::string &lib_name) const {
     std::vector<std::string> ans;
     cbagoa::get_cells(ns_native, *logger, lib_name, std::back_inserter(ans));
@@ -144,24 +156,20 @@ cbag::sch::cellview oa_database::read_sch_cellview(const std::string &lib_name,
     }
 }
 
-std::vector<cell_key_t>
-oa_database::read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
-                                const std::string &view_name, const std::string &new_root_path,
-                                const str_map_t &lib_map,
-                                const std::unordered_set<std::string> &exclude_libs) const {
+std::vector<cell_key_t> oa_database::read_sch_recursive(const std::string &lib_name,
+                                                        const std::string &cell_name,
+                                                        const std::string &view_name) const {
     std::vector<cell_key_t> ans;
     cbagoa::read_sch_recursive(ns_native, ns, *logger, lib_name, cell_name, view_name,
-                               new_root_path, lib_map, exclude_libs, std::back_inserter(ans));
+                               yaml_path_map, primitive_libs, std::back_inserter(ans));
     return ans;
 }
 
-std::vector<cell_key_t>
-oa_database::read_library(const std::string &lib_name, const std::string &view_name,
-                          const std::string &new_root_path, const str_map_t &lib_map,
-                          const std::unordered_set<std::string> &exclude_libs) const {
+std::vector<cell_key_t> oa_database::read_library(const std::string &lib_name,
+                                                  const std::string &view_name) const {
     std::vector<cell_key_t> ans;
-    cbagoa::read_library(ns_native, ns, *logger, lib_name, view_name, new_root_path, lib_map,
-                         exclude_libs, std::back_inserter(ans));
+    cbagoa::read_library(ns_native, ns, *logger, lib_name, view_name, yaml_path_map, primitive_libs,
+                         std::back_inserter(ans));
     return ans;
 }
 
@@ -241,7 +249,7 @@ void oa_database::implement_lay_list(const std::string &lib_name,
 } // namespace cbagoa
 
 void oa_database::write_tech_info_file(const std::string &fname, const std::string &tech_lib,
-                                       const std::string &pin_purpose) {
+                                       const std::string &pin_purpose) const {
     oa::oaTech *tech_ptr = read_tech(ns_native, tech_lib);
 
     // read layer/purpose/via mappings

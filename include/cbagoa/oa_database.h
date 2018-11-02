@@ -54,12 +54,13 @@ class oa_database {
   private:
     // OA namespace objects
     std::string lib_def_file;
-    str_map_t sch_lib_path;
     LibDefObserver lib_def_obs{1};
 
   public:
     oa::oaNativeNS ns_native;
     oa::oaCdbaNS ns;
+    str_map_t yaml_path_map;
+    std::unordered_set<std::string> primitive_libs;
     std::shared_ptr<spdlog::logger> logger;
 
   public:
@@ -69,6 +70,12 @@ class oa_database {
      */
     explicit oa_database(std::string lib_def_fname);
     ~oa_database();
+
+    void add_yaml_path(const std::string &lib_name, std::string yaml_path);
+
+    void add_primitive_lib(std::string lib_name);
+
+    bool is_primitive_lib(const std::string &lib_name) const;
 
     std::vector<std::string> get_cells_in_lib(const std::string &lib_name) const;
 
@@ -80,15 +87,12 @@ class oa_database {
     cbag::sch::cellview read_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                                           const std::string &view_name) const;
 
-    std::vector<cell_key_t>
-    read_sch_recursive(const std::string &lib_name, const std::string &cell_name,
-                       const std::string &view_name, const std::string &new_root_path,
-                       const str_map_t &lib_map,
-                       const std::unordered_set<std::string> &exclude_libs) const;
+    std::vector<cell_key_t> read_sch_recursive(const std::string &lib_name,
+                                               const std::string &cell_name,
+                                               const std::string &view_name) const;
 
-    std::vector<cell_key_t> read_library(const std::string &lib_name, const std::string &view_name,
-                                         const std::string &new_root_path, const str_map_t &lib_map,
-                                         const std::unordered_set<std::string> &exclude_libs) const;
+    std::vector<cell_key_t> read_library(const std::string &lib_name,
+                                         const std::string &view_name) const;
 
     void write_sch_cellview(const std::string &lib_name, const std::string &cell_name,
                             const std::string &view_name, bool is_sch,
@@ -109,7 +113,7 @@ class oa_database {
                             const std::vector<cbag::layout::cellview *> &cv_list) const;
 
     void write_tech_info_file(const std::string &fname, const std::string &tech_lib,
-                              const std::string &pin_purpose);
+                              const std::string &pin_purpose) const;
 };
 
 } // namespace cbagoa
