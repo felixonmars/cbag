@@ -45,7 +45,7 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
     uint32_t net_size = n_net.size();
     if (tot_size == net_size) {
         // direct connection
-        connections[std::move(term_str)] = std::move(net_str);
+        connections.insert_or_assign(std::move(term_str), std::move(net_str));
     } else if (tot_size % net_size != 0) {
         // cannot broadcast net
         throw std::invalid_argument(fmt::format("Cannot connect instance {} terminal {} to net {}",
@@ -58,7 +58,7 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
         for (uint32_t c = 0; c < mult - 1; ++c) {
             std::copy_n(n_net.unit_list.begin(), old_cnt, std::back_inserter(n_net.unit_list));
         }
-        connections[std::move(term_str)] = to_string_cdba(n_net);
+        connections.insert_or_assign(std::move(term_str), to_string_cdba(n_net));
     }
 }
 

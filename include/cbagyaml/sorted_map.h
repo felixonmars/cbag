@@ -25,9 +25,9 @@ template <typename K, typename V> struct convert<cbag::util::sorted_map<K, V>> {
         for (const_iterator it = node.begin(); it != node.end(); ++it)
 #if defined(__GNUC__) && __GNUC__ < 4
             // workaround for GCC 3:
-            rhs[it->first.template as<K>()] = it->second.template as<V>();
+            rhs.insert_or_assign(it->first.template as<K>(), it->second.template as<V>());
 #else
-            rhs[it->first.as<K>()] = it->second.as<V>();
+            rhs.insert_or_assign(it->first.as<K>(), it->second.as<V>());
 #endif
         return true;
     }

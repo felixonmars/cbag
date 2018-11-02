@@ -76,26 +76,6 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         return lhs.data_ == rhs.data_;
     }
 
-    mapped_type operator[](const key_type &key) {
-        auto iter_range = data_.equal_range(key);
-        if (iter_range.first == iter_range.second) {
-            auto iter = data_.insert_force(iter_range.first, value_type(key, mapped_type()));
-            return iter->second;
-        } else {
-            return iter_range.first->second;
-        }
-    }
-    mapped_type operator[](key_type &&key) {
-        auto iter_range = data_.equal_range(key);
-        if (iter_range.first == iter_range.second) {
-            auto iter =
-                data_.insert_force(iter_range.first, value_type(std::move(key), mapped_type()));
-            return iter->second;
-        } else {
-            return iter_range.first->second;
-        }
-    }
-
     template <class K> const_iterator find(const K &x) const { return data_.find(x); }
     template <class K> iterator find(const K &x) { return data_.find(x); }
 
@@ -114,6 +94,23 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         for (; first != last; ++first) {
             insert(*first);
         }
+    }
+
+    template <class M> std::pair<iterator, bool> insert_or_assign(const key_type &k, M &&obj) {
+        auto iter = data_.lower_bound(k);
+        if (data_.get_compare()(k, *iter))
+            return {data_._insert_force(iter, value_type(k, std::forward<M>(obj))), true};
+        iter->second = std::forward<M>(obj);
+        return {iter, false};
+    }
+
+    template <class M> std::pair<iterator, bool> insert_or_assign(key_type &&k, M &&obj) {
+        auto iter = data_.lower_bound(k);
+        if (data_.get_compare()(k, *iter))
+            return {data_._insert_force(iter, value_type(std::move(k), std::forward<M>(obj))),
+                    true};
+        iter->second = std::forward<M>(obj);
+        return {iter, false};
     }
 
     size_type erase(const key_type &key) {

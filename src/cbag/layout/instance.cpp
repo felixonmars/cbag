@@ -92,28 +92,28 @@ void instance::set_master(const cellview *new_master) { master = new_master; }
 void instance::set_int_param(const char *name, int value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
-        cv_ref->params[name] = value;
+        cv_ref->params.insert_or_assign(std::string(name), value);
     }
 }
 
 void instance::set_double_param(const char *name, double value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
-        cv_ref->params[name] = value;
+        cv_ref->params.insert_or_assign(std::string(name), value);
     }
 }
 
 void instance::set_bool_param(const char *name, bool value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
-        cv_ref->params[name] = value;
+        cv_ref->params.insert_or_assign(std::string(name), value);
     }
 }
 
 void instance::set_string_param(const char *name, const char *value) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
-        cv_ref->params[name] = std::string(value);
+        cv_ref->params.insert_or_assign(std::string(name), std::string(value));
     }
 }
 

@@ -93,7 +93,7 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
     param_map par_map(info.props);
     // update with instance parameters
     for (auto const &pair : inst.params) {
-        par_map[pair.first] = pair.second;
+        par_map.insert_or_assign(pair.first, pair.second);
     }
     // write instance parameters
     for (auto const &pair : par_map) {
