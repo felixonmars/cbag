@@ -25,7 +25,7 @@ namespace sch {
 struct instance;
 struct cellview_info;
 
-using inst_map_t = cbag::util::sorted_map<std::string, instance>;
+using inst_map_t = cbag::util::sorted_map<std::string, std::unique_ptr<instance>>;
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
 
 /** A schematic or symbol cell view

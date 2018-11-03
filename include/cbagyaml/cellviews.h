@@ -12,6 +12,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "yaml-cpp/unique_ptr.h"
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/schematic/cellview.h>

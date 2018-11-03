@@ -161,12 +161,12 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         if (up) {
             auto last = stop - 1;
             value_type tmp = std::move(*last);
-            std::copy_backward(start, last, stop);
+            std::move_backward(start, last, stop);
             *start = std::move(tmp);
             return start;
         } else {
             value_type tmp = std::move(*start);
-            std::copy(start + 1, stop, start);
+            std::move(start + 1, stop, start);
             auto ans = stop - 1;
             *ans = std::move(tmp);
             return ans;

@@ -133,7 +133,7 @@ void cellview::rename_instance(const std::string &old_name, std::string new_name
     uint32_t old_size = old_ast.size();
     uint32_t new_size = new_ast.size();
     if (old_size != new_size) {
-        iter->second.resize_nets(old_size, new_size);
+        iter->second->resize_nets(old_size, new_size);
     }
 }
 
