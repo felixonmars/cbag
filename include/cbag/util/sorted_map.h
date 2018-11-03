@@ -86,28 +86,26 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         return data_.emplace_unique(std::forward<Args>(args)...);
     }
 
-    std::pair<iterator, bool> insert(const value_type &val) { return data_.insert_unique(val); }
-    std::pair<iterator, bool> insert(value_type &&val) {
-        return data_.insert_unique(std::move(val));
+    template <class V, std::enable_if_t<
+                           std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>,
+                           int> = 0>
+    std::pair<iterator, bool> insert(V &&val) {
+        return data_.insert_unique(std::forward<V>(val));
     }
+
     template <class InputIt> void insert(InputIt first, InputIt last) {
         for (; first != last; ++first) {
-            insert(*first);
+            emplace(first->first, first->second);
         }
     }
 
-    template <class M> std::pair<iterator, bool> insert_or_assign(const key_type &k, M &&obj) {
+    template <class V, class M,
+              std::enable_if_t<
+                  std::is_same_v<key_type, std::remove_cv_t<std::remove_reference_t<V>>>, int> = 0>
+    std::pair<iterator, bool> insert_or_assign(V &&k, M &&obj) {
         auto iter = data_.lower_bound(k);
         if (data_.get_compare()(k, *iter))
-            return {data_._insert_force(iter, value_type(k, std::forward<M>(obj))), true};
-        iter->second = std::forward<M>(obj);
-        return {iter, false};
-    }
-
-    template <class M> std::pair<iterator, bool> insert_or_assign(key_type &&k, M &&obj) {
-        auto iter = data_.lower_bound(k);
-        if (data_.get_compare()(k, *iter))
-            return {data_._insert_force(iter, value_type(std::move(k), std::forward<M>(obj))),
+            return {data_._insert_force(iter, value_type(std::forward<V>(k), std::forward<M>(obj))),
                     true};
         iter->second = std::forward<M>(obj);
         return {iter, false};

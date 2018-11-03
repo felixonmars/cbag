@@ -121,17 +121,13 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
             throw std::invalid_argument("Cannot insert given element at back.");
     }
 
-    std::pair<iterator, bool> insert_unique(const value_type &item) {
+    template <class V, std::enable_if_t<
+                           std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>,
+                           int> = 0>
+    std::pair<iterator, bool> insert_unique(V &&item) {
         auto iter = lower_bound(item);
         if (iter == data_.end() || comp_(item, *iter))
-            return {data_.insert(iter, item), true};
-        return {iter, false};
-    }
-
-    std::pair<iterator, bool> insert_unique(value_type &&item) {
-        auto iter = lower_bound(item);
-        if (iter == data_.end() || comp_(item, *iter))
-            return {data_.insert(iter, std::move(item)), true};
+            return {data_.insert(iter, std::forward<V>(item)), true};
         return {iter, false};
     }
 
