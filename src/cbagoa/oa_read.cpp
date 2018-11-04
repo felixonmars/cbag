@@ -5,6 +5,7 @@
  *  \date   2018/07/13
  */
 
+#include <memory>
 #include <utility>
 
 #include <fmt/format.h>
@@ -273,12 +274,13 @@ cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger
     return inst;
 }
 
-std::pair<std::string, cbag::sch::instance>
+std::pair<std::string, std::unique_ptr<cbag::sch::instance>>
 read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
     logger.info("Reading instance {}", (const char *)inst_name_oa);
-    return {std::string(inst_name_oa), read_instance(ns, logger, p)};
+    return {std::string(inst_name_oa),
+            std::make_unique<cbag::sch::instance>(read_instance(ns, logger, p))};
 }
 
 // Read method for pin figures

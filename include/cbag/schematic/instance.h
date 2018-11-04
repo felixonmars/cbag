@@ -46,12 +46,15 @@ struct instance {
 
     void clear_params();
 
-    void set_param(std::string &&name, const std::variant<int32_t, double, bool, std::string> &val);
+    void set_param(const std::string &name,
+                   const std::variant<int32_t, double, bool, std::string> &val);
 
     void update_connection(const std::string &inst_name, uint32_t inst_size, std::string term_str,
                            std::string net_str);
 
-    void update_connection(const std::string &inst_name, std::string &&term, std::string &&net);
+    void update_connection(const std::string &inst_name, std::string term, std::string net);
+
+    void update_master(std::string lib, std::string cell, bool prim = false);
 
     void resize_nets(uint32_t old_size, uint32_t new_size);
 };

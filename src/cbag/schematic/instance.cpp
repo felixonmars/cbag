@@ -30,9 +30,9 @@ uint32_t instance::height() const { return bbox.getHeight(); }
 
 void instance::clear_params() { params.clear(); }
 
-void instance::set_param(std::string &&name,
+void instance::set_param(const std::string &name,
                          const std::variant<int32_t, double, bool, std::string> &val) {
-    cbag::set_param(params, std::move(name), val);
+    cbag::set_param(params, name, val);
 }
 
 void instance::update_connection(const std::string &inst_name, uint32_t inst_size,
@@ -62,11 +62,19 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
     }
 }
 
-void instance::update_connection(const std::string &inst_name, std::string &&term,
-                                 std::string &&net) {
+void instance::update_connection(const std::string &inst_name, std::string term, std::string net) {
     // check number of bits match
     spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
     update_connection(inst_name, nu.size(), std::move(term), std::move(net));
+}
+
+void instance::update_master(std::string lib, std::string cell, bool prim) {
+    lib_name = std::move(lib);
+    cell_name = std::move(cell);
+    is_primitive = prim;
+
+    clear_params();
+    connections.clear();
 }
 
 void instance::resize_nets(uint32_t old_size, uint32_t new_size) {

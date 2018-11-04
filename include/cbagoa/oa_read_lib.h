@@ -67,10 +67,11 @@ void read_sch_helper(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     // recurse
     auto exc_lib_end = primitive_libs.end();
     for (const auto &pair : sch_cv.instances) {
-        std::pair<std::string, std::string> ikey(pair.second.lib_name, pair.second.cell_name);
+        cbag::sch::instance *inst = pair.second.get();
+        std::pair<std::string, std::string> ikey(inst->lib_name, inst->cell_name);
         if (exclude_cells.find(ikey) == exclude_cells.end()) {
             // did not see this schematic master before
-            if (primitive_libs.find(pair.second.lib_name) == exc_lib_end) {
+            if (primitive_libs.find(inst->lib_name) == exc_lib_end) {
                 // non-primitive master, parse normally
                 read_sch_helper(ns_native, ns, logger, ikey, view_name, yaml_path_map,
                                 primitive_libs, exclude_cells, out_iter);

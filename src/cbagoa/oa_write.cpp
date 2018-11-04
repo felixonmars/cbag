@@ -297,7 +297,8 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
     // get dependencies
     cbag::util::sorted_vector<std::tuple<std::string, std::string, std::string>> dep_set;
     for (auto const &inst : cv.instances) {
-        dep_set.emplace_unique(inst.second.lib_name, inst.second.cell_name, inst.second.view_name);
+        dep_set.emplace_unique(inst.second->lib_name, inst.second->cell_name,
+                               inst.second->view_name);
     }
 
     // build dependencies
@@ -381,24 +382,25 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
     for (auto const &pair : cv.instances) {
         logger.info("Writing instance {}", pair.first);
         cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
-        if (pair.second.is_primitive) {
-            lib.init(ns, pair.second.lib_name.c_str());
-            cell.init(ns, pair.second.cell_name.c_str());
+        cbag::sch::instance *inst = pair.second.get();
+        if (pair.second->is_primitive) {
+            lib.init(ns, inst->lib_name.c_str());
+            cell.init(ns, inst->cell_name.c_str());
         } else {
             lib = dsn_lib;
-            cell.init(ns, rename_map->find(pair.second.cell_name)->second.c_str());
+            cell.init(ns, rename_map->find(inst->cell_name)->second.c_str());
         }
 
-        view.init(ns, pair.second.view_name.c_str());
+        view.init(ns, inst->view_name.c_str());
         name.init(ns, nu.base.c_str());
         oa::oaInst *ptr;
         if (nu.is_vector()) {
             ptr = oa::oaVectorInst::create(block, lib, cell, view, name, nu.idx_range.start,
-                                           nu.idx_range.stop, pair.second.xform);
+                                           nu.idx_range.stop, inst->xform);
         } else {
-            ptr = oa::oaScalarInst::create(block, lib, cell, view, name, pair.second.xform);
+            ptr = oa::oaScalarInst::create(block, lib, cell, view, name, inst->xform);
         }
-        for (auto const &term_net_pair : pair.second.connections) {
+        for (auto const &term_net_pair : inst->connections) {
             logger.info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
                         term_net_pair.second);
             term_name.init(ns, term_net_pair.first.c_str());
@@ -416,7 +418,7 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
             oa::oaBox pin_box;
             oa::oaPoint pts[2];
             pin_fig->getBBox(pin_box);
-            pin_box.transform(pair.second.xform);
+            pin_box.transform(inst->xform);
             pin_box.getCenter(pts[0]);
             oa::oaCoord x = pts[0].x();
             oa::oaCoord y = pts[0].y();
@@ -434,7 +436,7 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
         }
 
         logger.info("Writing instance {} params", pair.first);
-        for (auto const &prop_pair : pair.second.params) {
+        for (auto const &prop_pair : inst->params) {
             std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
         }
         logger.info("Writing instance {} done", pair.first);
