@@ -27,24 +27,27 @@ void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_siz
     spirit::ast::name_unit new_ast;
     parse(new_name, spirit::name_unit(), new_ast);
 
-    // create new copy
-    auto emp_iter = instances.emplace(new_name, inst);
+    // insert with empty pointer
+    auto emp_iter = instances.emplace(new_name, std::unique_ptr<instance>());
     if (!emp_iter.second) {
         throw std::invalid_argument(
             fmt::format("instance {} already exists.", emp_iter.first->first));
     }
+    // insert successful, make pointer point at something
+    emp_iter.first->second = std::make_unique<instance>(inst);
+    instance *cur_ptr = emp_iter.first->second.get();
 
     // resize nets
     uint32_t new_size = new_ast.size();
     if (old_size != new_size) {
-        emp_iter.first->second.resize_nets(old_size, new_size);
+        cur_ptr->resize_nets(old_size, new_size);
     }
 
     // shift and update connections
-    emp_iter.first->second.xform.xOffset() += dx;
-    emp_iter.first->second.xform.xOffset() += dy;
+    cur_ptr->xform.xOffset() += dx;
+    cur_ptr->xform.yOffset() += dy;
     for (auto const &p : conns) {
-        emp_iter.first->second.update_connection(new_name, new_ast.size(), p.first, p.second);
+        cur_ptr->update_connection(new_name, new_ast.size(), p.first, p.second);
     }
 }
 
@@ -63,13 +66,13 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
 
     if (dx == 0 && dy == 0) {
         // figure out default shift
-        dx = iter->second.bbox.getWidth() + 10;
+        dx = iter->second->bbox.getWidth() + 10;
     }
 
     coord_t x = 0;
     coord_t y = 0;
     for (const auto &p : name_conn_range) {
-        copy_instance(instances, iter->second, old_size, p.first, x, y, p.second);
+        copy_instance(instances, *(iter->second), old_size, p.first, x, y, p.second);
         x += dx;
         y += dy;
     }
