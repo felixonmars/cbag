@@ -36,6 +36,7 @@
 #include <cbag/spirit/ast.h>
 
 #include <cbagoa/oa_polygon.h>
+#include <cbagoa/oa_util.h>
 #include <cbagoa/oa_write.h>
 
 namespace cbagoa {
@@ -337,9 +338,15 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
     cv_data->close();
 }
 
-void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                        const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
-                        const str_map_t *rename_map) {
+void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                        spdlog::logger &logger, const std::string &lib_name,
+                        const std::string &cell_name, const std::string &view_name, bool is_sch,
+                        const cbag::sch::cellview &cv, const str_map_t *rename_map) {
+
+    oa::oaDesign *dsn = open_design(ns_native, logger, lib_name, cell_name, view_name, 'w',
+                                    is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
+    logger.info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
+
     oa::oaScalarName dsn_lib;
     dsn->getLibName(dsn_lib);
 
@@ -483,7 +490,7 @@ void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
         (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp + num_op);
     }
     dsn->save();
-
+    dsn->close();
     logger.info("Finish writing schematic/symbol cellview");
 }
 
@@ -542,24 +549,23 @@ void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
     oa::oaStdVia::create(blk, via_def, v.xform.to_transform(), &v.params);
 }
 
-void write_lay_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                        const cbag::layout::cellview &cv, oa::oaDesign *dsn, oa::oaTech *tech,
+void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                        spdlog::logger &logger, const std::string &lib_name,
+                        const std::string &cell_name, const std::string &view_name,
+                        const cbag::layout::cellview &cv, oa::oaTech *tech,
                         const str_map_t *rename_map) {
 
-    // get library/view
-    oa::oaString lib_name, view_name;
-    oa::oaScalarName lib_name_oa;
-    dsn->getLibName(lib_name_oa);
-    lib_name_oa.get(ns, lib_name);
-    dsn->getViewName(ns, view_name);
+    oa::oaDesign *dsn =
+        open_design(ns_native, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
+    logger.info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
 
     // create top block
     oa::oaBlock *blk = oa::oaBlock::create(dsn);
 
     logger.info("Making layout instances.");
     for (auto const &inst_pair : cv.inst_map) {
-        create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name, view_name,
-                        rename_map);
+        create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name.c_str(),
+                        view_name.c_str(), rename_map);
     }
 
     logger.info("Making layout geometries.");
@@ -641,6 +647,7 @@ void write_lay_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
 
     // save
     dsn->save();
+    dsn->close();
 }
 
 } // namespace cbagoa

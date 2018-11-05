@@ -105,8 +105,7 @@ class oa_database {
 
     void write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
                             const std::string &view_name, const cbag::layout::cellview &cv,
-                            const str_map_t *rename_map = nullptr,
-                            oa::oaTech *tech_ptr = nullptr) const;
+                            oa::oaTech *tech, const str_map_t *rename_map = nullptr) const;
 
     void implement_lay_list(const std::string &lib_name, const std::vector<std::string> &cell_list,
                             const std::string &view,

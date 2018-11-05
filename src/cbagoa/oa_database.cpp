@@ -178,11 +178,8 @@ void oa_database::write_sch_cellview(const std::string &lib_name, const std::str
                                      const cbag::sch::cellview &cv,
                                      const str_map_t *rename_map) const {
     try {
-        oa::oaDesign *dsn_ptr = open_design(ns_native, *logger, lib_name, cell_name, view_name, 'w',
-                                            is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
-        logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbagoa::write_sch_cellview(ns, *logger, cv, dsn_ptr, is_sch, rename_map);
-        dsn_ptr->close();
+        cbagoa::write_sch_cellview(ns_native, ns, *logger, lib_name, cell_name, view_name, is_sch,
+                                   cv, rename_map);
     } catch (...) {
         handle_oa_exceptions(*logger);
     }
@@ -212,17 +209,10 @@ void oa_database::implement_sch_list(const std::string &lib_name,
 
 void oa_database::write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
                                      const std::string &view_name, const cbag::layout::cellview &cv,
-                                     const str_map_t *rename_map, oa::oaTech *tech_ptr) const {
+                                     oa::oaTech *tech, const str_map_t *rename_map) const {
     try {
-        if (tech_ptr == nullptr) {
-            tech_ptr = read_tech(ns_native, lib_name);
-        }
-
-        oa::oaDesign *dsn_ptr =
-            open_design(ns_native, *logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
-        logger->info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
-        cbagoa::write_lay_cellview(ns, *logger, cv, dsn_ptr, tech_ptr, rename_map);
-        dsn_ptr->close();
+        cbagoa::write_lay_cellview(ns_native, ns, *logger, lib_name, cell_name, view_name, cv, tech,
+                                   rename_map);
     } catch (...) {
         handle_oa_exceptions(*logger);
     }
@@ -239,7 +229,7 @@ void oa_database::implement_lay_list(const std::string &lib_name,
         std::size_t num = cell_list.size();
         for (std::size_t idx = 0; idx < num; ++idx) {
             const std::string &cell_name = cell_list[idx].c_str();
-            write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]), &rename_map, tech_ptr);
+            write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]), tech_ptr, &rename_map);
             logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
             rename_map[cv_list[idx]->cell_name] = cell_list[idx];
         }

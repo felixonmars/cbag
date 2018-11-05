@@ -33,12 +33,15 @@ using str_map_t = std::unordered_map<std::string, std::string>;
 
 // Write method for schematic/symbol cell view
 
-void write_sch_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                        const cbag::sch::cellview &cv, oa::oaDesign *dsn, bool is_sch,
-                        const str_map_t *rename_map = nullptr);
+void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                        spdlog::logger &logger, const std::string &lib_name,
+                        const std::string &cell_name, const std::string &view_name, bool is_sch,
+                        const cbag::sch::cellview &cv, const str_map_t *rename_map = nullptr);
 
-void write_lay_cellview(const oa::oaCdbaNS &ns, spdlog::logger &logger,
-                        const cbag::layout::cellview &cv, oa::oaDesign *dsn, oa::oaTech *tech,
+void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
+                        spdlog::logger &logger, const std::string &lib_name,
+                        const std::string &cell_name, const std::string &view_name,
+                        const cbag::layout::cellview &cv, oa::oaTech *tech,
                         const str_map_t *rename_map = nullptr);
 
 } // namespace cbagoa
