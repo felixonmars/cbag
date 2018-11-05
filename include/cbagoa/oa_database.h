@@ -40,6 +40,8 @@ class oa_writer;
 
 using cell_key_t = std::pair<std::string, std::string>;
 using str_map_t = std::unordered_map<std::string, std::string>;
+using sch_cv_info = std::pair<std::string, cbag::sch::cellview *>;
+using lay_cv_info = std::pair<std::string, cbag::layout::cellview *>;
 
 class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
   public:
@@ -99,17 +101,16 @@ class oa_database {
                             const cbag::sch::cellview &cv,
                             const str_map_t *rename_map = nullptr) const;
 
-    void implement_sch_list(const std::string &lib_name, const std::vector<std::string> &cell_list,
-                            const std::string &sch_view, const std::string &sym_view,
-                            const std::vector<cbag::sch::cellview *> &cv_list) const;
-
     void write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
                             const std::string &view_name, const cbag::layout::cellview &cv,
                             oa::oaTech *tech, const str_map_t *rename_map = nullptr) const;
 
-    void implement_lay_list(const std::string &lib_name, const std::vector<std::string> &cell_list,
-                            const std::string &view,
-                            const std::vector<cbag::layout::cellview *> &cv_list) const;
+    void implement_sch_list(const std::string &lib_name, const std::string &sch_view,
+                            const std::string &sym_view,
+                            const std::vector<sch_cv_info> &cv_list) const;
+
+    void implement_lay_list(const std::string &lib_name, const std::string &view,
+                            const std::vector<lay_cv_info> &cv_list) const;
 
     void write_tech_info_file(const std::string &fname, const std::string &tech_lib,
                               const std::string &pin_purpose) const;

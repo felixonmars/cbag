@@ -28,6 +28,7 @@
 #include <cbagoa/oa_read_lib.h>
 #include <cbagoa/oa_util.h>
 #include <cbagoa/oa_write.h>
+#include <cbagoa/oa_write_lib.h>
 
 namespace fs = boost::filesystem;
 
@@ -185,28 +186,6 @@ void oa_database::write_sch_cellview(const std::string &lib_name, const std::str
     }
 }
 
-void oa_database::implement_sch_list(const std::string &lib_name,
-                                     const std::vector<std::string> &cell_list,
-                                     const std::string &sch_view, const std::string &sym_view,
-                                     const std::vector<cbag::sch::cellview *> &cv_list) const {
-    try {
-        str_map_t rename_map;
-
-        std::size_t num = cell_list.size();
-        for (std::size_t idx = 0; idx < num; ++idx) {
-            const std::string &cell_name = cell_list[idx].c_str();
-            write_sch_cellview(lib_name, cell_name, sch_view, true, *(cv_list[idx]), &rename_map);
-            if (cv_list[idx]->sym_ptr != nullptr && !sym_view.empty()) {
-                write_sch_cellview(lib_name, cell_name, sym_view, false, *(cv_list[idx]->sym_ptr));
-            }
-            logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
-            rename_map[cv_list[idx]->cell_name] = cell_list[idx];
-        }
-    } catch (...) {
-        handle_oa_exceptions(*logger);
-    }
-}
-
 void oa_database::write_lay_cellview(const std::string &lib_name, const std::string &cell_name,
                                      const std::string &view_name, const cbag::layout::cellview &cv,
                                      oa::oaTech *tech, const str_map_t *rename_map) const {
@@ -218,24 +197,17 @@ void oa_database::write_lay_cellview(const std::string &lib_name, const std::str
     }
 }
 
-void oa_database::implement_lay_list(const std::string &lib_name,
-                                     const std::vector<std::string> &cell_list,
-                                     const std::string &view,
-                                     const std::vector<cbag::layout::cellview *> &cv_list) const {
-    try {
-        str_map_t rename_map;
-        auto *tech_ptr = read_tech(ns_native, lib_name);
+void oa_database::implement_sch_list(const std::string &lib_name, const std::string &sch_view,
+                                     const std::string &sym_view,
+                                     const std::vector<sch_cv_info> &cv_list) const {
+    cbagoa::implement_sch_list<std::vector<sch_cv_info>>(ns_native, ns, *logger, lib_name, sch_view,
+                                                         sym_view, cv_list);
+}
 
-        std::size_t num = cell_list.size();
-        for (std::size_t idx = 0; idx < num; ++idx) {
-            const std::string &cell_name = cell_list[idx].c_str();
-            write_lay_cellview(lib_name, cell_name, view, *(cv_list[idx]), tech_ptr, &rename_map);
-            logger->info("cell name {} maps to {}", cv_list[idx]->cell_name, cell_list[idx]);
-            rename_map[cv_list[idx]->cell_name] = cell_list[idx];
-        }
-    } catch (...) {
-        handle_oa_exceptions(*logger);
-    }
+void oa_database::implement_lay_list(const std::string &lib_name, const std::string &view,
+                                     const std::vector<lay_cv_info> &cv_list) const {
+    cbagoa::implement_lay_list<std::vector<lay_cv_info>>(ns_native, ns, *logger, lib_name, view,
+                                                         cv_list);
 } // namespace cbagoa
 
 void oa_database::write_tech_info_file(const std::string &fname, const std::string &tech_lib,
