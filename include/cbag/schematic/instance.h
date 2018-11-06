@@ -31,14 +31,8 @@ struct instance {
 
     instance();
 
-    /** Create an instance with empty parameter and terminal mappings.
-     *
-     * @param lib the library name.
-     * @param cell the cell name.
-     * @param view the view name.
-     * @param xform the instance location.
-     */
-    instance(std::string lib, std::string cell, std::string view, transformation xform, box_t bbox);
+    instance(std::string lib, std::string cell, std::string view, transformation xform, coord_t xl,
+             coord_t yl, coord_t xh, coord_t yh);
 
     uint32_t width() const;
 

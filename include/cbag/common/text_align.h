@@ -7,15 +7,15 @@
 namespace cbag {
 
 enum class text_align : uint8_t {
-    upperLeft,
-    centerLeft,
-    lowerLeft,
-    upperCenter,
-    centerCenter,
-    lowerCenter,
-    upperRight,
-    centerRight,
-    lowerRight
+    upperLeft = 0,
+    centerLeft = 1,
+    lowerLeft = 2,
+    upperCenter = 3,
+    centerCenter = 4,
+    lowerCenter = 5,
+    upperRight = 6,
+    centerRight = 7,
+    lowerRight = 8
 };
 constexpr text_align taUL = text_align::upperLeft;
 constexpr text_align taCL = text_align::centerLeft;

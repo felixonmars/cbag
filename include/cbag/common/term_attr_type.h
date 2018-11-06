@@ -6,7 +6,7 @@
 
 namespace cbag {
 
-enum class term_attr_type : uint8_t { name, hasPins, numBits };
+enum class term_attr_type : uint8_t { name = 0, hasPins = 1, numBits = 2 };
 constexpr term_attr_type tatName = term_attr_type::name;
 constexpr term_attr_type tatHasPin = term_attr_type::hasPins;
 constexpr term_attr_type tatNumBits = term_attr_type::numBits;

@@ -21,9 +21,9 @@ namespace sch {
 instance::instance() = default;
 
 instance::instance(std::string lib, std::string cell, std::string view, transformation xform,
-                   box_t bbox)
+                   coord_t xl, coord_t yl, coord_t xh, coord_t yh)
     : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
-      xform(std::move(xform)), bbox(std::move(bbox)), connections(), params() {}
+      xform(std::move(xform)), bbox(xl, yl, xh, yh), connections(), params() {}
 
 uint32_t instance::width() const { return bbox.width(); }
 

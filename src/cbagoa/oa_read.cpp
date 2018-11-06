@@ -90,60 +90,125 @@ std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppD
 // Read methods for shapes
 
 cbag::sch::rectangle read_rect(oa::oaRect *p, std::string &&net) {
-    cbag::sch::rectangle ans(p->getLayerNum(), p->getPurposeNum(), net);
-    p->getBBox(ans.bbox);
+    oa::oaBox box;
+    p->getBBox(box);
+    cbag::sch::rectangle ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), box.left(),
+                             box.bottom(), box.right(), box.top());
     return ans;
 }
 
 cbag::sch::polygon read_poly(oa::oaPolygon *p, std::string &&net) {
-    cbag::sch::polygon ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
-    p->getPoints(ans.points);
+    oa::oaPointArray arr;
+    p->getPoints(arr);
+    oa::oaUInt4 size = p->getNumPoints();
+    cbag::sch::polygon ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), size);
+    for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
+        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+    }
     return ans;
 }
 
 cbag::sch::arc read_arc(oa::oaArc *p, std::string &&net) {
-    cbag::sch::arc ans(p->getLayerNum(), p->getPurposeNum(), net, p->getStartAngle(),
-                       p->getStopAngle());
-    p->getEllipseBBox(ans.bbox);
+    oa::oaBox box;
+    p->getBBox(box);
+    cbag::sch::arc ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), p->getStartAngle(),
+                       p->getStopAngle(), box.left(), box.bottom(), box.right(), box.top());
     return ans;
 }
 
 cbag::sch::donut read_donut(oa::oaDonut *p, std::string &&net) {
-    cbag::sch::donut ans(p->getLayerNum(), p->getPurposeNum(), net, p->getRadius(),
-                         p->getHoleRadius());
-    p->getCenter(ans.center);
+    oa::oaPoint pt;
+    p->getCenter(pt);
+    cbag::sch::donut ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), p->getRadius(),
+                         p->getHoleRadius(), pt.x(), pt.y());
     return ans;
 }
 
 cbag::sch::ellipse read_ellipse(oa::oaEllipse *p, std::string &&net) {
-    cbag::sch::ellipse ans(p->getLayerNum(), p->getPurposeNum(), net);
-    p->getBBox(ans.bbox);
+    oa::oaBox box;
+    p->getBBox(box);
+    cbag::sch::ellipse ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), box.left(),
+                           box.bottom(), box.right(), box.top());
     return ans;
 }
 
 cbag::sch::line read_line(oa::oaLine *p, std::string &&net) {
-    cbag::sch::line ans(p->getLayerNum(), p->getPurposeNum(), net, p->getNumPoints());
-    p->getPoints(ans.points);
+    oa::oaPointArray arr;
+    p->getPoints(arr);
+    oa::oaUInt4 size = p->getNumPoints();
+    cbag::sch::line ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), size);
+    for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
+        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+    }
     return ans;
 }
 
+cbag::path_style get_path_style(oa::oaPathStyleEnum oa_enum) {
+    return static_cast<cbag::path_style>(oa_enum);
+}
+
 cbag::sch::path read_path(oa::oaPath *p, std::string &&net) {
-    cbag::sch::path ans(p->getLayerNum(), p->getPurposeNum(), net, p->getWidth(), p->getNumPoints(),
-                        p->getStyle(), p->getBeginExt(), p->getEndExt());
-    p->getPoints(ans.points);
+    oa::oaPointArray arr;
+    p->getPoints(arr);
+    oa::oaUInt4 size = p->getNumPoints();
+    cbag::sch::path ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), p->getWidth(), size,
+                        get_path_style(p->getStyle()), p->getBeginExt(), p->getEndExt());
+    for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
+        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+    }
     return ans;
+    return ans;
+}
+
+cbag::text_align get_text_align(oa::oaTextAlignEnum oa_enum) {
+    return static_cast<cbag::text_align>(oa_enum);
+}
+
+cbag::orientation get_orientation(oa::oaOrientEnum oa_enum) {
+    switch (oa_enum) {
+    case oa::oacR0:
+        return cbag::oR0;
+    case oa::oacR90:
+        return cbag::oR90;
+    case oa::oacR180:
+        return cbag::oR180;
+    case oa::oacR270:
+        return cbag::oR270;
+    case oa::oacMY:
+        return cbag::oMY;
+    case oa::oacMYR90:
+        return cbag::oMYR90;
+    case oa::oacMX:
+        return cbag::oMX;
+    case oa::oacMXR90:
+        return cbag::oMXR90;
+    default:
+        throw std::invalid_argument("Unknown OA orientation code.");
+    }
+}
+
+cbag::font_t get_font(oa::oaFontEnum oa_enum) { return static_cast<cbag::font_t>(oa_enum); }
+
+cbag::text_disp_format get_text_disp_format(oa::oaTextDisplayFormatEnum oa_enum) {
+    return static_cast<cbag::text_disp_format>(oa_enum);
+}
+
+cbag::term_attr_type get_term_attr_type(oa::oaTermAttrTypeEnum oa_enum) {
+    return static_cast<cbag::term_attr_type>(oa_enum);
 }
 
 cbag::sch::text_t read_text(oa::oaText *p, std::string &&net) {
     oa::oaString text;
     p->getText(text);
+    oa::oaPoint pt;
+    p->getOrigin(pt);
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::sch::text_t ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
-                          p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(), overbar,
-                          visible, drafting);
-    p->getOrigin(ans.origin);
+    cbag::sch::text_t ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), std::string(text),
+                          get_text_align(p->getAlignment()), get_orientation(p->getOrient()),
+                          get_font(p->getFont()), p->getHeight(), overbar, visible, drafting,
+                          pt.x(), pt.y());
     return ans;
 }
 
@@ -151,13 +216,15 @@ cbag::sch::eval_text read_eval_text(oa::oaEvalText *p, std::string &&net) {
     oa::oaString text, eval;
     p->getText(text);
     p->getEvaluatorName(eval);
+    oa::oaPoint pt;
+    p->getOrigin(pt);
     bool overbar = (p->hasOverbar() != 0);
     bool visible = (p->isVisible() != 0);
     bool drafting = (p->isDrafting() != 0);
-    cbag::sch::eval_text ans(p->getLayerNum(), p->getPurposeNum(), net, std::string(text),
-                             p->getAlignment(), p->getOrient(), p->getFont(), p->getHeight(),
-                             overbar, visible, drafting, std::string(eval));
-    p->getOrigin(ans.origin);
+    cbag::sch::eval_text ans(
+        p->getLayerNum(), p->getPurposeNum(), std::move(net), std::string(text),
+        get_text_align(p->getAlignment()), get_orientation(p->getOrient()), get_font(p->getFont()),
+        p->getHeight(), overbar, visible, drafting, std::string(eval), pt.x(), pt.y());
     return ans;
 }
 
@@ -230,6 +297,9 @@ cbag::sch::shape_t read_shape(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa
 }
 
 // Read method for references
+cbag::transformation get_xform(const oa::oaTransform &xform) {
+    return {xform.xOffset(), xform.yOffset(), get_orientation(xform.orient())};
+}
 
 cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
     // read cellview name
@@ -246,7 +316,8 @@ cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger
 
     // create instance object
     cbag::sch::instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                             std::string(inst_view_oa), xform, bbox);
+                             std::string(inst_view_oa), get_xform(xform), bbox.left(),
+                             bbox.bottom(), bbox.right(), bbox.top());
 
     // read instance parameters
     if (p->hasProp()) {
@@ -310,12 +381,16 @@ cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &lo
             disp_ptr->getNet()->getName(ns, net_name);
             net = std::string(net_name);
         }
+        oa::oaPoint pt;
+        disp_ptr->getOrigin(pt);
         cbag::sch::term_attr attr(
-            oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue(),
-            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), net, disp_ptr->getAlignment(),
-            disp_ptr->getOrient(), disp_ptr->getFont(), disp_ptr->getHeight(),
-            disp_ptr->getFormat(), overbar, visible, drafting);
-        disp_ptr->getOrigin(attr.origin);
+            get_term_attr_type(
+                oa::oaTermAttrType(disp_ptr->getAttribute().getRawValue()).getValue()),
+            disp_ptr->getLayerNum(), disp_ptr->getPurposeNum(), std::move(net),
+            get_text_align(disp_ptr->getAlignment()), get_orientation(disp_ptr->getOrient()),
+            get_font(disp_ptr->getFont()), disp_ptr->getHeight(),
+            get_text_disp_format(disp_ptr->getFormat()), overbar, visible, drafting, pt.x(),
+            pt.y());
 
         return {cbag::sch::pin_object(std::move(inst), std::move(attr)), stype, ttype};
     } else if (p->getType() == oa::oacRectType) {
