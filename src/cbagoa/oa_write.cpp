@@ -90,6 +90,91 @@ constexpr auto cell_data = "(promptWidth nil "
 
 constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
+oa::oaBox get_box(const cbag::box_t &cbag_obj) {
+    return {cbag_obj.xl, cbag_obj.yl, cbag_obj.xh, cbag_obj.yh};
+}
+
+oa::oaPoint get_point(const cbag::point &cbag_obj) { return {cbag_obj.first, cbag_obj.second}; }
+
+oa::oaOrient get_orient(cbag::orientation cbag_enum) {
+    switch (cbag_enum) {
+    case cbag::oR0:
+        return oa::oacR0;
+    case cbag::oR90:
+        return oa::oacR90;
+    case cbag::oR180:
+        return oa::oacR180;
+    case cbag::oR270:
+        return oa::oacR270;
+    case cbag::oMY:
+        return oa::oacMY;
+    case cbag::oMYR90:
+        return oa::oacMYR90;
+    case cbag::oMX:
+        return oa::oacMX;
+    case cbag::oMXR90:
+        return oa::oacMXR90;
+    default:
+        throw std::invalid_argument("Unknown cbag orientation code.");
+    }
+}
+
+oa::oaPointArray get_point_arr(const cbag::point_array &pt_arr) {
+    oa::oaPointArray ans(pt_arr.size());
+    for (const auto &p : pt_arr) {
+        ans.append(oa::oaPoint(p.first, p.second));
+    }
+    return ans;
+}
+
+oa::oaTransform get_xform(const cbag::transformation &xform) {
+    return {xform.x(), xform.y(), get_orient(xform.orient())};
+}
+
+oa::oaTermAttrType get_attr_type(cbag::term_attr_type cbag_enum) {
+    return static_cast<oa::oaTermAttrTypeEnum>(cbag_enum);
+}
+
+oa::oaTextAlign get_text_align(cbag::text_align cbag_enum) {
+    return static_cast<oa::oaTextAlignEnum>(cbag_enum);
+}
+
+oa::oaTextDisplayFormat get_text_disp_format(cbag::text_disp_format cbag_enum) {
+    return static_cast<oa::oaTextDisplayFormatEnum>(cbag_enum);
+}
+
+oa::oaFont get_font(cbag::font_t cbag_enum) { return static_cast<oa::oaFontEnum>(cbag_enum); }
+
+oa::oaSigType get_sig_type(cbag::sig_type cbag_enum) {
+    return static_cast<oa::oaSigTypeEnum>(cbag_enum);
+}
+
+oa::oaTermType get_term_type(cbag::term_type cbag_enum) {
+    return static_cast<oa::oaTermTypeEnum>(cbag_enum);
+}
+
+oa::oaBlockageType get_blockage_type(cbag::blockage_type cbag_enum) {
+    return static_cast<oa::oaBlockageTypeEnum>(cbag_enum);
+}
+
+oa::oaPathStyle get_path_style(cbag::path_style cbag_enum) {
+    return static_cast<oa::oaPathStyleEnum>(cbag_enum);
+}
+
+oa::oaViaParam get_via_params(const cbag::via_param &params) {
+    oa::oaViaParam ans;
+    ans.setCutColumns(params.num[0]);
+    ans.setCutRows(params.num[1]);
+    ans.setCutWidth(params.cut_dim[0]);
+    ans.setCutHeight(params.cut_dim[1]);
+    ans.setCutSpacing(oa::oaVector(params.cut_spacing.first, params.cut_spacing.second));
+    ans.setLayer1Enc(oa::oaVector(params.lay1_enc.first, params.lay1_enc.second));
+    ans.setLayer2Enc(oa::oaVector(params.lay2_enc.first, params.lay2_enc.second));
+    ans.setLayer1Offset(oa::oaVector(params.lay1_off.first, params.lay1_off.second));
+    ans.setLayer2Offset(oa::oaVector(params.lay2_off.first, params.lay2_off.second));
+    return ans;
+}
+
 class make_pin_fig_visitor {
   private:
     const oa::oaCdbaNS &ns;
@@ -104,7 +189,8 @@ class make_pin_fig_visitor {
         : ns(ns), block(block), pin(pin), term(term), cnt(cnt) {}
 
     void operator()(const cbag::sch::rectangle &operand) const {
-        oa::oaRect *rect = oa::oaRect::create(block, operand.layer, operand.purpose, operand.bbox);
+        oa::oaRect *rect =
+            oa::oaRect::create(block, operand.layer, operand.purpose, get_box(operand.bbox));
         rect->addToPin(pin);
     }
 
@@ -115,12 +201,14 @@ class make_pin_fig_visitor {
         oa::oaScalarName name(ns, fmt::format("P__{}", (*cnt)++).c_str());
 
         oa::oaScalarInst *inst =
-            oa::oaScalarInst::create(block, lib, cell, view, name, obj.inst.xform);
+            oa::oaScalarInst::create(block, lib, cell, view, name, get_xform(obj.inst.xform));
         inst->addToPin(pin);
 
-        oa::oaAttrDisplay::create(term, obj.attr.attr_type, obj.attr.layer, obj.attr.purpose,
-                                  obj.attr.origin, obj.attr.alignment, obj.attr.orient,
-                                  obj.attr.font, obj.attr.height, obj.attr.format, obj.attr.overbar,
+        oa::oaAttrDisplay::create(term, get_attr_type(obj.attr.attr_type), obj.attr.layer,
+                                  obj.attr.purpose, get_point(obj.attr.origin),
+                                  get_text_align(obj.attr.alignment), get_orient(obj.attr.orient),
+                                  get_font(obj.attr.font), obj.attr.height,
+                                  get_text_disp_format(obj.attr.format), obj.attr.overbar,
                                   obj.attr.visible, obj.attr.drafting);
     }
 };
@@ -135,54 +223,57 @@ class make_shape_visitor {
         : block(block), ns(ns) {}
 
     void operator()(const cbag::sch::rectangle &v) const {
-        oa::oaShape *p = oa::oaRect::create(block, v.layer, v.purpose, v.bbox);
+        oa::oaShape *p = oa::oaRect::create(block, v.layer, v.purpose, get_box(v.bbox));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::polygon &v) const {
-        oa::oaShape *p = oa::oaPolygon::create(block, v.layer, v.purpose, v.points);
+        oa::oaShape *p = oa::oaPolygon::create(block, v.layer, v.purpose, get_point_arr(v.points));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::arc &v) const {
         oa::oaShape *p =
-            oa::oaArc::create(block, v.layer, v.purpose, v.bbox, v.ang_start, v.ang_stop);
+            oa::oaArc::create(block, v.layer, v.purpose, get_box(v.bbox), v.ang_start, v.ang_stop);
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::donut &v) const {
-        oa::oaShape *p =
-            oa::oaDonut::create(block, v.layer, v.purpose, v.center, v.radius, v.hole_radius);
+        oa::oaShape *p = oa::oaDonut::create(block, v.layer, v.purpose, get_point(v.center),
+                                             v.radius, v.hole_radius);
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::ellipse &v) const {
-        oa::oaShape *p = oa::oaEllipse::create(block, v.layer, v.purpose, v.bbox);
+        oa::oaShape *p = oa::oaEllipse::create(block, v.layer, v.purpose, get_box(v.bbox));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::line &v) const {
-        oa::oaShape *p = oa::oaLine::create(block, v.layer, v.purpose, v.points);
+        oa::oaShape *p = oa::oaLine::create(block, v.layer, v.purpose, get_point_arr(v.points));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::path &v) const {
-        oa::oaShape *p = oa::oaPath::create(block, v.layer, v.purpose, v.width, v.points, v.style,
-                                            v.begin_ext, v.end_ext);
+        oa::oaShape *p =
+            oa::oaPath::create(block, v.layer, v.purpose, v.width, get_point_arr(v.points),
+                               get_path_style(v.style), v.begin_ext, v.end_ext);
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::text_t &v) const {
         oa::oaShape *p =
-            oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(), v.origin, v.alignment,
-                               v.orient, v.font, v.height, v.overbar, v.visible, v.drafting);
+            oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(), get_point(v.origin),
+                               get_text_align(v.alignment), get_orient(v.orient), get_font(v.font),
+                               v.height, v.overbar, v.visible, v.drafting);
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::eval_text &v) const {
         oa::oaShape *p = oa::oaEvalText::create(
-            block, v.layer, v.purpose, v.text.c_str(), v.origin, v.alignment, v.orient, v.font,
-            v.height, v.evaluator.c_str(), v.overbar, v.visible, v.drafting);
+            block, v.layer, v.purpose, v.text.c_str(), get_point(v.origin),
+            get_text_align(v.alignment), get_orient(v.orient), get_font(v.font), v.height,
+            v.evaluator.c_str(), v.overbar, v.visible, v.drafting);
         add_shape_to_net(p, v.net);
     }
 
@@ -279,10 +370,11 @@ void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaB
         logger.info("Creating terminal net");
         oa::oaNet *term_net = oa::oaNet::find(block, term_name);
         if (term_net == nullptr || term_net->isImplicit()) {
-            term_net = oa::oaNet::create(block, term_name, pair.second.stype);
+            term_net = oa::oaNet::create(block, term_name, get_sig_type(pair.second.stype));
         }
         logger.info("Creating terminal");
-        oa::oaTerm *term = oa::oaTerm::create(term_net, term_name, pair.second.ttype);
+        oa::oaTerm *term =
+            oa::oaTerm::create(term_net, term_name, get_term_type(pair.second.ttype));
         logger.info("Creating terminal pin");
         oa::oaPin *pin = oa::oaPin::create(term);
         logger.info("Creating terminal shape");
@@ -390,6 +482,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         logger.info("Writing instance {}", pair.first);
         cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
         cbag::sch::instance *inst = pair.second.get();
+        oa::oaTransform inst_xform = get_xform(inst->xform);
         if (pair.second->is_primitive) {
             lib.init(ns, inst->lib_name.c_str());
             cell.init(ns, inst->cell_name.c_str());
@@ -403,9 +496,9 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         oa::oaInst *ptr;
         if (nu.is_vector()) {
             ptr = oa::oaVectorInst::create(block, lib, cell, view, name, nu.idx_range.start,
-                                           nu.idx_range.stop, inst->xform);
+                                           nu.idx_range.stop, inst_xform);
         } else {
-            ptr = oa::oaScalarInst::create(block, lib, cell, view, name, inst->xform);
+            ptr = oa::oaScalarInst::create(block, lib, cell, view, name, inst_xform);
         }
         for (auto const &term_net_pair : inst->connections) {
             logger.info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
@@ -425,7 +518,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             oa::oaBox pin_box;
             oa::oaPoint pts[2];
             pin_fig->getBBox(pin_box);
-            pin_box.transform(inst->xform);
+            pin_box.transform(inst_xform);
             pin_box.getCenter(pts[0]);
             oa::oaCoord x = pts[0].x();
             oa::oaCoord y = pts[0].y();
@@ -506,7 +599,7 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
     oa::oaParamArray oa_params;
 
     const oa::oaParamArray *params_ptr = (oa_params.getNumElements() == 0) ? nullptr : &oa_params;
-    oa::oaTransform xform = inst.get_transform();
+    oa::oaTransform xform = get_xform(inst.xform);
     if (inst.nx > 1 || inst.ny > 1) {
         oa::oaArrayInst::create(blk, lib_oa, cell_oa, view_oa, inst_name, xform, inst.spx, inst.spy,
                                 inst.ny, inst.nx, params_ptr);
@@ -546,7 +639,8 @@ void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
         return;
     }
 
-    oa::oaStdVia::create(blk, via_def, v.xform.to_transform(), &v.params);
+    oa::oaViaParam via_params = get_via_params(v.params);
+    oa::oaStdVia::create(blk, via_def, get_xform(v.xform), &via_params);
 }
 
 void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
@@ -584,7 +678,8 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     for (auto const &block_pair : cv.lay_block_map) {
         for (auto const &block : block_pair.second) {
             set_point_array(block, pt_arr);
-            oa::oaLayerBlockage::create(blk, block.type, block_pair.first, pt_arr);
+            oa::oaLayerBlockage::create(blk, get_blockage_type(block.type), block_pair.first,
+                                        pt_arr);
         }
     }
     logger.info("Making layout area blockages.");

@@ -128,12 +128,10 @@ target_link_libraries(cbag
   PUBLIC
   # for Spirit X3 error code
   boost_system
-  # for reading tech files
-  yaml-cpp
   PRIVATE
+  # for reading layout tech file
+  yaml-cpp
   fmt-header-only
-  m
-  ${CMAKE_DL_LIBS}
   )
 
 set(SRC_FILES_LIB_CBAGYAML
@@ -148,14 +146,12 @@ add_library(cbagyaml SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGYAML})
 
 # shared library dependencies
 target_link_libraries(cbagyaml
-  PUBLIC
+  PRIVATE
   cbag
+  yaml-cpp
   # for yaml file path manipulations
   boost_filesystem
-  yaml-cpp
-  PRIVATE
   fmt-header-only
-  boost_system
   )
 
 
@@ -171,21 +167,20 @@ add_library(cbagoa SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGOA})
 # shared library dependencies
 target_link_libraries(cbagoa
   PUBLIC
+  oaBase
+  oaCommon
+  oaPlugIn
+  PRIVATE
   cbag
   cbagyaml
   boost_filesystem
   boost_system
   yaml-cpp
-  PRIVATE
   fmt-header-only
   oaDM
   oaDMFileSysBase
   oaTech
   oaDesign
-  oaBase
-  oaCommon
-  oaPlugIn
-  m
   ${CMAKE_DL_LIBS}
   )
 

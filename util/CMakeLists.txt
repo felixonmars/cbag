@@ -4,10 +4,9 @@ add_executable(write_tech_info
 
 # shared library dependencies
 target_link_libraries(write_tech_info
-  PUBLIC
+  PRIVATE
   cbag
   cbagoa
-  PRIVATE
   fmt-header-only
   )
 
@@ -17,11 +16,10 @@ add_executable(write_cv_yaml
 
 # shared library dependencies
 target_link_libraries(write_cv_yaml
-  PUBLIC
+  PRIVATE
   cbag
   cbagyaml
   cbagoa
-  PRIVATE
   fmt-header-only
   )
 

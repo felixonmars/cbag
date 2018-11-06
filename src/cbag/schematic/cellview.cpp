@@ -22,9 +22,10 @@ namespace sch {
 
 cellview::cellview() = default;
 
-cellview::cellview(std::string lib_name, std::string cell_name, std::string view_name, box_t bbox)
+cellview::cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,
+                   coord_t yl, coord_t xh, coord_t yh)
     : lib_name(std::move(lib_name)), cell_name(std::move(cell_name)),
-      view_name(std::move(view_name)), bbox(std::move(bbox)) {}
+      view_name(std::move(view_name)), bbox(xl, yl, xh, yh) {}
 
 cellview_info cellview::get_info(const std::string &name) const {
     cellview_info ans(name, false);

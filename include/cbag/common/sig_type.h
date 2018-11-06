@@ -7,16 +7,16 @@
 namespace cbag {
 
 enum class sig_type : uint32_t {
-    signal,
-    power,
-    ground,
-    clock,
-    tieOff,
-    tieHi,
-    tieLo,
-    analog,
-    scan,
-    reset
+    signal = 0,
+    power = 1,
+    ground = 2,
+    clock = 3,
+    tieOff = 4,
+    tieHi = 5,
+    tieLo = 6,
+    analog = 7,
+    scan = 8,
+    reset = 9
 };
 constexpr sig_type stSignal = sig_type::signal;
 constexpr sig_type stPower = sig_type::power;

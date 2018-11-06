@@ -23,6 +23,57 @@
 
 namespace cbagoa {
 
+// enum conversion methods
+
+cbag::path_style get_path_style(oa::oaPathStyleEnum oa_enum) {
+    return static_cast<cbag::path_style>(oa_enum);
+}
+
+cbag::text_align get_text_align(oa::oaTextAlignEnum oa_enum) {
+    return static_cast<cbag::text_align>(oa_enum);
+}
+
+cbag::orientation get_orientation(oa::oaOrientEnum oa_enum) {
+    switch (oa_enum) {
+    case oa::oacR0:
+        return cbag::oR0;
+    case oa::oacR90:
+        return cbag::oR90;
+    case oa::oacR180:
+        return cbag::oR180;
+    case oa::oacR270:
+        return cbag::oR270;
+    case oa::oacMY:
+        return cbag::oMY;
+    case oa::oacMYR90:
+        return cbag::oMYR90;
+    case oa::oacMX:
+        return cbag::oMX;
+    case oa::oacMXR90:
+        return cbag::oMXR90;
+    default:
+        throw std::invalid_argument("Unknown OA orientation code.");
+    }
+}
+
+cbag::font_t get_font(oa::oaFontEnum oa_enum) { return static_cast<cbag::font_t>(oa_enum); }
+
+cbag::text_disp_format get_text_disp_format(oa::oaTextDisplayFormatEnum oa_enum) {
+    return static_cast<cbag::text_disp_format>(oa_enum);
+}
+
+cbag::term_attr_type get_term_attr_type(oa::oaTermAttrTypeEnum oa_enum) {
+    return static_cast<cbag::term_attr_type>(oa_enum);
+}
+
+cbag::sig_type get_sig_type(oa::oaSigTypeEnum oa_enum) {
+    return static_cast<cbag::sig_type>(oa_enum);
+}
+
+cbag::term_type get_term_type(oa::oaTermTypeEnum oa_enum) {
+    return static_cast<cbag::term_type>(oa_enum);
+}
+
 // Read method for properties
 
 std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p) {
@@ -143,10 +194,6 @@ cbag::sch::line read_line(oa::oaLine *p, std::string &&net) {
     return ans;
 }
 
-cbag::path_style get_path_style(oa::oaPathStyleEnum oa_enum) {
-    return static_cast<cbag::path_style>(oa_enum);
-}
-
 cbag::sch::path read_path(oa::oaPath *p, std::string &&net) {
     oa::oaPointArray arr;
     p->getPoints(arr);
@@ -158,43 +205,6 @@ cbag::sch::path read_path(oa::oaPath *p, std::string &&net) {
     }
     return ans;
     return ans;
-}
-
-cbag::text_align get_text_align(oa::oaTextAlignEnum oa_enum) {
-    return static_cast<cbag::text_align>(oa_enum);
-}
-
-cbag::orientation get_orientation(oa::oaOrientEnum oa_enum) {
-    switch (oa_enum) {
-    case oa::oacR0:
-        return cbag::oR0;
-    case oa::oacR90:
-        return cbag::oR90;
-    case oa::oacR180:
-        return cbag::oR180;
-    case oa::oacR270:
-        return cbag::oR270;
-    case oa::oacMY:
-        return cbag::oMY;
-    case oa::oacMYR90:
-        return cbag::oMYR90;
-    case oa::oacMX:
-        return cbag::oMX;
-    case oa::oacMXR90:
-        return cbag::oMXR90;
-    default:
-        throw std::invalid_argument("Unknown OA orientation code.");
-    }
-}
-
-cbag::font_t get_font(oa::oaFontEnum oa_enum) { return static_cast<cbag::font_t>(oa_enum); }
-
-cbag::text_disp_format get_text_disp_format(oa::oaTextDisplayFormatEnum oa_enum) {
-    return static_cast<cbag::text_disp_format>(oa_enum);
-}
-
-cbag::term_attr_type get_term_attr_type(oa::oaTermAttrTypeEnum oa_enum) {
-    return static_cast<cbag::term_attr_type>(oa_enum);
 }
 
 cbag::sch::text_t read_text(oa::oaText *p, std::string &&net) {
@@ -358,8 +368,8 @@ read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p
 
 cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *t,
                                       oa::oaPinFig *p) {
-    oa::oaSigType stype = t->getNet()->getSigType();
-    oa::oaTermType ttype = t->getTermType();
+    cbag::sig_type stype = get_sig_type(t->getNet()->getSigType());
+    cbag::term_type ttype = get_term_type(t->getTermType());
     if (p->isInst()) {
         cbag::sch::instance inst = read_instance(ns, logger, static_cast<oa::oaInst *>(p));
 
@@ -457,7 +467,8 @@ cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa:
     oa::oaBox bbox;
     block->getBBox(bbox);
 
-    cbag::sch::cellview ans(lib_name, cell_name, view_name, bbox);
+    cbag::sch::cellview ans(lib_name, cell_name, view_name, bbox.left(), bbox.bottom(),
+                            bbox.right(), bbox.top());
 
     // read terminals
     logger.info("Reading terminals");
