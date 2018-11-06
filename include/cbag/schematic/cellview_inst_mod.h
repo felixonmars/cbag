@@ -44,8 +44,8 @@ void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_siz
     }
 
     // shift and update connections
-    cur_ptr->xform.xOffset() += dx;
-    cur_ptr->xform.yOffset() += dy;
+
+    cur_ptr->xform.move_by(dx, dy);
     for (auto const &p : conns) {
         cur_ptr->update_connection(new_name, new_ast.size(), p.first, p.second);
     }
@@ -66,7 +66,7 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
 
     if (dx == 0 && dy == 0) {
         // figure out default shift
-        dx = iter->second->bbox.getWidth() + 10;
+        dx = iter->second->bbox.width() + 10;
     }
 
     coord_t x = 0;
