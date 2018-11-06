@@ -182,6 +182,9 @@ target_link_libraries(cbagoa
   oaDMFileSysBase
   oaTech
   oaDesign
+  oaBase
+  oaCommon
+  oaPlugIn
   m
   ${CMAKE_DL_LIBS}
   )
