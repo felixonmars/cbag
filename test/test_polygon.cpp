@@ -3,10 +3,10 @@
 
 #include <boost/polygon/polygon.hpp>
 
+#include <cbag/common/transformation.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/polygon90.h>
 #include <cbag/layout/pt_vector.h>
-#include <cbag/layout/transformation.h>
 
 namespace bp = boost::polygon;
 namespace bl = cbag::layout;
@@ -94,7 +94,7 @@ void test_transformation() {
 void test_orient_mapping() {
     for (unsigned int code = 0; code < 8; ++code) {
         bp::rectangle_data<int> rect(0, 0, 4, 1);
-        cbag::layout::transformation xform(1, 2, code);
+        cbag::transformation xform(1, 2, code);
         bp::transform(rect, xform);
         std::cout << code << " " << xform.orient() << ": " << bp::xl(rect) << " " << bp::yl(rect)
                   << " " << bp::xh(rect) << "  " << bp::yh(rect) << std::endl;

@@ -14,12 +14,12 @@ cellview_ref::cellview_ref(const char *lib, const char *cell, const char *view)
 instance::instance() = default;
 
 instance::instance(const char *name, const char *lib, const char *cell, const char *view,
-                   transformation xform, uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
+                   cbag::transformation xform, uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
     : master(std::in_place_type_t<cellview_ref>{}, lib, cell, view), name(name),
       xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
-instance::instance(const char *name, const cellview *master, transformation xform, uint32_t nx,
-                   uint32_t ny, coord_t spx, coord_t spy)
+instance::instance(const char *name, const cellview *master, cbag::transformation xform,
+                   uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
     : master(std::in_place_type_t<const cellview *>{}, master), name(name), xform(std::move(xform)),
       nx(nx), ny(ny), spx(spx), spy(spy) {}
 
@@ -73,8 +73,6 @@ const param_map *instance::get_params() const {
         },
         master);
 }
-
-const cbag::transform instance::get_transform() const { return xform.to_transform(); }
 
 rectangle instance::get_bbox(const char *layer, const char *purpose) const {
     rectangle r = std::visit(

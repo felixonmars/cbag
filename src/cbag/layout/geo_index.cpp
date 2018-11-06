@@ -51,7 +51,7 @@ rectangle &geo_index::get_bbox(rectangle &r) const {
 }
 
 geo_iterator geo_index::begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
-                                        const transformation &xform) const {
+                                        const cbag::transformation &xform) const {
 
     return {r,
             spx,
@@ -104,7 +104,7 @@ void geo_index::insert(const polygon45_set &obj, bool is_horiz) {
     writer.record_last();
 }
 
-void geo_index::insert(const geometry *master, transformation &&xform) {
+void geo_index::insert(const geometry *master, cbag::transformation &&xform) {
     geo_instance inst(master, std::move(xform));
     if (!inst.empty())
         index.insert(geo_object(std::move(inst), 0, 0));

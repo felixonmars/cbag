@@ -1,6 +1,8 @@
 #ifndef CBAG_LAYOUT_VECTOR45_H
 #define CBAG_LAYOUT_VECTOR45_H
 
+#include <iosfwd>
+
 #include <cbag/common/typedefs.h>
 
 namespace cbag {

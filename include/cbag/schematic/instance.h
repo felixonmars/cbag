@@ -9,7 +9,7 @@
 
 #include <cbag/common/box_t.h>
 #include <cbag/common/datatypes.h>
-#include <cbag/common/transform.h>
+#include <cbag/common/transformation.h>
 
 #include <cbag/util/sorted_map.h>
 
@@ -23,7 +23,7 @@ struct instance {
     std::string lib_name;
     std::string cell_name;
     std::string view_name;
-    transform xform;
+    transformation xform;
     box_t bbox;
     bool is_primitive = false;
     cbag::util::sorted_map<std::string, std::string> connections;
@@ -38,7 +38,7 @@ struct instance {
      * @param view the view name.
      * @param xform the instance location.
      */
-    instance(std::string lib, std::string cell, std::string view, transform xform, box_t bbox);
+    instance(std::string lib, std::string cell, std::string view, transformation xform, box_t bbox);
 
     uint32_t width() const;
 

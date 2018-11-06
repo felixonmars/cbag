@@ -11,12 +11,14 @@
 #include <cbag/layout/instance.h>
 
 namespace cbag {
+
+class transformation;
+
 namespace layout {
 
 class boundary;
 class blockage;
 class rectangle;
-class transformation;
 class pin;
 class via;
 class tech;

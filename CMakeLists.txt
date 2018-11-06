@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 3.8)
 project(cbag)
 
 # Boost Spirit X3 requires C++14
-# __has_include directive requires C++17
 # std::variant requires C++17
-# map::extract (use of node handles) requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # control compiler warnings
@@ -79,7 +77,9 @@ set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
 message("install rpath: " ${CMAKE_INSTALL_RPATH})
 
 set(SRC_FILES_LIB_CBAG
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/box_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/datatypes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp
@@ -92,7 +92,6 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/rectangle.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
@@ -127,10 +126,6 @@ add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  oaTech
-  oaBase
-  oaCommon
-  oaPlugIn
   # for Spirit X3 error code
   boost_system
   # for reading tech files
@@ -143,9 +138,7 @@ target_link_libraries(cbag
 
 set(SRC_FILES_LIB_CBAGYAML
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/box_t.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/point.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/point_array.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/transform.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/datatypes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/shapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/figures.cpp

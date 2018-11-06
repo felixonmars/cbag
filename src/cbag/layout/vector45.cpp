@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <iostream>
 #include <utility>
 
 #include <cbag/layout/vector45.h>

@@ -1,7 +1,7 @@
 #include <algorithm>
 
+#include <cbag/common/transformation.h>
 #include <cbag/layout/rectangle.h>
-#include <cbag/layout/transformation.h>
 
 namespace cbag {
 namespace layout {
@@ -46,7 +46,7 @@ rectangle rectangle::get_expand(offset_t dx, offset_t dy) const {
     return {xl - dx, yl - dy, xl + dx, yl + dy};
 }
 
-rectangle rectangle::get_transform(const transformation &xform) const {
+rectangle rectangle::get_transform(const cbag::transformation &xform) const {
     rectangle ans = *this;
     return bp::transform(ans, xform);
 }
@@ -71,7 +71,9 @@ rectangle &rectangle::merge(const rectangle &other) {
     return *this;
 }
 
-rectangle &rectangle::transform(const transformation &xform) { return bp::transform(*this, xform); }
+rectangle &rectangle::transform(const cbag::transformation &xform) {
+    return bp::transform(*this, xform);
+}
 
 } // namespace layout
 } // namespace cbag

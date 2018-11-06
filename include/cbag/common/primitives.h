@@ -24,7 +24,7 @@
 #include <cbag/common/box_t.h>
 #include <cbag/common/point.h>
 #include <cbag/common/point_array.h>
-#include <cbag/common/transform.h>
+#include <cbag/common/transformation.h>
 #include <cbag/common/vector.h>
 
 #endif // CBAG_COMMON_PRIMITIVES_H

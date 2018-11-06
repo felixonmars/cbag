@@ -5,9 +5,8 @@
 #include <variant>
 
 #include <cbag/common/datatypes.h>
-#include <cbag/common/transform.h>
+#include <cbag/common/transformation.h>
 #include <cbag/common/typedefs.h>
-#include <cbag/layout/transformation.h>
 
 namespace cbag {
 namespace layout {
@@ -33,7 +32,7 @@ class instance {
 
   public:
     const char *name;
-    transformation xform;
+    cbag::transformation xform;
     uint32_t nx = 1;
     uint32_t ny = 1;
     offset_t spx = 0;
@@ -42,10 +41,10 @@ class instance {
     instance();
 
     instance(const char *name, const char *lib, const char *cell, const char *view,
-             transformation xform, uint32_t nx = 1, uint32_t ny = 1, offset_t spx = 0,
+             cbag::transformation xform, uint32_t nx = 1, uint32_t ny = 1, offset_t spx = 0,
              offset_t spy = 0);
 
-    instance(const char *name, const cellview *master, transformation xform, uint32_t nx = 1,
+    instance(const char *name, const cellview *master, cbag::transformation xform, uint32_t nx = 1,
              uint32_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
     bool is_reference() const;
@@ -59,8 +58,6 @@ class instance {
     const char *get_view_name(const char *default_view) const;
 
     const param_map *get_params() const;
-
-    const cbag::transform get_transform() const;
 
     rectangle get_bbox(const char *layer, const char *purpose) const;
 

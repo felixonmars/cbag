@@ -5,11 +5,13 @@
 #include <cbag/layout/polygon45_set_fwd.h>
 
 namespace cbag {
+
+class transformation;
+
 namespace layout {
 
 class tech;
 class geo_iterator;
-class transformation;
 
 class geo_index {
   public:
@@ -30,7 +32,7 @@ class geo_index {
     rectangle &get_bbox(rectangle &r) const;
 
     const_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
-                                   const transformation &xform) const;
+                                   const cbag::transformation &xform) const;
     const_iterator end_intersect() const;
 
     void insert(const rectangle &obj, bool is_horiz);
@@ -38,7 +40,7 @@ class geo_index {
     void insert(const polygon45 &obj, bool is_horiz);
     void insert(const polygon &obj, bool is_horiz);
     void insert(const polygon45_set &obj, bool is_horiz);
-    void insert(const geometry *master, transformation &&xform);
+    void insert(const geometry *master, cbag::transformation &&xform);
 };
 
 } // namespace layout

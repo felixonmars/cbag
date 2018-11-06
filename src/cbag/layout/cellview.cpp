@@ -175,7 +175,7 @@ cv_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, const pt_vector &d
     return {this, boundary(data, btype), commit};
 }
 
-cv_obj_ref<via> cellview::add_via(transformation xform, const char *via_id,
+cv_obj_ref<via> cellview::add_via(cbag::transformation xform, const char *via_id,
                                   const uint32_t (&num)[2], const dist_t (&cut_dim)[2],
                                   const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
                                   const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
@@ -189,13 +189,13 @@ cv_obj_ref<via> cellview::add_via(transformation xform, const char *via_id,
 
 cv_obj_ref<instance> cellview::add_prim_instance(const char *lib, const char *cell,
                                                  const char *view, const char *name,
-                                                 transformation xform, uint32_t nx, uint32_t ny,
+                                                 cbag::transformation xform, uint32_t nx, uint32_t ny,
                                                  offset_t spx, offset_t spy, bool commit) {
     return {this, instance(name, lib, cell, view, std::move(xform), nx, ny, spx, spy), commit};
 }
 
 cv_obj_ref<instance> cellview::add_instance(const cellview *cv, const char *name,
-                                            transformation xform, uint32_t nx, uint32_t ny,
+                                            cbag::transformation xform, uint32_t nx, uint32_t ny,
                                             offset_t spx, offset_t spy, bool commit) {
     return {this, instance(name, cv, std::move(xform), nx, ny, spx, spy), commit};
 }

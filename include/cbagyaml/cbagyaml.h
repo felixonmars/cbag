@@ -18,6 +18,6 @@
 #include <cbagyaml/point_array.h>
 #include <cbagyaml/shapes.h>
 #include <cbagyaml/sorted_map.h>
-#include <cbagyaml/transform.h>
+#include <cbagyaml/transformation.h>
 
 #endif

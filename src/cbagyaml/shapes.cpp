@@ -13,7 +13,7 @@
 #include <cbagyaml/point.h>
 #include <cbagyaml/point_array.h>
 #include <cbagyaml/shapes.h>
-#include <cbagyaml/transform.h>
+#include <cbagyaml/transformation.h>
 
 namespace YAML {
 Node convert<cbag::sch::shape_t>::encode(const cbag::sch::shape_t &rhs) {

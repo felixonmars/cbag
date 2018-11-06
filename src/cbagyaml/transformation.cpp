@@ -11,30 +11,29 @@
 
 #include <cbagyaml/common.h>
 #include <cbagyaml/enum.h>
-#include <cbagyaml/transform.h>
+#include <cbagyaml/transformation.h>
 
 namespace YAML {
 
-Node convert<cbag::transform>::encode(const cbag::transform &rhs) {
+Node convert<cbag::transformation>::encode(const cbag::transformation &rhs) {
     Node root;
     root.push_back(rhs.xOffset());
     root.push_back(rhs.yOffset());
-    root.push_back(static_cast<int>(rhs.orient()));
+    root.push_back(rhs.orient_code());
     return root;
 }
 
-bool convert<cbag::transform>::decode(const Node &node, cbag::transform &rhs) {
+bool convert<cbag::transformation>::decode(const Node &node, cbag::transformation &rhs) {
     auto logger = spdlog::get("cbag");
     if (!node.IsSequence() || node.size() != 3) {
-        logger->warn("cbag::transform YAML decode: not a sequence or size != 3.  Node:\n{}",
+        logger->warn("cbag::transformation YAML decode: not a sequence or size != 3.  Node:\n{}",
                      cbagyaml::node_to_str(node));
         return false;
     }
     try {
-        rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
-                node[2].as<cbag::orientation>());
+        rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(), node[2].as<uint32_t>());
     } catch (...) {
-        logger->warn("cbag::transform YAML decode exception.  Node:\n{}",
+        logger->warn("cbag::transformation YAML decode exception.  Node:\n{}",
                      cbagyaml::node_to_str(node));
         return false;
     }

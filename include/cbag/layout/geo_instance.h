@@ -1,7 +1,7 @@
 #ifndef CBAG_LAYOUT_GEO_INSTANCE_H
 #define CBAG_LAYOUT_GEO_INSTANCE_H
 
-#include <cbag/layout/transformation.h>
+#include <cbag/common/transformation.h>
 
 namespace cbag {
 namespace layout {

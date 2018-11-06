@@ -3,8 +3,8 @@
 
 #include <string>
 
+#include <cbag/common/transformation.h>
 #include <cbag/common/via_param.h>
-#include <cbag/layout/transformation.h>
 
 namespace cbag {
 namespace layout {
@@ -16,7 +16,7 @@ class via {
     struct helper;
 
   public:
-    transformation xform;
+    cbag::transformation xform;
     std::string via_id;
     via_param params;
     bool add_layers;
@@ -26,7 +26,7 @@ class via {
   public:
     via();
 
-    via(transformation xform, const char *via_id, const uint32_t (&num)[2],
+    via(cbag::transformation xform, const char *via_id, const uint32_t (&num)[2],
         const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
         const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
         bool add_layers, bool bot_horiz, bool top_horiz);

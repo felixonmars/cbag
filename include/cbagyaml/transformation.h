@@ -5,16 +5,16 @@
  *  \date   2018/07/12
  */
 
-#ifndef CBAG_YAML_TRANSFORM_H
-#define CBAG_YAML_TRANSFORM_H
+#ifndef CBAG_YAML_TRANSFORMATION_H
+#define CBAG_YAML_TRANSFORMATION_H
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/transform.h>
+#include <cbag/common/transformation.h>
 
 namespace YAML {
 
-template <> struct convert<cbag::transform> {
+template <> struct convert<cbag::transformation> {
     static Node encode(const cbag::transform &rhs);
 
     static bool decode(const Node &node, cbag::transform &rhs);

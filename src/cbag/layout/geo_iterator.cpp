@@ -12,9 +12,9 @@ struct geo_iterator::helper {
 
     struct xform_visitor {
       public:
-        const transformation &xform;
+        const cbag::transformation &xform;
 
-        xform_visitor(const transformation &xform) : xform(xform) {}
+        xform_visitor(const cbag::transformation &xform) : xform(xform) {}
 
         template <typename T> void operator()(T &v) { bp::transform(v, xform); }
     };
@@ -75,7 +75,7 @@ struct geo_iterator::helper {
 geo_iterator::geo_iterator() = default;
 
 geo_iterator::geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
-                           geo_query_iter &&end, const transformation &xform)
+                           geo_query_iter &&end, const cbag::transformation &xform)
     : box(box), spx(spx), spy(spy), cur(std::move(cur)), end(std::move(end)), xform(xform) {
     helper::get_val_reference(*this);
 }

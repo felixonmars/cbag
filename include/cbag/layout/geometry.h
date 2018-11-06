@@ -18,11 +18,13 @@
 namespace bgi = boost::geometry::index;
 
 namespace cbag {
+
+class transformation;
+
 namespace layout {
 
 class rectangle;
 class tech;
-class transformation;
 
 /** A class representing layout geometries on the same layer.
  */
