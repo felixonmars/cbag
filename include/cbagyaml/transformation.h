@@ -15,9 +15,9 @@
 namespace YAML {
 
 template <> struct convert<cbag::transformation> {
-    static Node encode(const cbag::transform &rhs);
+    static Node encode(const cbag::transformation &rhs);
 
-    static bool decode(const Node &node, cbag::transform &rhs);
+    static bool decode(const Node &node, cbag::transformation &rhs);
 };
 
 } // namespace YAML

@@ -16,10 +16,10 @@ namespace YAML {
 
 Node convert<cbag::box_t>::encode(const cbag::box_t &rhs) {
     Node root;
-    root.push_back(rhs.left());
-    root.push_back(rhs.bottom());
-    root.push_back(rhs.right());
-    root.push_back(rhs.top());
+    root.push_back(rhs.xl);
+    root.push_back(rhs.yl);
+    root.push_back(rhs.xh);
+    root.push_back(rhs.yh);
     return root;
 }
 
@@ -31,8 +31,10 @@ bool convert<cbag::box_t>::decode(const Node &node, cbag::box_t &rhs) {
         return false;
     }
     try {
-        rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
-                node[2].as<cbag::coord_t>(), node[3].as<cbag::coord_t>());
+        rhs.xl = node[0].as<cbag::coord_t>();
+        rhs.yl = node[1].as<cbag::coord_t>();
+        rhs.xh = node[2].as<cbag::coord_t>();
+        rhs.yh = node[3].as<cbag::coord_t>();
     } catch (...) {
         logger->warn("cbag::box_t YAML decode exception.  Node:\n{}", cbagyaml::node_to_str(node));
         return false;

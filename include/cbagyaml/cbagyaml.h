@@ -14,8 +14,6 @@
 #include <cbagyaml/datatypes.h>
 #include <cbagyaml/enum.h>
 #include <cbagyaml/figures.h>
-#include <cbagyaml/point.h>
-#include <cbagyaml/point_array.h>
 #include <cbagyaml/shapes.h>
 #include <cbagyaml/sorted_map.h>
 #include <cbagyaml/transformation.h>
