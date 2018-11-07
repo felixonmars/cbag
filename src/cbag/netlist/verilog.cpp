@@ -7,7 +7,7 @@
 
 #include <boost/range/join.hpp>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellview.h>

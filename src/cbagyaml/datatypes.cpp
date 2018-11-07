@@ -5,7 +5,7 @@
  *  \date   2018/07/12
  */
 
-#include <spdlog/spdlog.h>
+#include <cbag/logging.h>
 
 #include <cbagyaml/common.h>
 #include <cbagyaml/datatypes.h>

@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <utility>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/common/typedefs.h>
 #include <cbag/util/sorted_vector.h>

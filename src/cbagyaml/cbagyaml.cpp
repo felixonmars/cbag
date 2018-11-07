@@ -12,7 +12,7 @@
 #include <boost/filesystem.hpp>
 
 #include "yaml-cpp/unordered_map.h"
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
 #include <cbagyaml/cbagyaml.h>

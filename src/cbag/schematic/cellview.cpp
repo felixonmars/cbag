@@ -5,7 +5,7 @@
  *  \date   2018/07/18
  */
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>

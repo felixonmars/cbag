@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
 #include "yaml-cpp/unordered_map.h"

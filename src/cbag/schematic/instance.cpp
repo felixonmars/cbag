@@ -7,7 +7,7 @@
 
 #include <cstdlib>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/spirit/ast.h>
 

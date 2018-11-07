@@ -1,6 +1,6 @@
 #include <cstring>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/util/binary_iterator.h>
 

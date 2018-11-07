@@ -8,7 +8,7 @@
 #ifndef CBAG_SCHEMATIC_CELLVIEW_INST_MOD_H
 #define CBAG_SCHEMATIC_CELLVIEW_INST_MOD_H
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/spirit/name.h>
 #include <cbag/spirit/name_unit.h>

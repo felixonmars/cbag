@@ -1,7 +1,5 @@
 
-#include <fmt/format.h>
-
-#include <spdlog/spdlog.h>
+#include <cbag/logging.h>
 
 #include <oa/oaDesignDB.h>
 

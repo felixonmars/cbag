@@ -10,9 +10,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include <spdlog/spdlog.h>
+#include <cbag/logging.h>
 
-#include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/util/sorted_map.h>

@@ -51,6 +51,8 @@
 #include <thread>
 #include <unistd.h>
 
+#include <fmt/format.h>
+
 #include <spdlog/details/registry.h>
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__) && !defined(__GNUC__))

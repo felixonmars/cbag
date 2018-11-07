@@ -5,7 +5,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <oa/oaDesignDB.h>
 

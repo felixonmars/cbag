@@ -5,7 +5,7 @@
  *  \date   2018/07/10
  */
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <cbag/netlist/name_convert.h>
 #include <cbag/spirit/ast.h>

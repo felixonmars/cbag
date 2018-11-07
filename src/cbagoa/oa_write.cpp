@@ -12,9 +12,7 @@
 
 #include <boost/range/join.hpp>
 
-#include <fmt/format.h>
-
-#include <spdlog/spdlog.h>
+#include <cbag/logging.h>
 
 #include <cbag/util/sorted_map.h>
 #include <cbag/util/sorted_vector.h>

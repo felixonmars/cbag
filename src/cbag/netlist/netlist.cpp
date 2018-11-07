@@ -5,9 +5,7 @@
  *  \date   2018/07/10
  */
 
-#include <spdlog/spdlog.h>
-
-#include <fmt/format.h>
+#include <cbag/logging.h>
 
 #include <cbag/common/datatypes.h>
 #include <cbag/netlist/netlist.h>

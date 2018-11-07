@@ -9,12 +9,11 @@
 #include <fstream>
 #include <memory>
 
-#include <fmt/format.h>
+#include <cbag/logging.h>
 
 #include "spdlog/details/signal_handler.h"
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/spdlog.h>
 
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
