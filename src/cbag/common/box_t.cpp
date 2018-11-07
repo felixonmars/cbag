@@ -13,13 +13,15 @@ box_t::box_t(interval_type horizontal, interval_type vertical)
 
 box_t::box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) : intvs{{xl, xh}, {yl, yh}} {}
 
+inline coord_t floor_half(coord_t a) { return a >> 1; }
+
 coord_t box_t::xl() const { return intvs[0][0]; }
 coord_t box_t::yl() const { return intvs[1][0]; }
 coord_t box_t::xh() const { return intvs[0][1]; }
 coord_t box_t::yh() const { return intvs[1][1]; }
-coord_t box_t::xm() const { return bp::center(intvs[0]); }
-coord_t box_t::ym() const { return bp::center(intvs[1]); }
-coord_t box_t::w() const { return xh() - yl(); }
+coord_t box_t::xm() const { return floor_half(xl() + xh()); }
+coord_t box_t::ym() const { return floor_half(yl() + yh()); }
+coord_t box_t::w() const { return xh() - xl(); }
 coord_t box_t::h() const { return yh() - yl(); }
 
 bool box_t::is_physical() const { return w() > 0 && h() > 0; }
