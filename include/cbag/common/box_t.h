@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_BBOX_H
-#define CBAG_COMMON_BBOX_H
+#ifndef CBAG_COMMON_BOX_T_H
+#define CBAG_COMMON_BOX_T_H
 
 #include <array>
 #include <optional>
@@ -14,10 +14,6 @@
 namespace bp = boost::polygon;
 
 namespace cbag {
-
-class box_array_t;
-
-class box_collection_t;
 
 class transformation;
 
@@ -57,8 +53,6 @@ class box_t {
     box_t get_move_by(offset_t dx = 0, offset_t dy = 0) const;
     box_t get_flip_xy() const;
     box_t get_with_interval(bp::orientation_2d_enum orient, interval_type intv) const;
-    box_array_t as_box_array() const;
-    box_collection_t as_box_collection() const;
 
     void set(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
     void set_interval(bp::orientation_2d_enum orient, interval_type interval);
