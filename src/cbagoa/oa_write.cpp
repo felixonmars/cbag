@@ -91,7 +91,7 @@ constexpr auto cell_data = "(promptWidth nil "
 constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
 oa::oaBox get_box(const cbag::box_t &cbag_obj) {
-    return {cbag_obj.xl, cbag_obj.yl, cbag_obj.xh, cbag_obj.yh};
+    return {cbag_obj.xl(), cbag_obj.yl(), cbag_obj.xh(), cbag_obj.yh()};
 }
 
 oa::oaPoint get_point(const cbag::point &cbag_obj) { return {cbag_obj.first, cbag_obj.second}; }

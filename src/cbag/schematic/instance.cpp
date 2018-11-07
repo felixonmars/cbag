@@ -25,9 +25,9 @@ instance::instance(std::string lib, std::string cell, std::string view, transfor
     : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
       xform(std::move(xform)), bbox(xl, yl, xh, yh), connections(), params() {}
 
-uint32_t instance::width() const { return bbox.width(); }
+uint32_t instance::width() const { return bbox.w(); }
 
-uint32_t instance::height() const { return bbox.height(); }
+uint32_t instance::height() const { return bbox.h(); }
 
 void instance::clear_params() { params.clear(); }
 

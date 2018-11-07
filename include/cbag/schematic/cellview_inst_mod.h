@@ -31,7 +31,7 @@ void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_siz
     auto emp_iter = instances.emplace(new_name, std::unique_ptr<instance>());
     if (!emp_iter.second) {
         throw std::invalid_argument(
-            fmt::format("instance {} already exists.", emp_iter.first->first));
+            fmt::format("instance {} already exists.", emp_iter. first->first));
     }
     // insert successful, make pointer point at something
     emp_iter.first->second = std::make_unique<instance>(inst);
@@ -66,7 +66,7 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
 
     if (dx == 0 && dy == 0) {
         // figure out default shift
-        dx = iter->second->bbox.width() + 10;
+        dx = iter->second->bbox.w() + 10;
     }
 
     coord_t x = 0;
