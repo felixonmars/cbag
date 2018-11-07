@@ -48,7 +48,7 @@ void transformation::get_location(coord_t &x, coord_t &y) const {
     transform(x, y);
 }
 
-bool transformation::flip_xy() const {
+bool transformation::flips_xy() const {
     bp::direction_2d x, y;
     get_directions(x, y);
     auto code = x.to_int();

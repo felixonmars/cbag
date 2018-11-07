@@ -19,11 +19,14 @@ box_t &geo_instance::get_bbox(box_t &r) const {
 }
 
 geo_iterator geo_instance::begin_intersect(const box_t &r, offset_t spx, offset_t spy) const {
+    offset_t spx_new = spx;
+    offset_t spy_new = spy;
     box_t test_r = r.get_transform(xform.get_inverse());
-    if (xform.flip_xy()) {
-        return master->begin_intersect(test_r, spy, spx, xform);
+    if (xform.flips_xy()) {
+        spx_new = spy;
+        spy_new = spx;
     }
-    return master->begin_intersect(test_r, spx, spy, xform);
+    return master->begin_intersect(test_r, spx_new, spy_new, xform);
 }
 
 geo_iterator geo_instance::end_intersect() const { return {}; }
