@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include <cbag/common/box_t.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/util/overload.h>
 
@@ -32,8 +33,8 @@ struct geo_iterator::helper {
         }
 
         template <typename T> bool operator()(const T &v) {
-            rectangle test_box = self.box.get_expand(std::max(self.spx, self.cur->spx),
-                                                     std::max(self.spy, self.cur->spy));
+            box_t test_box = self.box.get_expand(std::max(self.spx, self.cur->spx),
+                                                 std::max(self.spy, self.cur->spy));
             if (bp::empty(v & test_box)) {
                 ++self.cur;
                 return true;
@@ -74,7 +75,7 @@ struct geo_iterator::helper {
 
 geo_iterator::geo_iterator() = default;
 
-geo_iterator::geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
+geo_iterator::geo_iterator(const box_t &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
                            geo_query_iter &&end, const cbag::transformation &xform)
     : box(box), spx(spx), spy(spy), cur(std::move(cur)), end(std::move(end)), xform(xform) {
     helper::get_val_reference(*this);

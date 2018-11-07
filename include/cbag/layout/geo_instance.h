@@ -4,11 +4,13 @@
 #include <cbag/common/transformation.h>
 
 namespace cbag {
+
+class box_t;
+
 namespace layout {
 
 class geo_iterator;
 class geometry;
-class rectangle;
 
 class geo_instance {
   private:
@@ -22,9 +24,9 @@ class geo_instance {
 
     bool empty() const;
 
-    rectangle &get_bbox(rectangle &r) const;
+    box_t &get_bbox(box_t &r) const;
 
-    geo_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy) const;
+    geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy) const;
 
     geo_iterator end_intersect() const;
 

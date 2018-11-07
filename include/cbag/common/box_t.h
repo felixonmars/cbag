@@ -62,6 +62,8 @@ class box_t {
 
     void set(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
     void set_interval(bp::orientation_2d_enum orient, interval_type interval);
+    box_t &merge(const box_t &other);
+    box_t &transform(const transformation &xform);
 
     bool operator==(const box_t &other) const;
 };
@@ -114,6 +116,11 @@ template <> struct rectangle_mutable_traits<cbag::box_t> {
     static inline cbag::box_t construct(const cbag::box_t::interval_type &interval_horizontal,
                                         const cbag::box_t::interval_type &interval_vertical) {
         return {interval_horizontal, interval_vertical};
+    }
+    static inline cbag::box_t construct(const bp::interval_data<cbag::coord_t> &interval_horizontal,
+                                        const bp::interval_data<cbag::coord_t> &interval_vertical) {
+        return {interval_horizontal.low(), interval_vertical.low(), interval_horizontal.high(),
+                interval_vertical.high()};
     }
 };
 

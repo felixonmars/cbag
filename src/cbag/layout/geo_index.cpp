@@ -1,3 +1,4 @@
+#include <cbag/common/box_t.h>
 #include <cbag/layout/geo_index.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/tech.h>
@@ -41,30 +42,28 @@ geo_index::geo_index(std::string &&lay_type, tech *tech_ptr)
 
 bool geo_index::empty() const { return index.empty(); }
 
-rectangle &geo_index::get_bbox(rectangle &r) const {
+box_t &geo_index::get_bbox(box_t &r) const {
     auto box = index.bounds();
-    r.xl = box.min_corner().get<0>();
-    r.yl = box.min_corner().get<1>();
-    r.xh = box.max_corner().get<0>();
-    r.yh = box.max_corner().get<1>();
+    r.set(box.min_corner().get<0>(), box.min_corner().get<1>(), box.max_corner().get<0>(),
+          box.max_corner().get<1>());
     return r;
 }
 
-geo_iterator geo_index::begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                         const cbag::transformation &xform) const {
 
     return {r,
             spx,
             spy,
-            index.qbegin(bgi::intersects(
-                bg_box(bg_point(r.xl - spx, r.yl - spy), bg_point(r.xh + spx, r.yh + spy)))),
+            index.qbegin(bgi::intersects(bg_box(bg_point(r.xl() - spx, r.yl() - spy),
+                                                bg_point(r.xh() + spx, r.yh() + spy)))),
             index.qend(),
             xform};
 }
 
 geo_iterator geo_index::end_intersect() const { return {}; }
 
-void geo_index::insert(const rectangle &obj, bool is_horiz) {
+void geo_index::insert(const box_t &obj, bool is_horiz) {
     coord_t spx, spy;
     if (lay_type.empty()) {
         spx = spy = 0;

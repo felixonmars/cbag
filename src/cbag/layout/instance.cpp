@@ -1,8 +1,8 @@
 #include <utility>
 
+#include <cbag/common/box_t.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
-#include <cbag/layout/rectangle.h>
 #include <cbag/util/overload.h>
 
 namespace cbag {
@@ -74,11 +74,11 @@ const param_map *instance::get_params() const {
         master);
 }
 
-rectangle instance::get_bbox(const char *layer, const char *purpose) const {
-    rectangle r = std::visit(
+box_t instance::get_bbox(const char *layer, const char *purpose) const {
+    box_t r = std::visit(
         overload{
             [&layer, &purpose](const cellview *v) { return v->get_bbox(layer, purpose); },
-            [](const cellview_ref &v) { return rectangle(0, 0, 0, 0); },
+            [](const cellview_ref &v) { return box_t(0, 0, 0, 0); },
         },
         master);
 

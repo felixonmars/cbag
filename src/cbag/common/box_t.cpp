@@ -79,6 +79,12 @@ void box_t::set_interval(bp::orientation_2d_enum orient, interval_type interval)
     intvs[static_cast<unsigned int>(orient)] = std::move(interval);
 }
 
+box_t &box_t::transform(const transformation &xform) { return bp::transform(*this, xform); }
+box_t &box_t::merge(const box_t &other) {
+    bp::encompass(*this, other);
+    return *this;
+}
+
 bool box_t::operator==(const box_t &other) const {
     return intvs[0] == other.intvs[0] && intvs[1] == other.intvs[1];
 }

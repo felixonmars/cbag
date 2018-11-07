@@ -6,6 +6,7 @@
 
 namespace cbag {
 
+class box_t;
 class transformation;
 
 namespace layout {
@@ -29,13 +30,13 @@ class geo_index {
 
     bool empty() const;
 
-    rectangle &get_bbox(rectangle &r) const;
+    box_t &get_bbox(box_t &r) const;
 
-    const_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+    const_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                    const cbag::transformation &xform) const;
     const_iterator end_intersect() const;
 
-    void insert(const rectangle &obj, bool is_horiz);
+    void insert(const box_t &obj, bool is_horiz);
     void insert(const polygon90 &obj, bool is_horiz);
     void insert(const polygon45 &obj, bool is_horiz);
     void insert(const polygon &obj, bool is_horiz);

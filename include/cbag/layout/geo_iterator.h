@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 
+#include <cbag/common/box_t.h>
 #include <cbag/layout/geo_index_impl.h>
 
 namespace cbag {
@@ -18,7 +19,7 @@ enum geo_union_enum : uint8_t {
 
 class geo_union {
   public:
-    std::variant<rectangle, polygon90, polygon45, polygon> val;
+    std::variant<box_t, polygon90, polygon45, polygon> val;
 
     geo_union() = default;
 
@@ -41,7 +42,7 @@ class geo_iterator {
     using reference = value_type &;
 
   private:
-    rectangle box;
+    box_t box;
     offset_t spx = 0;
     offset_t spy = 0;
     geo_query_iter cur;
@@ -54,7 +55,7 @@ class geo_iterator {
   public:
     geo_iterator();
 
-    geo_iterator(const rectangle &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
+    geo_iterator(const box_t &box, offset_t spx, offset_t spy, geo_query_iter &&cur,
                  geo_query_iter &&end, const cbag::transformation &xform);
 
     bool has_next() const;

@@ -19,11 +19,11 @@ namespace bgi = boost::geometry::index;
 
 namespace cbag {
 
+class box_t;
 class transformation;
 
 namespace layout {
 
-class rectangle;
 class tech;
 
 /** A class representing layout geometries on the same layer.
@@ -43,17 +43,17 @@ class geometry {
     geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode = 0);
 
     bool index_empty() const;
-    rectangle get_bbox() const;
-    rectangle &get_bbox(rectangle &r) const;
-    rectangle &get_index_bbox(rectangle &r) const;
+    box_t get_bbox() const;
+    box_t &get_bbox(box_t &r) const;
+    box_t &get_index_bbox(box_t &r) const;
 
-    geo_iterator begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+    geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                  const transformation &xform = {0, 0}) const;
     geo_iterator end_intersect() const;
 
     void reset_to_mode(uint8_t m);
 
-    void add_shape(const rectangle &obj, bool is_horiz);
+    void add_shape(const box_t &obj, bool is_horiz);
     void add_shape(const polygon90 &obj, bool is_horiz);
     void add_shape(const polygon45 &obj, bool is_horiz);
     void add_shape(const polygon45_set &obj, bool is_horiz);

@@ -12,13 +12,13 @@
 
 namespace cbag {
 
+class box_t;
 class transformation;
 
 namespace layout {
 
 class boundary;
 class blockage;
-class rectangle;
 class pin;
 class via;
 class tech;
@@ -57,9 +57,9 @@ class cellview {
 
     layer_t get_lay_purp_key(const char *layer, const char *purpose) const;
 
-    rectangle get_bbox(const char *layer, const char *purpose) const;
+    box_t get_bbox(const char *layer, const char *purpose) const;
 
-    geo_iterator begin_intersect(const layer_t &key, const rectangle &r, offset_t spx,
+    geo_iterator begin_intersect(const layer_t &key, const box_t &r, offset_t spx,
                                  offset_t spy) const;
 
     geo_iterator end_intersect() const;
@@ -67,8 +67,8 @@ class cellview {
     void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
                  const char *label);
 
-    shape_ref<rectangle> add_rect(const char *layer, const char *purpose, bool is_horiz, coord_t xl,
-                                  coord_t yl, coord_t xh, coord_t yh, bool commit);
+    shape_ref<box_t> add_rect(const char *layer, const char *purpose, bool is_horiz, coord_t xl,
+                              coord_t yl, coord_t xh, coord_t yh, bool commit);
 
     shape_ref<polygon90> add_poly90(const char *layer, const char *purpose, bool is_horiz,
                                     const pt_vector &data, bool commit);

@@ -9,6 +9,7 @@
 #define CBAG_CBAG_H
 
 #include <cbag/cbag_fwd.h>
+#include <cbag/common/box_t.h>
 #include <cbag/common/transformation.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
@@ -16,7 +17,6 @@
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/pin.h>
-#include <cbag/layout/rectangle.h>
 #include <cbag/layout/tech.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>

@@ -6,6 +6,7 @@
 
 #include <cbag/common/blockage_type.h>
 #include <cbag/common/boundary_type.h>
+#include <cbag/common/box_t.h>
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
@@ -72,8 +73,8 @@ layer_t cellview::get_lay_purp_key(const char *layer, const char *purpose) const
     return {lay_id, purp_id};
 }
 
-rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
-    rectangle ans(0, 0, -1, -1);
+box_t cellview::get_bbox(const char *layer, const char *purpose) const {
+    box_t ans(0, 0, -1, -1);
     // merge geometry bounding box
     auto iter = geo_map.find(get_lay_purp_key(layer, purpose));
     if (iter != geo_map.end()) {
@@ -86,7 +87,7 @@ rectangle cellview::get_bbox(const char *layer, const char *purpose) const {
     return ans;
 }
 
-geo_iterator cellview::begin_intersect(const layer_t &key, const rectangle &r, offset_t spx,
+geo_iterator cellview::begin_intersect(const layer_t &key, const box_t &r, offset_t spx,
                                        offset_t spy) const {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end())
@@ -106,12 +107,11 @@ void cellview::add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, co
     iter->second.emplace_back(xl, yl, xh, yh, net, label);
 }
 
-shape_ref<rectangle> cellview::add_rect(const char *layer, const char *purpose, bool is_horiz,
-                                        coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                                        bool commit) {
+shape_ref<box_t> cellview::add_rect(const char *layer, const char *purpose, bool is_horiz,
+                                    coord_t xl, coord_t yl, coord_t xh, coord_t yh, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
-    return {this, std::move(key), is_horiz, rectangle(xl, yl, xh, yh), commit};
+    return {this, std::move(key), is_horiz, box_t(xl, yl, xh, yh), commit};
 }
 
 shape_ref<polygon90> cellview::add_poly90(const char *layer, const char *purpose, bool is_horiz,
@@ -189,8 +189,9 @@ cv_obj_ref<via> cellview::add_via(cbag::transformation xform, const char *via_id
 
 cv_obj_ref<instance> cellview::add_prim_instance(const char *lib, const char *cell,
                                                  const char *view, const char *name,
-                                                 cbag::transformation xform, uint32_t nx, uint32_t ny,
-                                                 offset_t spx, offset_t spy, bool commit) {
+                                                 cbag::transformation xform, uint32_t nx,
+                                                 uint32_t ny, offset_t spx, offset_t spy,
+                                                 bool commit) {
     return {this, instance(name, lib, cell, view, std::move(xform), nx, ny, spx, spy), commit};
 }
 

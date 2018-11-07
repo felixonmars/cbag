@@ -1,3 +1,5 @@
+
+#include <cbag/common/box_t.h>
 #include <cbag/layout/geo_object.h>
 #include <cbag/util/overload.h>
 
@@ -11,8 +13,8 @@ bool geo_object::operator==(const geo_object &v) const {
 const geo_instance *geo_object::get_instance() const { return std::get_if<geo_instance>(&val); }
 
 geo_object::box_type geo_object::get_bnd_box(const value_type &val, offset_t spx, offset_t spy) {
-    rectangle box;
-    std::visit(overload{[&box](const rectangle &v) { box = v; },
+    box_t box;
+    std::visit(overload{[&box](const box_t &v) { box = v; },
                         [&box](const polygon90 &v) { bp::extents(box, v); },
                         [&box](const polygon45 &v) { bp::extents(box, v); },
                         [&box](const polygon &v) { bp::extents(box, v); },
@@ -21,7 +23,8 @@ geo_object::box_type geo_object::get_bnd_box(const value_type &val, offset_t spx
 
     if (!box.is_valid())
         throw std::invalid_argument("Cannot add geometry object with invalid bound box.");
-    return bg_box(bg_point(box.xl - spx, box.yl - spy), bg_point(box.xh + spx, box.yh + spy));
+    return bg_box(bg_point(box.xl() - spx, box.yl() - spy),
+                  bg_point(box.xh() + spx, box.yh() + spy));
 }
 
 } // namespace layout

@@ -7,9 +7,10 @@
 #include <cbag/common/via_param.h>
 
 namespace cbag {
-namespace layout {
 
-class rectangle;
+class box_t;
+
+namespace layout {
 
 class via {
   private:
@@ -31,9 +32,9 @@ class via {
         const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
         bool add_layers, bool bot_horiz, bool top_horiz);
 
-    rectangle bot_box() const;
+    box_t bot_box() const;
 
-    rectangle top_box() const;
+    box_t top_box() const;
 };
 
 } // namespace layout

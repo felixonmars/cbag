@@ -9,12 +9,12 @@
 
 #include <string>
 
-#include <cbag/layout/rectangle.h>
+#include <cbag/common/box_t.h>
 
 namespace cbag {
 namespace layout {
 
-class pin : public rectangle {
+class pin : public box_t {
   public:
     std::string net;
     std::string label;

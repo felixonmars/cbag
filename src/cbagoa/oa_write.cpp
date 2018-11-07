@@ -707,7 +707,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         for (auto const &pin : pin_pair.second) {
             if (!pin.is_physical()) {
                 logger.warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
-                            pin.xl, pin.yl, pin.xh, pin.yh, lay, purp);
+                            pin.xl(), pin.yl(), pin.xh(), pin.yh(), lay, purp);
             }
             oa::oaPoint center(pin.xm(), pin.ym());
             cbag::offset_t w = pin.w();
@@ -722,8 +722,8 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
                                oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
             if (make_pin_obj) {
-                auto *r =
-                    oa::oaRect::create(blk, lay, purp, oa::oaBox(pin.xl, pin.yl, pin.xh, pin.yh));
+                auto *r = oa::oaRect::create(blk, lay, purp,
+                                             oa::oaBox(pin.xl(), pin.yl(), pin.xh(), pin.yh()));
 
                 oa::oaName term_name(ns, pin.net.c_str());
                 auto *term = oa::oaTerm::find(blk, term_name);

@@ -4,11 +4,11 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include <cbag/common/box_t.h>
 #include <cbag/common/transformation.h>
 #include <cbag/layout/end_style.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/geometry.h>
-#include <cbag/layout/rectangle.h>
 #include <cbag/layout/vector45.h>
 #include <cbag/math/constexpr.h>
 
@@ -27,12 +27,12 @@ geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
 
 bool geometry::index_empty() const { return index.empty(); }
 
-rectangle geometry::get_bbox() const {
-    rectangle ans;
+box_t geometry::get_bbox() const {
+    box_t ans;
     return get_bbox(ans);
 }
 
-rectangle &geometry::get_bbox(rectangle &r) const {
+box_t &geometry::get_bbox(box_t &r) const {
     std::visit(
         overload{
             [&r](const auto &d) { bp::extents(r, d); },
@@ -42,9 +42,9 @@ rectangle &geometry::get_bbox(rectangle &r) const {
     return r;
 }
 
-rectangle &geometry::get_index_bbox(rectangle &r) const { return index.get_bbox(r); }
+box_t &geometry::get_index_bbox(box_t &r) const { return index.get_bbox(r); }
 
-geo_iterator geometry::begin_intersect(const rectangle &r, offset_t spx, offset_t spy,
+geo_iterator geometry::begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                        const transformation &xform) const {
     return index.begin_intersect(r, spx, spy, xform);
 }
@@ -68,7 +68,7 @@ void geometry::reset_to_mode(uint8_t m) {
     mode = m;
 }
 
-void geometry::add_shape(const rectangle &obj, bool is_horiz) {
+void geometry::add_shape(const box_t &obj, bool is_horiz) {
     std::visit(
         overload{
             [&obj](polygon90_set &d) { d.insert(obj); },

@@ -6,12 +6,12 @@
 #include <boost/geometry.hpp>
 #include <boost/polygon/polygon.hpp>
 
+#include <cbag/common/box_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/layout/geo_instance.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon90_fwd.h>
-#include <cbag/layout/rectangle.h>
 
 namespace bg = boost::geometry;
 
@@ -23,7 +23,7 @@ using bg_box = bg::model::box<bg_point>;
 
 class geo_object {
   public:
-    using value_type = std::variant<rectangle, polygon90, polygon45, polygon, geo_instance>;
+    using value_type = std::variant<box_t, polygon90, polygon45, polygon, geo_instance>;
     using box_type = bg_box;
 
   public:

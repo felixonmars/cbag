@@ -6,8 +6,8 @@
 #include <boost/geometry/geometries/register/point.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
+#include <cbag/common/box_t.h>
 #include <cbag/layout/point_t.h>
-#include <cbag/layout/rectangle.h>
 
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
@@ -16,15 +16,14 @@ namespace bgi = boost::geometry::index;
 BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(cbag::layout::point_t, cbag::coord_t, bg::cs::cartesian, x,
                                          y, x, y)
 
-BOOST_GEOMETRY_REGISTER_BOX_2D_4VALUES(cbag::layout::rectangle, cbag::layout::point_t, xl, yl, xh,
-                                       yh)
+BOOST_GEOMETRY_REGISTER_BOX_2D_4VALUES(cbag::box_t, cbag::layout::point_t, xl, yl, xh, yh)
 
 template <typename Value> struct obj_eq {
     bool operator()(Value const &l, Value const &r) const { return l.second == r.second; }
 };
 
 void test_rtree() {
-    using box = cbag::layout::rectangle;
+    using box = cbag::box_t;
     using value = std::pair<box, unsigned>;
     using rtree_t = bgi::rtree<value, bgi::quadratic<32, 16>, bgi::indexable<value>, obj_eq<value>>;
 

@@ -1,12 +1,12 @@
+#include <cbag/common/box_t.h>
 #include <cbag/common/vector.h>
-#include <cbag/layout/rectangle.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
 namespace layout {
 
 struct via::helper {
-    static rectangle get_box(const via &self, const vector &offset, const vector &enc) {
+    static box_t get_box(const via &self, const vector &offset, const vector &enc) {
         uint32_t nx = self.params.num[0];
         uint32_t ny = self.params.num[1];
         dist_t via_w = nx * self.params.cut_dim[0] + (nx - 1) * self.params.cut_spacing.first;
@@ -17,7 +17,7 @@ struct via::helper {
         coord_t xh = xl + via_w + enc.first;
         coord_t yh = yl + via_h + enc.second;
 
-        rectangle r(xl, yl, xh, yh);
+        box_t r(xl, yl, xh, yh);
         bp::transform(r, self.xform);
         return r;
     }
@@ -42,9 +42,9 @@ via::via(cbag::transformation xform, const char *via_id, const uint32_t (&num)[2
     params.lay2_off = {lay2_off[0], lay2_off[1]};
 }
 
-rectangle via::bot_box() const { return helper::get_box(*this, params.lay1_off, params.lay1_enc); }
+box_t via::bot_box() const { return helper::get_box(*this, params.lay1_off, params.lay1_enc); }
 
-rectangle via::top_box() const { return helper::get_box(*this, params.lay2_off, params.lay2_enc); }
+box_t via::top_box() const { return helper::get_box(*this, params.lay2_off, params.lay2_enc); }
 
 } // namespace layout
 } // namespace cbag

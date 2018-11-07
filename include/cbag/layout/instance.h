@@ -9,11 +9,13 @@
 #include <cbag/common/typedefs.h>
 
 namespace cbag {
+
+class box_t;
+
 namespace layout {
 
 // class forwarding
 class cellview;
-class rectangle;
 
 struct cellview_ref {
     std::string lib;
@@ -59,7 +61,7 @@ class instance {
 
     const param_map *get_params() const;
 
-    rectangle get_bbox(const char *layer, const char *purpose) const;
+    box_t get_bbox(const char *layer, const char *purpose) const;
 
     void set_master(const cellview *new_master);
 
