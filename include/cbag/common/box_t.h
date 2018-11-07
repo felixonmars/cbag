@@ -41,6 +41,7 @@ class box_t {
     offset_t w() const;
     offset_t h() const;
 
+    std::string to_string() const;
     bool is_physical() const;
     bool is_valid() const;
     bool overlaps(const box_t &other) const;
