@@ -36,11 +36,7 @@ const box_t::interval_type &box_t::get_interval(bp::orientation_2d_enum orient) 
     return intvs[static_cast<unsigned int>(orient)];
 }
 
-box_t box_t::get_merge(const box_t &other) const {
-    box_t ans(*this);
-    bp::encompass(ans, other);
-    return ans;
-}
+box_t box_t::get_merge(const box_t &other) const { return box_t(*this).merge(other); }
 
 box_t box_t::get_intersect(const box_t &other) const {
     return {std::max(xl(), other.xl()), std::max(yl(), other.yl()), std::min(xh(), other.xh()),
@@ -58,9 +54,7 @@ box_t box_t::get_expand(coord_t dx, coord_t dy) const {
 }
 
 box_t box_t::get_transform(const transformation &xform) const {
-    box_t ans(*this);
-    bp::transform(ans, xform);
-    return ans;
+    return box_t(*this).transform(xform);
 }
 
 box_t box_t::get_move_by(offset_t dx, offset_t dy) const {
@@ -88,6 +82,10 @@ void box_t::set_interval(bp::orientation_2d_enum orient, interval_type interval)
 
 box_t &box_t::transform(const transformation &xform) { return bp::transform(*this, xform); }
 box_t &box_t::merge(const box_t &other) {
+    if (!other.is_valid())
+        return *this;
+    if (!is_valid())
+        *this = other;
     bp::encompass(*this, other);
     return *this;
 }
@@ -95,5 +93,7 @@ box_t &box_t::merge(const box_t &other) {
 bool box_t::operator==(const box_t &other) const {
     return intvs[0] == other.intvs[0] && intvs[1] == other.intvs[1];
 }
+
+box_t box_t::invalid_box() { return {0, 0, -1, -1}; }
 
 } // namespace cbag

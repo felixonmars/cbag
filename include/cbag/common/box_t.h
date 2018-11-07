@@ -61,6 +61,8 @@ class box_t {
     box_t &transform(const transformation &xform);
 
     bool operator==(const box_t &other) const;
+
+    static box_t invalid_box();
 };
 
 } // namespace cbag
