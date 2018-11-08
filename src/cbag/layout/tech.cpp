@@ -33,7 +33,7 @@ sp_map_t make_space_map(const YAML::Node &node) {
     return ans;
 }
 
-tech::tech(const char *tech_fname) {
+tech::tech(const std::string &tech_fname) {
     YAML::Node node = YAML::LoadFile(tech_fname);
 
     lay_map = node["layer"].as<lay_map_t>();
@@ -68,15 +68,15 @@ tech::tech(const char *tech_fname) {
 
     // populate space map
     sp_map_t sp_map;
-    sp_map_grp.emplace(DIFF_COLOR, make_space_map(node["sp_min"]));
-    sp_map_grp.emplace(LINE_END, make_space_map(node["sp_le_min"]));
+    sp_map_grp.emplace(space_type::DIFF_COLOR, make_space_map(node["sp_min"]));
+    sp_map_grp.emplace(space_type::LINE_END, make_space_map(node["sp_le_min"]));
 
     auto sp_sc_node = node["sp_sc_min"];
     if (sp_sc_node.IsDefined()) {
-        sp_map_grp.emplace(SAME_COLOR, make_space_map(sp_sc_node));
-        sp_sc_type = SAME_COLOR;
+        sp_map_grp.emplace(space_type::SAME_COLOR, make_space_map(sp_sc_node));
+        sp_sc_type = space_type::SAME_COLOR;
     } else {
-        sp_sc_type = DIFF_COLOR;
+        sp_sc_type = space_type::DIFF_COLOR;
     }
 }
 
@@ -91,7 +91,7 @@ std::string tech::get_purpose_name(purp_t purp_id) const {
     return iter->first;
 }
 
-lay_t tech::get_layer_id(const char *layer) const {
+lay_t tech::get_layer_id(const std::string &layer) const {
     try {
         return lay_map.at(layer);
     } catch (std::out_of_range) {
@@ -99,8 +99,8 @@ lay_t tech::get_layer_id(const char *layer) const {
     }
 }
 
-purp_t tech::get_purpose_id(const char *purpose) const {
-    if (purpose == nullptr) {
+purp_t tech::get_purpose_id(const std::string &purpose) const {
+    if (purpose.empty()) {
         return default_purpose;
     }
     try {
@@ -125,10 +125,11 @@ void tech::get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const 
     }
 }
 
-offset_t tech::get_min_space(const std::string &layer_type, offset_t width, uint8_t sp_type) const {
-    auto stype = static_cast<space_type>(sp_type);
+offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
+                             space_type sp_type) const {
     try {
-        const sp_map_t &cur_map = sp_map_grp.at((stype == SAME_COLOR) ? sp_sc_type : stype);
+        const sp_map_t &cur_map =
+            sp_map_grp.at((sp_type == space_type::SAME_COLOR) ? sp_sc_type : sp_type);
         const auto &pair = cur_map.at(layer_type);
         std::size_t n = std::min(pair.first.size(), pair.second.size());
         for (std::size_t idx = 0; idx < n; ++idx) {
@@ -137,9 +138,14 @@ offset_t tech::get_min_space(const std::string &layer_type, offset_t width, uint
         }
         return pair.second[pair.second.size() - 1];
     } catch (std::out_of_range) {
-        throw std::out_of_range(
-            fmt::format("Cannot find layer type {} or space type {}", layer_type, sp_type));
+        throw std::out_of_range(fmt::format("Cannot find layer type {} or space type {}",
+                                            layer_type, (uint32_t)sp_type));
     }
+}
+
+offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
+                             uint32_t sp_type) const {
+    return get_min_space(layer_type, width, static_cast<space_type>(sp_type));
 }
 
 } // namespace layout

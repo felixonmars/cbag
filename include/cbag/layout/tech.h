@@ -4,13 +4,14 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <cbag/common/typedefs.h>
 
 namespace cbag {
 namespace layout {
 
-enum space_type : uint8_t {
+enum class space_type : uint32_t {
     LINE_END = 0,
     DIFF_COLOR = 1,
     SAME_COLOR = 2,
@@ -38,7 +39,7 @@ class tech {
     purp_t pin_purpose;
     bool make_pin_obj = true;
 
-    tech(const char *tech_fname);
+    tech(const std::string &tech_fname);
 
     std::string get_pin_purpose_name() const;
 
@@ -46,15 +47,17 @@ class tech {
 
     std::string get_purpose_name(purp_t purp_id) const;
 
-    lay_t get_layer_id(const char *layer) const;
+    lay_t get_layer_id(const std::string &layer) const;
 
-    purp_t get_purpose_id(const char *purpose) const;
+    purp_t get_purpose_id(const std::string &purpose) const;
 
     std::string get_layer_type(lay_t lay_id) const;
 
     void get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const;
 
-    offset_t get_min_space(const std::string &layer_type, offset_t width, uint8_t sp_type) const;
+    offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
+
+    offset_t get_min_space(const std::string &layer_type, offset_t width, uint32_t sp_type) const;
 };
 
 } // namespace layout
