@@ -4,8 +4,6 @@
 
 void write_cv_yaml(const char *lib_name, const char *cell_name, const char *view_name = "symbol",
                    const char *output = nullptr, const char *lib_file = "cds.lib") {
-    cbag::init_logging();
-
     std::string out_fname;
     if (output == nullptr)
         out_fname = fmt::format("{}.yaml", cell_name);

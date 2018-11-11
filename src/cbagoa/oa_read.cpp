@@ -8,7 +8,7 @@
 #include <memory>
 #include <utility>
 
-#include <cbag/logging.h>
+#include <cbag/logging/spdlog.h>
 
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>

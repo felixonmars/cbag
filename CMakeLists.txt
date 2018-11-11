@@ -93,6 +93,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/logging/logging.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp

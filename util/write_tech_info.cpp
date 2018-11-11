@@ -3,8 +3,6 @@
 
 void write_tech_info_file(const char *fname, const char *tech_lib, const char *lib_file = nullptr,
                           const char *pin_purpose = "pin") {
-    cbag::init_logging();
-
     std::string lib_str("cds.lib");
     if (lib_file != nullptr) {
         lib_str = lib_file;

@@ -6,7 +6,7 @@
  *  \date   2018/07/12
  */
 
-#include <cbag/logging.h>
+#include <cbag/logging/logging.h>
 
 #include <cbagyaml/box_t.h>
 #include <cbagyaml/common.h>
@@ -25,7 +25,7 @@ Node convert<cbag::sch::pin_fig_t>::encode(const cbag::sch::pin_fig_t &rhs) {
 }
 
 bool convert<cbag::sch::pin_fig_t>::decode(const Node &node, cbag::sch::pin_fig_t &rhs) {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     if (!node.IsSequence() || node.size() != 2) {
         logger->warn("cbag::sch::pin_fig_t YAML decode: not a sequence or size != 2.  Node:\n{}",
                      cbagyaml::node_to_str(node));

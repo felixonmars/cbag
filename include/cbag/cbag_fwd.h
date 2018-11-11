@@ -15,7 +15,6 @@
 #include <cbag/schematic/cellview.h>
 
 namespace cbag {
-void init_logging();
 
 void write_netlist(const std::vector<sch::cellview *> &cv_list,
                    const std::vector<std::string> &name_list,

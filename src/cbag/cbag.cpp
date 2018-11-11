@@ -9,11 +9,7 @@
 #include <fstream>
 #include <memory>
 
-#include <cbag/logging.h>
-
-#include "spdlog/details/signal_handler.h"
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include <cbag/logging/logging.h>
 
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
@@ -21,26 +17,6 @@
 #include <cbag/schematic/cellview_info.h>
 
 namespace cbag {
-
-constexpr uint32_t max_log_size = 1024 * 1024 * 10;
-constexpr uint32_t num_log_file = 3;
-
-void init_logging() {
-    if (spdlog::get("cbag") == nullptr) {
-        spdlog::installCrashHandler();
-
-        std::vector<spdlog::sink_ptr> sinks;
-        sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_st>(
-            "cbag.log", max_log_size, num_log_file));
-        auto stdout_sink = std::make_shared<spdlog::sinks::stdout_color_sink_st>();
-        stdout_sink->set_level(spdlog::level::warn);
-        sinks.push_back(std::move(stdout_sink));
-
-        auto logger = std::make_shared<spdlog::logger>("cbag", sinks.begin(), sinks.end());
-        spdlog::register_logger(logger);
-        spdlog::flush_on(spdlog::level::warn);
-    }
-}
 
 std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
                                                       const std::string &format) {
@@ -57,7 +33,7 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
                    const std::vector<std::string> &name_list,
                    const std::vector<std::string> &inc_list, netlist_map_t &netlist_map,
                    const char *format, bool flat, bool shell, const char *fname) {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->info("Writing netlist file: {}", fname);
 
     logger->info("Creating netlist builder for netlist format: {}", format);

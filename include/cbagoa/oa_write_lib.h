@@ -1,7 +1,7 @@
 #ifndef CBAGOA_OA_WRITE_LIB_H
 #define CBAGOA_OA_WRITE_LIB_H
 
-#include <cbag/logging.h>
+#include <cbag/logging/spdlog.h>
 
 #include <cbag/schematic/cellview.h>
 

@@ -1,5 +1,5 @@
 
-#include <cbag/logging.h>
+#include <cbag/logging/spdlog.h>
 
 #include <oa/oaDesignDB.h>
 

@@ -10,7 +10,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <cbag/logging.h>
+#include <cbag/logging/logging.h>
 
 #include <yaml-cpp/yaml.h>
 
@@ -39,7 +39,7 @@ oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oa
 }
 
 oa_database::oa_database(std::string lib_def_fname)
-    : lib_def_file(std::move(lib_def_fname)), logger(spdlog::get("cbag")) {
+    : lib_def_file(std::move(lib_def_fname)), logger(cbag::get_cbag_logger()) {
     try {
         oaDesignInit(oacAPIMajorRevNumber, oacAPIMinorRevNumber, oacDataModelRevNumber);
 

@@ -5,7 +5,7 @@
  *  \date   2018/07/10
  */
 
-#include <cbag/logging.h>
+#include <cbag/logging/logging.h>
 
 #include <cbag/common/datatypes.h>
 #include <cbag/netlist/netlist.h>
@@ -118,23 +118,23 @@ void write_param_visitor::operator()(const std::string &v) const {
     (*ptr) << fmt::format("{}={}", *key, v);
 }
 void write_param_visitor::operator()(const int32_t &v) const {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->warn("integer parameter, do nothing.");
 }
 void write_param_visitor::operator()(const double &v) const {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->warn("double parameter, do nothing.");
 }
 void write_param_visitor::operator()(const bool &v) const {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->warn("bool parameter, do nothing.");
 }
 void write_param_visitor::operator()(const time_struct &v) const {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->warn("time parameter, do nothing.");
 }
 void write_param_visitor::operator()(const binary_t &v) const {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     logger->warn("binary parameter, do nothing.");
 }
 

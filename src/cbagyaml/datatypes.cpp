@@ -5,7 +5,7 @@
  *  \date   2018/07/12
  */
 
-#include <cbag/logging.h>
+#include <cbag/logging/logging.h>
 
 #include <cbagyaml/common.h>
 #include <cbagyaml/datatypes.h>
@@ -19,7 +19,7 @@ Node convert<cbag::value_t>::encode(const cbag::value_t &rhs) {
 }
 
 bool convert<cbag::value_t>::decode(const Node &node, cbag::value_t &rhs) {
-    auto logger = spdlog::get("cbag");
+    auto logger = cbag::get_cbag_logger();
     if (!node.IsSequence() || node.size() != 2) {
         logger->warn("cbag::value_t YAML decode: not a sequence or size != 2.  Node:\n{}",
                      cbagyaml::node_to_str(node));
