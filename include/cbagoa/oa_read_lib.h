@@ -23,7 +23,7 @@ using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
 cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                  spdlog::logger &logger, const std::string &lib_name,
                                  const std::string &cell_name, const std::string &sch_view,
-                                 const std::string &root_path);
+                                 const std::string &yaml_path);
 
 template <class OutIter>
 void get_cells(const oa::oaNativeNS &ns_native, spdlog::logger &logger, const std::string &lib_name,
@@ -49,16 +49,16 @@ void read_sch_helper(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                      const std::string &view_name, const str_map_t &yaml_path_map,
                      const std::unordered_set<std::string> &primitive_libs,
                      cell_set_t &exclude_cells, OutIter &out_iter) {
-    // find root_path
+    // find yaml_path
     auto map_iter = yaml_path_map.find(key.first);
     if (map_iter == yaml_path_map.end())
         throw std::runtime_error(fmt::format(
             "Cannot find yaml path for library {}, is the library registered?", key.first));
-    const std::string &root_path = map_iter->second;
+    const std::string &yaml_path = map_iter->second;
 
     // write cellviews to yaml files
     cbag::sch::cellview sch_cv =
-        cell_to_yaml(ns_native, ns, logger, key.first, key.second, view_name, root_path);
+        cell_to_yaml(ns_native, ns, logger, key.first, key.second, view_name, yaml_path);
 
     // update cell_list and exclude_cells
     out_iter = key;
