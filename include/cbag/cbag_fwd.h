@@ -12,7 +12,7 @@
 #include <vector>
 
 #include <cbag/netlist/netlist_map_t.h>
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 
 namespace cbag {
 

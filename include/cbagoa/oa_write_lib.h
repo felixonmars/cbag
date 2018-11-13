@@ -3,7 +3,7 @@
 
 #include <cbag/logging/spdlog.h>
 
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 
 #include <cbagoa/oa_util.h>
 #include <cbagoa/oa_write.h>

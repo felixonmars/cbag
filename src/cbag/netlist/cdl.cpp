@@ -11,7 +11,7 @@
 
 #include <cbag/spirit/ast.h>
 
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>

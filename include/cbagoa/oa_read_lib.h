@@ -9,7 +9,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/instance.h>
 
 #include <cbagoa/oa_util.h>

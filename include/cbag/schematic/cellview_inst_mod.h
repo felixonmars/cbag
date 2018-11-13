@@ -14,7 +14,7 @@
 #include <cbag/spirit/name_unit.h>
 #include <cbag/spirit/parsers.h>
 
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/instance.h>
 
 namespace cbag {

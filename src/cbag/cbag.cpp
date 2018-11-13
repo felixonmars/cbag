@@ -13,7 +13,7 @@
 
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/cellview_info.h>
 
 namespace cbag {

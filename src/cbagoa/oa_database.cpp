@@ -17,7 +17,7 @@
 #include <cbag/util/sorted_map.h>
 
 #include <cbag/layout/cellview.h>
-#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/shape_t_def.h>
