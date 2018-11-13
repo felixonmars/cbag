@@ -78,6 +78,12 @@ SCENARIO("sorted_map constructors and accessors", "[sorted_map]") {
             REQUIRE(iter_range.first == v.end());
             REQUIRE(iter_range.second == v.end());
         }
+
+        THEN("insert_or_assign works") {
+            expected.insert_or_assign(2, "hi");
+            v.insert_or_assign(2, "hi");
+            check_equal(v, expected);
+        }
     }
 
     GIVEN("not empty") {

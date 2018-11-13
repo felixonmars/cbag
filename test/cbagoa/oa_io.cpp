@@ -42,8 +42,7 @@ SCENARIO("read/write OA data", "[cbagoa]") {
         THEN("can read cellview from yaml file") {
             auto cv = read_cv(lib_name, cell_name, view_name, lib_file);
             auto out_fname = write_cv(cv, cell_name, view_name);
-            // TODO: debug this
-            // read_yaml(out_fname);
+            read_yaml(out_fname);
         }
     }
 }

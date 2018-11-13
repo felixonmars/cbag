@@ -104,7 +104,7 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
                   std::is_same_v<key_type, std::remove_cv_t<std::remove_reference_t<V>>>, int> = 0>
     std::pair<iterator, bool> insert_or_assign(V &&k, M &&obj) {
         auto iter = data_.lower_bound(k);
-        if (data_.get_compare()(k, *iter))
+        if (iter == data_.end() || data_.get_compare()(k, *iter))
             return {data_._insert_force(iter, value_type(std::forward<V>(k), std::forward<M>(obj))),
                     true};
         iter->second = std::forward<M>(obj);

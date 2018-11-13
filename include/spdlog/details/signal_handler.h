@@ -54,6 +54,7 @@
 #include <fmt/format.h>
 
 #include <spdlog/details/registry.h>
+#include <spdlog/spdlog.h>
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__) && !defined(__GNUC__))
 #error "Disabled fatal signal handling due to imcompatible OS or compiler"
@@ -232,15 +233,24 @@ inline void signalHandler(int signal_number, siginfo_t *info, void *unused_conte
         fatal_stream << "\n***** SIGNAL " << fatal_reason << "(" << signal_number << ")"
                      << std::endl;
 
-        std::string dumpstr(dump.c_str());
+        // only log on cbag logger
+        auto l = spdlog::get("cbag");
+        if (l) {
+            std::string dumpstr(dump.c_str());
+            l->critical(dumpstr);
+            l->critical(fatal_stream.str());
+            l->flush();
+        }
+        /*
         details::registry::instance().apply_all(
             [&dumpstr, &fatal_stream](std::shared_ptr<spdlog::logger> l) {
                 l->critical(dumpstr);
                 l->critical(fatal_stream.str());
             });
+        */
     }
 
-    details::registry::instance().flush_all();
+    // details::registry::instance().flush_all();
     exitWithDefaultSignalHandler(signal_number);
 }
 
