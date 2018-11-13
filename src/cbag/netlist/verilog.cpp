@@ -10,10 +10,9 @@
 #include <fmt/core.h>
 
 #include <cbag/netlist/verilog.h>
-#include <cbag/schematic/cellview_fwd.h>
+#include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
-#include <cbag/schematic/pin_figure.h>
 
 namespace cbag {
 verilog_builder::verilog_builder(const char *fname) : netlist_builder(fname) {}

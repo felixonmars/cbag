@@ -5,8 +5,8 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAG_SCHEMATIC_CELLVIEW_H
-#define CBAG_SCHEMATIC_CELLVIEW_H
+#ifndef CBAG_SCHEMATIC_CELLVIEW_FWD_H
+#define CBAG_SCHEMATIC_CELLVIEW_FWD_H
 
 #include <memory>
 #include <vector>
@@ -68,4 +68,4 @@ struct cellview {
 } // namespace sch
 } // namespace cbag
 
-#endif // CBAG_SCHEMATIC_CELLVIEWS_H
+#endif

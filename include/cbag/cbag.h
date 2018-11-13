@@ -18,11 +18,9 @@
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/pin.h>
 #include <cbag/layout/tech.h>
-#include <cbag/schematic/cellview_fwd.h>
+#include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
-#include <cbag/schematic/pin_figure.h>
-#include <cbag/schematic/shape_t_def.h>
 #include <cbag/util/interval.h>
 
 #endif // CBAG_CBAG_H

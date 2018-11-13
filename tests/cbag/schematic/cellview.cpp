@@ -5,11 +5,9 @@
 
 #include <catch2/catch.hpp>
 
-#include <cbag/schematic/cellview_fwd.h>
+#include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_inst_mod.h>
 #include <cbag/schematic/instance.h>
-#include <cbag/schematic/pin_figure.h>
-#include <cbag/schematic/shape_t_def.h>
 
 using cellview = cbag::sch::cellview;
 using instance = cbag::sch::instance;

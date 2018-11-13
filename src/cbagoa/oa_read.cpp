@@ -10,11 +10,8 @@
 
 #include <cbag/logging/spdlog.h>
 
-#include <cbag/schematic/cellview_fwd.h>
+#include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
-#include <cbag/schematic/pin_figure.h>
-#include <cbag/schematic/pin_object.h>
-#include <cbag/schematic/shape_t_def.h>
 
 #include <cbagoa/oa_read.h>
 #include <cbagoa/oa_util.h>
