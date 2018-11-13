@@ -22,6 +22,12 @@ namespace fs = boost::filesystem;
 namespace cbag {
 
 void to_file(const sch::cellview &cv, const std::string &fname) {
+    // create root directory if not exist.
+    fs::path path(fname);
+    if (path.has_parent_path()) {
+        fs::create_directories(path.parent_path());
+    }
+
     std::ofstream outfile(fname, std::ios_base::out);
     YAML::Node node(cv);
     YAML::Emitter emitter;
