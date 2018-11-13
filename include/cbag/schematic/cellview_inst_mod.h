@@ -31,7 +31,7 @@ void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_siz
     auto emp_iter = instances.emplace(new_name, std::unique_ptr<instance>());
     if (!emp_iter.second) {
         throw std::invalid_argument(
-            fmt::format("instance {} already exists.", emp_iter. first->first));
+            fmt::format("instance {} already exists.", emp_iter.first->first));
     }
     // insert successful, make pointer point at something
     emp_iter.first->second = std::make_unique<instance>(inst);
@@ -59,6 +59,7 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
     if (iter == instances.end()) {
         throw std::invalid_argument("Cannot find instance: " + old_name);
     }
+    instance *inst_ptr = iter->second.get();
     // get old instance name and size
     spirit::ast::name_unit old_ast;
     parse(old_name, spirit::name_unit(), old_ast);
@@ -66,13 +67,13 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
 
     if (dx == 0 && dy == 0) {
         // figure out default shift
-        dx = iter->second->bbox.w() + 10;
+        dx = inst_ptr->bbox.w() + 10;
     }
 
     coord_t x = 0;
     coord_t y = 0;
     for (const auto &p : name_conn_range) {
-        copy_instance(instances, *(iter->second), old_size, p.first, x, y, p.second);
+        copy_instance(instances, *inst_ptr, old_size, p.first, x, y, p.second);
         x += dx;
         y += dy;
     }

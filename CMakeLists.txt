@@ -187,5 +187,5 @@ target_link_libraries(cbagoa
 # add utility binaries
 add_subdirectory(util EXCLUDE_FROM_ALL)
 
-# add test binaries
-add_subdirectory(test EXCLUDE_FROM_ALL)
+# add tests binaries
+add_subdirectory(tests EXCLUDE_FROM_ALL)

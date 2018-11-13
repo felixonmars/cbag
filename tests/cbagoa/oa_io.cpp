@@ -14,7 +14,7 @@ cbag::sch::cellview read_cv(const std::string &lib_name, const std::string &cell
 
 std::string write_cv(const cbag::sch::cellview &cv, const std::string &cell_name,
                      const std::string &view_name) {
-    std::string out_fname = fmt::format("test/data/test_outputs/{}.{}.yaml", cell_name, view_name);
+    std::string out_fname = fmt::format("tests/data/test_outputs/{}.{}.yaml", cell_name, view_name);
     cbag::to_file(cv, out_fname);
     return out_fname;
 }
@@ -24,7 +24,7 @@ cbag::sch::cellview read_yaml(const std::string &fname) { return cbag::cv_from_f
 SCENARIO("read/write OA data", "[cbagoa]") {
     GIVEN("An OA library") {
         std::string lib_name = "bag_digital_ec";
-        std::string lib_file = "test/data/cds.lib";
+        std::string lib_file = "tests/data/cds.lib";
 
         std::string cell_name = GENERATE(values<std::string>({
             "inv",
