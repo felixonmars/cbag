@@ -23,7 +23,8 @@ using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
 cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                  spdlog::logger &logger, const std::string &lib_name,
                                  const std::string &cell_name, const std::string &sch_view,
-                                 const std::string &yaml_path);
+                                 const std::string &yaml_path,
+                                 const std::unordered_set<std::string> &primitive_libs);
 
 template <class OutIter>
 void get_cells(const oa::oaNativeNS &ns_native, spdlog::logger &logger, const std::string &lib_name,
@@ -57,8 +58,8 @@ void read_sch_helper(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     const std::string &yaml_path = map_iter->second;
 
     // write cellviews to yaml files
-    cbag::sch::cellview sch_cv =
-        cell_to_yaml(ns_native, ns, logger, key.first, key.second, view_name, yaml_path);
+    cbag::sch::cellview sch_cv = cell_to_yaml(ns_native, ns, logger, key.first, key.second,
+                                              view_name, yaml_path, primitive_libs);
 
     // update cell_list and exclude_cells
     out_iter = key;

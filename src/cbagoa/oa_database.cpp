@@ -147,7 +147,8 @@ cbag::sch::cellview oa_database::read_sch_cellview(const std::string &lib_name,
                                                    const std::string &cell_name,
                                                    const std::string &view_name) const {
     try {
-        return cbagoa::read_sch_cellview(ns_native, ns, *logger, lib_name, cell_name, view_name);
+        return cbagoa::read_sch_cellview(ns_native, ns, *logger, lib_name, cell_name, view_name,
+                                         primitive_libs);
     } catch (...) {
         handle_oa_exceptions(*logger);
         throw;

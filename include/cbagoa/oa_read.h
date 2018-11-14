@@ -8,6 +8,9 @@
 #ifndef CBAGOA_OA_READ_H
 #define CBAGOA_OA_READ_H
 
+#include <string>
+#include <unordered_set>
+
 #include <oa/oaDesignDB.h>
 
 // forward declare structures to reduce dependencies
@@ -25,7 +28,8 @@ namespace cbagoa {
 
 cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                       spdlog::logger &logger, const std::string &lib_name,
-                                      const std::string &cell_name, const std::string &view_name);
+                                      const std::string &cell_name, const std::string &view_name,
+                                      const std::unordered_set<std::string> &primitive_libs);
 
 } // namespace cbagoa
 

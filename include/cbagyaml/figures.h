@@ -20,7 +20,7 @@
 #include <cbagyaml/sorted_map.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, xform, bbox,
-                          connections, params)
+                          connections, params, is_primitive)
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::pin_object, inst, attr)
 

@@ -306,7 +306,8 @@ cbag::transformation get_xform(const oa::oaTransform &xform) {
     return {xform.xOffset(), xform.yOffset(), get_orientation(xform.orient())};
 }
 
-cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
+cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p,
+                                  const std::unordered_set<std::string> &primitive_libs) {
     // read cellview name
     oa::oaString inst_lib_oa, inst_cell_oa, inst_view_oa;
     p->getLibName(ns, inst_lib_oa);
@@ -320,10 +321,11 @@ cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger
     p->getBBox(bbox);
 
     // create instance object
-    cbag::sch::instance inst(std::string(inst_lib_oa), std::string(inst_cell_oa),
-                             std::string(inst_view_oa), get_xform(xform), bbox.left(),
-                             bbox.bottom(), bbox.right(), bbox.top());
-
+    std::string lib_name(inst_lib_oa);
+    cbag::sch::instance inst(lib_name, std::string(inst_cell_oa), std::string(inst_view_oa),
+                             get_xform(xform), bbox.left(), bbox.bottom(), bbox.right(),
+                             bbox.top());
+    inst.is_primitive = primitive_libs.find(lib_name) != primitive_libs.end();
     // read instance parameters
     if (p->hasProp()) {
         oa::oaIter<oa::oaProp> prop_iter(p->getProps());
@@ -351,22 +353,25 @@ cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger
 }
 
 std::pair<std::string, std::unique_ptr<cbag::sch::instance>>
-read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p) {
+read_instance_pair(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p,
+                   const std::unordered_set<std::string> &primitive_libs) {
     oa::oaString inst_name_oa;
     p->getName(ns, inst_name_oa);
     logger.info("Reading instance {}", (const char *)inst_name_oa);
     return {std::string(inst_name_oa),
-            std::make_unique<cbag::sch::instance>(read_instance(ns, logger, p))};
+            std::make_unique<cbag::sch::instance>(read_instance(ns, logger, p, primitive_libs))};
 }
 
 // Read method for pin figures
 
 cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *t,
-                                      oa::oaPinFig *p) {
+                                      oa::oaPinFig *p,
+                                      const std::unordered_set<std::string> &primitive_libs) {
     cbag::sig_type stype = get_sig_type(t->getNet()->getSigType());
     cbag::term_type ttype = get_term_type(t->getTermType());
     if (p->isInst()) {
-        cbag::sch::instance inst = read_instance(ns, logger, static_cast<oa::oaInst *>(p));
+        cbag::sch::instance inst =
+            read_instance(ns, logger, static_cast<oa::oaInst *>(p), primitive_libs);
 
         oa::oaTextDisplayIter disp_iter(oa::oaTextDisplay::getTextDisplays(t));
         auto *disp_ptr = static_cast<oa::oaAttrDisplay *>(disp_iter.getNext());
@@ -417,7 +422,8 @@ cbag::sch::pin_figure read_pin_figure(const oa::oaCdbaNS &ns, spdlog::logger &lo
 // Read method for terminals
 
 std::pair<std::string, cbag::sch::pin_figure>
-read_terminal_single(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *term) {
+read_terminal_single(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm *term,
+                     const std::unordered_set<std::string> &primitive_libs) {
     // parse terminal name
     oa::oaString term_name_oa;
     term->getName(ns, term_name_oa);
@@ -446,14 +452,15 @@ read_terminal_single(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaTerm 
             fmt::format("Terminal {} has more than one figures.", (const char *)term_name_oa));
     }
 
-    return {std::string(term_name_oa), read_pin_figure(ns, logger, term, fig_ptr)};
+    return {std::string(term_name_oa), read_pin_figure(ns, logger, term, fig_ptr, primitive_libs)};
 };
 
 // Read method for schematic/symbol cell view
 
 cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                       spdlog::logger &logger, const std::string &lib_name,
-                                      const std::string &cell_name, const std::string &view_name) {
+                                      const std::string &cell_name, const std::string &view_name,
+                                      const std::unordered_set<std::string> &primitive_libs) {
     oa::oaDesign *p =
         open_design(ns_native, logger, lib_name, cell_name, view_name, 'r', oa::oacSchematic);
 
@@ -472,7 +479,7 @@ cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa:
     oa::oaString tmp;
     while ((term_ptr = term_iter.getNext()) != nullptr) {
         term_ptr->getName(ns, tmp);
-        ans.terminals.insert(read_terminal_single(ns, logger, term_ptr));
+        ans.terminals.insert(read_terminal_single(ns, logger, term_ptr, primitive_libs));
     }
 
     // read shapes
@@ -496,7 +503,7 @@ cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa:
     while ((inst_ptr = inst_iter.getNext()) != nullptr) {
         // skip instances associated with pins.  We got those already.
         if (!inst_ptr->hasPin()) {
-            ans.instances.insert(read_instance_pair(ns, logger, inst_ptr));
+            ans.instances.insert(read_instance_pair(ns, logger, inst_ptr, primitive_libs));
         }
     }
 

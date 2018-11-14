@@ -13,14 +13,15 @@ namespace cbagoa {
 cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                  spdlog::logger &logger, const std::string &lib_name,
                                  const std::string &cell_name, const std::string &sch_view,
-                                 const std::string &yaml_path) {
+                                 const std::string &yaml_path,
+                                 const std::unordered_set<std::string> &primitive_libs) {
     // create directory if not exist, then compute output filename
     fs::path yaml_dir(yaml_path);
     fs::create_directories(yaml_dir);
 
     // parse schematic
     cbag::sch::cellview sch_cv =
-        read_sch_cellview(ns_native, ns, logger, lib_name, cell_name, sch_view);
+        read_sch_cellview(ns_native, ns, logger, lib_name, cell_name, sch_view, primitive_libs);
 
     // write schematic to file
     fs::path tmp_path = yaml_dir / fmt::format("{}.yaml", cell_name);
@@ -41,7 +42,7 @@ cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCd
             view_ptr->getName(ns_native, tmp_name);
             tmp_path = yaml_dir / fmt::format("{}.{}.yaml", cell_name, (const char *)tmp_name);
             cbag::to_file(read_sch_cellview(ns_native, ns, logger, lib_name, cell_name,
-                                            std::string((const char *)tmp_name)),
+                                            std::string((const char *)tmp_name), primitive_libs),
                           tmp_path.c_str());
         }
     }
