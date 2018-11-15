@@ -45,12 +45,6 @@ struct range : x3::position_tagged {
     uint32_t get_stop_exclude() const;
 
     uint32_t operator[](uint32_t index) const;
-
-    bool operator==(const range &other) const;
-
-    bool operator!=(const range &other) const;
-
-    bool operator<(const range &other) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.
@@ -66,12 +60,6 @@ struct name_unit : x3::position_tagged {
     uint32_t size() const;
 
     bool is_vector() const;
-
-    bool operator==(const name_unit &other) const;
-
-    bool operator!=(const name_unit &other) const;
-
-    bool operator<(const name_unit &other) const;
 };
 
 /** Represents a repeated name
@@ -88,12 +76,6 @@ struct name_rep : x3::position_tagged {
     uint32_t size() const;
 
     bool is_vector() const;
-
-    bool operator==(const name_rep &other) const;
-
-    bool operator!=(const name_rep &other) const;
-
-    bool operator<(const name_rep &other) const;
 
     std::string operator[](uint32_t index) const;
 };
@@ -128,12 +110,6 @@ struct name : x3::position_tagged {
     const_iterator end() const;
 
     uint32_t size() const;
-
-    bool operator==(const name &other) const;
-
-    bool operator!=(const name &other) const;
-
-    bool operator<(const name &other) const;
 };
 
 } // namespace ast
