@@ -8,7 +8,7 @@
 #include <fmt/core.h>
 
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/name_unit.h>
+#include <cbag/spirit/name_rep.h>
 #include <cbag/spirit/parsers.h>
 
 #include <cbag/schematic/cellview.h>
@@ -119,16 +119,16 @@ void cellview::rename_instance(const std::string &old_name, std::string new_name
         throw std::invalid_argument(fmt::format("instance {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name_unit new_ast;
-    parse(new_name, spirit::name_unit(), new_ast);
+    spirit::ast::name_rep new_ast;
+    parse(new_name, spirit::name_rep(), new_ast);
 
     auto iter = instances.replace_key(old_name, new_name);
     if (iter == instances.end())
         throw std::invalid_argument("Cannot find instance: " + old_name);
 
     // resize nets if necessary
-    spirit::ast::name_unit old_ast;
-    parse(old_name, spirit::name_unit(), old_ast);
+    spirit::ast::name_rep old_ast;
+    parse(old_name, spirit::name_rep(), old_ast);
     uint32_t old_size = old_ast.size();
     uint32_t new_size = new_ast.size();
     if (old_size != new_size) {

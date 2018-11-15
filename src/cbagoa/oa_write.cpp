@@ -475,7 +475,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
         logger.info("Writing instance {}", pair.first);
-        cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
+        cbag::spirit::ast::name_rep nu = cbag::parse_cdba_name_rep(pair.first);
         cbag::sch::instance *inst = pair.second.get();
         oa::oaTransform inst_xform = get_xform(inst->xform);
         if (pair.second->is_primitive) {

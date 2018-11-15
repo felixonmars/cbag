@@ -11,7 +11,7 @@
 #include <fmt/core.h>
 
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/name_unit.h>
+#include <cbag/spirit/name_rep.h>
 #include <cbag/spirit/parsers.h>
 
 #include <cbag/schematic/cellview_fwd.h>
@@ -24,8 +24,8 @@ template <class ConnRange>
 void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_size,
                    const std::string &new_name, coord_t dx, coord_t dy, const ConnRange &conns) {
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name_unit new_ast;
-    parse(new_name, spirit::name_unit(), new_ast);
+    spirit::ast::name_rep new_ast;
+    parse(new_name, spirit::name_rep(), new_ast);
 
     // insert with empty pointer
     auto emp_iter = instances.emplace(new_name, std::unique_ptr<instance>());
@@ -61,8 +61,8 @@ void array_instance(inst_map_t &instances, const std::string &old_name, coord_t 
     }
     instance *inst_ptr = iter->second.get();
     // get old instance name and size
-    spirit::ast::name_unit old_ast;
-    parse(old_name, spirit::name_unit(), old_ast);
+    spirit::ast::name_rep old_ast;
+    parse(old_name, spirit::name_rep(), old_ast);
     uint32_t old_size = old_ast.size();
 
     if (dx == 0 && dy == 0) {

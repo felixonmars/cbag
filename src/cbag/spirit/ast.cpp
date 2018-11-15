@@ -84,24 +84,24 @@ bool name_bit::operator<(const name_bit &other) const {
     }
 }
 
-name_unit::name_unit() = default;
+name_rep::name_rep() = default;
 
-uint32_t name_unit::size() const { return mult * std::max(idx_range.size(), 1u); }
+uint32_t name_rep::size() const { return mult * std::max(idx_range.size(), 1u); }
 
-bool name_unit::is_vector() const { return idx_range.size() > 0; }
+bool name_rep::is_vector() const { return idx_range.size() > 0; }
 
-name_bit name_unit::operator[](uint32_t index) const {
+name_bit name_rep::operator[](uint32_t index) const {
     uint32_t range_size = idx_range.size();
     return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index % range_size]);
 }
 
-bool name_unit::operator==(const name_unit &other) const {
+bool name_rep::operator==(const name_rep &other) const {
     return base == other.base && idx_range == other.idx_range && mult == other.mult;
 }
 
-bool name_unit::operator!=(const name_unit &other) const { return !(*this == other); }
+bool name_rep::operator!=(const name_rep &other) const { return !(*this == other); }
 
-bool name_unit::operator<(const name_unit &other) const {
+bool name_rep::operator<(const name_rep &other) const {
     return base < other.base ||
            (base == other.base &&
             (idx_range < other.idx_range || (idx_range == other.idx_range && mult < other.mult)));

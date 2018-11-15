@@ -73,12 +73,12 @@ struct name_bit : x3::position_tagged {
  *
  *  Possible formats are "foo", "bar<3:0>", "<*3>baz", or "<*3>asdf<3:0>".
  */
-struct name_unit : x3::position_tagged {
+struct name_rep : x3::position_tagged {
     uint32_t mult = 1;
     std::string base;
     range idx_range;
 
-    name_unit();
+    name_rep();
 
     uint32_t size() const;
 
@@ -86,11 +86,11 @@ struct name_unit : x3::position_tagged {
 
     name_bit operator[](uint32_t index) const;
 
-    bool operator==(const name_unit &other) const;
+    bool operator==(const name_rep &other) const;
 
-    bool operator!=(const name_unit &other) const;
+    bool operator!=(const name_rep &other) const;
 
-    bool operator<(const name_unit &other) const;
+    bool operator<(const name_rep &other) const;
 };
 
 /** Represents a list of name units.
@@ -114,7 +114,7 @@ struct name : x3::position_tagged {
         name_bit operator*() const;
     };
 
-    std::vector<name_unit> unit_list;
+    std::vector<name_rep> unit_list;
 
     name();
 

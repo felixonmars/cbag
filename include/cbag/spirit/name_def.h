@@ -15,7 +15,7 @@
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/name_unit_def.h>
+#include <cbag/spirit/name_rep_def.h>
 
 namespace x3 = boost::spirit::x3;
 
@@ -27,9 +27,9 @@ name_type const name = "name";
 
 /** Grammar for name.
  *
- *  a name is simply a comma-separated list of name_units.
+ *  a name is simply a comma-separated list of name_reps.
  */
-auto const name_def = name_unit % ',';
+auto const name_def = name_rep % ',';
 
 BOOST_SPIRIT_DEFINE(name);
 

@@ -117,7 +117,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/ast.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_rep.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/cbag.cpp
   )
