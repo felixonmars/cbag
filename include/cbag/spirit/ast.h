@@ -25,6 +25,11 @@ namespace ast {
 /** Represents a range of indices at regular interval.
  *
  *  step size of 0 means that this range is empty; it doesn't contain any item.
+ *  the step field is always non-negative.  However, if stop < start, then it is
+ *  implied that the index decreases.
+ *
+ *  the stop field is inclusive.  However, get_stop_exclude() method will return
+ *  an exclusive stop value if needed.
  */
 struct range : x3::position_tagged {
     uint32_t start = 0;
