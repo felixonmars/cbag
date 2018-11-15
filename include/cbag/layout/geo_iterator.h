@@ -1,6 +1,7 @@
 #ifndef CBAG_LAYOUT_GEO_ITERATOR_H
 #define CBAG_LAYOUT_GEO_ITERATOR_H
 
+#include <iterator>
 #include <memory>
 #include <utility>
 

@@ -65,7 +65,7 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
 
 void instance::update_connection(const std::string &inst_name, std::string term, std::string net) {
     // check number of bits match
-    spirit::ast::name_rep nu = parse_cdba_name_rep(inst_name);
+    spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
     update_connection(inst_name, nu.size(), std::move(term), std::move(net));
 }
 

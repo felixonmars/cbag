@@ -36,10 +36,12 @@ void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
 void cdl_builder::write_end() {}
 
 void append_name(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
+    spirit::ast::namespace_info info;
     for (auto const &name : names) {
         spirit::ast::name ast = parse_cdba_name(name);
-        for (auto const &bit : ast) {
-            b << bit;
+        auto stop = ast.end(&info);
+        for (auto iter = ast.begin(&info); iter != stop; ++iter) {
+            b << *iter;
         }
     }
 }

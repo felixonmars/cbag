@@ -10,14 +10,15 @@
 #include <cbag/netlist/name_convert.h>
 #include <cbag/spirit/ast.h>
 #include <cbag/spirit/name.h>
-#include <cbag/spirit/name_rep.h>
+#include <cbag/spirit/name_unit_def.h>
 #include <cbag/spirit/parsers.h>
+#include <cbag/util/overload.h>
 
 namespace cbag {
 
-spirit::ast::name_rep parse_cdba_name_rep(const std::string &source) {
-    spirit::ast::name_rep ast;
-    parse(source, spirit::name_rep(), ast);
+spirit::ast::name_unit parse_cdba_name_unit(const std::string &source) {
+    spirit::ast::name_unit ast;
+    parse(source, spirit::name_unit(), ast);
     return ast;
 }
 
@@ -39,12 +40,29 @@ std::string to_string_cdba(const spirit::ast::range &r) {
     }
 }
 
-std::string to_string_cdba(const spirit::ast::name_rep &nr) {
-    if (nr.mult == 1) {
-        return fmt::format("{}{}", nr.data.base, to_string_cdba(nr.data.idx_range));
-    } else {
-        return fmt::format("<*{}>{}{}", nr.mult, nr.data.base, to_string_cdba(nr.data.idx_range));
+std::string to_string_cdba(const spirit::ast::name_unit &nu) {
+    return fmt::format("{}{}", nu.base, to_string_cdba(nu.idx_range));
+}
+
+struct str_visitor : boost::static_visitor<std::string> {
+    uint32_t mult;
+
+    str_visitor(uint32_t mult) : mult(mult) {}
+
+    std::string operator()(const spirit::ast::name_unit &arg) const {
+        if (mult == 1)
+            return to_string_cdba(arg);
+        return fmt::format("<*{}>{}", mult, to_string_cdba(arg));
     }
+    std::string operator()(const spirit::ast::name &arg) const {
+        if (mult == 1)
+            return to_string_cdba(arg);
+        return fmt::format("<*{}>({})", mult, to_string_cdba(arg));
+    }
+};
+
+std::string to_string_cdba(const spirit::ast::name_rep &nr) {
+    return boost::apply_visitor(str_visitor(nr.mult), nr.data);
 }
 
 std::string to_string_cdba(const spirit::ast::name &name) {
