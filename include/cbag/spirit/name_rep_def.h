@@ -27,12 +27,15 @@ namespace parser {
 
 name_rep_type const name_rep = "name_rep";
 
+auto const mult_def = "<*" > (x3::uint32[check_zero]) > ">";
+
 /** Grammar for name_rep
  *
  *  name_rep has the form of <*N>base<a:b:c>.  The multiplier and index range
  * are optional. the multiplier cannot be 0.
  */
-auto const name_rep_def = name_rep_type{} = -("<*" > (x3::uint32[check_zero]) > ">") > name_unit;
+auto const name_rep_def = name_rep_type{} =
+    (((mult_def >> "(") > name_unit > ")") | (-mult_def > name_unit));
 
 BOOST_SPIRIT_DEFINE(name_rep);
 

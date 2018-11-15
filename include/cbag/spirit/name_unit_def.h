@@ -24,7 +24,7 @@ auto check_str = [](auto &ctx) { x3::_pass(ctx) = (std::isalpha(x3::_attr(ctx).a
 
 /** A string with no spaces, '<', '>', ':', ',', or '*'.
  */
-auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:*, "));
+auto const name_string = +(x3::ascii::print - x3::ascii::char_("()<>:*, "));
 
 /** Grammar for name_unit
  *
