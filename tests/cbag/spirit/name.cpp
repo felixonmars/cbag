@@ -6,15 +6,15 @@
 #include <cbag/netlist/name_convert.h>
 #include <cbag/spirit/ast.h>
 
-SCENARIO("valid names", "[name]") {
+SCENARIO("valid names", "[name_parse]") {
     std::pair<std::string, std::string> data =
         GENERATE(values<std::pair<std::string, std::string>>({
             {"foo", ""},
-            {"bar<3>", ""},
-            {"bar<0>", ""},
-            {"bar<3:5>", ""},
-            {"bar<5:1>", ""},
-            {"bar<3:5:1>", "bar<3:5>"},
+            {"bar0<3>", ""},
+            {"bar_foo<0>", ""},
+            {"bar_<3:5>", ""},
+            {"ACG<5:1>", ""},
+            {"ABC_a12<3:5:1>", "ABC_a12<3:5>"},
             {"bar<6:1:1>", "bar<6:1>"},
             {"<*1>baz", "baz"},
             {"<*3>baz", ""},
@@ -42,5 +42,23 @@ SCENARIO("valid names", "[name]") {
             std::string expected = (data.second == "") ? data.first : data.second;
             REQUIRE(cbag::to_string_cdba(name_obj) == expected);
         }
+    }
+}
+
+SCENARIO("invalid names", "[name_parse]") {
+    std::string data = GENERATE(values<std::string>({
+        "bar<1:2:0>",
+        "<*0>foo_hi",
+        "0baz",
+        "haha,",
+        "",
+        "test<-1>",
+        "tar<2:-3>",
+        "taz<1:5:-1>",
+    }));
+
+    THEN("parsing fails") {
+        CAPTURE(data);
+        CHECK_THROWS_AS(cbag::parse_cdba_name(data), std::invalid_argument);
     }
 }
