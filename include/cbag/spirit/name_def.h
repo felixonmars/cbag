@@ -28,7 +28,7 @@ name_rep_type const name_rep = "name_rep";
 
 name_type const name = "name";
 
-auto const mult_def = "<*" > (x3::uint32[check_zero]) > ">";
+auto const mult_def = "<*" > (x3::uint32[check_zero]) > '>';
 
 /** Grammar for name_rep
  *
@@ -36,7 +36,7 @@ auto const mult_def = "<*" > (x3::uint32[check_zero]) > ">";
  * are optional. the multiplier cannot be 0.
  */
 auto const name_rep_def = name_rep_type{} =
-    (((mult_def >> "(") > (name_unit | name) > ")") | (-mult_def > name_unit));
+    ((mult_def >> '(') > ((name_unit >> ')') | (name >> ')'))) | (-mult_def > name_unit);
 
 /** Grammar for name.
  *
