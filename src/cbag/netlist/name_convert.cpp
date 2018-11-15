@@ -17,25 +17,13 @@ namespace cbag {
 
 spirit::ast::name_rep parse_cdba_name_rep(const std::string &source) {
     spirit::ast::name_rep ast;
-    parse(source.c_str(), source.size(), spirit::name_rep(), ast);
-    return ast;
-}
-
-spirit::ast::name_rep parse_cdba_name_rep(const char *source) {
-    spirit::ast::name_rep ast;
-    parse(source, strlen(source), spirit::name_rep(), ast);
+    parse(source, spirit::name_rep(), ast);
     return ast;
 }
 
 spirit::ast::name parse_cdba_name(const std::string &source) {
     spirit::ast::name ast;
-    parse(source.c_str(), source.size(), spirit::name(), ast);
-    return ast;
-}
-
-spirit::ast::name parse_cdba_name(const char *source) {
-    spirit::ast::name ast;
-    parse(source, strlen(source), spirit::name(), ast);
+    parse(source, spirit::name(), ast);
     return ast;
 }
 
@@ -51,18 +39,11 @@ std::string to_string_cdba(const spirit::ast::range &r) {
     }
 }
 
-std::string to_string_cdba(const spirit::ast::name_bit &bit) {
-    if (bit.index) {
-        return fmt::format("{}<{}>", bit.base, *bit.index);
-    }
-    return std::string(bit.base);
-}
-
-std::string to_string_cdba(const spirit::ast::name_rep &nu) {
-    if (nu.mult == 1) {
-        return fmt::format("{}{}", nu.base, to_string_cdba(nu.idx_range));
+std::string to_string_cdba(const spirit::ast::name_rep &nr) {
+    if (nr.mult == 1) {
+        return fmt::format("{}{}", nr.base, to_string_cdba(nr.idx_range));
     } else {
-        return fmt::format("<*{}>{}{}", nu.mult, nu.base, to_string_cdba(nu.idx_range));
+        return fmt::format("<*{}>{}{}", nr.mult, nr.base, to_string_cdba(nr.idx_range));
     }
 }
 

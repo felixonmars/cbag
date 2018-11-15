@@ -48,27 +48,6 @@ struct range : x3::position_tagged {
     bool operator<(const range &other) const;
 };
 
-/** Represents a single name
- *
- *  Could be either a scalar name ("foo") or a vector bit name ("bar<3>").
- */
-struct name_bit : x3::position_tagged {
-    std::string base;
-    std::optional<uint32_t> index;
-
-    name_bit();
-
-    explicit name_bit(std::string base);
-
-    name_bit(std::string base, uint32_t index);
-
-    bool operator==(const name_bit &other) const;
-
-    bool operator!=(const name_bit &other) const;
-
-    bool operator<(const name_bit &other) const;
-};
-
 /** Represents a unit name; either a scalar or vector name.
  *
  *  POssible formats are "foo", "bar[2]", "baz[3:1]"
@@ -82,8 +61,6 @@ struct name_unit : x3::position_tagged {
     uint32_t size() const;
 
     bool is_vector() const;
-
-    name_bit operator[](uint32_t index) const;
 
     bool operator==(const name_unit &other) const;
 
@@ -107,13 +84,13 @@ struct name_rep : x3::position_tagged {
 
     bool is_vector() const;
 
-    name_bit operator[](uint32_t index) const;
-
     bool operator==(const name_rep &other) const;
 
     bool operator!=(const name_rep &other) const;
 
     bool operator<(const name_rep &other) const;
+
+    std::string operator[](uint32_t index) const;
 };
 
 /** Represents a list of name_rep's.
@@ -134,7 +111,7 @@ struct name : x3::position_tagged {
 
         bool operator==(const const_iterator &other) const;
 
-        name_bit operator*() const;
+        std::string operator*() const;
     };
 
     std::vector<name_rep> rep_list;

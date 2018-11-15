@@ -14,7 +14,6 @@ namespace cbag {
 
 namespace spirit {
 namespace ast {
-struct name_bit;
 struct name_rep;
 struct name;
 } // namespace ast
@@ -25,10 +24,6 @@ struct name;
 spirit::ast::name_rep parse_cdba_name_rep(const std::string &source);
 
 spirit::ast::name parse_cdba_name(const std::string &source);
-
-spirit::ast::name parse_cdba_name(const char *source);
-
-std::string to_string_cdba(const spirit::ast::name_bit &bit);
 
 std::string to_string_cdba(const spirit::ast::name_rep &nu);
 

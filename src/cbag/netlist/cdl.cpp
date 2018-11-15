@@ -39,7 +39,7 @@ void append_name(cdl_builder::line_builder &b, const std::vector<std::string> &n
     for (auto const &name : names) {
         spirit::ast::name ast = parse_cdba_name(name);
         for (auto const &bit : ast) {
-            b << to_string_cdba(bit);
+            b << bit;
         }
     }
 }

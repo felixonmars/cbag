@@ -58,41 +58,15 @@ bool range::operator<(const range &other) const {
             (stop < other.stop || (stop == other.stop && step < other.step)));
 }
 
-name_bit::name_bit() = default;
-
-name_bit::name_bit(std::string base) : base(std::move(base)) {}
-
-name_bit::name_bit(std::string base, uint32_t index) : base(std::move(base)), index(index) {}
-
-bool name_bit::operator==(const name_bit &other) const {
-    return base == other.base && index == other.index;
-}
-
-bool name_bit::operator!=(const name_bit &other) const { return !(*this == other); }
-
-bool name_bit::operator<(const name_bit &other) const {
-    if (base < other.base) {
-        return true;
-    } else if (base == other.base) {
-        if (index) {
-            return bool(other.index) && (*index < *other.index);
-        } else {
-            return bool(other.index);
-        }
-    } else {
-        return false;
-    }
-}
-
 name_rep::name_rep() = default;
 
 uint32_t name_rep::size() const { return mult * std::max(idx_range.size(), 1u); }
 
 bool name_rep::is_vector() const { return idx_range.size() > 0; }
 
-name_bit name_rep::operator[](uint32_t index) const {
+std::string name_rep::operator[](uint32_t index) const {
     uint32_t range_size = idx_range.size();
-    return (range_size == 0) ? name_bit(base) : name_bit(base, idx_range[index % range_size]);
+    return (range_size == 0) ? base : fmt::format("{}<{}>", base, idx_range[index % range_size]);
 }
 
 bool name_rep::operator==(const name_rep &other) const {
@@ -131,7 +105,7 @@ bool name::const_iterator::operator==(const const_iterator &other) const {
     return ptr == other.ptr && unit_index == other.unit_index && bit_index == other.bit_index;
 }
 
-name_bit name::const_iterator::operator*() const { return ptr->rep_list[unit_index][bit_index]; }
+std::string name::const_iterator::operator*() const { return ptr->rep_list[unit_index][bit_index]; }
 
 name::const_iterator name::begin() const { return {this, 0, 0}; }
 
@@ -184,18 +158,3 @@ bool name::operator<(const name &other) const {
 } // namespace ast
 } // namespace spirit
 } // namespace cbag
-
-namespace std {
-// define hash function for NameUnit
-template <> struct hash<cbag::spirit::ast::name_bit> {
-    size_t operator()(const cbag::spirit::ast::name_bit &v) const {
-
-        size_t seed = 0;
-        boost::hash_combine(seed, v.base);
-        boost::hash_combine(seed, (v.index) ? *(v.index) : std::numeric_limits<std::size_t>::max());
-
-        return seed;
-    }
-};
-
-} // namespace std
