@@ -68,8 +68,8 @@ std::string to_string_cdba(const spirit::ast::name_rep &nu) {
 
 std::string to_string_cdba(const spirit::ast::name &name) {
     std::ostringstream builder;
-    auto cursor = name.unit_list.begin();
-    auto stop = name.unit_list.end();
+    auto cursor = name.rep_list.begin();
+    auto stop = name.rep_list.end();
     if (cursor != stop) {
         builder << to_string_cdba(*cursor);
         ++cursor;

@@ -10,10 +10,10 @@
 #define CBAG_SPIRIT_AST_H
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
 namespace x3 = boost::spirit::x3;
@@ -54,7 +54,7 @@ struct range : x3::position_tagged {
  */
 struct name_bit : x3::position_tagged {
     std::string base;
-    boost::optional<uint32_t> index;
+    std::optional<uint32_t> index;
 
     name_bit();
 
@@ -69,9 +69,32 @@ struct name_bit : x3::position_tagged {
     bool operator<(const name_bit &other) const;
 };
 
-/** Represents a name unit
+/** Represents a unit name; either a scalar or vector name.
  *
- *  Possible formats are "foo", "bar<3:0>", "<*3>baz", or "<*3>asdf<3:0>".
+ *  POssible formats are "foo", "bar[2]", "baz[3:1]"
+ */
+struct name_unit : x3::position_tagged {
+    std::string base;
+    range idx_range;
+
+    name_unit();
+
+    uint32_t size() const;
+
+    bool is_vector() const;
+
+    name_bit operator[](uint32_t index) const;
+
+    bool operator==(const name_unit &other) const;
+
+    bool operator!=(const name_unit &other) const;
+
+    bool operator<(const name_unit &other) const;
+};
+
+/** Represents a repeated name
+ *
+ *  Possible formats are "<*3>foo", "<*3>(a,b)", or just name_unit.
  */
 struct name_rep : x3::position_tagged {
     uint32_t mult = 1;
@@ -93,7 +116,7 @@ struct name_rep : x3::position_tagged {
     bool operator<(const name_rep &other) const;
 };
 
-/** Represents a list of name units.
+/** Represents a list of name_rep's.
  */
 struct name : x3::position_tagged {
     class const_iterator {
@@ -114,7 +137,7 @@ struct name : x3::position_tagged {
         name_bit operator*() const;
     };
 
-    std::vector<name_rep> unit_list;
+    std::vector<name_rep> rep_list;
 
     name();
 

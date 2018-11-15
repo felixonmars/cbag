@@ -111,7 +111,7 @@ name::const_iterator::const_iterator(const name *ptr, unsigned long unit_index, 
     : ptr(ptr), unit_index(unit_index), bit_index(bit_index) {}
 
 name::const_iterator &name::const_iterator::operator++() {
-    if (bit_index < (ptr->unit_list[unit_index]).size() - 1) {
+    if (bit_index < (ptr->rep_list[unit_index]).size() - 1) {
         ++bit_index;
     } else {
         ++unit_index;
@@ -131,27 +131,27 @@ bool name::const_iterator::operator==(const const_iterator &other) const {
     return ptr == other.ptr && unit_index == other.unit_index && bit_index == other.bit_index;
 }
 
-name_bit name::const_iterator::operator*() const { return ptr->unit_list[unit_index][bit_index]; }
+name_bit name::const_iterator::operator*() const { return ptr->rep_list[unit_index][bit_index]; }
 
 name::const_iterator name::begin() const { return {this, 0, 0}; }
 
-name::const_iterator name::end() const { return {this, unit_list.size(), 0}; }
+name::const_iterator name::end() const { return {this, rep_list.size(), 0}; }
 
 uint32_t name::size() const {
     uint32_t tot = 0;
-    for (auto const &nu : unit_list) {
+    for (auto const &nu : rep_list) {
         tot += nu.size();
     }
     return tot;
 }
 
 bool name::operator==(const name &other) const {
-    unsigned long size1 = unit_list.size();
-    unsigned long size2 = other.unit_list.size();
+    unsigned long size1 = rep_list.size();
+    unsigned long size2 = other.rep_list.size();
 
     if (size1 == size2) {
         for (unsigned long idx = 0; idx < size1; idx++) {
-            if (unit_list[idx] != other.unit_list[idx]) {
+            if (rep_list[idx] != other.rep_list[idx]) {
                 return false;
             }
         }
@@ -164,14 +164,14 @@ bool name::operator==(const name &other) const {
 bool name::operator!=(const name &other) const { return !(*this == other); }
 
 bool name::operator<(const name &other) const {
-    unsigned long size1 = unit_list.size();
-    unsigned long size2 = other.unit_list.size();
+    unsigned long size1 = rep_list.size();
+    unsigned long size2 = other.rep_list.size();
 
     if (size1 < size2) {
         return true;
     } else if (size1 == size2) {
         for (unsigned long idx = 0; idx < size1; idx++) {
-            if (unit_list[idx] < other.unit_list[idx]) {
+            if (rep_list[idx] < other.rep_list[idx]) {
                 return true;
             }
         }
