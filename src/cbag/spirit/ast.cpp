@@ -46,6 +46,20 @@ uint32_t range::operator[](uint32_t index) const {
     return (stop >= start) ? start + step * index : start - step * index;
 }
 
+uint32_t range::at(uint32_t index) const {
+    uint32_t n = size();
+    if (index < 0 || index >= n) {
+        throw std::out_of_range(fmt::format("index {} out of range (size = {})", index, n));
+    }
+    return operator[](index);
+}
+
+name_unit::name_unit() = default;
+
+uint32_t name_unit::size() const { return std::max(idx_range.size(), 1u); }
+
+bool name_unit::is_vector() const { return idx_range.size() > 0; }
+
 name_rep::name_rep() = default;
 
 uint32_t name_rep::size() const { return mult * std::max(idx_range.size(), 1u); }

@@ -45,6 +45,8 @@ struct range : x3::position_tagged {
     uint32_t get_stop_exclude() const;
 
     uint32_t operator[](uint32_t index) const;
+
+    uint32_t at(uint32_t index) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.
@@ -60,6 +62,10 @@ struct name_unit : x3::position_tagged {
     uint32_t size() const;
 
     bool is_vector() const;
+
+    template <class Namespace> std::string at(uint32_t index, const Namespace &ns) const {
+        return (idx_range.size() > 0) ? ns.format_name_bit(base, idx_range.at(index)) : base;
+    }
 };
 
 /** Represents a repeated name
