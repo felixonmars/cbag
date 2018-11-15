@@ -19,7 +19,8 @@
 #include <vector>
 
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
-#include <boost/spirit/home/x3/support/ast/variant.hpp>
+
+#include <cbag/spirit/variant_support.h>
 
 namespace x3 = boost::spirit::x3;
 
@@ -236,11 +237,6 @@ class const_name_rep_iterator {
     bool operator!=(const const_name_rep_iterator &rhs) const;
 };
 
-struct name_rep_value : x3::variant<name_unit, name> {
-    using base_type::base_type;
-    using base_type::operator=;
-};
-
 /** Represents a repeated name
  *
  *  Possible formats are "<*3>foo", "<*3>(a,b)", or just name_unit.
@@ -249,7 +245,7 @@ struct name_rep : x3::position_tagged {
     using const_iterator = const_name_rep_iterator;
 
     uint32_t mult = 1;
-    name_rep_value data;
+    std::variant<name_unit, name> data;
 
     name_rep();
 

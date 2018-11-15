@@ -44,25 +44,21 @@ std::string to_string_cdba(const spirit::ast::name_unit &nu) {
     return fmt::format("{}{}", nu.base, to_string_cdba(nu.idx_range));
 }
 
-struct str_visitor : boost::static_visitor<std::string> {
-    uint32_t mult;
-
-    str_visitor(uint32_t mult) : mult(mult) {}
-
-    std::string operator()(const spirit::ast::name_unit &arg) const {
-        if (mult == 1)
-            return to_string_cdba(arg);
-        return fmt::format("<*{}>{}", mult, to_string_cdba(arg));
-    }
-    std::string operator()(const spirit::ast::name &arg) const {
-        if (mult == 1)
-            return to_string_cdba(arg);
-        return fmt::format("<*{}>({})", mult, to_string_cdba(arg));
-    }
-};
-
 std::string to_string_cdba(const spirit::ast::name_rep &nr) {
-    return boost::apply_visitor(str_visitor(nr.mult), nr.data);
+    return std::visit(
+        overload{
+            [&nr](const spirit::ast::name_unit &arg) {
+                if (nr.mult == 1)
+                    return to_string_cdba(arg);
+                return fmt::format("<*{}>{}", nr.mult, to_string_cdba(arg));
+            },
+            [&nr](const spirit::ast::name &arg) {
+                if (nr.mult == 1)
+                    return to_string_cdba(arg);
+                return fmt::format("<*{}>({})", nr.mult, to_string_cdba(arg));
+            },
+        },
+        nr.data);
 }
 
 std::string to_string_cdba(const spirit::ast::name &name) {

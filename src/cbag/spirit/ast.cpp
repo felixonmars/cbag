@@ -160,36 +160,29 @@ bool const_name_rep_iterator::operator!=(const const_name_rep_iterator &rhs) con
 
 name_rep::name_rep() = default;
 
-struct size_visitor : boost::static_visitor<uint32_t> {
-    template <typename T> uint32_t operator()(const T &arg) const { return arg.size(); }
-};
-
-uint32_t name_rep::size() const { return mult * boost::apply_visitor(size_visitor(), data); }
+uint32_t name_rep::size() const {
+    return mult * std::visit([](const auto &arg) { return arg.size(); }, data);
+}
 
 bool name_rep::is_vector() const {
-    const name_unit *ptr = boost::get<name_unit>(&data);
+    const name_unit *ptr = std::get_if<name_unit>(&data);
     return ptr && ptr->is_vector();
 }
 
-struct iter_visitor : boost::static_visitor<const_name_rep_iterator> {
-    const namespace_info *info;
-    uint32_t cnt;
-
-    iter_visitor(const namespace_info *info, uint32_t cnt) : info(info), cnt(cnt) {}
-
-    const_name_rep_iterator operator()(const name_unit &arg) const {
-        return const_name_rep_iterator(
-            info, cnt, nu_iter_tuple(arg.begin(info), arg.end(info), arg.begin(info)));
-    }
-    const_name_rep_iterator operator()(const name &arg) const {
-        return const_name_rep_iterator(
-            info, cnt, na_iter_tuple(arg.begin(info), arg.end(info), arg.begin(info)));
-    }
-};
-
-const_name_rep_iterator iter_helper(const namespace_info *info, const name_rep_value &data,
-                                    uint32_t cnt) {
-    return boost::apply_visitor(iter_visitor(info, cnt), data);
+const_name_rep_iterator iter_helper(const namespace_info *info,
+                                    const std::variant<name_unit, name> &data, uint32_t cnt) {
+    return std::visit(
+        overload{
+            [&info, &cnt](const name_unit &arg) {
+                return const_name_rep_iterator(
+                    info, cnt, nu_iter_tuple(arg.begin(info), arg.end(info), arg.begin(info)));
+            },
+            [&info, &cnt](const name &arg) {
+                return const_name_rep_iterator(
+                    info, cnt, na_iter_tuple(arg.begin(info), arg.end(info), arg.begin(info)));
+            },
+        },
+        data);
 }
 
 const_name_rep_iterator name_rep::begin(const namespace_info *info) const {
