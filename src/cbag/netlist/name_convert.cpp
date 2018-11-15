@@ -41,9 +41,9 @@ std::string to_string_cdba(const spirit::ast::range &r) {
 
 std::string to_string_cdba(const spirit::ast::name_rep &nr) {
     if (nr.mult == 1) {
-        return fmt::format("{}{}", nr.base, to_string_cdba(nr.idx_range));
+        return fmt::format("{}{}", nr.data.base, to_string_cdba(nr.data.idx_range));
     } else {
-        return fmt::format("<*{}>{}{}", nr.mult, nr.base, to_string_cdba(nr.idx_range));
+        return fmt::format("<*{}>{}{}", nr.mult, nr.data.base, to_string_cdba(nr.data.idx_range));
     }
 }
 

@@ -64,7 +64,12 @@ struct name_unit : x3::position_tagged {
     bool is_vector() const;
 
     template <class Namespace> std::string at(uint32_t index, const Namespace &ns) const {
-        return (idx_range.size() > 0) ? ns.format_name_bit(base, idx_range.at(index)) : base;
+        if (idx_range.size() > 0)
+            return ns.format_name_bit(base, idx_range.at(index));
+        else if (index == 0)
+            return base;
+        else
+            throw std::out_of_range("out of range index (size = 0): " + std::to_string(index));
     }
 };
 
@@ -74,8 +79,7 @@ struct name_unit : x3::position_tagged {
  */
 struct name_rep : x3::position_tagged {
     uint32_t mult = 1;
-    std::string base;
-    range idx_range;
+    name_unit data;
 
     name_rep();
 

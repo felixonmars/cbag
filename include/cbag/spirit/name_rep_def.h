@@ -17,7 +17,7 @@
 #include <cbag/spirit/ast_adapted.h>
 #include <cbag/spirit/error_handler.h>
 #include <cbag/spirit/name_rep.h>
-#include <cbag/spirit/range_def.h>
+#include <cbag/spirit/name_unit_def.h>
 
 namespace x3 = boost::spirit::x3;
 
@@ -27,19 +27,12 @@ namespace parser {
 
 name_rep_type const name_rep = "name_rep";
 
-auto check_str = [](auto &ctx) { x3::_pass(ctx) = (std::isalpha(x3::_attr(ctx).at(0)) != 0); };
-
-/** A string with no spaces, '<', '>', ':', ',', or '*'.
- */
-auto const name_string = +(x3::ascii::print - x3::ascii::char_("<>:*, "));
-
 /** Grammar for name_rep
  *
  *  name_rep has the form of <*N>base<a:b:c>.  The multiplier and index range
  * are optional. the multiplier cannot be 0.
  */
-auto const name_rep_def = name_rep_type{} = -("<*" > (x3::uint32[check_zero]) > ">") >
-                                            name_string[check_str] >> -(range);
+auto const name_rep_def = name_rep_type{} = -("<*" > (x3::uint32[check_zero]) > ">") > name_unit;
 
 BOOST_SPIRIT_DEFINE(name_rep);
 

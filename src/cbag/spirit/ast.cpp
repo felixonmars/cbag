@@ -62,13 +62,13 @@ bool name_unit::is_vector() const { return idx_range.size() > 0; }
 
 name_rep::name_rep() = default;
 
-uint32_t name_rep::size() const { return mult * std::max(idx_range.size(), 1u); }
+uint32_t name_rep::size() const { return mult * data.size(); }
 
-bool name_rep::is_vector() const { return idx_range.size() > 0; }
+bool name_rep::is_vector() const { return data.is_vector(); }
 
 std::string name_rep::operator[](uint32_t index) const {
-    uint32_t range_size = idx_range.size();
-    return (range_size == 0) ? base : fmt::format("{}<{}>", base, idx_range[index % range_size]);
+    // TODO: fix this broken code
+    return data.base;
 }
 
 name::const_iterator::const_iterator(const name *ptr, unsigned long unit_index, uint32_t bit_index)
