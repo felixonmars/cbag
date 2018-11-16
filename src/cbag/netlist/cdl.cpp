@@ -77,6 +77,7 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
     // write instance name
+    // TODO: handle array instance correctly.
     b << name;
 
     // write instance connections
