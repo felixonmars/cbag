@@ -35,10 +35,10 @@ void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
 
 void cdl_builder::write_end() {}
 
-void append_name(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
-    spirit::ast::namespace_info info;
+void append_name_unit(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
+    auto info = spirit::ast::get_ns_info(spirit::ast::namespace_type::CDL);
     for (auto const &name : names) {
-        spirit::ast::name ast = parse_cdba_name(name);
+        spirit::ast::name_unit ast = parse_cdba_name_unit(name);
         auto stop = ast.end(&info);
         for (auto iter = ast.begin(&info); iter != stop; ++iter) {
             b << *iter;
@@ -50,22 +50,22 @@ void cdl_builder::write_cv_header(const std::string &name, const sch::cellview_i
     line_builder b(ncol, cnt_char, break_before, tab_size);
     b << ".SUBCKT";
     b << name;
-    append_name(b, info.in_terms);
-    append_name(b, info.out_terms);
-    append_name(b, info.io_terms);
+    append_name_unit(b, info.in_terms);
+    append_name_unit(b, info.out_terms);
+    append_name_unit(b, info.io_terms);
 
     out_file << b;
 }
 
 void cdl_builder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
 
-void append_nets(cdl_builder::line_builder &b, const sch::instance &inst,
-                 const std::vector<std::string> &terms) {
+void append_nets(cdl_builder::line_builder &b, const std::string &inst_name,
+                 const sch::instance &inst, const std::vector<std::string> &terms) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
-            throw std::invalid_argument(fmt::format("Cannot find net {} in cellview {}__{}", term,
-                                                    inst.lib_name, inst.cell_name));
+            throw std::invalid_argument(fmt::format(
+                "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
         b << term_iter->second;
     }
@@ -80,9 +80,9 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
     b << name;
 
     // write instance connections
-    append_nets(b, inst, info.in_terms);
-    append_nets(b, inst, info.out_terms);
-    append_nets(b, inst, info.io_terms);
+    append_nets(b, name, inst, info.in_terms);
+    append_nets(b, name, inst, info.out_terms);
+    append_nets(b, name, inst, info.io_terms);
 
     // write instance cell name
     if (!info.is_prim) {

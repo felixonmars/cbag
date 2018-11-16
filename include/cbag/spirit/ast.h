@@ -29,14 +29,14 @@ namespace spirit {
 namespace ast {
 
 struct namespace_info {
-    char bus_begin = '<';
-    char bus_end = '>';
-    char bus_delim = ':';
-    char list_delim = ',';
-    char rep_grp_begin = '(';
-    char rep_grp_end = ')';
-    std::string rep_begin = "<*";
-    std::string rep_end = ">";
+    char bus_begin;
+    char bus_end;
+    char bus_delim;
+    char list_delim;
+    char rep_grp_begin;
+    char rep_grp_end;
+    std::string rep_begin;
+    std::string rep_end;
 
     bool operator==(const namespace_info &rhs) const;
 };

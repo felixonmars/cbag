@@ -26,9 +26,9 @@ bool namespace_info::operator==(const namespace_info &rhs) const {
 namespace_info get_ns_info(namespace_type ns_type) {
     switch (ns_type) {
     case namespace_type::CDBA:
-        return {};
+        return {'<', '>', ':', ',', '(', ')', "<*", ">"};
     case namespace_type::CDL:
-        return {};
+        return {'<', '>', ':', ',', '(', ')', "", ""};
     case namespace_type::VERILOG:
         return {'[', ']', ':', ',', '(', ')', "", ""};
     default:
