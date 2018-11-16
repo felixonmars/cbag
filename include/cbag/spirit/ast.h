@@ -38,13 +38,16 @@ struct namespace_info {
     std::string rep_begin = "<*";
     std::string rep_end = ">";
 
-    bool operator==(const namespace_info &rhs) const {
-        return (bus_begin == rhs.bus_begin && bus_end == rhs.bus_end &&
-                bus_delim == rhs.bus_delim && list_delim == rhs.list_delim &&
-                rep_grp_begin == rhs.rep_grp_begin && rep_grp_end == rhs.rep_grp_end &&
-                rep_begin == rhs.rep_begin && rep_end == rhs.rep_end);
-    }
+    bool operator==(const namespace_info &rhs) const;
 };
+
+enum class namespace_type : uint8_t {
+    CDBA = 0,
+    CDL = 1,
+    VERILOG = 2,
+};
+
+namespace_info get_ns_info(namespace_type ns_type);
 
 /** Represents a range of indices at regular interval.
  *
@@ -103,6 +106,8 @@ struct range : x3::position_tagged {
     uint32_t operator[](uint32_t index) const;
 
     uint32_t at(uint32_t index) const;
+
+    std::string to_string(const namespace_info &ns) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.
@@ -147,6 +152,8 @@ struct name_unit : x3::position_tagged {
     const_iterator begin(const namespace_info *info) const;
 
     const_iterator end(const namespace_info *info) const;
+
+    std::string to_string(const namespace_info &ns) const;
 };
 
 struct name_rep;
@@ -199,11 +206,13 @@ struct name : x3::position_tagged {
 
     name();
 
+    uint32_t size() const;
+
     const_iterator begin(const namespace_info *info) const;
 
     const_iterator end(const namespace_info *info) const;
 
-    uint32_t size() const;
+    std::string to_string(const namespace_info &ns) const;
 };
 
 using nu_iter_tuple =
@@ -256,6 +265,8 @@ struct name_rep : x3::position_tagged {
     const_iterator begin(const namespace_info *info) const;
 
     const_iterator end(const namespace_info *info) const;
+
+    std::string to_string(const namespace_info &ns) const;
 };
 
 } // namespace ast

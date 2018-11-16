@@ -7,11 +7,6 @@
  */
 
 #include <algorithm>
-#include <cstdint>
-#include <limits>
-#include <vector>
-
-#include <boost/functional/hash.hpp>
 
 #include <fmt/core.h>
 
@@ -21,6 +16,26 @@
 namespace cbag {
 namespace spirit {
 namespace ast {
+
+bool namespace_info::operator==(const namespace_info &rhs) const {
+    return (bus_begin == rhs.bus_begin && bus_end == rhs.bus_end && bus_delim == rhs.bus_delim &&
+            list_delim == rhs.list_delim && rep_grp_begin == rhs.rep_grp_begin &&
+            rep_grp_end == rhs.rep_grp_end && rep_begin == rhs.rep_begin && rep_end == rhs.rep_end);
+}
+
+namespace_info get_ns_info(namespace_type ns_type) {
+    switch (ns_type) {
+    case namespace_type::CDBA:
+        return {};
+    case namespace_type::CDL:
+        return {};
+    case namespace_type::VERILOG:
+        return {'[', ']', ':', ',', '(', ')', "", ""};
+    default:
+        throw std::invalid_argument(
+            fmt::format("Unsupported namespace type: {}", static_cast<uint8_t>(ns_type)));
+    }
+}
 
 range::const_iterator::const_iterator() = default;
 
@@ -85,6 +100,17 @@ uint32_t range::at(uint32_t index) const {
     return operator[](index);
 }
 
+std::string range::to_string(const namespace_info &ns) const {
+    if (step == 0)
+        return "";
+    if (start == stop)
+        return fmt::format("{0}{2}{1}", ns.bus_begin, ns.bus_end, start);
+    if (step == 1)
+        return fmt::format("{0}{3}{2}{4}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop);
+    return fmt::format("{0}{3}{2}{4}{2}{5}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop,
+                       step);
+}
+
 name_unit::const_iterator::const_iterator() = default;
 
 name_unit::const_iterator::const_iterator(const namespace_info *info, const name_unit *parent,
@@ -120,6 +146,10 @@ name_unit::const_iterator name_unit::begin(const namespace_info *info) const {
 
 name_unit::const_iterator name_unit::end(const namespace_info *info) const {
     return {info, this, idx_range.end()};
+}
+
+std::string name_unit::to_string(const namespace_info &ns) const {
+    return base + idx_range.to_string(ns);
 }
 
 const_name_rep_iterator::const_name_rep_iterator() = default;
@@ -196,6 +226,29 @@ const_name_rep_iterator name_rep::end(const namespace_info *info) const {
     return iter_helper(info, data, mult);
 } // namespace ast
 
+std::string name_rep::to_string(const namespace_info &ns) const {
+    if (mult == 0)
+        return "";
+    std::string base = std::visit([&ns](const auto &arg) { return arg.to_string(ns); }, data);
+    if (mult == 1)
+        return base;
+
+    if (ns.rep_begin.empty()) {
+        // handle namespaces that do not support name repetition
+        std::string ans = base;
+        ans.reserve(mult * base.size() + (mult - 1));
+        for (uint32_t idx = 1; idx < mult; ++idx) {
+            ans.append(1, ns.list_delim);
+            ans.append(base);
+        }
+        return ans;
+    }
+    if (std::holds_alternative<name_unit>(data))
+        return fmt::format("{0}{2}{1}{3}", ns.rep_begin, ns.rep_end, mult, base);
+    return fmt::format("{0}{4}{1}{2}{5}{3}", ns.rep_begin, ns.rep_end, ns.rep_grp_begin,
+                       ns.rep_grp_end, mult, base);
+}
+
 name::const_iterator::const_iterator() = default;
 
 name::const_iterator::const_iterator(const namespace_info *info, rep_vec_iter vbegin,
@@ -264,6 +317,17 @@ bool name::const_iterator::operator!=(const name::const_iterator &other) const {
 
 name::name() = default;
 
+uint32_t name::size() const {
+    if (!size_) {
+        uint32_t tot = 0;
+        for (auto const &nu : rep_list) {
+            tot += nu.size();
+        }
+        size_ = tot;
+    }
+    return *size_;
+}
+
 name::const_iterator name::begin(const namespace_info *info) const {
     rep_vec_iter vbegin = rep_list.begin();
     rep_vec_iter vend = rep_list.end();
@@ -286,15 +350,16 @@ name::const_iterator name::end(const namespace_info *info) const {
     return {info, rep_list.end(), rep_list.end(), std::move(rbegin), std::move(rend)};
 }
 
-uint32_t name::size() const {
-    if (!size_) {
-        uint32_t tot = 0;
-        for (auto const &nu : rep_list) {
-            tot += nu.size();
-        }
-        size_ = tot;
+std::string name::to_string(const namespace_info &ns) const {
+    std::size_t n = rep_list.size();
+    if (n == 0)
+        return "";
+    std::string ans = rep_list.front().to_string(ns);
+    for (std::size_t idx = 1; idx < n; ++idx) {
+        ans.append(1, ns.list_delim);
+        ans.append(rep_list[idx].to_string(ns));
     }
-    return *size_;
+    return ans;
 }
 
 } // namespace ast

@@ -38,6 +38,8 @@ SCENARIO("valid names", "[name_parse]") {
             {"<*2>(<*4>foo<3:5>,a),<*2>(b,c)", ""},
         }));
 
+    auto ns_info = cbag::spirit::ast::get_ns_info(cbag::spirit::ast::namespace_type::CDBA);
+
     THEN("parsing works") {
         cbag::spirit::ast::name name_obj;
         try {
@@ -47,7 +49,7 @@ SCENARIO("valid names", "[name_parse]") {
         }
         THEN("name converts back to same string") {
             std::string expected = (data.second == "") ? data.first : data.second;
-            REQUIRE(cbag::to_string_cdba(name_obj) == expected);
+            REQUIRE(name_obj.to_string(ns_info) == expected);
         }
     }
 }
