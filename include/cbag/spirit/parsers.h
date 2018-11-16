@@ -36,7 +36,17 @@ template <typename A, typename R> void parse(const std::string &source, R const 
         x3::with<spirit::parser::error_handler_tag>(err_ref)[rule];
 
     // Go forth and parse!
-    if (!x3::parse(iter_start, iter_end, parser, ast) || iter_start != iter_end) {
+    bool success = x3::parse(iter_start, iter_end, parser, ast);
+    bool not_finish = (iter_start != iter_end);
+    if (!success || not_finish) {
+        if (iter_start != iter_end) {
+            std::string marker(source.size(), '-');
+            marker[iter_start - source.begin()] = '^';
+            out << "Cannot parse following string completely:\n";
+            out << source << '\n'
+                << marker << '\n'
+                << "Only up to index " << (iter_start - source.begin()) << '\n';
+        }
         throw std::invalid_argument(out.str());
     }
 }

@@ -28,15 +28,41 @@ name_rep_type const name_rep = "name_rep";
 
 name_type const name = "name";
 
-auto const mult_def = "<*" > (x3::uint32[check_zero]) > '>';
-
-/** Grammar for name_rep
+/** Grammar for multiplier tag
  *
- *  name_rep has the form of <*N>base<a:b:c>.  The multiplier and index range
- * are optional. the multiplier cannot be 0.
+ *  The multiplier tag has the form:
+ *  <*a>
+ *
+ *  a must be positive.
+ *  expectation operator is used because once the tag prefix is matched,
+ *  the context is uniquely determined.
  */
-auto const name_rep_def = name_rep_type{} =
-    ((mult_def >> '(') > ((name_unit >> ')') | (name >> ')'))) | (-mult_def > name_unit);
+auto const mult_tag = "<*" > x3::uint32[check_zero] > '>';
+
+/** Grammar for a group of names
+ *
+ *  A group of names is a name_unit or a name surrounded by parentheses.
+ *  expectation operator is used to get good error messages.  sequence
+ *  operator is used after name_unit to allow for back-tracking, as
+ *  we cannot distinguish between name and name_unit until we hit
+ *  a comma or the close parenthesis.
+ */
+auto const grp_name = '(' > ((name_unit >> ')') | (name > ')'));
+
+/** Grammar for a repeated name
+ *
+ *  name_rep can be one of:
+ *  foo
+ *  <*a>foo
+ *  <*a>(foo)
+ *  <*a>(foo,bar)
+ *
+ *  sequence operator is used in the first OR block to allow for
+ *  back-tracking, as we cannot distinguish between a group of names
+ *  or a name unit until we see the character right after the multiplier
+ *  tag.
+ */
+auto const name_rep_def = name_rep_type{} = (mult_tag >> grp_name) | (-mult_tag > name_unit);
 
 /** Grammar for name.
  *

@@ -35,13 +35,18 @@ range_type const range = "range";
 
 /** Grammer for range
  *
- *  range is of the form <a:b:c>, b and c are optional.
+ *  range can be one of:
+ *  <a>
+ *  <a:b>
+ *  <a:b:c>
+ *
  *  if b is missing, then b = a by default.  If c is missing, then c = 1.
- *  c cannot be 0.
+ *  c cannot be 0, all of a, b, and c must be non-negative.
+ *  expectation operators are used in places where context is uniquely determined
+ *  so we get good error messages.
  */
 auto const range_def = range_type{} = '<' > (x3::uint32[init_range]) >>
-                                      -(':' > x3::uint32 >> -(':' > (x3::uint32[check_zero]))) >
-                                      '>';
+                                      -(':' > x3::uint32 >> -(':' > x3::uint32[check_zero])) > '>';
 
 BOOST_SPIRIT_DEFINE(range);
 
