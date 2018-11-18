@@ -31,8 +31,7 @@ SCENARIO("netlist generation", "[cbag]") {
 
         auto cv = cbag::cv_from_file(fmt::format("{}/{}.yaml", yaml_dir, cell_name));
 
-        std::vector<cbag::sch::cellview *> cv_list = {&cv};
-        std::vector<std::string> name_list = {"TEST"};
+        std::vector<std::pair<cbag::sch::cellview *, std::string>> cv_name_list = {{&cv, "TEST"}};
         std::vector<std::string> inc_list;
         cbag::netlist_map_t netlist_map;
         bool flat = false;
@@ -40,8 +39,8 @@ SCENARIO("netlist generation", "[cbag]") {
         std::string fname = fmt::format("{}/{}.netlist", output_dir, cell_name);
 
         THEN("can write cdl netlist") {
-            write_netlist(cv_list, name_list, inc_list, netlist_map, flat, shell,
-                          cbag::netlist_fmt::CDL, fname);
+            write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, cbag::netlist_fmt::CDL,
+                          fname);
         }
     }
 }
