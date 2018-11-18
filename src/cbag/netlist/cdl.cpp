@@ -45,7 +45,7 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
 void traits::nstream<cdl_stream>::write_end(type &stream) {}
 
 void append_name_unit(lstream &b, const std::vector<std::string> &names) {
-    auto info = spirit::ast::get_ns_info(spirit::ast::namespace_type::CDL);
+    auto info = spirit::get_ns_info(spirit::namespace_type::CDL);
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
         auto stop = ast.end(&info);

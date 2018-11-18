@@ -18,7 +18,6 @@ namespace x3 = boost::spirit::x3;
 
 namespace cbag {
 namespace spirit {
-namespace ast {
 
 struct namespace_info {
     char bus_begin;
@@ -41,7 +40,6 @@ enum class namespace_type : uint8_t {
 
 namespace_info get_ns_info(namespace_type ns_type);
 
-} // namespace ast
 } // namespace spirit
 } // namespace cbag
 

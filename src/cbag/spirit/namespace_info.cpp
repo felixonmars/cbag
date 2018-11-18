@@ -5,7 +5,6 @@
 
 namespace cbag {
 namespace spirit {
-namespace ast {
 
 bool namespace_info::operator==(const namespace_info &rhs) const {
     return (bus_begin == rhs.bus_begin && bus_end == rhs.bus_end && bus_delim == rhs.bus_delim &&
@@ -27,6 +26,5 @@ namespace_info get_ns_info(namespace_type ns_type) {
     }
 }
 
-} // namespace ast
 } // namespace spirit
 } // namespace cbag

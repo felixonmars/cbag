@@ -38,7 +38,7 @@ SCENARIO("valid names", "[name_parse]") {
             {"<*2>(<*4>foo<3:5>,a),<*2>(b,c)", ""},
         }));
 
-    auto ns_info = cbag::spirit::ast::get_ns_info(cbag::spirit::ast::namespace_type::CDBA);
+    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
 
     THEN("parsing works") {
         cbag::spirit::ast::name name_obj;
