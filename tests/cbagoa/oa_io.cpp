@@ -45,8 +45,6 @@ std::string write_cv(const cbag::sch::cellview &cv, const std::string &cell_name
     return out_fname;
 }
 
-cbag::sch::cellview read_yaml(const std::string &fname) { return cbag::cv_from_file(fname); }
-
 SCENARIO("read/write OA data", "[cbagoa]") {
     GIVEN("An OA library") {
         std::string lib_name = "test_netlist";
@@ -67,7 +65,7 @@ SCENARIO("read/write OA data", "[cbagoa]") {
             auto cv = read_cv(lib_name, cell_name, view_name, lib_file);
             AND_THEN("cellview written to yaml file properly") {
                 auto out_fname = write_cv(cv, cell_name, view_name, output_dir, expect_dir);
-                AND_THEN("can read cellview from yaml file") { read_yaml(out_fname); }
+                AND_THEN("can read cellview from yaml file") { cbag::cv_from_file(out_fname); }
             }
         }
     }

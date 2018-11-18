@@ -2,10 +2,8 @@
 
 #include <fmt/core.h>
 
-#include <cbag/cbag.h>
-#include <cbagyaml/cbagyaml.h>
-
-cbag::sch::cellview read_yaml(const std::string &fname) { return cbag::cv_from_file(fname); }
+#include "cbag/cbag.h"
+#include "cbagyaml/cbagyaml.h"
 
 SCENARIO("netlist generation", "[cbag]") {
     GIVEN("cellviews from yaml files") {
@@ -19,9 +17,9 @@ SCENARIO("netlist generation", "[cbag]") {
             //"cv_array_inst_w_bus",
         }));
 
-        auto cv = read_yaml(fmt::format("{}/{}.yaml", yaml_dir, cell_name));
+        auto cv = cbag::cv_from_file(fmt::format("{}/{}.yaml", yaml_dir, cell_name));
 
-        std::vector<sch::cellview *> cv_list = {&cv};
+        std::vector<cbag::sch::cellview *> cv_list = {&cv};
         std::vector<std::string> name_list = {"TEST"};
         std::vector<std::string> inc_list;
         cbag::netlist_map_t netlist_map;
