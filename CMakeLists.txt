@@ -129,6 +129,8 @@ target_link_libraries(cbag
   # for Spirit X3 error code
   boost_system
   PRIVATE
+  # for netlist generation
+  boost_filesystem
   # for reading layout tech file
   yaml-cpp
   fmt-header-only

@@ -5,6 +5,8 @@
  *  \date   2018/07/10
  */
 
+#include <boost/filesystem.hpp>
+
 #include <cbag/logging/logging.h>
 
 #include <cbag/common/datatypes.h>
@@ -12,6 +14,8 @@
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
+
+namespace fs = boost::filesystem;
 
 namespace cbag {
 
@@ -72,7 +76,14 @@ std::ofstream &operator<<(std::ofstream &stream, const netlist_builder::line_bui
     return stream;
 }
 
-netlist_builder::netlist_builder(const std::string &fname) : out_file(fname, std::ios_base::out) {}
+netlist_builder::netlist_builder(const std::string &fname) {
+    fs::path path(fname);
+    if (path.has_parent_path()) {
+        fs::create_directories(path.parent_path());
+    }
+
+    out_file = std::ofstream(fname, std::ios_base::out);
+}
 
 void netlist_builder::build() {
     write_end();
