@@ -35,11 +35,13 @@ SCENARIO("netlist generation", "[cbag]") {
         std::string output_dir = "tests/data/test_outputs/netlist";
 
         std::string cell_name = GENERATE(values<std::string>({
-            "nmos4_standard", "pmos4_standard",
-            // "cv_simple", "cv_bus_term",
-            //"cv_inst_w_bus",
-            //"cv_array_inst_simple",
-            //"cv_array_inst_w_bus",
+            "nmos4_standard",
+            "pmos4_standard",
+            "cv_simple",
+            "cv_bus_term",
+            "cv_inst_w_bus",
+            "cv_array_inst_simple",
+            "cv_array_inst_w_bus",
         }));
 
         const char *fmt_str = "{}/{}.yaml";
