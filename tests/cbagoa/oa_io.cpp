@@ -53,6 +53,8 @@ SCENARIO("read/write OA data", "[cbagoa]") {
         std::string expect_dir = "tests/data/test_netlist_yaml";
 
         std::string cell_name = GENERATE(values<std::string>({
+            "nmos4_standard",
+            "pmos4_standard",
             "cv_simple",
             "cv_bus_term",
             "cv_inst_w_bus",
