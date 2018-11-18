@@ -13,6 +13,7 @@
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/term_t.h>
+#include <cbag/spirit/namespace_info.h>
 
 namespace cbag {
 
@@ -97,8 +98,9 @@ class lstream {
 class nstream_file {
   public:
     std::ofstream out_file;
+    spirit::namespace_info ns;
 
-    explicit nstream_file(const std::string &fname);
+    explicit nstream_file(const std::string &fname, spirit::namespace_type ns_type);
 
     void close();
 };

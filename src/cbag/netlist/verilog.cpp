@@ -17,7 +17,8 @@
 namespace cbag {
 namespace netlist {
 
-verilog_stream::verilog_stream(const std::string &fname) : nstream_file(fname) {}
+verilog_stream::verilog_stream(const std::string &fname)
+    : nstream_file(fname, spirit::namespace_type::VERILOG) {}
 
 lstream verilog_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
 

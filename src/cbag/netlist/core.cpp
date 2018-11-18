@@ -75,7 +75,8 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
     return stream;
 }
 
-nstream_file::nstream_file(const std::string &fname) : out_file(util::open_file_write(fname)) {}
+nstream_file::nstream_file(const std::string &fname, spirit::namespace_type ns_type)
+    : out_file(util::open_file_write(fname)), ns(get_ns_info(ns_type)) {}
 
 void nstream_file::close() { out_file.close(); }
 

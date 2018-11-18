@@ -5,6 +5,7 @@
  *  \date   2018/07/10
  */
 
+#include <iostream>
 #include <variant>
 
 #include <fmt/core.h>
@@ -21,7 +22,8 @@
 namespace cbag {
 namespace netlist {
 
-cdl_stream::cdl_stream(const std::string &fname) : nstream_file(fname) {}
+cdl_stream::cdl_stream(const std::string &fname)
+    : nstream_file(fname, spirit::namespace_type::CDL) {}
 
 lstream cdl_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
 
@@ -44,12 +46,12 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
 
 void traits::nstream<cdl_stream>::write_end(type &stream) {}
 
-void append_name_unit(lstream &b, const std::vector<std::string> &names) {
-    auto info = spirit::get_ns_info(spirit::namespace_type::CDL);
+void append_name_unit(const spirit::namespace_info &ns, lstream &b,
+                      const std::vector<std::string> &names) {
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
-        auto stop = ast.end(&info);
-        for (auto iter = ast.begin(&info); iter != stop; ++iter) {
+        auto stop = ast.end(&ns);
+        for (auto iter = ast.begin(&ns); iter != stop; ++iter) {
             b << *iter;
         }
     }
@@ -59,9 +61,9 @@ void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::strin
     lstream b = cdl_stream::make_lstream();
     b << ".SUBCKT";
     b << name;
-    append_name_unit(b, info.in_terms);
-    append_name_unit(b, info.out_terms);
-    append_name_unit(b, info.io_terms);
+    append_name_unit(stream.ns, b, info.in_terms);
+    append_name_unit(stream.ns, b, info.out_terms);
+    append_name_unit(stream.ns, b, info.io_terms);
 
     stream.out_file << b;
 }
@@ -70,16 +72,21 @@ void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &
     stream.out_file << ".ENDS" << std::endl << std::endl;
 }
 
-void append_nets(lstream &b, const std::string &inst_name, const sch::instance &inst,
-                 const std::vector<std::string> &terms) {
+void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string &inst_name,
+                 const sch::instance &inst, const std::vector<std::string> &terms) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
             throw std::invalid_argument(fmt::format(
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
-        // spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
-        b << term_iter->second;
+        spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
+        auto stop = ast.end(&ns);
+        uint32_t idx = 0;
+        for (auto iter = ast.begin(&ns); idx < 3 && iter != stop; ++iter, ++idx) {
+            std::cout << term_iter->second << ": " << *iter << std::endl;
+            b << *iter;
+        }
     }
 }
 
@@ -94,9 +101,9 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
     b << name;
 
     // write instance connections
-    append_nets(b, name, inst, info.in_terms);
-    append_nets(b, name, inst, info.out_terms);
-    append_nets(b, name, inst, info.io_terms);
+    append_nets(stream.ns, b, name, inst, info.in_terms);
+    append_nets(stream.ns, b, name, inst, info.out_terms);
+    append_nets(stream.ns, b, name, inst, info.io_terms);
 
     // write instance cell name
     if (!info.is_prim) {

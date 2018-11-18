@@ -75,3 +75,51 @@ SCENARIO("invalid names", "[name_parse]") {
         CHECK_THROWS_AS(cbag::util::parse_cdba_name(data), std::invalid_argument);
     }
 }
+
+SCENARIO("iterator_test", "[name_class]") {
+    std::pair<std::string, std::vector<std::string>> data =
+        GENERATE(values<std::pair<std::string, std::vector<std::string>>>({
+            {"foo", {"foo"}},
+            {"a,b", {"a", "b"}},
+            {"foo<2>", {"foo<2>"}},
+            {"foo<1:3>", {"foo<1>", "foo<2>", "foo<3>"}},
+            {"foo<5:1:2>", {"foo<5>", "foo<3>", "foo<1>"}},
+            {"foo<1:2>,a", {"foo<1>", "foo<2>", "a"}},
+            {"<*3>a", {"a", "a", "a"}},
+            {"<*2>a<2:1>", {"a<2>", "a<1>", "a<2>", "a<1>"}},
+            {"<*2>(a,b)", {"a", "b", "a", "b"}},
+            {"<*2>(a,b<1:0>)", {"a", "b<1>", "b<0>", "a", "b<1>", "b<0>"}},
+            {"b,<*3>a", {"b", "a", "a", "a"}},
+        }));
+
+    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
+
+    auto &test_name = data.first;
+    auto &bit_list = data.second;
+
+    THEN("iterator works") {
+        cbag::spirit::ast::name name_obj;
+        try {
+            name_obj = cbag::util::parse_cdba_name(test_name);
+        } catch (std::invalid_argument &ex) {
+            FAIL("failed to parse " << test_name << ", error: " << std::string(ex.what()));
+        }
+
+        auto iter = name_obj.begin(&ns_info);
+        auto stop = name_obj.end(&ns_info);
+        std::size_t n = bit_list.size();
+        for (std::size_t idx = 0; idx < n; ++idx, ++iter) {
+            if (iter == stop) {
+                CAPTURE(data);
+                FAIL("Iterator has " << idx << " items, but expected " << n);
+            }
+            std::string &expect = bit_list[idx];
+            REQUIRE(*iter == expect);
+        }
+        if (iter != stop) {
+            CAPTURE(test_name);
+            CAPTURE(bit_list);
+            FAIL("Iterator has more than " << n << " items");
+        }
+    }
+}
