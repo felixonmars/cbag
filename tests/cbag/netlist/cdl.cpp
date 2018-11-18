@@ -14,11 +14,7 @@ cbag::sch::cellview read_cv(const std::string &lib_name, const std::string &cell
 
 std::string write_cv(const cbag::sch::cellview &cv, const std::string &cell_name,
                      const std::string &view_name) {
-    std::string out_fname;
-    if (view_name == "schematic")
-        out_fname = fmt::format("tests/data/test_outputs/{}.yaml", cell_name);
-    else
-        out_fname = fmt::format("tests/data/test_outputs/{}.{}.yaml", cell_name, view_name);
+    std::string out_fname = fmt::format("tests/data/test_outputs/{}.{}.yaml", cell_name, view_name);
     cbag::to_file(cv, out_fname);
     return out_fname;
 }
@@ -27,15 +23,12 @@ cbag::sch::cellview read_yaml(const std::string &fname) { return cbag::cv_from_f
 
 SCENARIO("read/write OA data", "[cbagoa]") {
     GIVEN("An OA library") {
-        std::string lib_name = "test_netlist_oa";
+        std::string lib_name = "bag_digital_ec";
         std::string lib_file = "tests/data/cds.lib";
 
         std::string cell_name = GENERATE(values<std::string>({
-            "cv_simple",
-            "cv_bus_term",
-            "cv_inst_w_bus",
-            "cv_array_inst_simple",
-            "cv_array_inst_w_bus",
+            "inv",
+            "inv_chain",
         }));
         std::string view_name = GENERATE(values<std::string>({"schematic", "symbol"}));
 
