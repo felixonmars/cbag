@@ -1,9 +1,20 @@
+#include <memory>
+
 #include <catch2/catch.hpp>
 
 #include <fmt/core.h>
 
-#include "cbag/cbag.h"
-#include "cbagyaml/cbagyaml.h"
+#include <cbag/netlist/netlist.h>
+#include <cbagyaml/cbagyaml.h>
+
+void write_netlist(const std::string &yaml_dir, const std::string &cell_name) {
+
+    const char *fmt_str = "{}/{}.yaml";
+
+    // get dependencies
+    std::vector<std::unique_ptr<cbag::sch::cellview>> cv_masters;
+    std::vector<std::string> name_list;
+}
 
 SCENARIO("netlist generation", "[cbag]") {
     GIVEN("cellviews from yaml files") {

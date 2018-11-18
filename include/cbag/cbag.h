@@ -8,7 +8,6 @@
 #ifndef CBAG_CBAG_H
 #define CBAG_CBAG_H
 
-#include <cbag/cbag_fwd.h>
 #include <cbag/common/box_t.h>
 #include <cbag/common/transformation.h>
 #include <cbag/layout/blockage.h>

@@ -94,9 +94,10 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/logging/logging.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/core.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/name_convert.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/arc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview.cpp
@@ -119,7 +120,6 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/cbag.cpp
   )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 

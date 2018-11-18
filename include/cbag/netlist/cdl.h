@@ -8,7 +8,7 @@
 #ifndef CBAG_NETLIST_CDL_H
 #define CBAG_NETLIST_CDL_H
 
-#include <cbag/netlist/netlist.h>
+#include <cbag/netlist/core.h>
 
 namespace cbag {
 
