@@ -54,8 +54,8 @@ class netlist_builder {
 
     void build();
 
-    void add_cellview(const std::string &name, sch::cellview *cv, const sch::cellview_info &info,
-                      const netlist_map_t &cell_map, bool shell);
+    void add_cellview(const std::string &name, const sch::cellview &cv,
+                      const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell);
 
   protected:
     void write_instance(const std::string &name, const sch::instance &inst,

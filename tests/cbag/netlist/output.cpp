@@ -1,4 +1,5 @@
 #include <memory>
+#include <unordered_set>
 
 #include <catch2/catch.hpp>
 
@@ -7,13 +8,25 @@
 #include <cbag/netlist/netlist.h>
 #include <cbagyaml/cbagyaml.h>
 
-void write_netlist(const std::string &yaml_dir, const std::string &cell_name) {
+using cv_name_vec = std::vector<std::pair<std::unique_ptr<cbag::sch::cellview>, std::string>>;
 
-    const char *fmt_str = "{}/{}.yaml";
+void populate_cv_name_list(const char *fmt_str, const std::string &yaml_dir,
+                           const std::string &top_cell, const std::string cv_name,
+                           cv_name_vec &cv_name_list, std::unordered_set<std::string> &recorded) {
+    auto cv = std::make_unique<cbag::sch::cellview>(
+        cbag::cv_from_file(fmt::format(fmt_str, yaml_dir, top_cell)));
 
-    // get dependencies
-    std::vector<std::unique_ptr<cbag::sch::cellview>> cv_masters;
-    std::vector<std::string> name_list;
+    // write subcells
+    for (const auto &p : cv->instances) {
+        std::string &cur_cell = p.second->cell_name;
+        if (recorded.find(cur_cell) == recorded.end()) {
+            populate_cv_name_list(fmt_str, yaml_dir, cur_cell, cur_cell, cv_name_list, recorded);
+        }
+    }
+
+    // write this cellview
+    cv_name_list.emplace_back(std::move(cv), cv_name);
+    recorded.emplace(top_cell);
 }
 
 SCENARIO("netlist generation", "[cbag]") {
@@ -29,9 +42,10 @@ SCENARIO("netlist generation", "[cbag]") {
             //"cv_array_inst_w_bus",
         }));
 
-        auto cv = cbag::cv_from_file(fmt::format("{}/{}.yaml", yaml_dir, cell_name));
-
-        std::vector<std::pair<cbag::sch::cellview *, std::string>> cv_name_list = {{&cv, "TEST"}};
+        const char *fmt_str = "{}/{}.yaml";
+        cv_name_vec cv_name_list;
+        std::unordered_set<std::string> recorded;
+        populate_cv_name_list(fmt_str, yaml_dir, cell_name, "TEST", cv_name_list, recorded);
         std::vector<std::string> inc_list;
         cbag::netlist_map_t netlist_map;
         bool flat = false;

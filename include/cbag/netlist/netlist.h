@@ -36,13 +36,13 @@ void write_netlist(const VectorType &cv_name_list, const std::vector<std::string
     auto iter = cv_name_list.begin();
     for (std::size_t idx = 0; idx < num; ++idx, ++iter) {
         if (!shell || idx == num - 1) {
-            auto cur_pair = *iter;
-            sch::cellview *cur_cv = cur_pair.first;
-            std::string &cur_name = cur_pair.second;
+            auto &cur_pair = *iter;
+            auto &cur_cv = cur_pair.first;
+            const std::string &cur_name = cur_pair.second;
             // add this cellview to netlist
             logger->info("Netlisting cellview: {}", cur_name);
             sch::cellview_info cv_info = cur_cv->get_info(cur_name);
-            builder_ptr->add_cellview(cur_name, cur_cv, cv_info, netlist_map, shell);
+            builder_ptr->add_cellview(cur_name, *cur_cv, cv_info, netlist_map, shell);
             // add this cellview to netlist map
             logger->info("Adding cellview to netlist cell map");
             auto lib_map_iter = netlist_map.find(cur_cv->lib_name);

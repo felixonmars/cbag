@@ -90,12 +90,12 @@ void netlist_builder::build() {
     out_file.close();
 }
 
-void netlist_builder::add_cellview(const std::string &name, sch::cellview *cv,
+void netlist_builder::add_cellview(const std::string &name, const sch::cellview &cv,
                                    const sch::cellview_info &info, const netlist_map_t &cell_map,
                                    bool shell) {
     write_cv_header(name, info);
     if (!shell) {
-        for (auto const &p : cv->instances) {
+        for (auto const &p : cv.instances) {
             write_instance(p.first, *(p.second), cell_map);
         }
     }
