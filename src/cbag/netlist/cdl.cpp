@@ -21,22 +21,30 @@
 namespace cbag {
 namespace netlist {
 
-cdl_builder::cdl_builder(const std::string &fname) : netlist_builder(fname) {}
+cdl_stream::cdl_stream(const std::string &fname) : nstream_file(fname) {}
 
-void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
+lstream cdl_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
+
+void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
+
+void traits::nstream<cdl_stream>::write_header(type &stream,
+                                               const std::vector<std::string> &inc_list,
+                                               bool shell) {
     if (!shell) {
-        for (auto const &fname : inc_list) {
-            out_file << ".INCLUDE " << fname << std::endl;
+        if (!inc_list.empty()) {
+            for (auto const &fname : inc_list) {
+                stream.out_file << ".INCLUDE " << fname << std::endl;
+            }
+            stream.out_file << std::endl;
         }
-        out_file << std::endl;
-        out_file << ".PARAM" << std::endl;
-        out_file << std::endl;
+        stream.out_file << ".PARAM" << std::endl;
+        stream.out_file << std::endl;
     }
 }
 
-void cdl_builder::write_end() {}
+void traits::nstream<cdl_stream>::write_end(type &stream) {}
 
-void append_name_unit(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
+void append_name_unit(lstream &b, const std::vector<std::string> &names) {
     auto info = spirit::ast::get_ns_info(spirit::ast::namespace_type::CDL);
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
@@ -46,22 +54,24 @@ void append_name_unit(cdl_builder::line_builder &b, const std::vector<std::strin
         }
     }
 }
-
-void cdl_builder::write_cv_header(const std::string &name, const sch::cellview_info &info) {
-    line_builder b(ncol, cnt_char, break_before, tab_size);
+void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
+                                                  const sch::cellview_info &info) {
+    lstream b = cdl_stream::make_lstream();
     b << ".SUBCKT";
     b << name;
     append_name_unit(b, info.in_terms);
     append_name_unit(b, info.out_terms);
     append_name_unit(b, info.io_terms);
 
-    out_file << b;
+    stream.out_file << b;
 }
 
-void cdl_builder::write_cv_end(const std::string &name) { out_file << ".ENDS" << std::endl; }
+void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &name) {
+    stream.out_file << ".ENDS" << std::endl << std::endl;
+}
 
-void append_nets(cdl_builder::line_builder &b, const std::string &inst_name,
-                 const sch::instance &inst, const std::vector<std::string> &terms) {
+void append_nets(lstream &b, const std::string &inst_name, const sch::instance &inst,
+                 const std::vector<std::string> &terms) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -72,9 +82,10 @@ void append_nets(cdl_builder::line_builder &b, const std::string &inst_name,
     }
 }
 
-void cdl_builder::write_instance_helper(const std::string &name, const sch::instance &inst,
-                                        const sch::cellview_info &info) {
-    line_builder b(ncol, cnt_char, break_before, tab_size);
+void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string &name,
+                                                 const sch::instance &inst,
+                                                 const sch::cellview_info &info) {
+    lstream b = cdl_stream::make_lstream();
 
     // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
     // write instance name
@@ -100,10 +111,10 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
     }
     // write instance parameters
     for (auto const &pair : par_map) {
-        std::visit(write_param_visitor(&b, &(pair.first)), pair.second);
+        std::visit(write_param_visitor(&b, pair.first), pair.second);
     }
 
-    out_file << b;
+    stream.out_file << b;
 }
 
 } // namespace netlist

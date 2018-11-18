@@ -4,17 +4,17 @@
 
 #include <fstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
+#include <fmt/core.h>
+
 #include <cbag/netlist/netlist_map_t.h>
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/term_t.h>
 
 namespace cbag {
-
-namespace sch {
-struct cellview;
-struct instance;
-} // namespace sch
 
 // forward declaration
 struct time_struct;
@@ -24,63 +24,92 @@ namespace netlist {
 
 // netlister base class
 
-class netlist_builder {
+namespace traits {
+
+template <typename T> struct nstream {
+    using type = T;
+
+    static void close(type &stream) {}
+
+    static void write_header(type &stream, const std::vector<std::string> &inc_list, bool shell) {}
+
+    static void write_end(type &stream) {}
+
+    static void write_cv_header(type &stream, const std::string &name,
+                                const sch::cellview_info &info) {}
+
+    static void write_cv_end(type &stream, const std::string &name) {}
+
+    static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
+                               const sch::cellview_info &info) {}
+};
+
+} // namespace traits
+
+template <typename Stream, typename traits::nstream<Stream>::type * = nullptr>
+void add_cellview(Stream &stream, const std::string &name, const sch::cellview &cv,
+                  const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell) {
+    traits::nstream<Stream>::write_cv_header(stream, name, info);
+    if (!shell) {
+        for (auto const &p : cv.instances) {
+            const sch::instance &inst = *(p.second);
+
+            // get instance master's information object
+            auto libmap_iter = cell_map.find(inst.lib_name);
+            if (libmap_iter == cell_map.end()) {
+                throw std::invalid_argument(
+                    fmt::format("Cannot find library {} in netlist map for cell {}.", inst.lib_name,
+                                inst.cell_name));
+            }
+            auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
+            if (cellmap_iter == libmap_iter->second.end()) {
+                throw std::invalid_argument(fmt::format("Cannot find cell {}__{} in netlist map.",
+                                                        inst.lib_name, inst.cell_name));
+            }
+
+            // Only write instance if the name is not empty
+            if (!cellmap_iter->second.cell_name.empty()) {
+                traits::nstream<Stream>::write_instance(stream, p.first, inst,
+                                                        cellmap_iter->second);
+            }
+        }
+    }
+    traits::nstream<Stream>::write_cv_end(stream, name);
+}
+
+class lstream {
+    std::vector<std::string> tokens;
+    size_t ncol = 80;
+    char cnt_char = ' ';
+    bool break_before = false;
+    int tab_size = 4;
+
   public:
-    /** A helper class for writing a line with column limit
-     */
-    class line_builder {
-      private:
-        std::vector<std::string> tokens;
-        size_t ncol = 80;
-        char cnt_char = ' ';
-        bool break_before = false;
-        int tab_size = 4;
+    lstream(size_t ncol, char cnt_char, bool break_before, int tab_size);
 
-      public:
-        line_builder(size_t ncol, char cnt_char, bool break_before, int tab_size);
+    friend lstream &operator<<(lstream &builder, const std::string &token);
 
-        friend line_builder &operator<<(line_builder &builder, const std::string &token);
+    friend lstream &operator<<(lstream &builder, std::string &&token);
 
-        friend line_builder &operator<<(line_builder &builder, std::string &&token);
+    friend std::ofstream &operator<<(std::ofstream &stream, const lstream &b);
+};
 
-        friend std::ofstream &operator<<(std::ofstream &stream, const line_builder &b);
-    };
-
-  protected:
+class nstream_file {
+  public:
     std::ofstream out_file;
 
-  public:
-    explicit netlist_builder(const std::string &fname);
+    explicit nstream_file(const std::string &fname);
 
-    virtual void init(const std::vector<std::string> &inc_list, bool shell) = 0;
-
-    void build();
-
-    void add_cellview(const std::string &name, const sch::cellview &cv,
-                      const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell);
-
-  protected:
-    void write_instance(const std::string &name, const sch::instance &inst,
-                        const netlist_map_t &cell_map);
-
-  private:
-    virtual void write_end() = 0;
-
-    virtual void write_cv_header(const std::string &name, const sch::cellview_info &info) = 0;
-
-    virtual void write_cv_end(const std::string &name) = 0;
-
-    virtual void write_instance_helper(const std::string &name, const sch::instance &inst,
-                                       const sch::cellview_info &info) = 0;
+    void close();
 };
 
 class write_param_visitor {
   private:
-    netlist_builder::line_builder *ptr = nullptr;
-    const std::string *key = nullptr;
+    lstream *ptr = nullptr;
+    const std::string &key;
 
   public:
-    write_param_visitor(netlist_builder::line_builder *ptr, const std::string *key);
+    write_param_visitor(lstream *ptr, const std::string &key);
 
     void operator()(const std::string &v) const;
     void operator()(const int32_t &v) const;

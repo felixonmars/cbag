@@ -21,8 +21,7 @@
 
 namespace YAML {
 
-template <typename T, typename std::enable_if_t<std::is_enum_v<T>> * = nullptr>
-struct convert_enum {
+template <typename T, typename std::enable_if_t<std::is_enum_v<T>, int> = 0> struct convert_enum {
     static Node encode(const T &rhs) {
         Node n;
         n = static_cast<int>(rhs);

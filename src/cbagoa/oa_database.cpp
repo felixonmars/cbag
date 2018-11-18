@@ -19,6 +19,7 @@
 #include <cbag/layout/cellview.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
+#include <cbag/util/io.h>
 
 #include <cbagoa/oa_database.h>
 #include <cbagoa/oa_read.h>
@@ -111,9 +112,7 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
             // append library name to lib_path
             fs::path new_lib_path(lib_path);
             new_lib_path /= lib_name;
-            if (new_lib_path.has_parent_path()) {
-                fs::create_directories(new_lib_path.parent_path());
-            }
+            cbag::util::make_parent_dirs(new_lib_path.string());
 
             // create new library
             logger->info("Creating library {} at path {}, with tech lib {}", lib_name,
@@ -276,11 +275,7 @@ void oa_database::write_tech_info_file(const std::string &fname, const std::stri
     out << YAML::EndMap;
 
     // write to file
-    fs::path file_path(fname);
-    if (file_path.has_parent_path()) {
-        fs::create_directories(file_path.parent_path());
-    }
-    std::ofstream out_file(fname, std::ios_base::out);
+    std::ofstream out_file = cbag::util::open_file_write(fname);
     out_file << out.c_str();
     out_file.close();
 }

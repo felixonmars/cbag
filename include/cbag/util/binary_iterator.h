@@ -7,7 +7,7 @@
 namespace cbag {
 namespace util {
 
-template <typename T, typename std::enable_if_t<std::is_integral_v<T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_integral_v<T>, int> = 0>
 class binary_iterator {
   private:
     T low;

@@ -13,7 +13,7 @@
 namespace cbag {
 namespace netlist {
 
-class verilog_builder : public netlist_builder {
+class verilog_stream : public nstream_file {
   private:
     static const size_t ncol = 120;
     static const char cnt_char = '\0';
@@ -21,19 +21,27 @@ class verilog_builder : public netlist_builder {
     static const int tab_size = 4;
 
   public:
-    explicit verilog_builder(const std::string &fname);
+    explicit verilog_stream(const std::string &fname);
 
-    void init(const std::vector<std::string> &inc_list, bool shell) override;
+    static lstream make_lstream();
+};
 
-  private:
-    void write_end() override;
+template <> struct traits::nstream<verilog_stream> {
+    using type = verilog_stream;
 
-    void write_cv_header(const std::string &name, const sch::cellview_info &info) override;
+    static void close(type &stream);
 
-    void write_cv_end(const std::string &name) override;
+    static void write_header(type &stream, const std::vector<std::string> &inc_list, bool shell);
 
-    void write_instance_helper(const std::string &name, const sch::instance &inst,
-                               const sch::cellview_info &info) override;
+    static void write_end(type &stream);
+
+    static void write_cv_header(type &stream, const std::string &name,
+                                const sch::cellview_info &info);
+
+    static void write_cv_end(type &stream, const std::string &name);
+
+    static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
+                               const sch::cellview_info &info);
 };
 
 } // namespace netlist

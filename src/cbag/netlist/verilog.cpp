@@ -17,17 +17,24 @@
 namespace cbag {
 namespace netlist {
 
-verilog_builder::verilog_builder(const std::string &fname) : netlist_builder(fname) {}
+verilog_stream::verilog_stream(const std::string &fname) : nstream_file(fname) {}
 
-void verilog_builder::init(const std::vector<std::string> &inc_list, bool shell) {
+lstream verilog_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
+
+void traits::nstream<verilog_stream>::close(type &stream) { stream.close(); }
+
+void traits::nstream<verilog_stream>::write_header(type &stream,
+                                                   const std::vector<std::string> &inc_list,
+                                                   bool shell) {
     // TODO: Add actual implementation
 }
 
-void verilog_builder::write_end() {}
+void traits::nstream<verilog_stream>::write_end(type &stream) {}
 
-void verilog_builder::write_cv_header(const std::string &name, const sch::cellview_info &info) {
+void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
+                                                      const sch::cellview_info &info) {
     // write module declaration
-    line_builder b(ncol, cnt_char, break_before, tab_size);
+    lstream b = verilog_stream::make_lstream();
     b << "module";
     b << name;
     b << "(";
@@ -49,28 +56,29 @@ void verilog_builder::write_cv_header(const std::string &name, const sch::cellvi
     }
     b << ");";
 
-    out_file << b;
-    out_file << std::endl;
+    stream.out_file << b;
+    stream.out_file << std::endl;
 
     // write io type
     for (auto const &name : info.in_terms) {
-        out_file << "    input " << name << ";" << std::endl;
+        stream.out_file << "    input " << name << ";" << std::endl;
     }
     for (auto const &name : info.out_terms) {
-        out_file << "    output " << name << ";" << std::endl;
+        stream.out_file << "    output " << name << ";" << std::endl;
     }
     for (auto const &name : info.io_terms) {
-        out_file << "    inout " << name << ";" << std::endl;
+        stream.out_file << "    inout " << name << ";" << std::endl;
     }
-    out_file << std::endl;
+    stream.out_file << std::endl;
 }
 
-void verilog_builder::write_cv_end(const std::string &name) {
-    out_file << "endmodule" << std::endl;
+void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name) {
+    stream.out_file << "endmodule" << std::endl << std::endl;
 }
 
-void verilog_builder::write_instance_helper(const std::string &name, const sch::instance &inst,
-                                            const sch::cellview_info &info) {
+void traits::nstream<verilog_stream>::write_instance(type &stream, const std::string &name,
+                                                     const sch::instance &inst,
+                                                     const sch::cellview_info &info) {
     // TODO: add actual implementation
 }
 

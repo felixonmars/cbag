@@ -15,6 +15,8 @@
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/util/io.h>
+
 #include <cbagyaml/cbagyaml.h>
 
 namespace fs = boost::filesystem;
@@ -23,12 +25,7 @@ namespace cbag {
 
 void to_file(const sch::cellview &cv, const std::string &fname) {
     // create root directory if not exist.
-    fs::path path(fname);
-    if (path.has_parent_path()) {
-        fs::create_directories(path.parent_path());
-    }
-
-    std::ofstream outfile(fname, std::ios_base::out);
+    std::ofstream outfile = util::open_file_write(fname);
     YAML::Node node(cv);
     YAML::Emitter emitter;
     emitter << node;
