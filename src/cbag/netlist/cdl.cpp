@@ -20,7 +20,7 @@
 
 namespace cbag {
 
-cdl_builder::cdl_builder(const char *fname) : netlist_builder(fname) {}
+cdl_builder::cdl_builder(const std::string &fname) : netlist_builder(fname) {}
 
 void cdl_builder::init(const std::vector<std::string> &inc_list, bool shell) {
     if (!shell) {

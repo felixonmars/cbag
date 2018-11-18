@@ -1,16 +1,9 @@
-/** \file cbag.cpp
- *  \brief This implements the top level header file for cbag library.
- *
- *  \author Eric Chang
- *  \date   2018/07/18
- */
-
-#include <cstring>
 #include <fstream>
 #include <memory>
 
 #include <cbag/logging/logging.h>
 
+#include <cbag/cbag_fwd.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellview.h>
@@ -18,26 +11,29 @@
 
 namespace cbag {
 
-std::unique_ptr<netlist_builder> make_netlist_builder(const char *fname,
-                                                      const std::string &format) {
-    if (format == "cdl") {
+std::unique_ptr<netlist_builder> make_netlist_builder(const std::string &fname, netlist_fmt format,
+                                                      spdlog::logger &logger) {
+    uint8_t fmt_code = static_cast<uint8_t>(format);
+    logger.info("Creating netlist builder for netlist format code: {}", fmt_code);
+
+    switch (format) {
+    case netlist_fmt::CDL:
         return std::make_unique<cdl_builder>(fname);
-    } else if (format == "verilog") {
+    case netlist_fmt::VERILOG:
         return std::make_unique<verilog_builder>(fname);
-    } else {
-        throw std::invalid_argument(fmt::format("Unrecognized netlist format: {}", format));
+    default:
+        throw std::invalid_argument(fmt::format("Unrecognized netlist format code: {}", fmt_code));
     }
 }
 
 void write_netlist(const std::vector<sch::cellview *> &cv_list,
                    const std::vector<std::string> &name_list,
-                   const std::vector<std::string> &inc_list, netlist_map_t &netlist_map,
-                   const char *format, bool flat, bool shell, const char *fname) {
+                   const std::vector<std::string> &inc_list, netlist_map_t &netlist_map, bool flat,
+                   bool shell, netlist_fmt format, const std::string &fname) {
     auto logger = cbag::get_cbag_logger();
     logger->info("Writing netlist file: {}", fname);
 
-    logger->info("Creating netlist builder for netlist format: {}", format);
-    auto builder_ptr = make_netlist_builder(fname, std::string(format));
+    auto builder_ptr = make_netlist_builder(fname, format, *logger);
     builder_ptr->init(inc_list, shell);
 
     size_t num = cv_list.size();

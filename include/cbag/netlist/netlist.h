@@ -54,7 +54,7 @@ class netlist_builder {
     std::ofstream out_file;
 
   public:
-    explicit netlist_builder(const char *fname);
+    explicit netlist_builder(const std::string &fname);
 
     virtual void init(const std::vector<std::string> &inc_list, bool shell) = 0;
 

@@ -72,7 +72,7 @@ std::ofstream &operator<<(std::ofstream &stream, const netlist_builder::line_bui
     return stream;
 }
 
-netlist_builder::netlist_builder(const char *fname) : out_file(fname, std::ios_base::out) {}
+netlist_builder::netlist_builder(const std::string &fname) : out_file(fname, std::ios_base::out) {}
 
 void netlist_builder::build() {
     write_end();

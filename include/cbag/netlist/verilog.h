@@ -20,7 +20,7 @@ class verilog_builder : public netlist_builder {
     static const int tab_size = 4;
 
   public:
-    explicit verilog_builder(const char *fname);
+    explicit verilog_builder(const std::string &fname);
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 

@@ -51,7 +51,7 @@ SCENARIO("read/write OA data", "[cbagoa]") {
     GIVEN("An OA library") {
         std::string lib_name = "test_netlist";
         std::string lib_file = "tests/data/cds.lib";
-        std::string output_dir = "tests/data/test_outputs";
+        std::string output_dir = "tests/data/test_outputs/yaml";
         std::string expect_dir = "tests/data/test_netlist_yaml";
 
         std::string cell_name = GENERATE(values<std::string>({

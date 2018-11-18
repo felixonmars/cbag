@@ -20,7 +20,7 @@ class cdl_builder : public netlist_builder {
     static const int tab_size = 0;
 
   public:
-    explicit cdl_builder(const char *fname);
+    explicit cdl_builder(const std::string &fname);
 
     void init(const std::vector<std::string> &inc_list, bool shell) override;
 
