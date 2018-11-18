@@ -1,4 +1,4 @@
-lib_name: test_netlist_oa
+lib_name: test_netlist
 cell_name: cv_array_inst_simple
 view_name: schematic
 bbox:

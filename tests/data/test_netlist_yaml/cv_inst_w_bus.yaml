@@ -1,4 +1,4 @@
-lib_name: test_netlist_oa
+lib_name: test_netlist
 cell_name: cv_inst_w_bus
 view_name: schematic
 bbox:

@@ -1,4 +1,4 @@
-lib_name: test_netlist_oa
+lib_name: test_netlist
 cell_name: cv_simple
 view_name: symbol
 bbox:
