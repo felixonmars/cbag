@@ -65,8 +65,8 @@ uint32_t range::get_stop_exclude() const {
     }
 }
 
-range::const_iterator range::begin() const { return {start, step, stop > start}; }
-range::const_iterator range::end() const { return {get_stop_exclude(), step, stop > start}; }
+range::const_iterator range::begin() const { return {start, step, stop >= start}; }
+range::const_iterator range::end() const { return {get_stop_exclude(), step, stop >= start}; }
 
 uint32_t range::operator[](uint32_t index) const {
     return (stop >= start) ? start + step * index : start - step * index;

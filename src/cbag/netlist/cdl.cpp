@@ -5,7 +5,6 @@
  *  \date   2018/07/10
  */
 
-#include <iostream>
 #include <variant>
 
 #include <fmt/core.h>
@@ -82,9 +81,7 @@ void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string
         }
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
         auto stop = ast.end(&ns);
-        uint32_t idx = 0;
-        for (auto iter = ast.begin(&ns); idx < 3 && iter != stop; ++iter, ++idx) {
-            std::cout << term_iter->second << ": " << *iter << std::endl;
+        for (auto iter = ast.begin(&ns); iter != stop; ++iter) {
             b << *iter;
         }
     }
