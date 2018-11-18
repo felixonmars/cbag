@@ -17,9 +17,12 @@ namespace sch {
 struct cellview_info;
 }
 
+namespace netlist {
+
 using lib_map_t = std::unordered_map<std::string, sch::cellview_info>;
 using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
+} // namespace netlist
 } // namespace cbag
 
 #endif

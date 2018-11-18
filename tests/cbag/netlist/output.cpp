@@ -49,14 +49,14 @@ SCENARIO("netlist generation", "[cbag]") {
         std::unordered_set<std::string> recorded;
         populate_cv_name_list(fmt_str, yaml_dir, cell_name, "TEST", cv_name_list, recorded);
         std::vector<std::string> inc_list;
-        cbag::netlist_map_t netlist_map;
+        cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
         bool shell = false;
         std::string fname = fmt::format("{}/{}.netlist", output_dir, cell_name);
 
         THEN("can write cdl netlist") {
-            write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, cbag::netlist_fmt::CDL,
-                          fname);
+            cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell,
+                                         cbag::netlist::netlist_fmt::CDL, fname);
         }
     }
 }

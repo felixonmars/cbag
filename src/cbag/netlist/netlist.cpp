@@ -10,6 +10,7 @@
 #include <cbag/schematic/cellview_info.h>
 
 namespace cbag {
+namespace netlist {
 
 std::unique_ptr<netlist_builder> make_netlist_builder(const std::string &fname, netlist_fmt format,
                                                       spdlog::logger &logger) {
@@ -26,4 +27,5 @@ std::unique_ptr<netlist_builder> make_netlist_builder(const std::string &fname, 
     }
 }
 
+} // namespace netlist
 } // namespace cbag

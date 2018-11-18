@@ -3,8 +3,8 @@
 
 #include <catch2/catch.hpp>
 
-#include <cbag/netlist/name_convert.h>
 #include <cbag/spirit/ast.h>
+#include <cbag/util/name_convert.h>
 
 SCENARIO("valid names", "[name_parse]") {
     std::pair<std::string, std::string> data =
@@ -43,7 +43,7 @@ SCENARIO("valid names", "[name_parse]") {
     THEN("parsing works") {
         cbag::spirit::ast::name name_obj;
         try {
-            name_obj = cbag::parse_cdba_name(data.first);
+            name_obj = cbag::util::parse_cdba_name(data.first);
         } catch (std::invalid_argument &ex) {
             FAIL("failed to parse " << data.first << ", error: " << std::string(ex.what()));
         }
@@ -72,6 +72,6 @@ SCENARIO("invalid names", "[name_parse]") {
 
     THEN("parsing fails") {
         CAPTURE(data);
-        CHECK_THROWS_AS(cbag::parse_cdba_name(data), std::invalid_argument);
+        CHECK_THROWS_AS(cbag::util::parse_cdba_name(data), std::invalid_argument);
     }
 }

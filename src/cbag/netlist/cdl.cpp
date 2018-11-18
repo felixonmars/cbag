@@ -16,9 +16,10 @@
 #include <cbag/schematic/instance.h>
 
 #include <cbag/netlist/cdl.h>
-#include <cbag/netlist/name_convert.h>
+#include <cbag/util/name_convert.h>
 
 namespace cbag {
+namespace netlist {
 
 cdl_builder::cdl_builder(const std::string &fname) : netlist_builder(fname) {}
 
@@ -38,7 +39,7 @@ void cdl_builder::write_end() {}
 void append_name_unit(cdl_builder::line_builder &b, const std::vector<std::string> &names) {
     auto info = spirit::ast::get_ns_info(spirit::ast::namespace_type::CDL);
     for (auto const &name : names) {
-        spirit::ast::name_unit ast = parse_cdba_name_unit(name);
+        spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
         auto stop = ast.end(&info);
         for (auto iter = ast.begin(&info); iter != stop; ++iter) {
             b << *iter;
@@ -105,4 +106,5 @@ void cdl_builder::write_instance_helper(const std::string &name, const sch::inst
     out_file << b;
 }
 
+} // namespace netlist
 } // namespace cbag

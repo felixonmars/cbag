@@ -13,6 +13,7 @@
 #include <cbag/schematic/cellview_info.h>
 
 namespace cbag {
+namespace netlist {
 
 enum class netlist_fmt : uint8_t {
     CDL = 0,
@@ -61,5 +62,6 @@ void write_netlist(const VectorType &cv_name_list, const std::vector<std::string
     builder_ptr->build();
 }
 
+} // namespace netlist
 } // namespace cbag
 #endif // CBAG_CBAG_FWD_H

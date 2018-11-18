@@ -52,10 +52,10 @@ sch::cellview cv_from_file(const std::string &yaml_fname, const std::string &sym
     return ans;
 }
 
-netlist_map_t read_netlist_map(const char *fname) {
+netlist::netlist_map_t read_netlist_map(const std::string &fname) {
     fs::path yaml_path(fname);
     YAML::Node n = YAML::LoadFile(yaml_path.string());
-    return n.as<netlist_map_t>();
+    return n.as<netlist::netlist_map_t>();
 }
 
 } // namespace cbag

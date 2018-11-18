@@ -24,11 +24,11 @@
 #include <cbag/layout/pin.h>
 #include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
-#include <cbag/netlist/name_convert.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/spirit/ast.h>
+#include <cbag/util/name_convert.h>
 
 #include <cbagoa/oa_polygon.h>
 #include <cbagoa/oa_util.h>
@@ -475,7 +475,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
         logger.info("Writing instance {}", pair.first);
-        cbag::spirit::ast::name_unit nu = cbag::parse_cdba_name_unit(pair.first);
+        cbag::spirit::ast::name_unit nu = cbag::util::parse_cdba_name_unit(pair.first);
         cbag::sch::instance *inst = pair.second.get();
         oa::oaTransform inst_xform = get_xform(inst->xform);
         if (pair.second->is_primitive) {

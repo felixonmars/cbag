@@ -20,6 +20,8 @@ struct instance;
 struct time_struct;
 struct binary_t;
 
+namespace netlist {
+
 // netlister base class
 
 class netlist_builder {
@@ -88,6 +90,7 @@ class write_param_visitor {
     void operator()(const binary_t &v) const;
 };
 
+} // namespace netlist
 } // namespace cbag
 
 #endif // CBAG_NETLIST_NETLIST_H

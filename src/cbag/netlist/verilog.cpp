@@ -15,6 +15,8 @@
 #include <cbag/schematic/instance.h>
 
 namespace cbag {
+namespace netlist {
+
 verilog_builder::verilog_builder(const std::string &fname) : netlist_builder(fname) {}
 
 void verilog_builder::init(const std::vector<std::string> &inc_list, bool shell) {
@@ -72,4 +74,5 @@ void verilog_builder::write_instance_helper(const std::string &name, const sch::
     // TODO: add actual implementation
 }
 
+} // namespace netlist
 } // namespace cbag

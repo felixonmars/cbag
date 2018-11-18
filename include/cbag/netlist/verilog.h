@@ -11,6 +11,7 @@
 #include <cbag/netlist/core.h>
 
 namespace cbag {
+namespace netlist {
 
 class verilog_builder : public netlist_builder {
   private:
@@ -35,6 +36,7 @@ class verilog_builder : public netlist_builder {
                                const sch::cellview_info &info) override;
 };
 
+} // namespace netlist
 } // namespace cbag
 
 #endif // CBAG_NETLIST_VERILOG_H

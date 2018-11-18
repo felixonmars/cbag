@@ -18,6 +18,7 @@
 namespace fs = boost::filesystem;
 
 namespace cbag {
+namespace netlist {
 
 netlist_builder::line_builder::line_builder(size_t ncol, char cnt_char, bool break_before,
                                             int tab_size)
@@ -149,4 +150,5 @@ void write_param_visitor::operator()(const binary_t &v) const {
     logger->warn("binary parameter, do nothing.");
 }
 
+} // namespace netlist
 } // namespace cbag

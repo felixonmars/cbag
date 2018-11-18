@@ -11,7 +11,7 @@
 
 #include <cbag/spirit/ast.h>
 
-#include <cbag/netlist/name_convert.h>
+#include <cbag/util/name_convert.h>
 
 #include <cbag/schematic/instance.h>
 
@@ -39,8 +39,8 @@ void instance::set_param(const std::string &name,
 void instance::update_connection(const std::string &inst_name, uint32_t inst_size,
                                  std::string term_str, std::string net_str) {
     // check number of bits match
-    spirit::ast::name n_term = parse_cdba_name(term_str);
-    spirit::ast::name n_net = parse_cdba_name(net_str);
+    spirit::ast::name n_term = cbag::util::parse_cdba_name(term_str);
+    spirit::ast::name n_net = cbag::util::parse_cdba_name(net_str);
 
     uint32_t tot_size = inst_size * n_term.size();
     uint32_t net_size = n_net.size();
@@ -66,7 +66,7 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
 
 void instance::update_connection(const std::string &inst_name, std::string term, std::string net) {
     // check number of bits match
-    spirit::ast::name_unit nu = parse_cdba_name_unit(inst_name);
+    spirit::ast::name_unit nu = cbag::util::parse_cdba_name_unit(inst_name);
     update_connection(inst_name, nu.size(), std::move(term), std::move(net));
 }
 
@@ -88,7 +88,7 @@ void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
         // repeat all nets
         auto info = spirit::ast::get_ns_info(spirit::ast::namespace_type::CDBA);
         for (auto &pair : connections) {
-            spirit::ast::name net = parse_cdba_name(pair.second);
+            spirit::ast::name net = cbag::util::parse_cdba_name(pair.second);
             std::size_t old_cnt = net.rep_list.size();
             net.rep_list.reserve(result.quot * old_cnt);
             for (int c = 0; c < result.quot - 1; ++c) {

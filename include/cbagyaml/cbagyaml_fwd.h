@@ -18,7 +18,7 @@ void to_file(const sch::cellview &cv, const std::string &fname);
 
 sch::cellview cv_from_file(const std::string &yaml_fname, const std::string &sym_view = "");
 
-netlist_map_t read_netlist_map(const char *fname);
+netlist::netlist_map_t read_netlist_map(const std::string &fname);
 
 } // namespace cbag
 #endif
