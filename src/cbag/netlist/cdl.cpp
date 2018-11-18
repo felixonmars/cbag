@@ -78,6 +78,7 @@ void append_nets(lstream &b, const std::string &inst_name, const sch::instance &
             throw std::invalid_argument(fmt::format(
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
+        // spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
         b << term_iter->second;
     }
 }

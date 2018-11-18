@@ -115,9 +115,10 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/text_base.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/text_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/ast.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/name_unit.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/namespace_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/io.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/name_convert.cpp
   )
