@@ -21,8 +21,18 @@ namespace fs = boost::filesystem;
 namespace cbag {
 namespace netlist {
 
+lstream::back_inserter::back_inserter(lstream *stream) : stream_(stream) {}
+
+lstream::back_inserter &lstream::back_inserter::operator*() { return *this; }
+lstream::back_inserter &lstream::back_inserter::operator=(std::string name) {
+    (*stream_) << std::move(name);
+    return *this;
+}
+
 lstream::lstream(size_t ncol, char cnt_char, bool break_before, int tab_size)
     : ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
+
+lstream::back_inserter lstream::get_back_inserter() { return back_inserter(this); }
 
 lstream &operator<<(lstream &builder, const std::string &token) {
     builder.tokens.push_back(token);

@@ -49,10 +49,7 @@ void append_name_unit(const spirit::namespace_info &ns, lstream &b,
                       const std::vector<std::string> &names) {
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
-        auto stop = ast.end(&ns);
-        for (auto iter = ast.begin(&ns); iter != stop; ++iter) {
-            b << *iter;
-        }
+        ast.append_name_bits(ns, b.get_back_inserter());
     }
 }
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
@@ -80,10 +77,7 @@ void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
-        auto stop = ast.end(&ns);
-        for (auto iter = ast.begin(&ns); iter != stop; ++iter) {
-            b << *iter;
-        }
+        ast.append_name_bits(ns, b.get_back_inserter());
     }
 }
 

@@ -79,6 +79,7 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
 }
 
 class lstream {
+  private:
     std::vector<std::string> tokens;
     size_t ncol = 80;
     char cnt_char = ' ';
@@ -86,7 +87,19 @@ class lstream {
     int tab_size = 4;
 
   public:
+    class back_inserter {
+      private:
+        lstream *stream_ = nullptr;
+
+      public:
+        explicit back_inserter(lstream *stream);
+        back_inserter &operator*();
+        back_inserter &operator=(std::string name);
+    };
+
     lstream(size_t ncol, char cnt_char, bool break_before, int tab_size);
+
+    back_inserter get_back_inserter();
 
     friend lstream &operator<<(lstream &builder, const std::string &token);
 

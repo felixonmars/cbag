@@ -6,6 +6,25 @@
 #include <cbag/spirit/ast.h>
 #include <cbag/util/name_convert.h>
 
+class out_iter_check {
+  public:
+    std::vector<std::string> *ptr;
+    std::size_t nmax;
+
+    out_iter_check(std::vector<std::string> *vec, std::size_t n) : ptr(vec), nmax(n) {
+        ptr->reserve(nmax);
+    }
+
+    out_iter_check &operator*() { return *this; }
+    out_iter_check &operator=(std::string name) {
+        if (ptr->size() >= nmax) {
+            throw std::out_of_range("Cannot append more than " + std::to_string(nmax) + " items.");
+        }
+        ptr->emplace_back(std::move(name));
+        return *this;
+    }
+};
+
 SCENARIO("valid names", "[name_parse]") {
     std::pair<std::string, std::string> data =
         GENERATE(values<std::pair<std::string, std::string>>({
@@ -105,21 +124,18 @@ SCENARIO("iterator_test", "[name_class]") {
             FAIL("failed to parse " << test_name << ", error: " << std::string(ex.what()));
         }
 
-        auto iter = name_obj.begin(&ns_info);
-        auto stop = name_obj.end(&ns_info);
+        std::vector<std::string> output;
         std::size_t n = bit_list.size();
-        for (std::size_t idx = 0; idx < n; ++idx, ++iter) {
-            if (iter == stop) {
-                CAPTURE(data);
-                FAIL("Iterator has " << idx << " items, but expected " << n);
+        out_iter_check out_iter(&output, n);
+        CAPTURE(test_name);
+        CAPTURE(bit_list);
+        name_obj.append_name_bits(ns_info, out_iter);
+        for (std::size_t idx = 0; idx < n; ++idx) {
+            if (idx == output.size()) {
+                FAIL("Output has " << idx << " items, but expected " << n);
             }
             std::string &expect = bit_list[idx];
-            REQUIRE(*iter == expect);
-        }
-        if (iter != stop) {
-            CAPTURE(test_name);
-            CAPTURE(bit_list);
-            FAIL("Iterator has more than " << n << " items");
+            REQUIRE(output[idx] == expect);
         }
     }
 }

@@ -11,12 +11,12 @@
 
 #include <cstdint>
 #include <iterator>
-#include <memory>
 #include <optional>
 #include <string>
-#include <tuple>
 #include <variant>
 #include <vector>
+
+#include <fmt/core.h>
 
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
@@ -98,50 +98,26 @@ struct name_unit : x3::position_tagged {
     std::string base;
     range idx_range;
 
-    class const_iterator {
-      public:
-        using iterator_category = std::input_iterator_tag;
-        using value_type = std::string;
-        using difference_type = std::ptrdiff_t;
-        using pointer = value_type *;
-        using reference = value_type &;
-
-      private:
-        const namespace_info *info_ = nullptr;
-        const name_unit *parent_ = nullptr;
-        range::const_iterator iter_;
-        bool base_flag_ = true;
-
-      public:
-        const_iterator();
-
-        const_iterator(const namespace_info *info, const name_unit *parent,
-                       range::const_iterator iter, bool base_flag);
-
-        const_iterator &operator++();
-        value_type operator*() const;
-        bool operator==(const const_iterator &rhs) const;
-        bool operator!=(const const_iterator &rhs) const;
-    };
-
     name_unit();
 
     uint32_t size() const;
 
     bool is_vector() const;
 
-    const_iterator begin(const namespace_info *info) const;
-
-    const_iterator end(const namespace_info *info) const;
-
     std::string to_string(const namespace_info &ns) const;
+
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const {
+        if (is_vector()) {
+            for (const auto &idx : idx_range) {
+                *iter = fmt::format("{}{}{}{}", base, ns.bus_begin, idx, ns.bus_end);
+            }
+        } else {
+            *iter = base;
+        }
+    }
 };
 
 struct name_rep;
-
-class const_name_rep_iterator;
-
-using rep_vec_iter = std::vector<name_rep>::const_iterator;
 
 /** Represents a list of name_rep's.
  */
@@ -152,79 +128,13 @@ struct name : x3::position_tagged {
   public:
     std::vector<name_rep> rep_list;
 
-    class const_iterator {
-      public:
-        using iterator_category = std::input_iterator_tag;
-        using value_type = std::string;
-        using difference_type = std::ptrdiff_t;
-        using pointer = value_type *;
-        using reference = value_type &;
-
-      private:
-        const namespace_info *info_ = nullptr;
-        rep_vec_iter vbegin_;
-        rep_vec_iter vend_;
-        std::unique_ptr<const_name_rep_iterator> rbegin_ = nullptr;
-        std::unique_ptr<const_name_rep_iterator> rend_ = nullptr;
-
-      public:
-        const_iterator();
-
-        const_iterator(const namespace_info *info, rep_vec_iter vbegin, rep_vec_iter vend,
-                       std::unique_ptr<const_name_rep_iterator> &&rbegin,
-                       std::unique_ptr<const_name_rep_iterator> &&rend);
-        const_iterator(const const_iterator &rhs);
-        const_iterator(const_iterator &&rhs);
-
-        const_iterator &operator=(const const_iterator &rhs);
-        const_iterator &operator=(const_iterator &&rhs);
-
-        const_iterator &operator++();
-        value_type operator*() const;
-        bool operator==(const const_iterator &rhs) const;
-        bool operator!=(const const_iterator &rhs) const;
-    };
-
     name();
 
     uint32_t size() const;
 
-    const_iterator begin(const namespace_info *info) const;
-
-    const_iterator end(const namespace_info *info) const;
-
     std::string to_string(const namespace_info &ns) const;
-};
 
-using nu_iter_tuple =
-    std::tuple<name_unit::const_iterator, name_unit::const_iterator, name_unit::const_iterator>;
-
-using na_iter_tuple = std::tuple<name::const_iterator, name::const_iterator, name::const_iterator>;
-
-class const_name_rep_iterator {
-  public:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = std::string;
-    using difference_type = std::ptrdiff_t;
-    using pointer = value_type *;
-    using reference = value_type &;
-
-  private:
-    const namespace_info *info_ = nullptr;
-    uint32_t cnt_ = 0;
-    std::variant<nu_iter_tuple, na_iter_tuple> iter_;
-
-  public:
-    const_name_rep_iterator();
-
-    const_name_rep_iterator(const namespace_info *info, uint32_t cnt, nu_iter_tuple iter);
-
-    const_name_rep_iterator(const namespace_info *info, uint32_t cnt, na_iter_tuple iter);
-
-    const_name_rep_iterator &operator++();
-    value_type operator*() const;
-    bool operator==(const const_name_rep_iterator &rhs) const;
-    bool operator!=(const const_name_rep_iterator &rhs) const;
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const;
 };
 
 /** Represents a repeated name
@@ -232,8 +142,6 @@ class const_name_rep_iterator {
  *  Possible formats are "<*3>foo", "<*3>(a,b)", or just name_unit.
  */
 struct name_rep : x3::position_tagged {
-    using const_iterator = const_name_rep_iterator;
-
     uint32_t mult = 1;
     std::variant<name_unit, name> data;
 
@@ -241,14 +149,41 @@ struct name_rep : x3::position_tagged {
 
     uint32_t size() const;
 
+    uint32_t data_size() const;
+
     bool is_vector() const;
 
-    const_iterator begin(const namespace_info *info) const;
-
-    const_iterator end(const namespace_info *info) const;
-
     std::string to_string(const namespace_info &ns) const;
+
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const {
+        uint32_t n = size();
+        if (n == 0)
+            return;
+        else if (mult == 1)
+            std::visit([&ns, &iter](const auto &arg) { arg.append_name_bits(ns, std::move(iter)); },
+                       data);
+        else {
+            std::vector<std::string> cache;
+            cache.reserve(n);
+            std::visit(
+                [&ns, &cache](const auto &arg) {
+                    arg.append_name_bits(ns, std::back_inserter(cache));
+                },
+                data);
+            for (uint32_t cnt = 0; cnt < mult; ++cnt) {
+                for (auto &name_bit : cache) {
+                    *iter = name_bit;
+                }
+            }
+        }
+    }
 };
+
+template <class OutIter> void name::append_name_bits(const namespace_info &ns, OutIter iter) const {
+    for (const auto &name_rep : rep_list) {
+        name_rep.append_name_bits(ns, iter);
+    }
+}
 
 } // namespace ast
 } // namespace spirit
