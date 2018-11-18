@@ -114,20 +114,26 @@ std::string range::to_string(const namespace_info &ns) const {
 name_unit::const_iterator::const_iterator() = default;
 
 name_unit::const_iterator::const_iterator(const namespace_info *info, const name_unit *parent,
-                                          range::const_iterator iter)
-    : info_(info), parent_(parent), iter_(std::move(iter)) {}
+                                          range::const_iterator iter, bool base_flag)
+    : info_(info), parent_(parent), iter_(std::move(iter)), base_flag_(base_flag) {}
 
 name_unit::const_iterator &name_unit::const_iterator::operator++() {
-    ++iter_;
+    if (base_flag_)
+        ++iter_;
+    else
+        base_flag_ = true;
     return *this;
 }
 
 name_unit::const_iterator::value_type name_unit::const_iterator::operator*() const {
-    return fmt::format("{}{}{}{}", parent_->base, info_->bus_begin, *iter_, info_->bus_end);
+    if (base_flag_)
+        return fmt::format("{}{}{}{}", parent_->base, info_->bus_begin, *iter_, info_->bus_end);
+    return parent_->base;
 }
 
 bool name_unit::const_iterator::operator==(const name_unit::const_iterator &rhs) const {
-    return info_ == rhs.info_ && parent_ == rhs.parent_ && iter_ == rhs.iter_;
+    return info_ == rhs.info_ && parent_ == rhs.parent_ && iter_ == rhs.iter_ &&
+           base_flag_ == rhs.base_flag_;
 }
 
 bool name_unit::const_iterator::operator!=(const name_unit::const_iterator &rhs) const {
@@ -141,11 +147,11 @@ uint32_t name_unit::size() const { return std::max(idx_range.size(), 1u); }
 bool name_unit::is_vector() const { return idx_range.size() > 0; }
 
 name_unit::const_iterator name_unit::begin(const namespace_info *info) const {
-    return {info, this, idx_range.begin()};
+    return {info, this, idx_range.begin(), is_vector()};
 }
 
 name_unit::const_iterator name_unit::end(const namespace_info *info) const {
-    return {info, this, idx_range.end()};
+    return {info, this, idx_range.end(), true};
 }
 
 std::string name_unit::to_string(const namespace_info &ns) const {

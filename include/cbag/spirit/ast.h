@@ -130,12 +130,13 @@ struct name_unit : x3::position_tagged {
         const namespace_info *info_ = nullptr;
         const name_unit *parent_ = nullptr;
         range::const_iterator iter_;
+        bool base_flag_ = true;
 
       public:
         const_iterator();
 
         const_iterator(const namespace_info *info, const name_unit *parent,
-                       range::const_iterator iter);
+                       range::const_iterator iter, bool base_flag);
 
         const_iterator &operator++();
         value_type operator*() const;

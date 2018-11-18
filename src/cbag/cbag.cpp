@@ -51,7 +51,7 @@ void write_netlist(const std::vector<sch::cellview *> &cv_list,
                              cv_list[idx]->lib_name);
                 lib_map_t new_lib_map;
                 new_lib_map.emplace(cv_list[idx]->cell_name, cv_info);
-                netlist_map.emplace(cv_list[idx]->lib_name, new_lib_map);
+                netlist_map.emplace(cv_list[idx]->lib_name, std::move(new_lib_map));
             } else {
                 lib_map_iter->second.emplace(cv_list[idx]->cell_name, cv_info);
             }
