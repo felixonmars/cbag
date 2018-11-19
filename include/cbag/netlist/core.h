@@ -105,6 +105,8 @@ class lstream {
 
     back_inserter get_back_inserter();
 
+    void append_last(const char *seq);
+
     friend lstream &operator<<(lstream &builder, const std::string &token);
 
     friend lstream &operator<<(lstream &builder, std::string &&token);

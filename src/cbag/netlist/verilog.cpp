@@ -13,6 +13,8 @@
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
+#include <cbag/spirit/ast.h>
+#include <cbag/util/name_convert.h>
 
 namespace cbag {
 namespace netlist {
@@ -32,32 +34,30 @@ void traits::nstream<verilog_stream>::write_header(type &stream,
 
 void traits::nstream<verilog_stream>::write_end(type &stream) {}
 
+void write_cv_ports(lstream &b, const std::vector<std::string> &terms, bool &has_prev_term) {
+    for (const auto &term : terms) {
+        if (has_prev_term) {
+            b.append_last(",");
+        } else {
+            has_prev_term = true;
+        }
+        spirit::ast::name_unit ast = util::parse_cdba_name_unit(term);
+        b << ast.base;
+    }
+}
+
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
                                                       const sch::cellview_info &info) {
     // write module declaration
+    bool has_prev_term = false;
     lstream b = verilog_stream::make_lstream();
-    b << "module";
-    b << name;
-    auto tmp_range1 = boost::join(info.in_terms, info.out_terms);
-    auto tmp_range2 = boost::join(tmp_range1, info.io_terms);
-    auto ptr = tmp_range2.begin();
-    auto const pend = tmp_range2.end();
-    while (ptr != pend) {
-        // has elements
-        const std::string &str_val = *ptr;
-        ++ptr;
-        if (ptr == pend) {
-            // The current string is the last string
-            b << str_val;
-        } else {
-            // The current string is not the last string
-            b << (str_val + std::string(","));
-        }
-    }
+    b << "module" << name << "(";
+    write_cv_ports(b, info.in_terms, has_prev_term);
+    write_cv_ports(b, info.out_terms, has_prev_term);
+    write_cv_ports(b, info.io_terms, has_prev_term);
     b << ");";
 
-    stream.out_file << b;
-    stream.out_file << std::endl;
+    stream.out_file << b << std::endl;
 
     // write io type
     for (auto const &name : info.in_terms) {

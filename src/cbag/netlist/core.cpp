@@ -34,6 +34,8 @@ bool lstream::empty() const { return tokens.empty(); }
 
 lstream::back_inserter lstream::get_back_inserter() { return back_inserter(this); }
 
+void lstream::append_last(const char *seq) { tokens.back().append(seq); }
+
 lstream &operator<<(lstream &builder, const std::string &token) {
     builder.tokens.push_back(token);
     return builder;
