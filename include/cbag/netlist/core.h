@@ -101,11 +101,15 @@ class lstream {
 
     lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size);
 
+    bool empty() const;
+
     back_inserter get_back_inserter();
 
     friend lstream &operator<<(lstream &builder, const std::string &token);
 
     friend lstream &operator<<(lstream &builder, std::string &&token);
+
+    friend lstream &operator<<(lstream &builder, const std::vector<std::string> &tokens);
 
     friend std::ofstream &operator<<(std::ofstream &stream, const lstream &b);
 };

@@ -30,6 +30,8 @@ lstream::back_inserter &lstream::back_inserter::operator=(std::string name) {
 lstream::lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size)
     : ncol(ncol), cnt_str(std::move(cnt_str)), break_before(break_before), tab_size(tab_size) {}
 
+bool lstream::empty() const { return tokens.empty(); }
+
 lstream::back_inserter lstream::get_back_inserter() { return back_inserter(this); }
 
 lstream &operator<<(lstream &builder, const std::string &token) {
@@ -39,6 +41,11 @@ lstream &operator<<(lstream &builder, const std::string &token) {
 
 lstream &operator<<(lstream &builder, std::string &&token) {
     builder.tokens.push_back(token);
+    return builder;
+}
+
+lstream &operator<<(lstream &builder, const std::vector<std::string> &tokens) {
+    builder.tokens.insert(builder.tokens.end(), tokens.begin(), tokens.end());
     return builder;
 }
 

@@ -194,9 +194,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
                 }
             }
             // write instance cell name
-            for (const auto &tok : tokens) {
-                b << tok;
-            }
+            b << tokens;
             stream.out_file << b;
         }
     }

@@ -38,7 +38,6 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     lstream b = verilog_stream::make_lstream();
     b << "module";
     b << name;
-    b << "(";
     auto tmp_range1 = boost::join(info.in_terms, info.out_terms);
     auto tmp_range2 = boost::join(tmp_range1, info.io_terms);
     auto ptr = tmp_range2.begin();
