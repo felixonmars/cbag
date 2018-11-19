@@ -95,6 +95,7 @@ struct range : x3::position_tagged {
  *  POssible formats are "foo", "bar[2]", "baz[3:1]"
  */
 struct name_unit : x3::position_tagged {
+  public:
     std::string base;
     range idx_range;
 
@@ -106,7 +107,7 @@ struct name_unit : x3::position_tagged {
 
     std::string to_string(const namespace_info &ns) const;
 
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const {
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const {
         if (is_vector()) {
             for (const auto &idx : idx_range) {
                 *iter = fmt::format("{}{}{}{}", base, ns.bus_begin, idx, ns.bus_end);
@@ -134,7 +135,7 @@ struct name : x3::position_tagged {
 
     std::string to_string(const namespace_info &ns) const;
 
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const;
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const;
 };
 
 /** Represents a repeated name
@@ -142,6 +143,7 @@ struct name : x3::position_tagged {
  *  Possible formats are "<*3>foo", "<*3>(a,b)", or just name_unit.
  */
 struct name_rep : x3::position_tagged {
+  public:
     uint32_t mult = 1;
     std::variant<name_unit, name> data;
 
@@ -155,21 +157,20 @@ struct name_rep : x3::position_tagged {
 
     std::string to_string(const namespace_info &ns) const;
 
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter iter) const {
+    std::vector<std::string> data_name_bits(const namespace_info &ns) const;
+
+    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const {
         uint32_t n = size();
         if (n == 0)
             return;
-        else if (mult == 1)
-            std::visit([&ns, &iter](const auto &arg) { arg.append_name_bits(ns, std::move(iter)); },
-                       data);
-        else {
-            std::vector<std::string> cache;
-            cache.reserve(n);
+        else if (mult == 1) {
             std::visit(
-                [&ns, &cache](const auto &arg) {
-                    arg.append_name_bits(ns, std::back_inserter(cache));
+                [&ns, &iter](const auto &arg) {
+                    arg.append_name_bits(ns, std::forward<OutIter>(iter));
                 },
                 data);
+        } else {
+            std::vector<std::string> cache = data_name_bits(ns);
             for (uint32_t cnt = 0; cnt < mult; ++cnt) {
                 for (auto &name_bit : cache) {
                     *iter = name_bit;
@@ -179,7 +180,8 @@ struct name_rep : x3::position_tagged {
     }
 };
 
-template <class OutIter> void name::append_name_bits(const namespace_info &ns, OutIter iter) const {
+template <class OutIter>
+void name::append_name_bits(const namespace_info &ns, OutIter &&iter) const {
     for (const auto &name_rep : rep_list) {
         name_rep.append_name_bits(ns, iter);
     }

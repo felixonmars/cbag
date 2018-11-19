@@ -134,6 +134,14 @@ std::string name_rep::to_string(const namespace_info &ns) const {
                        ns.rep_grp_end, mult, base);
 }
 
+std::vector<std::string> name_rep::data_name_bits(const namespace_info &ns) const {
+    std::vector<std::string> ans;
+    ans.reserve(data_size());
+    auto iter = std::back_inserter(ans);
+    std::visit([&ns, &iter](const auto &arg) { arg.append_name_bits(ns, iter); }, data);
+    return ans;
+}
+
 name::name() = default;
 
 uint32_t name::size() const {
