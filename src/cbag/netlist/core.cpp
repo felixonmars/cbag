@@ -7,8 +7,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <cbag/logging/logging.h>
-
 #include <cbag/common/datatypes.h>
 #include <cbag/netlist/core.h>
 #include <cbag/schematic/cellview.h>
@@ -89,33 +87,6 @@ nstream_file::nstream_file(const std::string &fname, spirit::namespace_type ns_t
     : out_file(util::open_file_write(fname)), ns(get_ns_info(ns_type)) {}
 
 void nstream_file::close() { out_file.close(); }
-
-write_param_visitor::write_param_visitor(lstream *ptr, const std::string &key)
-    : ptr(ptr), key(key) {}
-
-void write_param_visitor::operator()(const std::string &v) const {
-    (*ptr) << fmt::format("{}={}", key, v);
-}
-void write_param_visitor::operator()(const int32_t &v) const {
-    auto logger = cbag::get_cbag_logger();
-    logger->warn("integer parameter, do nothing.");
-}
-void write_param_visitor::operator()(const double &v) const {
-    auto logger = cbag::get_cbag_logger();
-    logger->warn("double parameter, do nothing.");
-}
-void write_param_visitor::operator()(const bool &v) const {
-    auto logger = cbag::get_cbag_logger();
-    logger->warn("bool parameter, do nothing.");
-}
-void write_param_visitor::operator()(const time_struct &v) const {
-    auto logger = cbag::get_cbag_logger();
-    logger->warn("time parameter, do nothing.");
-}
-void write_param_visitor::operator()(const binary_t &v) const {
-    auto logger = cbag::get_cbag_logger();
-    logger->warn("binary parameter, do nothing.");
-}
 
 } // namespace netlist
 } // namespace cbag

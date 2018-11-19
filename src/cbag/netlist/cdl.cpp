@@ -81,26 +81,13 @@ void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string
     }
 }
 
-void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string &name,
-                                                 const sch::instance &inst,
-                                                 const sch::cellview_info &info) {
-    lstream b = cdl_stream::make_lstream();
-
-    // <name> <net1> <net2> ... <cell name> <par1>=<val1> ...
-    // write instance name
-    // TODO: handle array instance correctly.
-    b << name;
-
-    // write instance connections
-    append_nets(stream.ns, b, name, inst, info.in_terms);
-    append_nets(stream.ns, b, name, inst, info.out_terms);
-    append_nets(stream.ns, b, name, inst, info.io_terms);
-
-    // write instance cell name
+template <class OutIter>
+void write_instance_cell_name(OutIter &&iter, const sch::instance &inst,
+                              const sch::cellview_info &info) {
     if (!info.is_prim) {
-        b << "/";
+        *iter = "/";
     }
-    b << inst.cell_name;
+    *iter = inst.cell_name;
 
     // get default parameter values
     param_map par_map(info.props);
@@ -110,10 +97,38 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
     }
     // write instance parameters
     for (auto const &pair : par_map) {
-        std::visit(write_param_visitor(&b, pair.first), pair.second);
+        std::visit(write_param_visitor(iter, pair.first), pair.second);
     }
+}
 
+void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string &name,
+                                                 const sch::instance &inst,
+                                                 const sch::cellview_info &info) {
+    spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
+    uint32_t n = inst_ast.size();
+
+    // if (n == 1) {
+    // normal instance, just write normally
+    lstream b = cdl_stream::make_lstream();
+    b << name;
+    append_nets(stream.ns, b, name, inst, info.in_terms);
+    append_nets(stream.ns, b, name, inst, info.out_terms);
+    append_nets(stream.ns, b, name, inst, info.io_terms);
+    cbag::netlist::write_instance_cell_name(b.get_back_inserter(), inst, info);
     stream.out_file << b;
+    /*
+} else {
+    // arrayed instance, need to split up
+    // first get cell name tokens
+    std::vector<std::string> tokens;
+    tokens.reserve(2);
+    cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
+    // array instance
+    for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
+        lstream b = cdl_stream::make_lstream();
+    }
+}
+    */
 }
 
 } // namespace netlist

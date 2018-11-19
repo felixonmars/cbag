@@ -7,6 +7,8 @@
 #include <type_traits>
 #include <vector>
 
+#include <cbag/logging/logging.h>
+
 #include <fmt/core.h>
 
 #include <cbag/netlist/netlist_map_t.h>
@@ -118,20 +120,35 @@ class nstream_file {
     void close();
 };
 
-class write_param_visitor {
+template <class OutIter> class write_param_visitor {
   private:
-    lstream *ptr = nullptr;
-    const std::string &key;
+    OutIter &iter_;
+    const std::string &key_;
 
   public:
-    write_param_visitor(lstream *ptr, const std::string &key);
+    write_param_visitor(OutIter &iter, const std::string &key) : iter_(iter), key_(key) {}
 
-    void operator()(const std::string &v) const;
-    void operator()(const int32_t &v) const;
-    void operator()(const double &v) const;
-    void operator()(const bool &v) const;
-    void operator()(const time_struct &v) const;
-    void operator()(const binary_t &v) const;
+    void operator()(const std::string &v) const { *iter_ = fmt::format("{}={}", key_, v); }
+    void operator()(const int32_t &v) const {
+        auto logger = cbag::get_cbag_logger();
+        logger->warn("integer parameter, do nothing.");
+    }
+    void operator()(const double &v) const {
+        auto logger = cbag::get_cbag_logger();
+        logger->warn("integer parameter, do nothing.");
+    }
+    void operator()(const bool &v) const {
+        auto logger = cbag::get_cbag_logger();
+        logger->warn("integer parameter, do nothing.");
+    }
+    void operator()(const time_struct &v) const {
+        auto logger = cbag::get_cbag_logger();
+        logger->warn("integer parameter, do nothing.");
+    }
+    void operator()(const binary_t &v) const {
+        auto logger = cbag::get_cbag_logger();
+        logger->warn("integer parameter, do nothing.");
+    }
 };
 
 } // namespace netlist
