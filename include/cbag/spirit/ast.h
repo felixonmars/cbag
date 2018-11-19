@@ -107,6 +107,8 @@ struct name_unit : x3::position_tagged {
 
     std::string to_string(const namespace_info &ns) const;
 
+    std::string get_name_bit(const namespace_info &ns, uint32_t index) const;
+
     template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const {
         if (is_vector()) {
             for (const auto &idx : idx_range) {

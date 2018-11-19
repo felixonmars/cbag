@@ -74,6 +74,8 @@ SCENARIO("netlist generation", "[cbag]") {
         std::string fname = fmt::format("{}/{}.{}", output_dir, cell_name, ext_str);
         std::string expect_fname = fmt::format("{}/{}.{}", expect_dir, cell_name, ext_str);
 
+        CAPTURE(cell_name);
+        CAPTURE(ext_str);
         THEN("writes netlist correctly") {
             cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, format,
                                          fname);

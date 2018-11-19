@@ -98,6 +98,10 @@ std::string name_unit::to_string(const namespace_info &ns) const {
     return base + idx_range.to_string(ns);
 }
 
+std::string name_unit::get_name_bit(const namespace_info &ns, uint32_t index) const {
+    return fmt::format("{}{}{}{}", base, ns.bus_begin, idx_range[index], ns.bus_end);
+}
+
 name_rep::name_rep() = default;
 
 uint32_t name_rep::size() const { return mult * data_size(); }
