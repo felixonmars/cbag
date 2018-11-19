@@ -16,7 +16,6 @@ namespace netlist {
 class verilog_stream : public nstream_file {
   private:
     static const size_t ncol = 120;
-    static const char cnt_char = '\0';
     static const bool break_before = true;
     static const int tab_size = 4;
 

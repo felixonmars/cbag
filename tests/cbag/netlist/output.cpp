@@ -69,6 +69,7 @@ SCENARIO("netlist generation", "[cbag]") {
         cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
         bool shell = false;
+        uint32_t rmin = 2000;
 
         std::string ext_str = get_extension(format);
         std::string fname = fmt::format("{}/{}.{}", output_dir, cell_name, ext_str);
@@ -78,7 +79,7 @@ SCENARIO("netlist generation", "[cbag]") {
         CAPTURE(ext_str);
         THEN("writes netlist correctly") {
             cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, format,
-                                         fname);
+                                         fname, rmin);
             std::string output_str = read_file(fname);
             std::string expect_str = read_file(expect_fname);
             REQUIRE(output_str == expect_str);

@@ -99,7 +99,9 @@ std::string name_unit::to_string(const namespace_info &ns) const {
 }
 
 std::string name_unit::get_name_bit(const namespace_info &ns, uint32_t index) const {
-    return fmt::format("{}{}{}{}", base, ns.bus_begin, idx_range[index], ns.bus_end);
+    if (is_vector())
+        return fmt::format("{}{}{}{}", base, ns.bus_begin, idx_range[index], ns.bus_end);
+    return base;
 }
 
 name_rep::name_rep() = default;

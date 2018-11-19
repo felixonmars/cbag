@@ -84,7 +84,7 @@ class lstream {
   private:
     std::vector<std::string> tokens;
     size_t ncol = 80;
-    char cnt_char = ' ';
+    std::string cnt_str = " ";
     bool break_before = false;
     int tab_size = 4;
 
@@ -99,7 +99,7 @@ class lstream {
         back_inserter &operator=(std::string name);
     };
 
-    lstream(size_t ncol, char cnt_char, bool break_before, int tab_size);
+    lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size);
 
     back_inserter get_back_inserter();
 

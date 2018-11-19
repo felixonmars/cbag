@@ -17,14 +17,15 @@ namespace netlist {
 class cdl_stream : public nstream_file {
   private:
     static const size_t ncol = 80;
-    static const char cnt_char = '+';
     static const bool break_before = false;
     static const int tab_size = 0;
 
   public:
-    explicit cdl_stream(const std::string &fname);
+    uint32_t rmin;
 
-    static lstream make_lstream();
+    cdl_stream(const std::string &fname, uint32_t rmin);
+
+    static lstream make_lstream(std::string cnt_str = "+");
 };
 
 template <> struct traits::nstream<cdl_stream> {

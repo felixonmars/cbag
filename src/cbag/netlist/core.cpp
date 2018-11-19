@@ -27,8 +27,8 @@ lstream::back_inserter &lstream::back_inserter::operator=(std::string name) {
     return *this;
 }
 
-lstream::lstream(size_t ncol, char cnt_char, bool break_before, int tab_size)
-    : ncol(ncol), cnt_char(cnt_char), break_before(break_before), tab_size(tab_size) {}
+lstream::lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size)
+    : ncol(ncol), cnt_str(std::move(cnt_str)), break_before(break_before), tab_size(tab_size) {}
 
 lstream::back_inserter lstream::get_back_inserter() { return back_inserter(this); }
 
@@ -58,7 +58,7 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
             cur_col += n + 1;
         } else {
             // line break
-            if (b.cnt_char == '\0') {
+            if (b.cnt_str.empty()) {
                 // no line break character
                 stream << std::endl;
                 for (int cnt = 0; cnt < tab_size; ++cnt) {
@@ -67,14 +67,14 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
                 stream << b.tokens[idx];
                 cur_col = n + tab_size;
             } else if (b.break_before) {
-                stream << ' ' << b.cnt_char << std::endl;
+                stream << ' ' << b.cnt_str << std::endl;
                 for (int cnt = 0; cnt < tab_size; ++cnt) {
                     stream << ' ';
                 }
                 stream << b.tokens[idx];
                 cur_col = n + tab_size;
             } else {
-                stream << std::endl << b.cnt_char << ' ' << b.tokens[idx];
+                stream << std::endl << b.cnt_str << ' ' << b.tokens[idx];
                 cur_col = n + 2;
             }
         }

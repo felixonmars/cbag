@@ -20,7 +20,7 @@ namespace netlist {
 verilog_stream::verilog_stream(const std::string &fname)
     : nstream_file(fname, spirit::namespace_type::VERILOG) {}
 
-lstream verilog_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
+lstream verilog_stream::make_lstream() { return {ncol, "", break_before, tab_size}; }
 
 void traits::nstream<verilog_stream>::close(type &stream) { stream.close(); }
 

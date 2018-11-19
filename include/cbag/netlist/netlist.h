@@ -25,7 +25,7 @@ enum class netlist_fmt : uint8_t {
 template <class VectorType>
 void write_netlist(const VectorType &cv_name_list, const std::vector<std::string> &inc_list,
                    netlist_map_t &netlist_map, bool flat, bool shell, netlist_fmt format,
-                   const std::string &fname) {
+                   const std::string &fname, uint32_t rmin = 2000) {
     auto logger = cbag::get_cbag_logger();
     logger->info("Writing netlist file: {}", fname);
 
@@ -34,7 +34,8 @@ void write_netlist(const VectorType &cv_name_list, const std::vector<std::string
 
     switch (format) {
     case netlist_fmt::CDL:
-        write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, cdl_stream(fname), *logger);
+        write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, cdl_stream(fname, rmin),
+                      *logger);
         break;
     case netlist_fmt::VERILOG:
         write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, verilog_stream(fname),

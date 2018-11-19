@@ -22,10 +22,12 @@
 namespace cbag {
 namespace netlist {
 
-cdl_stream::cdl_stream(const std::string &fname)
-    : nstream_file(fname, spirit::namespace_type::CDL) {}
+cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin)
+    : nstream_file(fname, spirit::namespace_type::CDL), rmin(rmin) {}
 
-lstream cdl_stream::make_lstream() { return {ncol, cnt_char, break_before, tab_size}; }
+lstream cdl_stream::make_lstream(std::string cnt_str) {
+    return {ncol, std::move(cnt_str), break_before, tab_size};
+}
 
 void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
 
@@ -39,17 +41,41 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
             }
             stream.out_file << std::endl;
         }
+        // write CDL control commands
+        // keep analog devices (BJT)
+        stream.out_file << "*.BIPOLAR" << std::endl;
+        // minimum resistor value: resistors below this value are shorted
+        stream.out_file << "*.RESI = " << stream.rmin << std::endl;
+        // transistor width/lengths interpreted as meters
+        stream.out_file << "*.SCALE METER" << std::endl;
+        // these commands are printed by CDL export, but
+        // ignored by LVS usually.
+        stream.out_file << "*.MEGA" << std::endl;
+        stream.out_file << "*.RESVAL" << std::endl;
+        stream.out_file << "*.CAPVAL" << std::endl;
+        stream.out_file << "*.DIOPERI" << std::endl;
+        stream.out_file << "*.DIOAREA" << std::endl;
+        stream.out_file << "*.EQUATION" << std::endl;
+
+        // write SPICE control commands
+        // global parameters definitions
         stream.out_file << ".PARAM" << std::endl;
     }
 }
 
 void traits::nstream<cdl_stream>::write_end(type &stream) {}
 
-void append_name_unit(const spirit::namespace_info &ns, lstream &b,
-                      const std::vector<std::string> &names) {
+void get_cv_term_bits(const spirit::namespace_info &ns, lstream &b, lstream &b2,
+                      const std::vector<std::string> &names, const std::string &term_type) {
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
-        ast.append_name_bits(ns, b.get_back_inserter());
+        uint32_t n = ast.size();
+        for (uint32_t idx = 0; idx < n; ++idx) {
+            std::string tmp = ast.get_name_bit(ns, idx);
+            b << tmp;
+            tmp.append(term_type);
+            b2 << std::move(tmp);
+        }
     }
 }
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
@@ -58,11 +84,16 @@ void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::strin
     stream.out_file << std::endl;
     b << ".SUBCKT";
     b << name;
-    append_name_unit(stream.ns, b, info.in_terms);
-    append_name_unit(stream.ns, b, info.out_terms);
-    append_name_unit(stream.ns, b, info.io_terms);
+    lstream b2 = cdl_stream::make_lstream("*+");
+    b2 << "*.PININFO";
+    get_cv_term_bits(stream.ns, b, b2, info.in_terms, ":I");
+    get_cv_term_bits(stream.ns, b, b2, info.out_terms, ":O");
+    get_cv_term_bits(stream.ns, b, b2, info.io_terms, ":B");
 
+    // write definition line
     stream.out_file << b;
+    // write pin information line
+    stream.out_file << b2;
 }
 
 void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &name) {
