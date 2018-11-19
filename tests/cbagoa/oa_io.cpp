@@ -1,5 +1,3 @@
-#include <fstream>
-#include <sstream>
 #include <string>
 
 #include <catch2/catch.hpp>
@@ -10,12 +8,7 @@
 #include <cbagoa/cbagoa.h>
 #include <cbagyaml/cbagyaml.h>
 
-std::string read_file(const std::string &fname) {
-    std::ifstream in(fname);
-    std::stringstream stream;
-    stream << in.rdbuf();
-    return stream.str();
-}
+#include "util/io.h"
 
 cbag::sch::cellview read_cv(const std::string &lib_name, const std::string &cell_name,
                             const std::string &view_name, const std::string &lib_file) {

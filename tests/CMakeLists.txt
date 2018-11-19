@@ -9,7 +9,11 @@ add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_map.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_vector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbagoa/oa_io.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/util/io.cpp
+
   )
+
+target_include_directories(test_main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(test_main
   PRIVATE

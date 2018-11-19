@@ -8,7 +8,20 @@
 #include <cbag/netlist/netlist.h>
 #include <cbagyaml/cbagyaml.h>
 
+#include "util/io.h"
+
 using cv_name_vec = std::vector<std::pair<std::unique_ptr<cbag::sch::cellview>, std::string>>;
+
+std::string get_extension(cbag::netlist::netlist_fmt netlist_type) {
+    switch (netlist_type) {
+    case cbag::netlist::netlist_fmt::CDL:
+        return "cdl";
+    case cbag::netlist::netlist_fmt::VERILOG:
+        return "v";
+    default:
+        return "netlist";
+    }
+}
 
 void populate_cv_name_list(const char *fmt_str, const std::string &yaml_dir,
                            const std::string &top_cell, const std::string cv_name,
@@ -33,6 +46,7 @@ SCENARIO("netlist generation", "[cbag]") {
     GIVEN("cellviews from yaml files") {
         std::string yaml_dir = "tests/data/test_netlist_yaml";
         std::string output_dir = "tests/data/test_outputs/netlist";
+        std::string expect_dir = "tests/data/test_netlist_netlist";
 
         std::string cell_name = GENERATE(values<std::string>({
             "nmos4_standard",
@@ -43,6 +57,9 @@ SCENARIO("netlist generation", "[cbag]") {
             "cv_array_inst_simple",
             "cv_array_inst_w_bus",
         }));
+        cbag::netlist::netlist_fmt format = GENERATE(values<cbag::netlist::netlist_fmt>({
+            cbag::netlist::netlist_fmt::CDL,
+        }));
 
         const char *fmt_str = "{}/{}.yaml";
         cv_name_vec cv_name_list;
@@ -52,11 +69,17 @@ SCENARIO("netlist generation", "[cbag]") {
         cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
         bool shell = false;
-        std::string fname = fmt::format("{}/{}.netlist", output_dir, cell_name);
 
-        THEN("can write cdl netlist") {
-            cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell,
-                                         cbag::netlist::netlist_fmt::CDL, fname);
+        std::string ext_str = get_extension(format);
+        std::string fname = fmt::format("{}/{}.{}", output_dir, cell_name, ext_str);
+        std::string expect_fname = fmt::format("{}/{}.{}", expect_dir, cell_name, ext_str);
+
+        THEN("writes netlist correctly") {
+            cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, format,
+                                         fname);
+            std::string output_str = read_file(fname);
+            std::string expect_str = read_file(expect_fname);
+            REQUIRE(output_str == expect_str);
         }
     }
 }

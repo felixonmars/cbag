@@ -1,0 +1,5 @@
+.PARAM
+
+.SUBCKT TEST B D G S
+.ENDS
+
