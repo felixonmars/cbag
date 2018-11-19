@@ -39,7 +39,7 @@ void instance::set_param(const std::string &name,
 void instance::update_connection(const std::string &inst_name, uint32_t inst_size,
                                  std::string term_str, std::string net_str) {
     // check number of bits match
-    spirit::ast::name n_term = cbag::util::parse_cdba_name(term_str);
+    spirit::ast::name_unit n_term = cbag::util::parse_cdba_name_unit(term_str);
     spirit::ast::name n_net = cbag::util::parse_cdba_name(net_str);
 
     uint32_t tot_size = inst_size * n_term.size();
