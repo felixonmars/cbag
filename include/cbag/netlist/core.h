@@ -111,6 +111,8 @@ class lstream {
 
     void append_last(const char *seq);
 
+    std::ofstream &append_to(std::ofstream &stream, bool newline = true) const;
+
     friend lstream &operator<<(lstream &builder, const std::string &token);
 
     friend lstream &operator<<(lstream &builder, std::string &&token);

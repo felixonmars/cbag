@@ -1,9 +1,9 @@
 
-module TEST ( B, D, G, S );
-
-    inout B;
-    inout D;
-    inout G;
-    inout S;
+module TEST(
+    inout wire B,
+    inout wire D,
+    inout wire G,
+    inout wire S
+);
 
 endmodule

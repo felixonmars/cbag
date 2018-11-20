@@ -1,9 +1,9 @@
 
-module TEST ( VDD, VSS, in, out );
-
-    input VDD;
-    input VSS;
-    input in;
-    output out;
+module TEST(
+    input wire VDD,
+    input wire VSS,
+    input wire in,
+    output wire out
+);
 
 endmodule
