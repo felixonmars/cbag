@@ -109,7 +109,9 @@ class lstream {
 
     back_inserter get_back_inserter();
 
-    void append_last(const char *seq);
+    lstream &append_last(const char *seq);
+
+    lstream &append_last(const std::string &seq);
 
     std::ofstream &append_to(std::ofstream &stream, bool newline = true) const;
 

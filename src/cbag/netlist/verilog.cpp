@@ -69,17 +69,60 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     write_cv_ports(stream, info.io_terms, has_prev_term, "    inout ");
     if (has_prev_term)
         stream.out_file << std::endl;
-    stream.out_file << ");" << std::endl << std::endl;
+    stream.out_file << ");" << std::endl;
 }
 
 void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name) {
-    stream.out_file << "endmodule" << std::endl;
+
+    stream.out_file << std::endl << "endmodule" << std::endl;
+}
+
+void append_inst_nets(const spirit::namespace_info &ns, verilog_stream &stream,
+                      const std::string &inst_name, const sch::instance &inst,
+                      const std::vector<std::string> &terms, bool &has_prev_term) {
+    for (auto const &term : terms) {
+        auto term_iter = inst.connections.find(term);
+        if (term_iter == inst.connections.end()) {
+            throw std::invalid_argument(fmt::format(
+                "Cannot find net connected to instance {} terminal {}", inst_name, term));
+        }
+        spirit::ast::name_unit term_ast = cbag::util::parse_cdba_name_unit(term);
+        lstream b = stream.make_lstream();
+        b << "    .";
+        b.append_last(term_ast.base).append_last("(");
+        b << term_iter->second << ")";
+
+        if (has_prev_term)
+            stream.out_file << "," << std::endl;
+        else
+            has_prev_term = true;
+        stream.out_file << b;
+    }
 }
 
 void traits::nstream<verilog_stream>::write_instance(type &stream, const std::string &name,
                                                      const sch::instance &inst,
                                                      const sch::cellview_info &info) {
-    // TODO: add actual implementation
+    spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
+    uint32_t n = inst_ast.size();
+
+    if (n == 1) {
+        // normal instance, just write normally
+        stream.out_file << std::endl;
+        lstream b = stream.make_lstream();
+        b << inst.cell_name << name << "(";
+        stream.out_file << b;
+
+        bool has_prev_term = false;
+        append_inst_nets(stream.ns, stream, name, inst, info.in_terms, has_prev_term);
+        append_inst_nets(stream.ns, stream, name, inst, info.out_terms, has_prev_term);
+        append_inst_nets(stream.ns, stream, name, inst, info.io_terms, has_prev_term);
+        if (has_prev_term)
+            stream.out_file << std::endl;
+        stream.out_file << ");" << std::endl;
+    } else {
+        // TODO: implement this
+    }
 }
 
 } // namespace netlist

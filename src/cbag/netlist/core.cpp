@@ -33,7 +33,15 @@ bool lstream::empty() const { return tokens.empty(); }
 
 lstream::back_inserter lstream::get_back_inserter() { return back_inserter(this); }
 
-void lstream::append_last(const char *seq) { tokens.back().append(seq); }
+lstream &lstream::append_last(const char *seq) {
+    tokens.back().append(seq);
+    return *this;
+}
+
+lstream &lstream::append_last(const std::string &seq) {
+    tokens.back().append(seq);
+    return *this;
+}
 
 std::ofstream &lstream::append_to(std::ofstream &stream, bool newline) const {
     size_t num_tokens = tokens.size();
