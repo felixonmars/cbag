@@ -147,7 +147,12 @@ void get_partition_helper(OutIter &&iter, const name &obj, std::vector<name_rep>
 }
 
 template <class OutIter> void get_partition(const name &obj, uint32_t chunk, OutIter &&iter) {
-    get_partition_helper(std::forward<OutIter>(iter), obj, {}, 0, chunk);
+    std::vector<name_rep> temp;
+    uint32_t cum_size = 0;
+    get_partition_helper(std::forward<OutIter>(iter), obj, temp, cum_size, chunk);
+    if (cum_size != 0) {
+        *iter = name(std::move(temp));
+    }
 }
 
 } // namespace util
