@@ -40,11 +40,11 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
         spirit::ast::name_unit ast = util::parse_cdba_name_unit(term);
 
         auto b = stream.make_lstream();
-        b << prefix;
+        b << prefix << "wire";
         if (ast.is_vector()) {
             b << ast.idx_range.to_string(stream.ns, true);
         }
-        b << "wire" << ast.base;
+        b << ast.base;
 
         if (has_prev_term)
             stream.out_file << "," << std::endl;
@@ -64,9 +64,9 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     stream.out_file << b;
 
     bool has_prev_term = false;
-    write_cv_ports(stream, info.in_terms, has_prev_term, "    input");
+    write_cv_ports(stream, info.in_terms, has_prev_term, "    input ");
     write_cv_ports(stream, info.out_terms, has_prev_term, "    output");
-    write_cv_ports(stream, info.io_terms, has_prev_term, "    inout");
+    write_cv_ports(stream, info.io_terms, has_prev_term, "    inout ");
     if (has_prev_term)
         stream.out_file << std::endl;
     stream.out_file << ");" << std::endl << std::endl;
