@@ -80,13 +80,17 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
     traits::nstream<Stream>::write_cv_end(stream, name);
 }
 
+struct line_format {
+    size_t ncol;
+    std::string cnt_str;
+    bool break_before;
+    int tab_size;
+};
+
 class lstream {
   private:
     std::vector<std::string> tokens;
-    size_t ncol = 80;
-    std::string cnt_str = " ";
-    bool break_before = false;
-    int tab_size = 4;
+    const line_format *fmt_info;
 
   public:
     class back_inserter {
@@ -99,7 +103,7 @@ class lstream {
         back_inserter &operator=(std::string name);
     };
 
-    lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size);
+    explicit lstream(const line_format *fmt_info);
 
     bool empty() const;
 
@@ -120,8 +124,12 @@ class nstream_file {
   public:
     std::ofstream out_file;
     spirit::namespace_info ns;
+    line_format line_fmt;
 
-    explicit nstream_file(const std::string &fname, spirit::namespace_type ns_type);
+    explicit nstream_file(const std::string &fname, spirit::namespace_type ns_type,
+                          line_format line_fmt);
+
+    lstream make_lstream() const;
 
     void close();
 };

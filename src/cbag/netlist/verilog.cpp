@@ -19,10 +19,10 @@
 namespace cbag {
 namespace netlist {
 
-verilog_stream::verilog_stream(const std::string &fname)
-    : nstream_file(fname, spirit::namespace_type::VERILOG) {}
+line_format get_verilog_line_format() { return {120, "", true, 4}; }
 
-lstream verilog_stream::make_lstream() { return {ncol, "", break_before, tab_size}; }
+verilog_stream::verilog_stream(const std::string &fname)
+    : nstream_file(fname, spirit::namespace_type::VERILOG, get_verilog_line_format()) {}
 
 void traits::nstream<verilog_stream>::close(type &stream) { stream.close(); }
 
@@ -50,7 +50,7 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
                                                       const sch::cellview_info &info) {
     // write module declaration
     bool has_prev_term = false;
-    lstream b = verilog_stream::make_lstream();
+    lstream b = stream.make_lstream();
     b << "module" << name << "(";
     write_cv_ports(b, info.in_terms, has_prev_term);
     write_cv_ports(b, info.out_terms, has_prev_term);

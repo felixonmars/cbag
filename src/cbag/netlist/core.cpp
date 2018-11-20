@@ -27,8 +27,7 @@ lstream::back_inserter &lstream::back_inserter::operator=(std::string name) {
     return *this;
 }
 
-lstream::lstream(size_t ncol, std::string cnt_str, bool break_before, int tab_size)
-    : ncol(ncol), cnt_str(std::move(cnt_str)), break_before(break_before), tab_size(tab_size) {}
+lstream::lstream(const line_format *fmt_info) : fmt_info(fmt_info) {}
 
 bool lstream::empty() const { return tokens.empty(); }
 
@@ -53,7 +52,7 @@ lstream &operator<<(lstream &builder, const std::vector<std::string> &tokens) {
 
 std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
     size_t num_tokens = b.tokens.size();
-    int tab_size = b.tab_size;
+    int tab_size = b.fmt_info->tab_size;
     if (num_tokens == 0) {
         return stream;
     }
@@ -61,13 +60,13 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
     size_t cur_col = b.tokens[0].size();
     for (size_t idx = 1; idx < num_tokens; ++idx) {
         size_t n = b.tokens[idx].size();
-        size_t cur_len = (b.break_before) ? n + 3 : n + 1;
-        if (cur_col + cur_len <= b.ncol) {
+        size_t cur_len = (b.fmt_info->break_before) ? n + 3 : n + 1;
+        if (cur_col + cur_len <= b.fmt_info->ncol) {
             stream << ' ' << b.tokens[idx];
             cur_col += n + 1;
         } else {
             // line break
-            if (b.cnt_str.empty()) {
+            if (b.fmt_info->cnt_str.empty()) {
                 // no line break character
                 stream << std::endl;
                 for (int cnt = 0; cnt < tab_size; ++cnt) {
@@ -75,15 +74,15 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
                 }
                 stream << b.tokens[idx];
                 cur_col = n + tab_size;
-            } else if (b.break_before) {
-                stream << ' ' << b.cnt_str << std::endl;
+            } else if (b.fmt_info->break_before) {
+                stream << ' ' << b.fmt_info->cnt_str << std::endl;
                 for (int cnt = 0; cnt < tab_size; ++cnt) {
                     stream << ' ';
                 }
                 stream << b.tokens[idx];
                 cur_col = n + tab_size;
             } else {
-                stream << std::endl << b.cnt_str << ' ' << b.tokens[idx];
+                stream << std::endl << b.fmt_info->cnt_str << ' ' << b.tokens[idx];
                 cur_col = n + 2;
             }
         }
@@ -92,8 +91,12 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
     return stream;
 }
 
-nstream_file::nstream_file(const std::string &fname, spirit::namespace_type ns_type)
-    : out_file(util::open_file_write(fname)), ns(get_ns_info(ns_type)) {}
+nstream_file::nstream_file(const std::string &fname, spirit::namespace_type ns_type,
+                           line_format line_fmt)
+    : out_file(util::open_file_write(fname)), ns(get_ns_info(ns_type)),
+      line_fmt(std::move(line_fmt)) {}
+
+lstream nstream_file::make_lstream() const { return lstream(&line_fmt); }
 
 void nstream_file::close() { out_file.close(); }
 

@@ -22,12 +22,10 @@
 namespace cbag {
 namespace netlist {
 
-cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin)
-    : nstream_file(fname, spirit::namespace_type::CDL), rmin(rmin) {}
+line_format get_cdl_line_format(std::string cnt_str = "+") { return {80, cnt_str, false, 0}; }
 
-lstream cdl_stream::make_lstream(std::string cnt_str) {
-    return {ncol, std::move(cnt_str), break_before, tab_size};
-}
+cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin)
+    : nstream_file(fname, spirit::namespace_type::CDL, get_cdl_line_format()), rmin(rmin) {}
 
 void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
 
@@ -80,11 +78,12 @@ void get_cv_term_bits(const spirit::namespace_info &ns, lstream &b, lstream &b2,
 }
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
                                                   const sch::cellview_info &info) {
-    lstream b = cdl_stream::make_lstream();
+    lstream b = stream.make_lstream();
     stream.out_file << std::endl;
     b << ".SUBCKT";
     b << name;
-    lstream b2 = cdl_stream::make_lstream("*+");
+    auto cmd_line_fmt = get_cdl_line_format("*+");
+    lstream b2 = lstream(&cmd_line_fmt);
     b2 << "*.PININFO";
     get_cv_term_bits(stream.ns, b, b2, info.in_terms, ":I");
     get_cv_term_bits(stream.ns, b, b2, info.out_terms, ":O");
@@ -161,7 +160,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
 
     if (n == 1) {
         // normal instance, just write normally
-        lstream b = cdl_stream::make_lstream();
+        lstream b = stream.make_lstream();
         b << name;
         append_nets(stream.ns, b, name, inst, info.in_terms);
         append_nets(stream.ns, b, name, inst, info.out_terms);
@@ -181,7 +180,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
         cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
         // array instance
         for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
-            lstream b = cdl_stream::make_lstream();
+            lstream b = stream.make_lstream();
             // write instance name
             b << inst_ast.get_name_bit(stream.ns, inst_idx);
             // write instance nets

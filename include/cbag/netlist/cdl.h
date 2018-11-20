@@ -15,17 +15,10 @@ namespace cbag {
 namespace netlist {
 
 class cdl_stream : public nstream_file {
-  private:
-    static const size_t ncol = 80;
-    static const bool break_before = false;
-    static const int tab_size = 0;
-
   public:
     uint32_t rmin;
 
     cdl_stream(const std::string &fname, uint32_t rmin);
-
-    static lstream make_lstream(std::string cnt_str = "+");
 };
 
 template <> struct traits::nstream<cdl_stream> {
