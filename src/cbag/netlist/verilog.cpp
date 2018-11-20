@@ -34,7 +34,9 @@ void traits::nstream<verilog_stream>::write_header(type &stream,
 
 void traits::nstream<verilog_stream>::write_end(type &stream) {}
 
-void write_cv_ports(lstream &b, const std::vector<std::string> &terms, bool &has_prev_term) {
+void write_cv_ports(verilog_stream &stream, lstream &b, std::vector<lstream> &line_vec,
+                    const std::vector<std::string> &terms, bool &has_prev_term,
+                    const char *prefix) {
     for (const auto &term : terms) {
         if (has_prev_term) {
             b.append_last(",");
@@ -43,37 +45,44 @@ void write_cv_ports(lstream &b, const std::vector<std::string> &terms, bool &has
         }
         spirit::ast::name_unit ast = util::parse_cdba_name_unit(term);
         b << ast.base;
+
+        line_vec.emplace_back(stream.make_lstream());
+        if (ast.is_vector()) {
+            (line_vec.back() << prefix << ast.idx_range.to_string(stream.ns, true) << ast.base)
+                .append_last(";");
+        } else {
+            (line_vec.back() << prefix << ast.base).append_last(";");
+        }
     }
 }
 
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
                                                       const sch::cellview_info &info) {
+    stream.out_file << std::endl;
+
     // write module declaration
     bool has_prev_term = false;
     lstream b = stream.make_lstream();
     b << "module" << name << "(";
-    write_cv_ports(b, info.in_terms, has_prev_term);
-    write_cv_ports(b, info.out_terms, has_prev_term);
-    write_cv_ports(b, info.io_terms, has_prev_term);
+
+    std::vector<lstream> line_vec;
+    write_cv_ports(stream, b, line_vec, info.in_terms, has_prev_term, "    input");
+    write_cv_ports(stream, b, line_vec, info.out_terms, has_prev_term, "    output");
+    write_cv_ports(stream, b, line_vec, info.io_terms, has_prev_term, "    inout");
     b << ");";
 
     stream.out_file << b << std::endl;
 
-    // write io type
-    for (auto const &name : info.in_terms) {
-        stream.out_file << "    input " << name << ";" << std::endl;
+    // write port declarations
+    for (const auto &line : line_vec) {
+        stream.out_file << line;
     }
-    for (auto const &name : info.out_terms) {
-        stream.out_file << "    output " << name << ";" << std::endl;
-    }
-    for (auto const &name : info.io_terms) {
-        stream.out_file << "    inout " << name << ";" << std::endl;
-    }
+
     stream.out_file << std::endl;
 }
 
 void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name) {
-    stream.out_file << "endmodule" << std::endl << std::endl;
+    stream.out_file << "endmodule" << std::endl;
 }
 
 void traits::nstream<verilog_stream>::write_instance(type &stream, const std::string &name,

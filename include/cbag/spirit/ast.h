@@ -87,7 +87,7 @@ struct range : x3::position_tagged {
 
     uint32_t at(uint32_t index) const;
 
-    std::string to_string(const namespace_info &ns) const;
+    std::string to_string(const namespace_info &ns, bool show_stop = false) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.

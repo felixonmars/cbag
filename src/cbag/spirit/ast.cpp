@@ -77,12 +77,12 @@ uint32_t range::at(uint32_t index) const {
     return operator[](index);
 }
 
-std::string range::to_string(const namespace_info &ns) const {
+std::string range::to_string(const namespace_info &ns, bool show_stop) const {
     if (step == 0)
         return "";
-    if (start == stop)
+    if (start == stop && !show_stop)
         return fmt::format("{0}{2}{1}", ns.bus_begin, ns.bus_end, start);
-    if (step == 1)
+    if (start == stop || step == 1)
         return fmt::format("{0}{3}{2}{4}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop);
     return fmt::format("{0}{3}{2}{4}{2}{5}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop,
                        step);

@@ -39,26 +39,26 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
             }
             stream.out_file << std::endl;
         }
-        // write CDL control commands
-        // keep analog devices (BJT)
-        stream.out_file << "*.BIPOLAR" << std::endl;
-        // minimum resistor value: resistors below this value are shorted
-        stream.out_file << "*.RESI = " << stream.rmin << std::endl;
-        // transistor width/lengths interpreted as meters
-        stream.out_file << "*.SCALE METER" << std::endl;
-        // these commands are printed by CDL export, but
-        // ignored by LVS usually.
-        stream.out_file << "*.MEGA" << std::endl;
-        stream.out_file << "*.RESVAL" << std::endl;
-        stream.out_file << "*.CAPVAL" << std::endl;
-        stream.out_file << "*.DIOPERI" << std::endl;
-        stream.out_file << "*.DIOAREA" << std::endl;
-        stream.out_file << "*.EQUATION" << std::endl;
-
-        // write SPICE control commands
-        // global parameters definitions
-        stream.out_file << ".PARAM" << std::endl;
     }
+    // write CDL control commands
+    // keep analog devices (BJT)
+    stream.out_file << "*.BIPOLAR" << std::endl;
+    // minimum resistor value: resistors below this value are shorted
+    stream.out_file << "*.RESI = " << stream.rmin << std::endl;
+    // transistor width/lengths interpreted as meters
+    stream.out_file << "*.SCALE METER" << std::endl;
+    // these commands are printed by CDL export, but
+    // ignored by LVS usually.
+    stream.out_file << "*.MEGA" << std::endl;
+    stream.out_file << "*.RESVAL" << std::endl;
+    stream.out_file << "*.CAPVAL" << std::endl;
+    stream.out_file << "*.DIOPERI" << std::endl;
+    stream.out_file << "*.DIOAREA" << std::endl;
+    stream.out_file << "*.EQUATION" << std::endl;
+
+    // write SPICE control commands
+    // global parameters definitions
+    stream.out_file << ".PARAM" << std::endl;
 }
 
 void traits::nstream<cdl_stream>::write_end(type &stream) {}

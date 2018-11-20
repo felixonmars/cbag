@@ -57,10 +57,14 @@ SCENARIO("netlist generation", "[cbag]") {
             "cv_array_inst_simple",
             "cv_array_inst_w_bus",
         }));
-        cbag::netlist::netlist_fmt format = GENERATE(values<cbag::netlist::netlist_fmt>({
-            cbag::netlist::netlist_fmt::CDL,
-        }));
+        std::pair<cbag::netlist::netlist_fmt, bool> fmt_shell =
+            GENERATE(values<std::pair<cbag::netlist::netlist_fmt, bool>>({
+                {cbag::netlist::netlist_fmt::CDL, false},
+                {cbag::netlist::netlist_fmt::VERILOG, true},
+            }));
 
+        auto format = fmt_shell.first;
+        bool shell = fmt_shell.second;
         const char *fmt_str = "{}/{}.yaml";
         cv_name_vec cv_name_list;
         std::unordered_set<std::string> recorded;
@@ -68,12 +72,12 @@ SCENARIO("netlist generation", "[cbag]") {
         std::vector<std::string> inc_list;
         cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
-        bool shell = false;
         uint32_t rmin = 2000;
 
         std::string ext_str = get_extension(format);
-        std::string fname = fmt::format("{}/{}.{}", output_dir, cell_name, ext_str);
-        std::string expect_fname = fmt::format("{}/{}.{}", expect_dir, cell_name, ext_str);
+        std::string fname = fmt::format("{}/{}_{:d}.{}", output_dir, cell_name, shell, ext_str);
+        std::string expect_fname =
+            fmt::format("{}/{}_{:d}.{}", expect_dir, cell_name, shell, ext_str);
 
         CAPTURE(cell_name);
         CAPTURE(ext_str);
