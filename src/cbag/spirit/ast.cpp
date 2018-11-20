@@ -107,6 +107,8 @@ name_rep::name_rep(uint32_t mult, std::variant<name_unit, name> data)
 
 name_rep::name_rep(uint32_t mult, name_unit nu) : mult(mult), data(std::move(nu)) {}
 
+name_rep::name_rep(uint32_t mult, name na) : mult(mult), data(std::move(na)) {}
+
 bool name_rep::empty() const { return mult == 0; }
 
 uint32_t name_rep::size() const { return mult * data_size(); }
@@ -178,6 +180,27 @@ std::string name::to_string(const namespace_info &ns) const {
         ans.append(rep_list[idx].to_string(ns));
     }
     return ans;
+}
+
+name &name::repeat(uint32_t mult) {
+    if (!empty()) {
+        switch (mult) {
+        case 0:
+            rep_list.clear();
+            break;
+        case 1:
+            break;
+        default:
+            if (rep_list.size() == 1) {
+                rep_list[0].mult *= mult;
+            } else {
+                std::vector<name_rep> other = std::move(rep_list);
+                rep_list.clear();
+                rep_list.emplace_back(mult, name(std::move(other)));
+            }
+        }
+    }
+    return *this;
 }
 
 } // namespace ast

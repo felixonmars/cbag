@@ -171,6 +171,7 @@ SCENARIO("get_partition_test", "[name_class]") {
         GENERATE(values<std::tuple<std::string, std::vector<std::string>, uint32_t>>({
             // name_unit tests
             {"foo", {"foo"}, 1},
+            {"foo<1>", {"foo<1>"}, 1},
             {"foo<2:0>", {"foo<2:0>"}, 3},
             {"foo<2:0>", {"foo<2>", "foo<1>", "foo<0>"}, 1},
             {"foo<5:0>", {"foo<5:4>", "foo<3:2>", "foo<1:0>"}, 2},
@@ -178,7 +179,7 @@ SCENARIO("get_partition_test", "[name_class]") {
             // name_rep tests
             {"<*3>foo", {"foo", "foo", "foo"}, 1},
             {"<*4>foo", {"<*2>foo", "<*2>foo"}, 2},
-            {"<*3>foo", {"<*2>foo", "foo"}, 2},
+            {"<*3>foo<1>", {"<*2>foo<1>", "foo<1>"}, 2},
             {"<*2>foo<3:0>", {"foo<3:2>", "foo<1:0>", "foo<3:2>", "foo<1:0>"}, 2},
             {"<*3>foo<1:0>", {"foo<1:0>,foo<1>", "foo<0>,foo<1:0>"}, 3},
             {"<*3>(a,b)", {"a,b", "a,b", "a,b"}, 2},
@@ -187,7 +188,7 @@ SCENARIO("get_partition_test", "[name_class]") {
             // name tests
             {"a,b,c", {"a", "b", "c"}, 1},
             {"a,<*2>b,c", {"a,b", "b,c"}, 2},
-            {"a,<*4>b,c", {"a,<*2>b", "<*2>b,c"}, 3},
+            {"a,<*4>b,c<0>", {"a,<*2>b", "<*2>b,c<0>"}, 3},
             {"a,foo<3:0>,c", {"a,foo<3:2>", "foo<1:0>,c"}, 3},
             {"a,foo<1:0>,bar<1:0>,c", {"a,foo<1:0>", "bar<1:0>,c"}, 3},
             {"a,foo<1:0>,bar<1:0>,c", {"a", "foo<1>", "foo<0>", "bar<1>", "bar<0>", "c"}, 1},
@@ -221,5 +222,41 @@ SCENARIO("get_partition_test", "[name_class]") {
             std::string &expect = str_list[idx];
             REQUIRE(output[idx] == expect);
         }
+    }
+}
+
+SCENARIO("repeat_test", "[name_parse]") {
+    std::tuple<std::string, std::string, uint32_t> data =
+        GENERATE(values<std::tuple<std::string, std::string, uint32_t>>({
+            {"foo", "", 0},
+            {"foo", "foo", 1},
+            {"foo", "<*2>foo", 2},
+            {"foo<1:3>", "<*2>foo<1:3>", 2},
+            {"<*2>foo", "<*4>foo", 2},
+            {"<*2>foo<0>", "<*6>foo<0>", 3},
+            {"<*2>foo<1:2>", "<*6>foo<1:2>", 3},
+            {"a,b", "<*3>(a,b)", 3},
+            {"a,b<2:0>", "<*3>(a,b<2:0>)", 3},
+            {"<*2>a,b", "<*3>(<*2>a,b)", 3},
+        }));
+
+    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
+
+    std::string start = std::get<0>(data);
+    std::string expect = std::get<1>(data);
+    uint32_t mult = std::get<2>(data);
+
+    CAPTURE(start);
+    CAPTURE(expect);
+    CAPTURE(mult);
+    THEN("repeat works") {
+        cbag::spirit::ast::name name_obj;
+        try {
+            name_obj = cbag::util::parse_cdba_name(start);
+        } catch (std::invalid_argument &ex) {
+            FAIL("failed to parse " << start << ", error: " << std::string(ex.what()));
+        }
+        std::string ans = name_obj.repeat(mult).to_string(ns_info);
+        REQUIRE(ans == expect);
     }
 }

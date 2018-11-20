@@ -90,12 +90,7 @@ void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
         auto info = spirit::get_ns_info(spirit::namespace_type::CDBA);
         for (auto &pair : connections) {
             spirit::ast::name net = cbag::util::parse_cdba_name(pair.second);
-            std::size_t old_cnt = net.rep_list.size();
-            net.rep_list.reserve(result.quot * old_cnt);
-            for (int c = 0; c < result.quot - 1; ++c) {
-                std::copy_n(net.rep_list.begin(), old_cnt, std::back_inserter(net.rep_list));
-            }
-            pair.second = net.to_string(info);
+            pair.second = net.repeat(static_cast<uint32_t>(result.quot)).to_string(info);
         }
     }
 }

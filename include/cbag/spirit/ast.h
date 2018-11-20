@@ -131,6 +131,8 @@ struct name : x3::position_tagged {
     uint32_t size() const;
 
     std::string to_string(const namespace_info &ns) const;
+
+    name &repeat(uint32_t mult);
 };
 
 /** Represents a repeated name
@@ -148,6 +150,8 @@ struct name_rep : x3::position_tagged {
     name_rep(uint32_t mult, std::variant<name_unit, name> data);
 
     name_rep(uint32_t mult, name_unit nu);
+
+    name_rep(uint32_t mult, name na);
 
     bool empty() const;
 
