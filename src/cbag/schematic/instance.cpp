@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 
 #include <cbag/spirit/ast.h>
+#include <cbag/spirit/namespace_info.h>
 
 #include <cbag/util/name_convert.h>
 
@@ -80,7 +81,7 @@ void instance::update_master(std::string lib, std::string cell, bool prim) {
 }
 
 void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
-    std::div_t result = std::div(static_cast<int>(new_size), static_cast<int>(old_size));
+    std::ldiv_t result = std::div(static_cast<long>(new_size), static_cast<long>(old_size));
     if (result.rem != 0) {
         // new size not multiple of old size, just clear connections
         connections.clear();

@@ -1,20 +1,7 @@
 #ifndef CBAG_SPIRIT_NAMESPACE_INFO_H
 #define CBAG_SPIRIT_NAMESPACE_INFO_H
 
-#include <cstdint>
-#include <iterator>
-#include <memory>
-#include <optional>
 #include <string>
-#include <tuple>
-#include <variant>
-#include <vector>
-
-#include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
-
-#include <cbag/spirit/variant_support.h>
-
-namespace x3 = boost::spirit::x3;
 
 namespace cbag {
 namespace spirit {

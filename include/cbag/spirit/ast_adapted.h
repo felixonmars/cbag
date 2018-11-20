@@ -12,6 +12,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 
 #include <cbag/spirit/ast.h>
+#include <cbag/spirit/variant_support.h>
 
 // We need to tell fusion about our structs
 // to make it a first-class fusion citizen. This has to

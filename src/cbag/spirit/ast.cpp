@@ -7,8 +7,13 @@
  */
 
 #include <algorithm>
+#include <cassert>
+
+#include <fmt/core.h>
 
 #include <cbag/spirit/ast.h>
+#include <cbag/spirit/namespace_info.h>
+#include <cbag/spirit/util.h>
 
 namespace cbag {
 namespace spirit {
@@ -41,40 +46,25 @@ range::range() {}
 
 range::range(uint32_t start, uint32_t stop, uint32_t step) : start(start), stop(stop), step(step) {}
 
+bool range::empty() const { return step == 0; }
+
 uint32_t range::size() const {
-    if (!size_) {
-        if (step == 0) {
-            size_ = 0;
-        } else if (stop >= start) {
-            size_ = (stop - start + step) / step;
-        } else {
-            size_ = (start - stop + step) / step;
-        }
+    if (step == 0) {
+        return 0;
+    } else if (stop >= start) {
+        return (stop - start + step) / step;
+    } else {
+        return (start - stop + step) / step;
     }
-    return *size_;
 }
 
-uint32_t range::get_stop_exclude() const {
-    if (stop >= start) {
-        return start + size() * step;
-    } else {
-        return start - size() * step;
-    }
-}
+uint32_t range::get_stop_exclude() const { return operator[](size()); }
 
 range::const_iterator range::begin() const { return {start, step, stop >= start}; }
 range::const_iterator range::end() const { return {get_stop_exclude(), step, stop >= start}; }
 
 uint32_t range::operator[](uint32_t index) const {
     return (stop >= start) ? start + step * index : start - step * index;
-}
-
-uint32_t range::at(uint32_t index) const {
-    uint32_t n = size();
-    if (index < 0 || index >= n) {
-        throw std::out_of_range(fmt::format("index {} out of range (size = {})", index, n));
-    }
-    return operator[](index);
 }
 
 std::string range::to_string(const namespace_info &ns, bool show_stop) const {
@@ -90,21 +80,34 @@ std::string range::to_string(const namespace_info &ns, bool show_stop) const {
 
 name_unit::name_unit() = default;
 
+name_unit::name_unit(std::string base, range idx_range)
+    : base(std::move(base)), idx_range(std::move(idx_range)) {}
+
+bool name_unit::empty() const { return base.empty(); }
+
 uint32_t name_unit::size() const { return std::max(idx_range.size(), 1u); }
 
-bool name_unit::is_vector() const { return idx_range.size() > 0; }
+bool name_unit::is_vector() const { return !idx_range.empty(); }
 
 std::string name_unit::to_string(const namespace_info &ns) const {
     return base + idx_range.to_string(ns);
 }
 
 std::string name_unit::get_name_bit(const namespace_info &ns, uint32_t index) const {
+    assert(0 <= index && index < size());
     if (is_vector())
         return fmt::format("{}{}{}{}", base, ns.bus_begin, idx_range[index], ns.bus_end);
     return base;
 }
 
 name_rep::name_rep() = default;
+
+name_rep::name_rep(uint32_t mult, std::variant<name_unit, name> data)
+    : mult(mult), data(std::move(data)) {}
+
+name_rep::name_rep(uint32_t mult, name_unit nu) : mult(mult), data(std::move(nu)) {}
+
+bool name_rep::empty() const { return mult == 0; }
 
 uint32_t name_rep::size() const { return mult * data_size(); }
 
@@ -141,24 +144,28 @@ std::string name_rep::to_string(const namespace_info &ns) const {
 }
 
 std::vector<std::string> name_rep::data_name_bits(const namespace_info &ns) const {
-    std::vector<std::string> ans;
-    ans.reserve(data_size());
-    auto iter = std::back_inserter(ans);
-    std::visit([&ns, &iter](const auto &arg) { arg.append_name_bits(ns, iter); }, data);
-    return ans;
+    return std::visit(
+        [&ns](const auto &arg) {
+            std::vector<std::string> ans;
+            ans.reserve(arg.size());
+            util::get_name_bits(arg, ns, std::back_inserter(ans));
+            return ans;
+        },
+        data);
 }
 
 name::name() = default;
 
+name::name(std::vector<name_rep> rep_list) : rep_list(std::move(rep_list)) {}
+
+bool name::empty() const { return rep_list.empty(); }
+
 uint32_t name::size() const {
-    if (!size_) {
-        uint32_t tot = 0;
-        for (auto const &nu : rep_list) {
-            tot += nu.size();
-        }
-        size_ = tot;
+    uint32_t tot = 0;
+    for (auto const &nr : rep_list) {
+        tot += nr.size();
     }
-    return *size_;
+    return tot;
 }
 
 std::string name::to_string(const namespace_info &ns) const {

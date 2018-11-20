@@ -17,6 +17,7 @@
 #include <cbag/schematic/instance.h>
 
 #include <cbag/netlist/cdl.h>
+#include <cbag/spirit/util.h>
 #include <cbag/util/name_convert.h>
 
 namespace cbag {
@@ -108,7 +109,7 @@ void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
-        ast.append_name_bits(ns, b.get_back_inserter());
+        spirit::util::get_name_bits(ast, ns, b.get_back_inserter());
     }
 }
 
@@ -147,7 +148,7 @@ void get_term_net_pairs(const spirit::namespace_info &ns, term_net_vec_t &term_n
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
         std::vector<std::string> net_vec;
         net_vec.reserve(ast.size());
-        ast.append_name_bits(ns, std::back_inserter(net_vec));
+        spirit::util::get_name_bits(ast, ns, std::back_inserter(net_vec));
         term_net_vec.emplace_back(ast_term.size(), std::move(net_vec));
     }
 }

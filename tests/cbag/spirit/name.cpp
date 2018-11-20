@@ -3,7 +3,7 @@
 
 #include <catch2/catch.hpp>
 
-#include <cbag/spirit/ast.h>
+#include <cbag/spirit/util.h>
 #include <cbag/util/name_convert.h>
 
 class out_iter_check {
@@ -95,7 +95,7 @@ SCENARIO("invalid names", "[name_parse]") {
     }
 }
 
-SCENARIO("iterator_test", "[name_class]") {
+SCENARIO("get_name_bits_test", "[name_class]") {
     std::pair<std::string, std::vector<std::string>> data =
         GENERATE(values<std::pair<std::string, std::vector<std::string>>>({
             {"foo", {"foo"}},
@@ -129,7 +129,7 @@ SCENARIO("iterator_test", "[name_class]") {
         out_iter_check out_iter(&output, n);
         CAPTURE(test_name);
         CAPTURE(bit_list);
-        name_obj.append_name_bits(ns_info, out_iter);
+        cbag::spirit::util::get_name_bits(name_obj, ns_info, out_iter);
         for (std::size_t idx = 0; idx < n; ++idx) {
             if (idx == output.size()) {
                 FAIL("Output has " << idx << " items, but expected " << n);

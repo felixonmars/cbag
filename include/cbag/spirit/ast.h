@@ -11,22 +11,19 @@
 
 #include <cstdint>
 #include <iterator>
-#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
 
-#include <fmt/core.h>
-
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
-
-#include <cbag/spirit/namespace_info.h>
-#include <cbag/spirit/variant_support.h>
 
 namespace x3 = boost::spirit::x3;
 
 namespace cbag {
 namespace spirit {
+
+struct namespace_info;
+
 namespace ast {
 
 /** Represents a range of indices at regular interval.
@@ -39,9 +36,6 @@ namespace ast {
  *  an exclusive stop value if needed.
  */
 struct range : x3::position_tagged {
-  private:
-    mutable std::optional<uint32_t> size_;
-
   public:
     uint32_t start = 0;
     uint32_t stop = 0;
@@ -75,6 +69,8 @@ struct range : x3::position_tagged {
 
     range(uint32_t start, uint32_t stop, uint32_t step);
 
+    bool empty() const;
+
     uint32_t size() const;
 
     uint32_t get_stop_exclude() const;
@@ -83,9 +79,8 @@ struct range : x3::position_tagged {
 
     const_iterator end() const;
 
+    // no bounds checking
     uint32_t operator[](uint32_t index) const;
-
-    uint32_t at(uint32_t index) const;
 
     std::string to_string(const namespace_info &ns, bool show_stop = false) const;
 };
@@ -93,6 +88,8 @@ struct range : x3::position_tagged {
 /** Represents a unit name; either a scalar or vector name.
  *
  *  POssible formats are "foo", "bar[2]", "baz[3:1]"
+ *
+ *  An empty base means that this name_unit is empty.
  */
 struct name_unit : x3::position_tagged {
   public:
@@ -101,48 +98,45 @@ struct name_unit : x3::position_tagged {
 
     name_unit();
 
+    name_unit(std::string base, range idx_range);
+
+    bool empty() const;
+
     uint32_t size() const;
 
     bool is_vector() const;
 
     std::string to_string(const namespace_info &ns) const;
 
+    // precondition: 0 <= idx < size
     std::string get_name_bit(const namespace_info &ns, uint32_t index) const;
-
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const {
-        if (is_vector()) {
-            for (const auto &idx : idx_range) {
-                *iter = fmt::format("{}{}{}{}", base, ns.bus_begin, idx, ns.bus_end);
-            }
-        } else {
-            *iter = base;
-        }
-    }
 };
 
 struct name_rep;
 
 /** Represents a list of name_rep's.
+ *
+ *  An empty rep_list means that this name is empty.
  */
 struct name : x3::position_tagged {
-  private:
-    mutable std::optional<uint32_t> size_;
-
   public:
     std::vector<name_rep> rep_list;
 
     name();
 
+    name(std::vector<name_rep> rep_list);
+
+    bool empty() const;
+
     uint32_t size() const;
 
     std::string to_string(const namespace_info &ns) const;
-
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const;
 };
 
 /** Represents a repeated name
  *
  *  Possible formats are "<*3>foo", "<*3>(a,b)", or just name_unit.
+ *  A mult of 0 means this name_rep is empty.
  */
 struct name_rep : x3::position_tagged {
   public:
@@ -150,6 +144,12 @@ struct name_rep : x3::position_tagged {
     std::variant<name_unit, name> data;
 
     name_rep();
+
+    name_rep(uint32_t mult, std::variant<name_unit, name> data);
+
+    name_rep(uint32_t mult, name_unit nu);
+
+    bool empty() const;
 
     uint32_t size() const;
 
@@ -160,34 +160,7 @@ struct name_rep : x3::position_tagged {
     std::string to_string(const namespace_info &ns) const;
 
     std::vector<std::string> data_name_bits(const namespace_info &ns) const;
-
-    template <class OutIter> void append_name_bits(const namespace_info &ns, OutIter &&iter) const {
-        uint32_t n = size();
-        if (n == 0)
-            return;
-        else if (mult == 1) {
-            std::visit(
-                [&ns, &iter](const auto &arg) {
-                    arg.append_name_bits(ns, std::forward<OutIter>(iter));
-                },
-                data);
-        } else {
-            std::vector<std::string> cache = data_name_bits(ns);
-            for (uint32_t cnt = 0; cnt < mult; ++cnt) {
-                for (auto &name_bit : cache) {
-                    *iter = name_bit;
-                }
-            }
-        }
-    }
 };
-
-template <class OutIter>
-void name::append_name_bits(const namespace_info &ns, OutIter &&iter) const {
-    for (const auto &name_rep : rep_list) {
-        name_rep.append_name_bits(ns, iter);
-    }
-}
 
 } // namespace ast
 } // namespace spirit
