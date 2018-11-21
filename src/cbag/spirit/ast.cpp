@@ -14,6 +14,7 @@
 #include <cbag/spirit/ast.h>
 #include <cbag/spirit/namespace_info.h>
 #include <cbag/spirit/util.h>
+#include <cbag/util/overload.h>
 
 namespace cbag {
 namespace spirit {
@@ -58,6 +59,12 @@ uint32_t range::size() const {
     }
 }
 
+uint32_t range::get_stop_include() const {
+    auto n = size();
+    assert(n > 0);
+    return operator[](n - 1);
+}
+
 uint32_t range::get_stop_exclude() const { return operator[](size()); }
 
 range::const_iterator range::begin() const { return {start, step, stop >= start}; }
@@ -65,17 +72,6 @@ range::const_iterator range::end() const { return {get_stop_exclude(), step, sto
 
 uint32_t range::operator[](uint32_t index) const {
     return (stop >= start) ? start + step * index : start - step * index;
-}
-
-std::string range::to_string(const namespace_info &ns, bool show_stop) const {
-    if (step == 0)
-        return "";
-    if (start == stop && !show_stop)
-        return fmt::format("{0}{2}{1}", ns.bus_begin, ns.bus_end, start);
-    if (start == stop || step == 1)
-        return fmt::format("{0}{3}{2}{4}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop);
-    return fmt::format("{0}{3}{2}{4}{2}{5}{1}", ns.bus_begin, ns.bus_end, ns.bus_delim, start, stop,
-                       step);
 }
 
 name_unit::name_unit() = default;
@@ -89,15 +85,64 @@ uint32_t name_unit::size() const { return std::max(idx_range.size(), 1u); }
 
 bool name_unit::is_vector() const { return !idx_range.empty(); }
 
-std::string name_unit::to_string(const namespace_info &ns) const {
-    return base + idx_range.to_string(ns);
+std::string name_unit::to_string(namespace_cdba) const {
+    if (empty())
+        return "";
+    if (is_vector()) {
+        auto n = idx_range.size();
+        if (n == 1)
+            return fmt::format("{}<{}>", base, idx_range.start);
+        if (idx_range.step == 1)
+            return fmt::format("{}<{}:{}>", base, idx_range.start, idx_range.stop);
+        return fmt::format("{}<{}:{}:{}>", base, idx_range.start, idx_range.stop, idx_range.step);
+    } else {
+        return base;
+    }
 }
 
-std::string name_unit::get_name_bit(const namespace_info &ns, uint32_t index) const {
-    assert(0 <= index && index < size());
-    if (is_vector())
-        return fmt::format("{}{}{}{}", base, ns.bus_begin, idx_range[index], ns.bus_end);
-    return base;
+std::string name_unit::to_string(namespace_verilog) const {
+    if (empty())
+        return "";
+    if (is_vector()) {
+        auto n = idx_range.size();
+        if (n == 1)
+            return fmt::format("{}[{}]", base, idx_range.start);
+        if (idx_range.step == 1)
+            return fmt::format("{}[{}:{}]", base, idx_range.start, idx_range.stop);
+        // verilog does not support skip indexing
+        std::string ans = "{";
+        ans.reserve(2 + (base.size() + 4) * n);
+        auto iter = idx_range.begin();
+        auto stop = idx_range.end();
+        ans.append(fmt::format("{}[{}]", base, *iter));
+        ++iter;
+        for (; iter != stop; ++iter) {
+            ans.append(fmt::format(",{}[{}]", base, *iter));
+        }
+        ans.append("}");
+        return ans;
+    } else {
+        return base;
+    }
+}
+
+std::string get_name_bit_helper(const name_unit &nu, uint32_t index, bool is_id,
+                                const char *fmt_str) {
+    assert(0 <= index && index < nu.size());
+    if (nu.is_vector()) {
+        if (is_id)
+            return fmt::format("{}_{}", nu.base, nu.idx_range[index]);
+        return fmt::format(fmt_str, nu.base, nu.idx_range[index]);
+    }
+    return nu.base;
+}
+
+std::string name_unit::get_name_bit(uint32_t index, bool is_id, namespace_cdba) const {
+    return get_name_bit_helper(*this, index, is_id, "{}<{}>");
+}
+
+std::string name_unit::get_name_bit(uint32_t index, bool is_id, namespace_verilog) const {
+    return get_name_bit_helper(*this, index, is_id, "{}[{}]");
 }
 
 name_rep::name_rep() = default;
@@ -111,47 +156,50 @@ name_rep::name_rep(uint32_t mult, name na) : mult(mult), data(std::move(na)) {}
 
 bool name_rep::empty() const { return mult == 0; }
 
+bool name_rep::is_name_unit() const {
+    return mult == 0 || (mult == 1 && std::holds_alternative<name_unit>(data));
+}
+
 uint32_t name_rep::size() const { return mult * data_size(); }
 
 uint32_t name_rep::data_size() const {
     return std::visit([](const auto &arg) { return arg.size(); }, data);
 }
 
-bool name_rep::is_vector() const {
-    const name_unit *ptr = std::get_if<name_unit>(&data);
-    return ptr && ptr->is_vector();
-}
-
-std::string name_rep::to_string(const namespace_info &ns) const {
-    if (mult == 0)
+std::string name_rep::to_string(namespace_cdba ns) const {
+    if (empty())
         return "";
     std::string base = std::visit([&ns](const auto &arg) { return arg.to_string(ns); }, data);
     if (mult == 1)
         return base;
 
-    if (ns.rep_begin.empty()) {
-        // handle namespaces that do not support name repetition
-        std::string ans = base;
-        ans.reserve(mult * base.size() + (mult - 1));
-        for (uint32_t idx = 1; idx < mult; ++idx) {
-            ans.append(1, ns.list_delim);
-            ans.append(base);
-        }
-        return ans;
-    }
     if (std::holds_alternative<name_unit>(data))
-        return fmt::format("{0}{2}{1}{3}", ns.rep_begin, ns.rep_end, mult, base);
-    return fmt::format("{0}{4}{1}{2}{5}{3}", ns.rep_begin, ns.rep_end, ns.rep_grp_begin,
-                       ns.rep_grp_end, mult, base);
+        return fmt::format("<*{}>{}", mult, base);
+    return fmt::format("<*{}>({})", mult, base);
 }
 
-std::vector<std::string> name_rep::data_name_bits(const namespace_info &ns) const {
+std::string name_rep::to_string(namespace_verilog ns) const {
+    if (empty())
+        return "";
+    uint32_t m = mult;
     return std::visit(
-        [&ns](const auto &arg) {
-            std::vector<std::string> ans;
-            ans.reserve(arg.size());
-            util::get_name_bits(arg, ns, std::back_inserter(ans));
-            return ans;
+        overload{
+            [&m, &ns](const name_unit &arg) {
+                std::string base = arg.to_string(ns);
+                if (m == 1)
+                    return base;
+                if (arg.size() > 1 && arg.idx_range.step > 1)
+                    // step size > 1: name_unit has bracket around it already
+                    return fmt::format("{{{}{}}}", m, base);
+                // need to add bracket around name_unit
+                return fmt::format("{{{}{{{}}}}}", m, base);
+            },
+            [&m, &ns](const name &arg) {
+                std::string base = arg.to_string(ns);
+                if (m == 1)
+                    return base;
+                return fmt::format("{{{}{}}}", m, base);
+            },
         },
         data);
 }
@@ -162,6 +210,10 @@ name::name(std::vector<name_rep> rep_list) : rep_list(std::move(rep_list)) {}
 
 bool name::empty() const { return rep_list.empty(); }
 
+bool name::is_name_rep() const { return rep_list.size() == 1; }
+
+bool name::is_name_unit() const { return rep_list.size() == 1 && rep_list[0].is_name_unit(); }
+
 uint32_t name::size() const {
     uint32_t tot = 0;
     for (auto const &nr : rep_list) {
@@ -170,16 +222,25 @@ uint32_t name::size() const {
     return tot;
 }
 
-std::string name::to_string(const namespace_info &ns) const {
-    std::size_t n = rep_list.size();
+template <class NS> std::string name_to_string_helper(const name &na, NS ns) {
+    std::size_t n = na.rep_list.size();
     if (n == 0)
         return "";
-    std::string ans = rep_list.front().to_string(ns);
+    std::string ans = na.rep_list.front().to_string(ns);
     for (std::size_t idx = 1; idx < n; ++idx) {
-        ans.append(1, ns.list_delim);
-        ans.append(rep_list[idx].to_string(ns));
+        ans.append(",");
+        ans.append(na.rep_list[idx].to_string(ns));
     }
     return ans;
+}
+
+std::string name::to_string(namespace_cdba ns) const { return name_to_string_helper(*this, ns); }
+
+std::string name::to_string(namespace_verilog ns) const {
+    std::string base = name_to_string_helper(*this, ns);
+    if (is_name_rep())
+        return base;
+    return fmt::format("{{{}}}", base);
 }
 
 name &name::repeat(uint32_t mult) {

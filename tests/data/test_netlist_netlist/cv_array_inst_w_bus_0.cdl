@@ -27,6 +27,6 @@ XP VDD out in<0> VDD / pmos4_standard l=90n nf=2 w=400n
 
 .SUBCKT TEST VDD VSS in0<1> in0<0> in1<1> in1<0> out<1> out<0>
 *.PININFO VDD:I VSS:I in0<1>:I in0<0>:I in1<1>:I in1<0>:I out<1>:O out<0>:O
-XINST<1> VDD VSS in1<1> in1<0> out<1> / cv_bus_term
-XINST<0> VDD VSS in0<1> in0<0> out<0> / cv_bus_term
+XINST_1 VDD VSS in1<1> in1<0> out<1> / cv_bus_term
+XINST_0 VDD VSS in0<1> in0<0> out<0> / cv_bus_term
 .ENDS

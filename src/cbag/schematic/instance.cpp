@@ -53,7 +53,6 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
         throw std::invalid_argument(fmt::format("Cannot connect instance {} terminal {} to net {}",
                                                 inst_name, term_str, net_str));
     } else {
-        auto info = spirit::get_ns_info(spirit::namespace_type::CDBA);
         // broadcast net
         std::size_t old_cnt = n_net.rep_list.size();
         uint32_t mult = tot_size / net_size;
@@ -61,7 +60,8 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
         for (uint32_t c = 0; c < mult - 1; ++c) {
             std::copy_n(n_net.rep_list.begin(), old_cnt, std::back_inserter(n_net.rep_list));
         }
-        connections.insert_or_assign(std::move(term_str), n_net.to_string(info));
+        connections.insert_or_assign(std::move(term_str),
+                                     n_net.to_string(spirit::namespace_cdba{}));
     }
 }
 
@@ -87,10 +87,10 @@ void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
         connections.clear();
     } else {
         // repeat all nets
-        auto info = spirit::get_ns_info(spirit::namespace_type::CDBA);
         for (auto &pair : connections) {
             spirit::ast::name net = cbag::util::parse_cdba_name(pair.second);
-            pair.second = net.repeat(static_cast<uint32_t>(result.quot)).to_string(info);
+            pair.second =
+                net.repeat(static_cast<uint32_t>(result.quot)).to_string(spirit::namespace_cdba{});
         }
     }
 }

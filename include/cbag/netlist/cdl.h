@@ -9,7 +9,6 @@
 #define CBAG_NETLIST_CDL_H
 
 #include <cbag/netlist/core.h>
-#include <cbag/spirit/namespace_info.h>
 
 namespace cbag {
 namespace netlist {

@@ -104,10 +104,8 @@ std::ofstream &operator<<(std::ofstream &stream, const lstream &b) {
     return b.append_to(stream, true);
 }
 
-nstream_file::nstream_file(const std::string &fname, spirit::namespace_type ns_type,
-                           line_format line_fmt)
-    : out_file(util::open_file_write(fname)), ns(get_ns_info(ns_type)),
-      line_fmt(std::move(line_fmt)) {}
+nstream_file::nstream_file(const std::string &fname, line_format line_fmt)
+    : out_file(util::open_file_write(fname)), line_fmt(std::move(line_fmt)) {}
 
 lstream nstream_file::make_lstream() const { return lstream(&line_fmt); }
 

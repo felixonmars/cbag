@@ -16,31 +16,53 @@ using name_unit = ast::name_unit;
 using name_rep = ast::name_rep;
 using range = ast::range;
 
+template <typename NS>
+using IsNameSpace =
+    std::enable_if_t<std::is_same_v<std::remove_reference_t<NS>, spirit::namespace_cdba> ||
+                         std::is_same_v<std::remove_reference_t<NS>, spirit::namespace_cdba>,
+                     int>;
+
 template <class OutIter>
-void get_name_bits(const name_unit &obj, const namespace_info &ns, OutIter &&iter) {
+void get_name_bits_helper(const name_unit &obj, OutIter &&iter, const char *fmt_str) {
     if (obj.is_vector()) {
         for (const auto &idx : obj.idx_range) {
-            *iter = fmt::format("{}{}{}{}", obj.base, ns.bus_begin, idx, ns.bus_end);
+            *iter = fmt::format(fmt_str, obj.base, idx);
         }
     } else {
         *iter = obj.base;
     }
 }
 
-template <class OutIter>
-void get_name_bits(const name &obj, const namespace_info &ns, OutIter &&iter);
+template <class OutIter> void get_name_bits(const name_unit &obj, OutIter &&iter, namespace_cdba) {
+    get_name_bits_helper(obj, std::forward<OutIter>(iter), "{}<{}>");
+}
 
 template <class OutIter>
-void get_name_bits(const name_rep &obj, const namespace_info &ns, OutIter &&iter) {
+void get_name_bits(const name_unit &obj, OutIter &&iter, namespace_verilog) {
+    get_name_bits_helper(obj, std::forward<OutIter>(iter), "{}[{}]");
+}
+
+template <class OutIter, class NS, typename = IsNameSpace<NS>>
+void get_name_bits(const name &obj, OutIter &&iter, NS ns);
+
+template <class OutIter, class NS, typename = IsNameSpace<NS>>
+void get_name_bits(const name_rep &obj, OutIter &&iter, NS ns) {
     uint32_t n = obj.size();
     if (n == 0)
         return;
     else if (obj.mult == 1) {
         std::visit(
-            [&ns, &iter](const auto &arg) { get_name_bits(arg, ns, std::forward<OutIter>(iter)); },
+            [&ns, &iter](const auto &arg) { get_name_bits(arg, std::forward<OutIter>(iter), ns); },
             obj.data);
     } else {
-        std::vector<std::string> cache = obj.data_name_bits(ns);
+        std::vector<std::string> cache = std::visit(
+            [&ns](const auto &arg) {
+                std::vector<std::string> ans;
+                ans.reserve(arg.size());
+                util::get_name_bits(arg, std::back_inserter(ans), ns);
+                return ans;
+            },
+            obj.data);
         for (uint32_t cnt = 0; cnt < obj.mult; ++cnt) {
             for (auto &name_bit : cache) {
                 *iter = name_bit;
@@ -49,10 +71,10 @@ void get_name_bits(const name_rep &obj, const namespace_info &ns, OutIter &&iter
     }
 }
 
-template <class OutIter>
-void get_name_bits(const name &obj, const namespace_info &ns, OutIter &&iter) {
+template <class OutIter, class NS, typename = IsNameSpace<NS>>
+void get_name_bits(const name &obj, OutIter &&iter, NS ns) {
     for (const auto &name_rep : obj.rep_list) {
-        get_name_bits(name_rep, ns, iter);
+        get_name_bits(name_rep, iter, ns);
     }
 }
 

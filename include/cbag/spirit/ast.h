@@ -17,13 +17,12 @@
 
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
+#include <cbag/spirit/namespace_info.h>
+
 namespace x3 = boost::spirit::x3;
 
 namespace cbag {
 namespace spirit {
-
-struct namespace_info;
-
 namespace ast {
 
 /** Represents a range of indices at regular interval.
@@ -73,6 +72,8 @@ struct range : x3::position_tagged {
 
     uint32_t size() const;
 
+    uint32_t get_stop_include() const;
+
     uint32_t get_stop_exclude() const;
 
     const_iterator begin() const;
@@ -81,8 +82,6 @@ struct range : x3::position_tagged {
 
     // no bounds checking
     uint32_t operator[](uint32_t index) const;
-
-    std::string to_string(const namespace_info &ns, bool show_stop = false) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.
@@ -106,10 +105,12 @@ struct name_unit : x3::position_tagged {
 
     bool is_vector() const;
 
-    std::string to_string(const namespace_info &ns) const;
+    std::string to_string(namespace_cdba) const;
+    std::string to_string(namespace_verilog) const;
 
     // precondition: 0 <= idx < size
-    std::string get_name_bit(const namespace_info &ns, uint32_t index) const;
+    std::string get_name_bit(uint32_t index, bool is_id, namespace_cdba) const;
+    std::string get_name_bit(uint32_t index, bool is_id, namespace_verilog) const;
 };
 
 struct name_rep;
@@ -128,9 +129,14 @@ struct name : x3::position_tagged {
 
     bool empty() const;
 
+    bool is_name_rep() const;
+
+    bool is_name_unit() const;
+
     uint32_t size() const;
 
-    std::string to_string(const namespace_info &ns) const;
+    std::string to_string(namespace_cdba) const;
+    std::string to_string(namespace_verilog) const;
 
     name &repeat(uint32_t mult);
 };
@@ -155,15 +161,14 @@ struct name_rep : x3::position_tagged {
 
     bool empty() const;
 
+    bool is_name_unit() const;
+
     uint32_t size() const;
 
     uint32_t data_size() const;
 
-    bool is_vector() const;
-
-    std::string to_string(const namespace_info &ns) const;
-
-    std::vector<std::string> data_name_bits(const namespace_info &ns) const;
+    std::string to_string(namespace_cdba) const;
+    std::string to_string(namespace_verilog) const;
 };
 
 } // namespace ast

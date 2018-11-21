@@ -22,7 +22,7 @@ namespace netlist {
 line_format get_verilog_line_format() { return {120, "", true, 4}; }
 
 verilog_stream::verilog_stream(const std::string &fname)
-    : nstream_file(fname, spirit::namespace_type::VERILOG, get_verilog_line_format()) {}
+    : nstream_file(fname, get_verilog_line_format()) {}
 
 void traits::nstream<verilog_stream>::close(type &stream) { stream.close(); }
 
@@ -42,7 +42,8 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
         auto b = stream.make_lstream();
         b << prefix << "wire";
         if (ast.is_vector()) {
-            b << ast.idx_range.to_string(stream.ns, true);
+            // TODO: figure out if step != 1 what happens.
+            b << fmt::format("[{}:{}]", ast.idx_range.start, ast.idx_range.get_stop_include());
         }
         b << ast.base;
 
@@ -77,9 +78,9 @@ void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::stri
     stream.out_file << std::endl << "endmodule" << std::endl;
 }
 
-void append_inst_nets(const spirit::namespace_info &ns, verilog_stream &stream,
-                      const std::string &inst_name, const sch::instance &inst,
-                      const std::vector<std::string> &terms, bool &has_prev_term) {
+void append_inst_nets(verilog_stream &stream, const std::string &inst_name,
+                      const sch::instance &inst, const std::vector<std::string> &terms,
+                      bool &has_prev_term) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -90,7 +91,8 @@ void append_inst_nets(const spirit::namespace_info &ns, verilog_stream &stream,
         lstream b = stream.make_lstream();
         b << "    .";
         b.append_last(term_ast.base).append_last("(");
-        b << term_iter->second << ")";
+        spirit::ast::name net_ast = cbag::util::parse_cdba_name(term_iter->second);
+        b << net_ast.to_string(spirit::namespace_verilog{}) << ")";
 
         if (has_prev_term)
             stream.out_file << "," << std::endl;
@@ -114,9 +116,9 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
         stream.out_file << b;
 
         bool has_prev_term = false;
-        append_inst_nets(stream.ns, stream, name, inst, info.in_terms, has_prev_term);
-        append_inst_nets(stream.ns, stream, name, inst, info.out_terms, has_prev_term);
-        append_inst_nets(stream.ns, stream, name, inst, info.io_terms, has_prev_term);
+        append_inst_nets(stream, name, inst, info.in_terms, has_prev_term);
+        append_inst_nets(stream, name, inst, info.out_terms, has_prev_term);
+        append_inst_nets(stream, name, inst, info.io_terms, has_prev_term);
         if (has_prev_term)
             stream.out_file << std::endl;
         stream.out_file << ");" << std::endl;

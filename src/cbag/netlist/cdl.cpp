@@ -26,7 +26,7 @@ namespace netlist {
 line_format get_cdl_line_format(std::string cnt_str = "+") { return {80, cnt_str, false, 0}; }
 
 cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin)
-    : nstream_file(fname, spirit::namespace_type::CDL, get_cdl_line_format()), rmin(rmin) {}
+    : nstream_file(fname, get_cdl_line_format()), rmin(rmin) {}
 
 void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
 
@@ -64,13 +64,13 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
 
 void traits::nstream<cdl_stream>::write_end(type &stream) {}
 
-void get_cv_term_bits(const spirit::namespace_info &ns, lstream &b, lstream &b2,
-                      const std::vector<std::string> &names, const std::string &term_type) {
+void get_cv_term_bits(lstream &b, lstream &b2, const std::vector<std::string> &names,
+                      const std::string &term_type) {
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
         uint32_t n = ast.size();
         for (uint32_t idx = 0; idx < n; ++idx) {
-            std::string tmp = ast.get_name_bit(ns, idx);
+            std::string tmp = ast.get_name_bit(idx, false, spirit::namespace_cdba{});
             b << tmp;
             tmp.append(term_type);
             b2 << std::move(tmp);
@@ -86,9 +86,9 @@ void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::strin
     auto cmd_line_fmt = get_cdl_line_format("*+");
     lstream b2 = lstream(&cmd_line_fmt);
     b2 << "*.PININFO";
-    get_cv_term_bits(stream.ns, b, b2, info.in_terms, ":I");
-    get_cv_term_bits(stream.ns, b, b2, info.out_terms, ":O");
-    get_cv_term_bits(stream.ns, b, b2, info.io_terms, ":B");
+    get_cv_term_bits(b, b2, info.in_terms, ":I");
+    get_cv_term_bits(b, b2, info.out_terms, ":O");
+    get_cv_term_bits(b, b2, info.io_terms, ":B");
 
     // write definition line
     stream.out_file << b;
@@ -100,8 +100,8 @@ void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &
     stream.out_file << ".ENDS" << std::endl;
 }
 
-void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string &inst_name,
-                 const sch::instance &inst, const std::vector<std::string> &terms) {
+void append_nets(lstream &b, const std::string &inst_name, const sch::instance &inst,
+                 const std::vector<std::string> &terms) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -109,7 +109,7 @@ void append_nets(const spirit::namespace_info &ns, lstream &b, const std::string
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
-        spirit::util::get_name_bits(ast, ns, b.get_back_inserter());
+        spirit::util::get_name_bits(ast, b.get_back_inserter(), spirit::namespace_cdba{});
     }
 }
 
@@ -135,9 +135,8 @@ void write_instance_cell_name(OutIter &&iter, const sch::instance &inst,
 
 using term_net_vec_t = std::vector<std::pair<uint32_t, std::vector<std::string>>>;
 
-void get_term_net_pairs(const spirit::namespace_info &ns, term_net_vec_t &term_net_vec,
-                        const std::string &inst_name, const sch::instance &inst,
-                        const std::vector<std::string> &terms) {
+void get_term_net_pairs(term_net_vec_t &term_net_vec, const std::string &inst_name,
+                        const sch::instance &inst, const std::vector<std::string> &terms) {
     for (const auto &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -148,7 +147,7 @@ void get_term_net_pairs(const spirit::namespace_info &ns, term_net_vec_t &term_n
         spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
         std::vector<std::string> net_vec;
         net_vec.reserve(ast.size());
-        spirit::util::get_name_bits(ast, ns, std::back_inserter(net_vec));
+        spirit::util::get_name_bits(ast, std::back_inserter(net_vec), spirit::namespace_cdba{});
         term_net_vec.emplace_back(ast_term.size(), std::move(net_vec));
     }
 }
@@ -163,18 +162,18 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
         // normal instance, just write normally
         lstream b = stream.make_lstream();
         b << name;
-        append_nets(stream.ns, b, name, inst, info.in_terms);
-        append_nets(stream.ns, b, name, inst, info.out_terms);
-        append_nets(stream.ns, b, name, inst, info.io_terms);
+        append_nets(b, name, inst, info.in_terms);
+        append_nets(b, name, inst, info.out_terms);
+        append_nets(b, name, inst, info.io_terms);
         cbag::netlist::write_instance_cell_name(b.get_back_inserter(), inst, info);
         stream.out_file << b;
     } else {
         // arrayed instance, need to split up
         // get name bits of terminals/nets
         term_net_vec_t term_net_vec;
-        get_term_net_pairs(stream.ns, term_net_vec, name, inst, info.in_terms);
-        get_term_net_pairs(stream.ns, term_net_vec, name, inst, info.out_terms);
-        get_term_net_pairs(stream.ns, term_net_vec, name, inst, info.io_terms);
+        get_term_net_pairs(term_net_vec, name, inst, info.in_terms);
+        get_term_net_pairs(term_net_vec, name, inst, info.out_terms);
+        get_term_net_pairs(term_net_vec, name, inst, info.io_terms);
         // get cell name tokens
         std::vector<std::string> tokens;
         tokens.reserve(2);
@@ -183,7 +182,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
         for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
             lstream b = stream.make_lstream();
             // write instance name
-            b << inst_ast.get_name_bit(stream.ns, inst_idx);
+            b << inst_ast.get_name_bit(inst_idx, true, spirit::namespace_cdba{});
             // write instance nets
             for (const auto &pair : term_net_vec) {
                 uint32_t term_n = pair.first;

@@ -26,21 +26,18 @@ class nb_iter_check {
     }
 };
 
-class par_iter_check {
+template <class NS> class par_iter_check {
   public:
     std::vector<std::string> *ptr;
-    const cbag::spirit::namespace_info &ns;
     std::size_t nmax;
 
-    par_iter_check(std::vector<std::string> *vec, const cbag::spirit::namespace_info &ns,
-                   std::size_t n)
-        : ptr(vec), ns(ns), nmax(n) {
+    par_iter_check(std::vector<std::string> *vec, std::size_t n) : ptr(vec), nmax(n) {
         ptr->reserve(nmax);
     }
 
     par_iter_check &operator*() { return *this; }
     par_iter_check &operator=(const cbag::spirit::ast::name &name) {
-        std::string cur_name = name.to_string(ns);
+        std::string cur_name = name.to_string(NS{});
         if (ptr->size() >= nmax) {
             CAPTURE(*ptr);
             CAPTURE(cur_name);
@@ -83,8 +80,6 @@ SCENARIO("valid names", "[name_parse]") {
             {"<*2>(<*4>foo<3:5>,a),<*2>(b,c)", ""},
         }));
 
-    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
-
     THEN("parsing works") {
         cbag::spirit::ast::name name_obj;
         try {
@@ -94,7 +89,7 @@ SCENARIO("valid names", "[name_parse]") {
         }
         THEN("name converts back to same string") {
             std::string expected = (data.second == "") ? data.first : data.second;
-            REQUIRE(name_obj.to_string(ns_info) == expected);
+            REQUIRE(name_obj.to_string(cbag::spirit::namespace_cdba{}) == expected);
         }
     }
 }
@@ -137,8 +132,6 @@ SCENARIO("get_name_bits_test", "[name_class]") {
             {"b,<*3>a", {"b", "a", "a", "a"}},
         }));
 
-    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
-
     auto &test_name = data.first;
     auto &bit_list = data.second;
 
@@ -155,7 +148,7 @@ SCENARIO("get_name_bits_test", "[name_class]") {
         std::vector<std::string> output;
         std::size_t n = bit_list.size();
         nb_iter_check out_iter(&output, n);
-        cbag::spirit::util::get_name_bits(name_obj, ns_info, out_iter);
+        cbag::spirit::util::get_name_bits(name_obj, out_iter, cbag::spirit::namespace_cdba{});
         for (std::size_t idx = 0; idx < n; ++idx) {
             if (idx == output.size()) {
                 FAIL("Output has " << idx << " items, but expected " << n);
@@ -194,8 +187,6 @@ SCENARIO("get_partition_test", "[name_class]") {
             {"a,foo<1:0>,bar<1:0>,c", {"a", "foo<1>", "foo<0>", "bar<1>", "bar<0>", "c"}, 1},
         }));
 
-    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
-
     auto &test_name = std::get<0>(data);
     auto &str_list = std::get<1>(data);
     auto chunk = std::get<2>(data);
@@ -213,7 +204,7 @@ SCENARIO("get_partition_test", "[name_class]") {
 
         std::vector<std::string> output;
         std::size_t n = str_list.size();
-        par_iter_check out_iter(&output, ns_info, n);
+        par_iter_check<cbag::spirit::namespace_cdba> out_iter(&output, n);
         cbag::spirit::util::get_partition(name_obj, chunk, out_iter);
         for (std::size_t idx = 0; idx < n; ++idx) {
             if (idx == output.size()) {
@@ -240,8 +231,6 @@ SCENARIO("repeat_test", "[name_class]") {
             {"<*2>a,b", "<*3>(<*2>a,b)", 3},
         }));
 
-    auto ns_info = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
-
     std::string start = std::get<0>(data);
     std::string expect = std::get<1>(data);
     uint32_t mult = std::get<2>(data);
@@ -256,7 +245,7 @@ SCENARIO("repeat_test", "[name_class]") {
         } catch (std::invalid_argument &ex) {
             FAIL("failed to parse " << start << ", error: " << std::string(ex.what()));
         }
-        std::string ans = name_obj.repeat(mult).to_string(ns_info);
+        std::string ans = name_obj.repeat(mult).to_string(cbag::spirit::namespace_cdba{});
         REQUIRE(ans == expect);
     }
 }
@@ -271,18 +260,15 @@ SCENARIO("verilog_test", "[name_class]") {
             {"foo<3:0:1>", "foo[3:0]"},
             {"foo<0:3:1>", "foo[0:3]"},
             {"foo<4:0:2>", "{foo[4],foo[2],foo[0]}"},
-            {"foo<0:4:2>", "{foo[0],foo[4],foo[2]}"},
+            {"foo<0:4:2>", "{foo[0],foo[2],foo[4]}"},
             {"<*2>foo", "{2{foo}}"},
             {"<*2>foo<1:0>", "{2{foo[1:0]}}"},
-            {"<*2>foo<4:0:2>", "{2{foo[4], foo[2], foo[0]}}"},
+            {"<*2>foo<4:0:2>", "{2{foo[4],foo[2],foo[0]}}"},
             {"<*2>(a,b)", "{2{a,b}}"},
             {"a,b", "{a,b}"},
             {"a,b<2:0>", "{a,b[2:0]}"},
             {"a,b<4:0:2>", "{a,{b[4],b[2],b[0]}}"},
         }));
-
-    auto ns_cdba = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
-    auto ns_v = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::VERILOG);
 
     std::string &parse = data.first;
     std::string &expected = data.second;
@@ -295,6 +281,8 @@ SCENARIO("verilog_test", "[name_class]") {
         } catch (std::invalid_argument &ex) {
             FAIL("failed to parse " << parse << ", error: " << std::string(ex.what()));
         }
-        THEN("verilog to_string works") { REQUIRE(name_obj.to_string(ns_v) == expected); }
+        THEN("verilog to_string works") {
+            REQUIRE(name_obj.to_string(cbag::spirit::namespace_verilog{}) == expected);
+        }
     }
 }
