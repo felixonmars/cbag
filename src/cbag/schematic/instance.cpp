@@ -48,18 +48,16 @@ void instance::update_connection(const std::string &inst_name, uint32_t inst_siz
     if (tot_size == net_size) {
         // direct connection
         connections.insert_or_assign(std::move(term_str), std::move(net_str));
-    } else if (tot_size % net_size != 0) {
-        // cannot broadcast net
-        throw std::invalid_argument(fmt::format("Cannot connect instance {} terminal {} to net {}",
-                                                inst_name, term_str, net_str));
     } else {
-        // broadcast net
-        std::size_t old_cnt = n_net.rep_list.size();
-        uint32_t mult = tot_size / net_size;
-        n_net.rep_list.reserve(mult * old_cnt);
-        for (uint32_t c = 0; c < mult - 1; ++c) {
-            std::copy_n(n_net.rep_list.begin(), old_cnt, std::back_inserter(n_net.rep_list));
+        std::ldiv_t result = std::div(static_cast<long>(tot_size), static_cast<long>(net_size));
+
+        if (result.rem != 0) {
+            // cannot broadcast net
+            throw std::invalid_argument(fmt::format(
+                "Cannot connect instance {} terminal {} to net {}", inst_name, term_str, net_str));
         }
+        // broadcast net
+        n_net.repeat(result.quot);
         connections.insert_or_assign(std::move(term_str),
                                      n_net.to_string(spirit::namespace_cdba{}));
     }
