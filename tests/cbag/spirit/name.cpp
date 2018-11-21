@@ -225,7 +225,7 @@ SCENARIO("get_partition_test", "[name_class]") {
     }
 }
 
-SCENARIO("repeat_test", "[name_parse]") {
+SCENARIO("repeat_test", "[name_class]") {
     std::tuple<std::string, std::string, uint32_t> data =
         GENERATE(values<std::tuple<std::string, std::string, uint32_t>>({
             {"foo", "", 0},
@@ -258,5 +258,43 @@ SCENARIO("repeat_test", "[name_parse]") {
         }
         std::string ans = name_obj.repeat(mult).to_string(ns_info);
         REQUIRE(ans == expect);
+    }
+}
+
+SCENARIO("verilog_test", "[name_class]") {
+    std::pair<std::string, std::string> data =
+        GENERATE(values<std::pair<std::string, std::string>>({
+            {"foo", "foo"},
+            {"bar0<3>", "bar0[3]"},
+            {"bar_<3:0>", "bar_[3:0]"},
+            {"Bar<0:3>", "Bar[0:3]"},
+            {"foo<3:0:1>", "foo[3:0]"},
+            {"foo<0:3:1>", "foo[0:3]"},
+            {"foo<4:0:2>", "{foo[4],foo[2],foo[0]}"},
+            {"foo<0:4:2>", "{foo[0],foo[4],foo[2]}"},
+            {"<*2>foo", "{2{foo}}"},
+            {"<*2>foo<1:0>", "{2{foo[1:0]}}"},
+            {"<*2>foo<4:0:2>", "{2{foo[4], foo[2], foo[0]}}"},
+            {"<*2>(a,b)", "{2{a,b}}"},
+            {"a,b", "{a,b}"},
+            {"a,b<2:0>", "{a,b[2:0]}"},
+            {"a,b<4:0:2>", "{a,{b[4],b[2],b[0]}}"},
+        }));
+
+    auto ns_cdba = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::CDBA);
+    auto ns_v = cbag::spirit::get_ns_info(cbag::spirit::namespace_type::VERILOG);
+
+    std::string &parse = data.first;
+    std::string &expected = data.second;
+    CAPTURE(parse);
+    CAPTURE(expected);
+    THEN("parsing works") {
+        cbag::spirit::ast::name name_obj;
+        try {
+            name_obj = cbag::util::parse_cdba_name(parse);
+        } catch (std::invalid_argument &ex) {
+            FAIL("failed to parse " << parse << ", error: " << std::string(ex.what()));
+        }
+        THEN("verilog to_string works") { REQUIRE(name_obj.to_string(ns_v) == expected); }
     }
 }
