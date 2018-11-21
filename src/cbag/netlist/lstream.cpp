@@ -44,6 +44,11 @@ lstream &lstream::operator<<(std::string &&token) {
     return *this;
 }
 
+lstream &lstream::operator<<(const char *token) {
+    tokens.emplace_back(token);
+    return *this;
+}
+
 lstream &lstream::operator<<(const std::vector<std::string> &tokens_) {
     tokens.insert(tokens.end(), tokens_.begin(), tokens_.end());
     return *this;

@@ -15,6 +15,7 @@
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 #include <cbag/spirit/ast.h>
+#include <cbag/spirit/util.h>
 #include <cbag/util/name_convert.h>
 
 namespace cbag {
@@ -99,32 +100,82 @@ void append_inst_nets(verilog_stream &stream, const std::string &inst_name,
             stream.out_file << "," << std::endl;
         else
             has_prev_term = true;
-        b.to_file(stream.out_file, spirit::namespace_verilog{});
+        b.to_file(stream.out_file, spirit::namespace_verilog{}, false);
+    }
+}
+
+using term_net_vec_t = std::vector<std::pair<std::string, std::vector<spirit::ast::name>>>;
+
+void split_array_inst_nets(term_net_vec_t &term_net_vec, const std::string &inst_name,
+                           uint32_t inst_size, const sch::instance &inst,
+                           const std::vector<std::string> &terms) {
+    for (const auto &term : terms) {
+        auto term_iter = inst.connections.find(term);
+        if (term_iter == inst.connections.end()) {
+            throw std::invalid_argument(fmt::format(
+                "Cannot find net connected to instance {} terminal {}", inst_name, term));
+        }
+        spirit::ast::name_unit ast_term = cbag::util::parse_cdba_name_unit(term);
+        spirit::ast::name ast_net = cbag::util::parse_cdba_name(term_iter->second);
+
+        std::vector<spirit::ast::name> net_vec;
+        net_vec.reserve(inst_size);
+        spirit::util::get_partition(ast_net, ast_term.size(), std::back_inserter(net_vec));
+        term_net_vec.emplace_back(ast_term.base, std::move(net_vec));
     }
 }
 
 void traits::nstream<verilog_stream>::write_instance(type &stream, const std::string &name,
                                                      const sch::instance &inst,
                                                      const sch::cellview_info &info) {
+    auto tag = spirit::namespace_verilog{};
     spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
     uint32_t n = inst_ast.size();
 
     if (n == 1) {
         // normal instance, just write normally
-        stream.out_file << std::endl;
         lstream b;
+        stream.out_file << std::endl;
         b << inst.cell_name << name << "(";
-        b.to_file(stream.out_file, spirit::namespace_verilog{});
+        b.to_file(stream.out_file, tag);
 
         bool has_prev_term = false;
         append_inst_nets(stream, name, inst, info.in_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.out_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.io_terms, has_prev_term);
+        // TODO: bug is here
         if (has_prev_term)
             stream.out_file << std::endl;
         stream.out_file << ");" << std::endl;
     } else {
-        // TODO: implement this
+        // arrayed instance, need to split up nets
+        term_net_vec_t term_net_vec;
+        split_array_inst_nets(term_net_vec, name, n, inst, info.in_terms);
+        split_array_inst_nets(term_net_vec, name, n, inst, info.out_terms);
+        split_array_inst_nets(term_net_vec, name, n, inst, info.io_terms);
+        // write each instance
+        auto stop = term_net_vec.end();
+        auto last_check = stop - 1;
+        for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
+            lstream b;
+            stream.out_file << std::endl;
+            b << inst.cell_name << inst_ast.get_name_bit(inst_idx, true, tag) << "(";
+            b.to_file(stream.out_file, tag);
+            auto iter = term_net_vec.begin();
+            for (; iter != stop; ++iter) {
+                lstream cur;
+                cur << "    .";
+                cur.append_last(iter->first);
+                cur.append_last("(");
+                cur << iter->second[inst_idx].to_string(tag);
+                if (iter == last_check)
+                    cur << ")";
+                else
+                    cur << "),";
+                cur.to_file(stream.out_file, tag);
+            }
+            stream.out_file << ");" << std::endl;
+        }
     }
 }
 

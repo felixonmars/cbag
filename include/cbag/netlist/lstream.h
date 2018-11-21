@@ -43,6 +43,8 @@ class lstream {
 
     lstream &operator<<(std::string &&token);
 
+    lstream &operator<<(const char *token);
+
     lstream &operator<<(const std::vector<std::string> &tokens);
 
     lstream &operator<<(std::vector<std::string> &&tokens);

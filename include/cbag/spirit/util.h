@@ -71,7 +71,7 @@ void get_name_bits(const name_rep &obj, OutIter &&iter, NS ns) {
     }
 }
 
-template <class OutIter, class NS, typename = IsNameSpace<NS>>
+template <class OutIter, class NS, typename>
 void get_name_bits(const name &obj, OutIter &&iter, NS ns) {
     for (const auto &name_rep : obj.rep_list) {
         get_name_bits(name_rep, iter, ns);

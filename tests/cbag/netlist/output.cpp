@@ -61,6 +61,7 @@ SCENARIO("netlist generation", "[cbag]") {
             GENERATE(values<std::pair<cbag::netlist::netlist_fmt, bool>>({
                 {cbag::netlist::netlist_fmt::CDL, false},
                 {cbag::netlist::netlist_fmt::VERILOG, true},
+                {cbag::netlist::netlist_fmt::VERILOG, false},
             }));
 
         auto format = fmt_shell.first;
