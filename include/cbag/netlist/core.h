@@ -79,58 +79,11 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
     traits::nstream<Stream>::write_cv_end(stream, name);
 }
 
-struct line_format {
-    size_t ncol;
-    std::string cnt_str;
-    bool break_before;
-    int tab_size;
-};
-
-class lstream {
-  private:
-    std::vector<std::string> tokens;
-    const line_format *fmt_info;
-
-  public:
-    class back_inserter {
-      private:
-        lstream *stream_ = nullptr;
-
-      public:
-        explicit back_inserter(lstream *stream);
-        back_inserter &operator*();
-        back_inserter &operator=(std::string name);
-    };
-
-    explicit lstream(const line_format *fmt_info);
-
-    bool empty() const;
-
-    back_inserter get_back_inserter();
-
-    lstream &append_last(const char *seq);
-
-    lstream &append_last(const std::string &seq);
-
-    std::ofstream &append_to(std::ofstream &stream, bool newline = true) const;
-
-    friend lstream &operator<<(lstream &builder, const std::string &token);
-
-    friend lstream &operator<<(lstream &builder, std::string &&token);
-
-    friend lstream &operator<<(lstream &builder, const std::vector<std::string> &tokens);
-
-    friend std::ofstream &operator<<(std::ofstream &stream, const lstream &b);
-};
-
 class nstream_file {
   public:
     std::ofstream out_file;
-    line_format line_fmt;
 
-    explicit nstream_file(const std::string &fname, line_format line_fmt);
-
-    lstream make_lstream() const;
+    explicit nstream_file(const std::string &fname);
 
     void close();
 };

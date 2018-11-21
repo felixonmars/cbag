@@ -96,6 +96,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/logging/logging.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/core.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/lstream.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/arc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview.cpp

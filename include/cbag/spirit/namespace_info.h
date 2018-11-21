@@ -7,6 +7,7 @@ namespace cbag {
 namespace spirit {
 
 struct namespace_cdba {};
+struct namespace_cdl_cmd {};
 struct namespace_verilog {};
 
 enum class namespace_type : uint8_t {

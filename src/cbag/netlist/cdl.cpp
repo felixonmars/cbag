@@ -17,16 +17,14 @@
 #include <cbag/schematic/instance.h>
 
 #include <cbag/netlist/cdl.h>
+#include <cbag/netlist/lstream.h>
 #include <cbag/spirit/util.h>
 #include <cbag/util/name_convert.h>
 
 namespace cbag {
 namespace netlist {
 
-line_format get_cdl_line_format(std::string cnt_str = "+") { return {80, cnt_str, false, 0}; }
-
-cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin)
-    : nstream_file(fname, get_cdl_line_format()), rmin(rmin) {}
+cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin) : nstream_file(fname), rmin(rmin) {}
 
 void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
 
@@ -79,21 +77,20 @@ void get_cv_term_bits(lstream &b, lstream &b2, const std::vector<std::string> &n
 }
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
                                                   const sch::cellview_info &info) {
-    lstream b = stream.make_lstream();
+    lstream b;
     stream.out_file << std::endl;
     b << ".SUBCKT";
     b << name;
-    auto cmd_line_fmt = get_cdl_line_format("*+");
-    lstream b2 = lstream(&cmd_line_fmt);
+    lstream b2;
     b2 << "*.PININFO";
     get_cv_term_bits(b, b2, info.in_terms, ":I");
     get_cv_term_bits(b, b2, info.out_terms, ":O");
     get_cv_term_bits(b, b2, info.io_terms, ":B");
 
     // write definition line
-    stream.out_file << b;
+    b.to_file(stream.out_file, spirit::namespace_cdba{});
     // write pin information line
-    stream.out_file << b2;
+    b2.to_file(stream.out_file, spirit::namespace_cdl_cmd{});
 }
 
 void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &name) {
@@ -160,13 +157,13 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
 
     if (n == 1) {
         // normal instance, just write normally
-        lstream b = stream.make_lstream();
+        lstream b;
         b << name;
         append_nets(b, name, inst, info.in_terms);
         append_nets(b, name, inst, info.out_terms);
         append_nets(b, name, inst, info.io_terms);
         cbag::netlist::write_instance_cell_name(b.get_back_inserter(), inst, info);
-        stream.out_file << b;
+        b.to_file(stream.out_file, spirit::namespace_cdba{});
     } else {
         // arrayed instance, need to split up
         // get name bits of terminals/nets
@@ -180,7 +177,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
         cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
         // array instance
         for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
-            lstream b = stream.make_lstream();
+            lstream b;
             // write instance name
             b << inst_ast.get_name_bit(inst_idx, true, spirit::namespace_cdba{});
             // write instance nets
@@ -194,7 +191,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
             }
             // write instance cell name
             b << tokens;
-            stream.out_file << b;
+            b.to_file(stream.out_file, spirit::namespace_cdba{});
         }
     }
 }
