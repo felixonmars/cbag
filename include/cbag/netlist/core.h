@@ -48,7 +48,7 @@ template <typename T> struct nstream {
 
 } // namespace traits
 
-template <typename Stream, typename traits::nstream<Stream>::type * = nullptr>
+template <typename Stream, typename = typename traits::nstream<Stream>::type>
 void add_cellview(Stream &stream, const std::string &name, const sch::cellview &cv,
                   const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell) {
     traits::nstream<Stream>::write_cv_header(stream, name, info);

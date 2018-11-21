@@ -22,6 +22,10 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
     using const_reverse_iterator = typename std::vector<T>::const_reverse_iterator;
     using difference_type = typename std::vector<T>::difference_type;
 
+    template <typename V>
+    using IsValue =
+        std::enable_if_t<std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>>;
+
   private:
     std::vector<value_type> data_;
     Compare comp_;
@@ -121,10 +125,7 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
             throw std::invalid_argument("Cannot insert given element at back.");
     }
 
-    template <class V, std::enable_if_t<
-                           std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>,
-                           int> = 0>
-    std::pair<iterator, bool> insert_unique(V &&item) {
+    template <class V, typename = IsValue<V>> std::pair<iterator, bool> insert_unique(V &&item) {
         auto iter = lower_bound(item);
         if (iter == data_.end() || comp_(item, *iter))
             return {data_.insert(iter, std::forward<V>(item)), true};

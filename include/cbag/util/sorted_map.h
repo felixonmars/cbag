@@ -25,6 +25,14 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
     using reverse_iterator = typename vector_type::reverse_iterator;
     using const_reverse_iterator = typename vector_type::const_reverse_iterator;
 
+    template <typename V>
+    using IsValue =
+        std::enable_if_t<std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>>;
+
+    template <typename V>
+    using IsKey =
+        std::enable_if_t<std::is_same_v<key_type, std::remove_cv_t<std::remove_reference_t<V>>>>;
+
     struct value_compare {
         using is_transparent = void;
 
@@ -86,10 +94,7 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         return data_.emplace_unique(std::forward<Args>(args)...);
     }
 
-    template <class V, std::enable_if_t<
-                           std::is_same_v<value_type, std::remove_cv_t<std::remove_reference_t<V>>>,
-                           int> = 0>
-    std::pair<iterator, bool> insert(V &&val) {
+    template <class V, typename = IsValue<V>> std::pair<iterator, bool> insert(V &&val) {
         return data_.insert_unique(std::forward<V>(val));
     }
 
@@ -99,9 +104,7 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         }
     }
 
-    template <class V, class M,
-              std::enable_if_t<
-                  std::is_same_v<key_type, std::remove_cv_t<std::remove_reference_t<V>>>, int> = 0>
+    template <class V, class M, typename = IsKey<V>>
     std::pair<iterator, bool> insert_or_assign(V &&k, M &&obj) {
         auto iter = data_.lower_bound(k);
         if (iter == data_.end() || data_.get_compare()(k, *iter))

@@ -43,9 +43,11 @@ using value_t = std::variant<int32_t, double, bool, std::string, time_struct, bi
  */
 using param_map = util::sorted_map<std::string, value_t>;
 
-template <class S,
-          std::enable_if_t<
-              std::is_same_v<std::string, std::remove_cv_t<std::remove_reference_t<S>>>, int> = 0>
+template <class S>
+using IsString =
+    std::enable_if_t<std::is_same_v<std::string, std::remove_cv_t<std::remove_reference_t<S>>>>;
+
+template <class S, typename = IsString<S>>
 void set_param(param_map &params, S &&name,
                const std::variant<int32_t, double, bool, std::string> &val) {
     std::visit([&](auto &arg) { params.insert_or_assign(std::forward<S>(name), arg); }, val);
