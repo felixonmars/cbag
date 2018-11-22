@@ -17,8 +17,14 @@
 
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
-
-#include <cbagyaml/fusion.h>
+#include <cbag/yaml/box_t.h>
+#include <cbag/yaml/datatypes.h>
+#include <cbag/yaml/enum.h>
+#include <cbag/yaml/figures.h>
+#include <cbag/yaml/fusion.h>
+#include <cbag/yaml/shapes.h>
+#include <cbag/yaml/sorted_map.h>
+#include <cbag/yaml/transformation.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview, lib_name, cell_name, view_name, bbox, terminals,
                           shapes, instances, props, app_defs)

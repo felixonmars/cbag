@@ -45,10 +45,14 @@ struct cellview {
 
     cellview();
 
+    explicit cellview(const std::string &fname);
+
     cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,
              coord_t yl, coord_t xh, coord_t yh);
 
     cellview_info get_info(const std::string &cell_name) const;
+
+    void to_file(const std::string &fname) const;
 
     void clear_params();
 

@@ -1,14 +1,8 @@
-/** \file yaml_datatypes.cpp
- *  \brief This file defines YAML serialization methods for datatypes.
- *
- *  \author Eric Chang
- *  \date   2018/07/12
- */
 
 #include <cbag/logging/logging.h>
 
-#include <cbagyaml/common.h>
-#include <cbagyaml/datatypes.h>
+#include <cbag/yaml/common.h>
+#include <cbag/yaml/datatypes.h>
 
 namespace YAML {
 Node convert<cbag::value_t>::encode(const cbag::value_t &rhs) {

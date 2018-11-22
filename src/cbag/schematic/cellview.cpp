@@ -14,11 +14,23 @@
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
+#include <cbag/util/io.h>
+#include <cbag/yaml/cellviews.h>
 
 namespace cbag {
 namespace sch {
 
 cellview::cellview() = default;
+
+cellview::cellview(const std::string &fname) {
+    if (!util::is_file(fname)) {
+        throw std::invalid_argument(fname + " is not a file.");
+    }
+
+    YAML::Node n = YAML::LoadFile(fname);
+
+    *this = n.as<sch::cellview>();
+}
 
 cellview::cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,
                    coord_t yl, coord_t xh, coord_t yh)
@@ -42,6 +54,16 @@ cellview_info cellview::get_info(const std::string &name) const {
     }
 
     return ans;
+}
+
+void cellview::to_file(const std::string &fname) const {
+    // create root directory if not exist.
+    std::ofstream outfile = util::open_file_write(fname);
+    YAML::Node node(*this);
+    YAML::Emitter emitter;
+    emitter << node;
+    outfile << emitter.c_str() << std::endl;
+    outfile.close();
 }
 
 void cellview::clear_params() { props.clear(); }

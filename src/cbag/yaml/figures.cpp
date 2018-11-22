@@ -1,20 +1,13 @@
-/** \file figures.cpp
- *  \brief This file defines YAML serialization methods for datatypes and
- * figures.
- *
- *  \author Eric Chang
- *  \date   2018/07/12
- */
 
 #include <cbag/logging/logging.h>
 
-#include <cbagyaml/box_t.h>
-#include <cbagyaml/common.h>
-#include <cbagyaml/datatypes.h>
-#include <cbagyaml/enum.h>
-#include <cbagyaml/figures.h>
-#include <cbagyaml/shapes.h>
-#include <cbagyaml/transformation.h>
+#include <cbag/yaml/box_t.h>
+#include <cbag/yaml/common.h>
+#include <cbag/yaml/datatypes.h>
+#include <cbag/yaml/enum.h>
+#include <cbag/yaml/figures.h>
+#include <cbag/yaml/shapes.h>
+#include <cbag/yaml/transformation.h>
 
 namespace YAML {
 Node convert<cbag::sch::pin_fig_t>::encode(const cbag::sch::pin_fig_t &rhs) {

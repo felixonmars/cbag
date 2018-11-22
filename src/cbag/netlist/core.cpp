@@ -1,16 +1,6 @@
-/** \file netlist.h
- *  \brief This file defines classes that netlists objects.
- *
- *  \author Eric Chang
- *  \date   2018/07/10
- */
-
-#include <boost/filesystem.hpp>
 
 #include <cbag/netlist/core.h>
 #include <cbag/util/io.h>
-
-namespace fs = boost::filesystem;
 
 namespace cbag {
 namespace netlist {

@@ -17,5 +17,10 @@ std::ofstream open_file_write(const std::string &fname) {
     return std::ofstream(fname, std::ios_base::out);
 }
 
+bool is_file(const std::string &fname) {
+    boost::filesystem::path path(fname);
+    return boost::filesystem::is_regular_file(path);
+}
+
 } // namespace util
 } // namespace cbag

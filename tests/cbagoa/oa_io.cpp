@@ -6,7 +6,6 @@
 
 #include <cbag/cbag.h>
 #include <cbagoa/cbagoa.h>
-#include <cbagyaml/cbagyaml.h>
 
 #include "util/io.h"
 
@@ -28,7 +27,7 @@ std::string write_cv(const cbag::sch::cellview &cv, const std::string &cell_name
         out_fname = fmt::format("{}/{}.{}.yaml", output_dir, cell_name, view_name);
         expect_fname = fmt::format("{}/{}.{}.yaml", expect_dir, cell_name, view_name);
     }
-    cbag::to_file(cv, out_fname);
+    cv.to_file(out_fname);
 
     // check two file equivalent
     std::string output_str = read_file(out_fname);
@@ -60,7 +59,9 @@ SCENARIO("read/write OA data", "[cbagoa]") {
             auto cv = read_cv(lib_name, cell_name, view_name, lib_file);
             AND_THEN("cellview written to yaml file properly") {
                 auto out_fname = write_cv(cv, cell_name, view_name, output_dir, expect_dir);
-                AND_THEN("can read cellview from yaml file") { cbag::cv_from_file(out_fname); }
+                AND_THEN("can read cellview from yaml file") {
+                    cbag::sch::cellview cv_test(out_fname);
+                }
             }
         }
     }

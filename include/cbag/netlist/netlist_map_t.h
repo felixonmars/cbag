@@ -11,6 +11,9 @@
 #include <string>
 #include <unordered_map>
 
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
+
 namespace cbag {
 
 namespace sch {

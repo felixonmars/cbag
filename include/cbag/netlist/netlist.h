@@ -2,7 +2,6 @@
 #ifndef CBAG_NETLIST_NETLIST_H
 #define CBAG_NETLIST_NETLIST_H
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -11,8 +10,6 @@
 #include <cbag/netlist/core.h>
 #include <cbag/netlist/netlist_map_t.h>
 #include <cbag/netlist/verilog.h>
-#include <cbag/schematic/cellview.h>
-#include <cbag/schematic/cellview_info.h>
 
 namespace cbag {
 namespace netlist {
@@ -22,35 +19,40 @@ enum class netlist_fmt : uint8_t {
     VERILOG = 1,
 };
 
-template <class VectorType>
-void write_netlist(const VectorType &name_cv_list, const std::vector<std::string> &inc_list,
-                   netlist_map_t &netlist_map, bool flat, bool shell, netlist_fmt format,
-                   const std::string &fname, uint32_t rmin = 2000) {
-    auto logger = cbag::get_cbag_logger();
-    logger->info("Writing netlist file: {}", fname);
+template <class N> using IsNetlister = typename traits::nstream<N>::type;
 
-    uint8_t fmt_code = static_cast<uint8_t>(format);
-    logger->info("Creating netlist builder for netlist format code: {}", fmt_code);
+template <class ContentList>
+void write_netlist(const ContentList &name_cv_list, const std::string &fname, netlist_fmt format,
+                   bool flat = true, bool shell = false, uint32_t rmin = 2000,
+                   const std::string &prim_fname = "") {
+    auto logger = cbag::get_cbag_logger();
 
     switch (format) {
     case netlist_fmt::CDL:
-        write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, cdl_stream(fname, rmin),
-                      *logger);
+        logger->info("Writing CDL netlist: {}", fname);
+        write_netlist(name_cv_list, cdl_stream(fname, rmin), flat, shell, prim_fname, *logger);
         break;
     case netlist_fmt::VERILOG:
-        write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, verilog_stream(fname),
-                      *logger);
+        logger->info("Writing Verilog netlist: {}", fname);
+        write_netlist(name_cv_list, verilog_stream(fname), flat, shell, prim_fname, *logger);
         break;
     default:
-        throw std::invalid_argument(fmt::format("Unrecognized netlist format code: {}", fmt_code));
+        throw std::invalid_argument(
+            fmt::format("Unrecognized netlist format code: {}", static_cast<uint8_t>(format)));
     }
 }
 
-template <class VectorType, class Netlister>
-void write_netlist(const VectorType &name_cv_list, const std::vector<std::string> &inc_list,
-                   netlist_map_t &netlist_map, bool flat, bool shell, Netlister stream,
-                   spdlog::logger &logger) {
-    traits::nstream<Netlister>::write_header(stream, inc_list, shell);
+void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc_list,
+                    netlist_map_t &netlist_map);
+
+template <class ContentList, class N, typename = IsNetlister<N>>
+void write_netlist(const ContentList &name_cv_list, N &&stream, bool flat, bool shell,
+                   const std::string &prim_fname, spdlog::logger &logger) {
+    std::vector<std::string> inc_list;
+    netlist_map_t netlist_map;
+    read_prim_info(prim_fname, inc_list, netlist_map);
+
+    traits::nstream<N>::write_header(stream, inc_list, shell);
 
     std::size_t num = name_cv_list.size();
     auto iter = name_cv_list.begin();
@@ -78,8 +80,8 @@ void write_netlist(const VectorType &name_cv_list, const std::vector<std::string
     }
 
     // build final netlist
-    traits::nstream<Netlister>::write_end(stream);
-    traits::nstream<Netlister>::close(stream);
+    traits::nstream<N>::write_end(stream);
+    traits::nstream<N>::close(stream);
 }
 
 } // namespace netlist

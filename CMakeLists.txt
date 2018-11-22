@@ -97,6 +97,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/core.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/lstream.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/arc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview.cpp
@@ -121,6 +122,11 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/io.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/name_convert.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/box_t.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/transformation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/figures.cpp
   )
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
@@ -136,27 +142,6 @@ target_link_libraries(cbag
   yaml-cpp
   fmt-header-only
   )
-
-set(SRC_FILES_LIB_CBAGYAML
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/box_t.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/transformation.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/datatypes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/shapes.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/figures.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagyaml/cbagyaml.cpp
-  )
-add_library(cbagyaml SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGYAML})
-
-# shared library dependencies
-target_link_libraries(cbagyaml
-  PRIVATE
-  cbag
-  yaml-cpp
-  # for yaml file path manipulations
-  boost_filesystem
-  fmt-header-only
-  )
-
 
 set(SRC_FILES_LIB_CBAGOA
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
@@ -175,7 +160,6 @@ target_link_libraries(cbagoa
   oaPlugIn
   PRIVATE
   cbag
-  cbagyaml
   boost_filesystem
   boost_system
   yaml-cpp

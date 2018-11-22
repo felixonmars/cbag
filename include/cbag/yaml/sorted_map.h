@@ -1,6 +1,6 @@
 
-#ifndef CBAGYAML_SORTED_MAP_H
-#define CBAGYAML_SORTED_MAP_H
+#ifndef CBAG_YAML_SORTED_MAP_H
+#define CBAG_YAML_SORTED_MAP_H
 
 #include <cbag/util/sorted_map.h>
 

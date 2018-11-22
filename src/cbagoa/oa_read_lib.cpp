@@ -1,7 +1,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <cbagyaml/cbagyaml.h>
+#include <cbag/schematic/cellview.h>
 
 #include <cbagoa/oa_read.h>
 #include <cbagoa/oa_read_lib.h>
@@ -25,7 +25,7 @@ cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCd
 
     // write schematic to file
     fs::path tmp_path = yaml_dir / fmt::format("{}.yaml", cell_name);
-    cbag::to_file(sch_cv, tmp_path.c_str());
+    sch_cv.to_file(tmp_path.string());
 
     // write all symbol views to file
     // get library read access
@@ -41,9 +41,9 @@ cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCd
         if (view_ptr->getViewType() == oa::oaViewType::get(oa::oacSchematicSymbol)) {
             view_ptr->getName(ns_native, tmp_name);
             tmp_path = yaml_dir / fmt::format("{}.{}.yaml", cell_name, (const char *)tmp_name);
-            cbag::to_file(read_sch_cellview(ns_native, ns, logger, lib_name, cell_name,
-                                            std::string((const char *)tmp_name), primitive_libs),
-                          tmp_path.c_str());
+            read_sch_cellview(ns_native, ns, logger, lib_name, cell_name,
+                              std::string((const char *)tmp_name), primitive_libs)
+                .to_file(tmp_path.string());
         }
     }
     // release read access

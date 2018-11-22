@@ -6,7 +6,6 @@
 #include <fmt/core.h>
 
 #include <cbag/netlist/netlist.h>
-#include <cbagyaml/cbagyaml.h>
 
 #include "util/io.h"
 
@@ -26,8 +25,7 @@ std::string get_extension(cbag::netlist::netlist_fmt netlist_type) {
 void populate_name_cv_list(const char *fmt_str, const std::string &yaml_dir,
                            const std::string &top_cell, const std::string cv_name,
                            name_cv_vec &name_cv_list, std::unordered_set<std::string> &recorded) {
-    auto cv = std::make_unique<cbag::sch::cellview>(
-        cbag::cv_from_file(fmt::format(fmt_str, yaml_dir, top_cell)));
+    auto cv = std::make_unique<cbag::sch::cellview>(fmt::format(fmt_str, yaml_dir, top_cell));
 
     // write subcells
     for (const auto &p : cv->instances) {
@@ -83,8 +81,7 @@ SCENARIO("netlist generation", "[cbag]") {
         CAPTURE(cell_name);
         CAPTURE(ext_str);
         THEN("writes netlist correctly") {
-            cbag::netlist::write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, format,
-                                         fname, rmin);
+            cbag::netlist::write_netlist(name_cv_list, fname, format, flat, shell, rmin);
             std::string output_str = read_file(fname);
             std::string expect_str = read_file(expect_fname);
             REQUIRE(output_str == expect_str);

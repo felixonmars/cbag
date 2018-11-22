@@ -1,6 +1,5 @@
 #include <cbag/cbag.h>
 #include <cbagoa/cbagoa.h>
-#include <cbagyaml/cbagyaml.h>
 
 void write_cv_yaml(const char *lib_name, const char *cell_name, const char *view_name = "symbol",
                    const char *output = nullptr, const char *lib_file = "cds.lib") {
@@ -13,7 +12,7 @@ void write_cv_yaml(const char *lib_name, const char *cell_name, const char *view
     cbagoa::oa_database db(lib_file);
     auto cv = db.read_sch_cellview(lib_name, cell_name, view_name);
 
-    cbag::to_file(cv, out_fname);
+    cv.to_file(out_fname);
 }
 
 int main(int argc, char *argv[]) {

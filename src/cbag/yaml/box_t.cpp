@@ -1,16 +1,10 @@
-/** \file primitives.cpp
- *  \brief This file defines YAML serialization methods for primitive objects
- *
- *  \author Eric Chang
- *  \date   2018/07/12
- */
 
 #include <cbag/logging/logging.h>
 
 #include <cbag/common/typedefs.h>
 
-#include <cbagyaml/box_t.h>
-#include <cbagyaml/common.h>
+#include <cbag/yaml/box_t.h>
+#include <cbag/yaml/common.h>
 
 namespace YAML {
 

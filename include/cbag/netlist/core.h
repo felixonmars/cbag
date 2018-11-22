@@ -12,9 +12,6 @@
 #include <fmt/core.h>
 
 #include <cbag/netlist/netlist_map_t.h>
-#include <cbag/schematic/cellview.h>
-#include <cbag/schematic/cellview_info.h>
-#include <cbag/schematic/term_t.h>
 
 namespace cbag {
 

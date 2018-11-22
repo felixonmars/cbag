@@ -10,6 +10,9 @@ namespace util {
 void make_parent_dirs(const std::string &fname);
 
 std::ofstream open_file_write(const std::string &fname);
+
+bool is_file(const std::string &fname);
+
 } // namespace util
 // namespace util
 } // namespace cbag

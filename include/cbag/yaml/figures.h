@@ -16,8 +16,8 @@
 #include <cbag/schematic/pin_figure.h>
 #include <cbag/schematic/pin_object.h>
 
-#include <cbagyaml/fusion.h>
-#include <cbagyaml/sorted_map.h>
+#include <cbag/yaml/fusion.h>
+#include <cbag/yaml/sorted_map.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, xform, bbox,
                           connections, params, is_primitive)
