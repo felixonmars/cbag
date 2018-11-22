@@ -54,10 +54,12 @@ void write_netlist(const ContentList &name_cv_list, N &&stream, bool flat, bool 
 
     traits::nstream<N>::write_header(stream, inc_list, shell);
 
-    std::size_t num = name_cv_list.size();
+    auto stop = name_cv_list.end();
     auto iter = name_cv_list.begin();
-    for (std::size_t idx = 0; idx < num; ++idx, ++iter) {
-        if (!shell || idx == num - 1) {
+    auto next_iter = iter;
+    for (auto iter = name_cv_list.begin(); iter != stop; ++iter) {
+        ++next_iter;
+        if (!shell || next_iter == stop) {
             auto &cur_pair = *iter;
             auto &cur_cv = cur_pair.second;
             const std::string &cur_name = cur_pair.first;
