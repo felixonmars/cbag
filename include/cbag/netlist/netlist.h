@@ -23,7 +23,7 @@ enum class netlist_fmt : uint8_t {
 };
 
 template <class VectorType>
-void write_netlist(const VectorType &cv_name_list, const std::vector<std::string> &inc_list,
+void write_netlist(const VectorType &name_cv_list, const std::vector<std::string> &inc_list,
                    netlist_map_t &netlist_map, bool flat, bool shell, netlist_fmt format,
                    const std::string &fname, uint32_t rmin = 2000) {
     auto logger = cbag::get_cbag_logger();
@@ -34,11 +34,11 @@ void write_netlist(const VectorType &cv_name_list, const std::vector<std::string
 
     switch (format) {
     case netlist_fmt::CDL:
-        write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, cdl_stream(fname, rmin),
+        write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, cdl_stream(fname, rmin),
                       *logger);
         break;
     case netlist_fmt::VERILOG:
-        write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, verilog_stream(fname),
+        write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, verilog_stream(fname),
                       *logger);
         break;
     default:
@@ -47,18 +47,18 @@ void write_netlist(const VectorType &cv_name_list, const std::vector<std::string
 }
 
 template <class VectorType, class Netlister>
-void write_netlist(const VectorType &cv_name_list, const std::vector<std::string> &inc_list,
+void write_netlist(const VectorType &name_cv_list, const std::vector<std::string> &inc_list,
                    netlist_map_t &netlist_map, bool flat, bool shell, Netlister stream,
                    spdlog::logger &logger) {
     traits::nstream<Netlister>::write_header(stream, inc_list, shell);
 
-    std::size_t num = cv_name_list.size();
-    auto iter = cv_name_list.begin();
+    std::size_t num = name_cv_list.size();
+    auto iter = name_cv_list.begin();
     for (std::size_t idx = 0; idx < num; ++idx, ++iter) {
         if (!shell || idx == num - 1) {
             auto &cur_pair = *iter;
-            auto &cur_cv = cur_pair.first;
-            const std::string &cur_name = cur_pair.second;
+            auto &cur_cv = cur_pair.second;
+            const std::string &cur_name = cur_pair.first;
             // add this cellview to netlist
             logger.info("Netlisting cellview: {}", cur_name);
             sch::cellview_info cv_info = cur_cv->get_info(cur_name);

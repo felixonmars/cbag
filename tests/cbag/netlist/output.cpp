@@ -10,7 +10,7 @@
 
 #include "util/io.h"
 
-using cv_name_vec = std::vector<std::pair<std::unique_ptr<cbag::sch::cellview>, std::string>>;
+using name_cv_vec = std::vector<std::pair<std::string, std::unique_ptr<cbag::sch::cellview>>>;
 
 std::string get_extension(cbag::netlist::netlist_fmt netlist_type) {
     switch (netlist_type) {
@@ -23,9 +23,9 @@ std::string get_extension(cbag::netlist::netlist_fmt netlist_type) {
     }
 }
 
-void populate_cv_name_list(const char *fmt_str, const std::string &yaml_dir,
+void populate_name_cv_list(const char *fmt_str, const std::string &yaml_dir,
                            const std::string &top_cell, const std::string cv_name,
-                           cv_name_vec &cv_name_list, std::unordered_set<std::string> &recorded) {
+                           name_cv_vec &name_cv_list, std::unordered_set<std::string> &recorded) {
     auto cv = std::make_unique<cbag::sch::cellview>(
         cbag::cv_from_file(fmt::format(fmt_str, yaml_dir, top_cell)));
 
@@ -33,12 +33,12 @@ void populate_cv_name_list(const char *fmt_str, const std::string &yaml_dir,
     for (const auto &p : cv->instances) {
         std::string &cur_cell = p.second->cell_name;
         if (recorded.find(cur_cell) == recorded.end()) {
-            populate_cv_name_list(fmt_str, yaml_dir, cur_cell, cur_cell, cv_name_list, recorded);
+            populate_name_cv_list(fmt_str, yaml_dir, cur_cell, cur_cell, name_cv_list, recorded);
         }
     }
 
     // write this cellview
-    cv_name_list.emplace_back(std::move(cv), cv_name);
+    name_cv_list.emplace_back(cv_name, std::move(cv));
     recorded.emplace(top_cell);
 }
 
@@ -67,9 +67,9 @@ SCENARIO("netlist generation", "[cbag]") {
         auto format = fmt_shell.first;
         bool shell = fmt_shell.second;
         const char *fmt_str = "{}/{}.yaml";
-        cv_name_vec cv_name_list;
+        name_cv_vec name_cv_list;
         std::unordered_set<std::string> recorded;
-        populate_cv_name_list(fmt_str, yaml_dir, cell_name, "TEST", cv_name_list, recorded);
+        populate_name_cv_list(fmt_str, yaml_dir, cell_name, "TEST", name_cv_list, recorded);
         std::vector<std::string> inc_list;
         cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
@@ -83,7 +83,7 @@ SCENARIO("netlist generation", "[cbag]") {
         CAPTURE(cell_name);
         CAPTURE(ext_str);
         THEN("writes netlist correctly") {
-            cbag::netlist::write_netlist(cv_name_list, inc_list, netlist_map, flat, shell, format,
+            cbag::netlist::write_netlist(name_cv_list, inc_list, netlist_map, flat, shell, format,
                                          fname, rmin);
             std::string output_str = read_file(fname);
             std::string expect_str = read_file(expect_fname);
