@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <cbag/common/design_output.h>
 #include <cbag/logging/logging.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/core.h>
@@ -14,31 +15,26 @@
 namespace cbag {
 namespace netlist {
 
-enum class netlist_fmt : uint8_t {
-    CDL = 0,
-    VERILOG = 1,
-};
-
 template <class N> using IsNetlister = typename traits::nstream<N>::type;
 
 template <class ContentList>
-void write_netlist(const ContentList &name_cv_list, const std::string &fname, netlist_fmt format,
+void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
                    bool flat = true, bool shell = false, uint32_t rmin = 2000,
                    const std::string &prim_fname = "") {
     auto logger = cbag::get_cbag_logger();
 
     switch (format) {
-    case netlist_fmt::CDL:
+    case design_output::CDL:
         logger->info("Writing CDL netlist: {}", fname);
         write_netlist(name_cv_list, cdl_stream(fname, rmin), flat, shell, prim_fname, *logger);
         break;
-    case netlist_fmt::VERILOG:
+    case design_output::VERILOG:
         logger->info("Writing Verilog netlist: {}", fname);
         write_netlist(name_cv_list, verilog_stream(fname), flat, shell, prim_fname, *logger);
         break;
     default:
         throw std::invalid_argument(
-            fmt::format("Unrecognized netlist format code: {}", static_cast<uint8_t>(format)));
+            fmt::format("Unrecognized design output code: {}", static_cast<uint8_t>(format)));
     }
 }
 

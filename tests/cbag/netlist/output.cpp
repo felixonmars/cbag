@@ -11,11 +11,11 @@
 
 using name_cv_vec = std::vector<std::pair<std::string, std::unique_ptr<cbag::sch::cellview>>>;
 
-std::string get_extension(cbag::netlist::netlist_fmt netlist_type) {
+std::string get_extension(cbag::design_output netlist_type) {
     switch (netlist_type) {
-    case cbag::netlist::netlist_fmt::CDL:
+    case cbag::design_output::CDL:
         return "cdl";
-    case cbag::netlist::netlist_fmt::VERILOG:
+    case cbag::design_output::VERILOG:
         return "v";
     default:
         return "netlist";
@@ -55,11 +55,11 @@ SCENARIO("netlist generation", "[cbag]") {
             "cv_array_inst_simple",
             "cv_array_inst_w_bus",
         }));
-        std::pair<cbag::netlist::netlist_fmt, bool> fmt_shell =
-            GENERATE(values<std::pair<cbag::netlist::netlist_fmt, bool>>({
-                {cbag::netlist::netlist_fmt::CDL, false},
-                {cbag::netlist::netlist_fmt::VERILOG, true},
-                {cbag::netlist::netlist_fmt::VERILOG, false},
+        std::pair<cbag::design_output, bool> fmt_shell =
+            GENERATE(values<std::pair<cbag::design_output, bool>>({
+                {cbag::design_output::CDL, false},
+                {cbag::design_output::VERILOG, true},
+                {cbag::design_output::VERILOG, false},
             }));
 
         auto format = fmt_shell.first;
@@ -68,8 +68,6 @@ SCENARIO("netlist generation", "[cbag]") {
         name_cv_vec name_cv_list;
         std::unordered_set<std::string> recorded;
         populate_name_cv_list(fmt_str, yaml_dir, cell_name, "TEST", name_cv_list, recorded);
-        std::vector<std::string> inc_list;
-        cbag::netlist::netlist_map_t netlist_map;
         bool flat = false;
         uint32_t rmin = 2000;
 
