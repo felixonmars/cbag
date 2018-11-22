@@ -1,9 +1,5 @@
-/** \file cellviews.cpp
- *  \brief This file defines classes representing various cellviews
- *
- *  \author Eric Chang
- *  \date   2018/07/18
- */
+
+#include <boost/filesystem.hpp>
 
 #include <fmt/core.h>
 
@@ -17,19 +13,31 @@
 #include <cbag/util/io.h>
 #include <cbag/yaml/cellviews.h>
 
+namespace fs = boost::filesystem;
+
 namespace cbag {
 namespace sch {
 
 cellview::cellview() = default;
 
-cellview::cellview(const std::string &fname) {
-    if (!util::is_file(fname)) {
-        throw std::invalid_argument(fname + " is not a file.");
+cellview::cellview(const std::string &yaml_fname, const std::string &sym_view) {
+    if (!util::is_file(yaml_fname)) {
+        throw std::invalid_argument(yaml_fname + " is not a file.");
     }
 
-    YAML::Node n = YAML::LoadFile(fname);
+    YAML::Node n = YAML::LoadFile(yaml_fname);
 
-    *this = n.as<sch::cellview>();
+    *this = n.as<cellview>();
+
+    if (!sym_view.empty()) {
+        // load symbol cellview
+        fs::path yaml_path(yaml_fname);
+        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().string()));
+        if (fs::is_regular_file(yaml_path)) {
+            YAML::Node s = YAML::LoadFile(yaml_path.string());
+            sym_ptr = std::make_unique<cellview>(s.as<cellview>());
+        }
+    }
 }
 
 cellview::cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,

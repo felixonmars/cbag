@@ -45,7 +45,7 @@ struct cellview {
 
     cellview();
 
-    explicit cellview(const std::string &fname);
+    cellview(const std::string &yaml_fname, const std::string &sym_view = "");
 
     cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,
              coord_t yl, coord_t xh, coord_t yh);
