@@ -113,9 +113,7 @@ void append_nets(lstream &b, const std::string &inst_name, const sch::instance &
 template <class OutIter>
 void write_instance_cell_name(OutIter &&iter, const sch::instance &inst,
                               const sch::cellview_info &info) {
-    if (!info.is_prim) {
-        *iter = "/";
-    }
+    *iter = "/";
     *iter = inst.cell_name;
 
     // get default parameter values
