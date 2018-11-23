@@ -82,7 +82,7 @@ void get_cv_term_bits(lstream &b, lstream &b2, const std::vector<std::string> &n
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
                                                   const sch::cellview_info &info) {
     lstream b;
-    stream.out_file << std::endl;
+    stream.out_file << std::endl << std::endl;
     b << ".SUBCKT";
     b << name;
     lstream b2;

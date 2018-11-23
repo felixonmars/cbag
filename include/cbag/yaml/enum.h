@@ -10,6 +10,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/common/design_output.h>
 #include <cbag/common/font_t.h>
 #include <cbag/common/orientation.h>
 #include <cbag/common/path_style.h>
@@ -43,6 +44,8 @@ template <typename T, typename = IsEnum<T>> struct convert_enum {
         }
     }
 };
+
+template <> struct convert<cbag::design_output> : public convert_enum<cbag::design_output> {};
 
 template <> struct convert<cbag::orientation> : public convert_enum<cbag::orientation> {};
 

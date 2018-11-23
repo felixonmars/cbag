@@ -17,36 +17,13 @@ namespace netlist {
 
 template <class N> using IsNetlister = typename traits::nstream<N>::type;
 
-template <class ContentList>
-void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
-                   bool flat = true, bool shell = false, uint32_t rmin = 2000,
-                   const std::string &prim_fname = "") {
-    auto logger = cbag::get_cbag_logger();
-
-    switch (format) {
-    case design_output::CDL:
-        logger->info("Writing CDL netlist: {}", fname);
-        write_netlist(name_cv_list, cdl_stream(fname, rmin), flat, shell, prim_fname, *logger);
-        break;
-    case design_output::VERILOG:
-        logger->info("Writing Verilog netlist: {}", fname);
-        write_netlist(name_cv_list, verilog_stream(fname), flat, shell, prim_fname, *logger);
-        break;
-    default:
-        throw std::invalid_argument(
-            fmt::format("Unrecognized design output code: {}", static_cast<uint8_t>(format)));
-    }
-}
-
 void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc_list,
-                    netlist_map_t &netlist_map);
+                    netlist_map_t &netlist_map, design_output out_type);
 
 template <class ContentList, class N, typename = IsNetlister<N>>
-void write_netlist(const ContentList &name_cv_list, N &&stream, bool flat, bool shell,
-                   const std::string &prim_fname, spdlog::logger &logger) {
-    std::vector<std::string> inc_list;
-    netlist_map_t netlist_map;
-    read_prim_info(prim_fname, inc_list, netlist_map);
+void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat, bool shell,
+                          netlist_map_t &netlist_map, const std::vector<std::string> &inc_list,
+                          spdlog::logger &logger) {
 
     traits::nstream<N>::write_header(stream, inc_list, shell);
 
@@ -80,6 +57,33 @@ void write_netlist(const ContentList &name_cv_list, N &&stream, bool flat, bool 
     // build final netlist
     traits::nstream<N>::write_end(stream);
     traits::nstream<N>::close(stream);
+}
+
+template <class ContentList>
+void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
+                   bool flat = true, bool shell = false, uint32_t rmin = 2000,
+                   const std::string &prim_fname = "") {
+    auto logger = cbag::get_cbag_logger();
+
+    std::vector<std::string> inc_list;
+    netlist_map_t netlist_map;
+    read_prim_info(prim_fname, inc_list, netlist_map, format);
+
+    switch (format) {
+    case design_output::CDL:
+        logger->info("Writing CDL netlist: {}", fname);
+        write_netlist_helper(name_cv_list, cdl_stream(fname, rmin), flat, shell, netlist_map,
+                             inc_list, *logger);
+        break;
+    case design_output::VERILOG:
+        logger->info("Writing Verilog netlist: {}", fname);
+        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, netlist_map,
+                             inc_list, *logger);
+        break;
+    default:
+        throw std::invalid_argument(
+            fmt::format("Unrecognized design output code: {}", static_cast<uint8_t>(format)));
+    }
 }
 
 } // namespace netlist

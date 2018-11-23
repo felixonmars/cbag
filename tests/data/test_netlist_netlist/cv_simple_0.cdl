@@ -9,13 +9,16 @@
 *.EQUATION
 .PARAM
 
+
 .SUBCKT nmos4_standard B D G S
 *.PININFO B:B D:B G:B S:B
 .ENDS
 
+
 .SUBCKT pmos4_standard B D G S
 *.PININFO B:B D:B G:B S:B
 .ENDS
+
 
 .SUBCKT TEST VDD VSS in out
 *.PININFO VDD:I VSS:I in:I out:O

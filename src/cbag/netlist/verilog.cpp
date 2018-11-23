@@ -35,7 +35,6 @@ void traits::nstream<verilog_stream>::write_header(type &stream,
                 stream.out_file << "`include \"" << boost::filesystem::canonical(fpath).string()
                                 << '"' << std::endl;
             }
-            stream.out_file << std::endl;
         }
     }
 }
@@ -68,7 +67,7 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
 
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
                                                       const sch::cellview_info &info) {
-    stream.out_file << std::endl;
+    stream.out_file << std::endl << std::endl;
 
     // write module declaration
     lstream b;
