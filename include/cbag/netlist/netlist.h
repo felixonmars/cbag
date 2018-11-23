@@ -27,12 +27,11 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
     traits::nstream<N>::write_header(stream, inc_list, shell);
 
+    auto last_idx = name_cv_list.size() - 1;
     auto stop = name_cv_list.end();
-    auto iter = name_cv_list.begin();
-    auto next_iter = iter;
-    for (auto iter = name_cv_list.begin(); iter != stop; ++iter) {
-        ++next_iter;
-        if (!shell || next_iter == stop) {
+    decltype(name_cv_list.size()) idx = 0;
+    for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
+        if (!shell || idx == last_idx) {
             auto &cur_pair = *iter;
             auto &cur_cv = cur_pair.second;
             const std::string &cur_name = cur_pair.first;
