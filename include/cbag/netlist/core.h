@@ -57,8 +57,9 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
             auto libmap_iter = cell_map.find(inst.lib_name);
             if (libmap_iter == cell_map.end()) {
                 throw std::invalid_argument(
-                    fmt::format("Cannot find library {} in netlist map for cell {}.", inst.lib_name,
-                                inst.cell_name));
+                    fmt::format("Cannot find library {} in netlist map for cell {}.  "
+                                "Check your primitives definition file.",
+                                inst.lib_name, inst.cell_name));
             }
             auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
             if (cellmap_iter == libmap_iter->second.end()) {
