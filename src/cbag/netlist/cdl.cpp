@@ -8,6 +8,8 @@
 #include <utility>
 #include <variant>
 
+#include <boost/filesystem.hpp>
+
 #include <fmt/core.h>
 
 #include <cbag/spirit/ast.h>
@@ -34,7 +36,9 @@ void traits::nstream<cdl_stream>::write_header(type &stream,
     if (!shell) {
         if (!inc_list.empty()) {
             for (auto const &fname : inc_list) {
-                stream.out_file << ".INCLUDE " << fname << std::endl;
+                boost::filesystem::path fpath(fname);
+                stream.out_file << ".INCLUDE " << boost::filesystem::canonical(fpath).string()
+                                << std::endl;
             }
             stream.out_file << std::endl;
         }

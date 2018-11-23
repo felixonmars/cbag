@@ -5,7 +5,7 @@
  *  \date   2018/07/10
  */
 
-#include <boost/range/join.hpp>
+#include <boost/filesystem.hpp>
 
 #include <fmt/core.h>
 
@@ -28,7 +28,16 @@ void traits::nstream<verilog_stream>::close(type &stream) { stream.close(); }
 void traits::nstream<verilog_stream>::write_header(type &stream,
                                                    const std::vector<std::string> &inc_list,
                                                    bool shell) {
-    // TODO: Add actual implementation
+    if (!shell) {
+        if (!inc_list.empty()) {
+            for (auto const &fname : inc_list) {
+                boost::filesystem::path fpath(fname);
+                stream.out_file << "`include \"" << boost::filesystem::canonical(fpath).string()
+                                << '"' << std::endl;
+            }
+            stream.out_file << std::endl;
+        }
+    }
 }
 
 void traits::nstream<verilog_stream>::write_end(type &stream) {}
