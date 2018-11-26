@@ -13,6 +13,7 @@ enum class design_output : uint8_t {
     YAML = 3,
     CDL = 4,
     VERILOG = 5,
+    SYSVERILOG = 6,
 };
 
 } // namespace cbag

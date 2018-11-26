@@ -86,6 +86,11 @@ void write_netlist(const ContentList &name_cv_list, const std::string &fname, de
         write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, netlist_map,
                              inc_list, *logger);
         break;
+    case design_output::SYSVERILOG:
+        logger->info("Writing System Verilog netlist: {}", fname);
+        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, netlist_map,
+                             inc_list, *logger);
+        break;
     default:
         throw std::invalid_argument(
             fmt::format("Unrecognized design output code: {}", static_cast<uint8_t>(format)));
