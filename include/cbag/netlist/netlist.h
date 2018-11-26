@@ -33,29 +33,31 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
     for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
         if (!shell || idx == last_idx) {
             auto &cur_pair = *iter;
-            const std::string &cur_name = cur_pair.first;
-            const auto &cur_cv = cur_pair.second.first;
-            const std::string &cur_netlist = cur_pair.second.second;
-            sch::cellview_info cv_info = cur_cv->get_info(cur_name);
-            logger.info("Netlisting cellview: {}", cur_name);
+            const auto &cv_ptr = cur_pair.second.first;
+            if (cv_ptr) {
+                const std::string &cur_name = cur_pair.first;
+                const std::string &cur_netlist = cur_pair.second.second;
+                sch::cellview_info cv_info = cv_ptr->get_info(cur_name);
+                logger.info("Netlisting cellview: {}", cur_name);
 
-            if (cur_netlist.empty()) {
-                // add this cellview to netlist
-                add_cellview(stream, cur_name, *cur_cv, cv_info, netlist_map, shell);
-            } else {
-                add_cellview(stream, cur_netlist);
-            }
+                if (cur_netlist.empty()) {
+                    // add this cellview to netlist
+                    add_cellview(stream, cur_name, *cv_ptr, cv_info, netlist_map, shell);
+                } else {
+                    add_cellview(stream, cur_netlist);
+                }
 
-            // add this cellview to netlist map
-            logger.info("Adding cellview to netlist cell map");
-            auto lib_map_iter = netlist_map.find(cur_cv->lib_name);
-            if (lib_map_iter == netlist_map.end()) {
-                logger.info("Cannot find library {}, creating lib cell map", cur_cv->lib_name);
-                lib_map_t new_lib_map;
-                new_lib_map.emplace(cur_cv->cell_name, cv_info);
-                netlist_map.emplace(cur_cv->lib_name, std::move(new_lib_map));
-            } else {
-                lib_map_iter->second.emplace(cur_cv->cell_name, cv_info);
+                // add this cellview to netlist map
+                logger.info("Adding cellview to netlist cell map");
+                auto lib_map_iter = netlist_map.find(cv_ptr->lib_name);
+                if (lib_map_iter == netlist_map.end()) {
+                    logger.info("Cannot find library {}, creating lib cell map", cv_ptr->lib_name);
+                    lib_map_t new_lib_map;
+                    new_lib_map.emplace(cv_ptr->cell_name, cv_info);
+                    netlist_map.emplace(cv_ptr->lib_name, std::move(new_lib_map));
+                } else {
+                    lib_map_iter->second.emplace(cv_ptr->cell_name, cv_info);
+                }
             }
         }
     }
