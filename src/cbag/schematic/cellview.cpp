@@ -74,6 +74,26 @@ void cellview::to_file(const std::string &fname) const {
     outfile.close();
 }
 
+std::unique_ptr<cellview> cellview::get_copy() const {
+    // copy easily copiable attributes
+    cellview ans(lib_name, cell_name, view_name, bbox.xl(), bbox.yl(), bbox.xh(), bbox.yh());
+    ans.terminals = terminals;
+    ans.shapes = shapes;
+    ans.props = props;
+    ans.app_defs = app_defs;
+
+    // copy instances
+    for (const auto &pair : instances) {
+        ans.instances.emplace_back(pair.first, pair.second->get_copy());
+    }
+    // copy symbol pointer
+    if (sym_ptr != nullptr) {
+        ans.sym_ptr = sym_ptr->get_copy();
+    }
+
+    return std::make_unique<cellview>(std::move(ans));
+}
+
 void cellview::clear_params() { props.clear(); }
 
 void cellview::set_param(std::string name,

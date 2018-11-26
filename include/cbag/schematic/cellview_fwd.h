@@ -41,7 +41,7 @@ struct cellview {
     inst_map_t instances;
     param_map props;
     param_map app_defs;
-    std::unique_ptr<cellview> sym_ptr;
+    std::unique_ptr<cellview> sym_ptr = nullptr;
 
     cellview();
 
@@ -53,6 +53,8 @@ struct cellview {
     cellview_info get_info(const std::string &cell_name) const;
 
     void to_file(const std::string &fname) const;
+
+    std::unique_ptr<cellview> get_copy() const;
 
     void clear_params();
 

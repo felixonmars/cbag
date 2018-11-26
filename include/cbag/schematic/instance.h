@@ -7,6 +7,8 @@
 #ifndef CBAG_SCHEMATIC_INSTANCE_H
 #define CBAG_SCHEMATIC_INSTANCE_H
 
+#include <memory>
+
 #include <cbag/common/box_t.h>
 #include <cbag/common/datatypes.h>
 #include <cbag/common/transformation.h>
@@ -37,6 +39,8 @@ struct instance {
     uint32_t width() const;
 
     uint32_t height() const;
+
+    std::unique_ptr<instance> get_copy() const;
 
     void clear_params();
 

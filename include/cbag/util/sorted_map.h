@@ -94,6 +94,10 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
         return data_.emplace_unique(std::forward<Args>(args)...);
     }
 
+    template <class... Args> void emplace_back(Args &&... args) {
+        data_.emplace_back(std::forward<Args>(args)...);
+    }
+
     template <class V, typename = IsValue<V>> std::pair<iterator, bool> insert(V &&val) {
         return data_.insert_unique(std::forward<V>(val));
     }

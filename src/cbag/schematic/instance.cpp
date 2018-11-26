@@ -30,6 +30,8 @@ uint32_t instance::width() const { return bbox.w(); }
 
 uint32_t instance::height() const { return bbox.h(); }
 
+std::unique_ptr<instance> instance::get_copy() const { return std::make_unique<instance>(*this); }
+
 void instance::clear_params() { params.clear(); }
 
 void instance::set_param(const std::string &name,
