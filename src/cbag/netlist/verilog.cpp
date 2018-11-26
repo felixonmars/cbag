@@ -187,5 +187,10 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
     }
 }
 
+void traits::nstream<verilog_stream>::append_netlist(type &stream, const std::string &netlist) {
+    stream.out_file << std::endl << std::endl;
+    stream.out_file << netlist;
+}
+
 } // namespace netlist
 } // namespace cbag

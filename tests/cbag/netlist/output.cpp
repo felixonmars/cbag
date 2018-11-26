@@ -9,7 +9,8 @@
 
 #include "util/io.h"
 
-using name_cv_vec = std::vector<std::pair<std::string, std::unique_ptr<cbag::sch::cellview>>>;
+using name_cv_vec = std::vector<
+    std::pair<std::string, std::pair<std::unique_ptr<cbag::sch::cellview>, std::string>>>;
 
 std::string get_extension(cbag::design_output netlist_type) {
     switch (netlist_type) {
@@ -36,7 +37,8 @@ void populate_name_cv_list(const char *fmt_str, const std::string &yaml_dir,
     }
 
     // write this cellview
-    name_cv_list.emplace_back(cv_name, std::move(cv));
+    name_cv_list.emplace_back(
+        cv_name, std::pair<std::unique_ptr<cbag::sch::cellview>, std::string>(std::move(cv), ""));
     recorded.emplace(top_cell);
 }
 

@@ -34,6 +34,8 @@ template <> struct traits::nstream<verilog_stream> {
 
     static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info);
+
+    static void append_netlist(type &stream, const std::string &netlist);
 };
 
 } // namespace netlist

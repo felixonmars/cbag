@@ -198,5 +198,10 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
     }
 }
 
+void traits::nstream<cdl_stream>::append_netlist(type &stream, const std::string &netlist) {
+    stream.out_file << std::endl << std::endl;
+    stream.out_file << netlist;
+}
+
 } // namespace netlist
 } // namespace cbag

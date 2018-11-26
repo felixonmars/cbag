@@ -33,12 +33,19 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
     for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
         if (!shell || idx == last_idx) {
             auto &cur_pair = *iter;
-            auto &cur_cv = cur_pair.second;
             const std::string &cur_name = cur_pair.first;
-            // add this cellview to netlist
-            logger.info("Netlisting cellview: {}", cur_name);
+            const auto &cur_cv = cur_pair.second.first;
+            const std::string &cur_netlist = cur_pair.second.second;
             sch::cellview_info cv_info = cur_cv->get_info(cur_name);
-            add_cellview(stream, cur_name, *cur_cv, cv_info, netlist_map, shell);
+            logger.info("Netlisting cellview: {}", cur_name);
+
+            if (cur_netlist.empty()) {
+                // add this cellview to netlist
+                add_cellview(stream, cur_name, *cur_cv, cv_info, netlist_map, shell);
+            } else {
+                add_cellview(stream, cur_netlist);
+            }
+
             // add this cellview to netlist map
             logger.info("Adding cellview to netlist cell map");
             auto lib_map_iter = netlist_map.find(cur_cv->lib_name);

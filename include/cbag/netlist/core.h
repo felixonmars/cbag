@@ -41,6 +41,8 @@ template <typename T> struct nstream {
 
     static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info) {}
+
+    static void append_netlist(type &stream, const std::string &netlist) {}
 };
 
 } // namespace traits
@@ -75,6 +77,11 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
         }
     }
     traits::nstream<Stream>::write_cv_end(stream, name);
+}
+
+template <typename Stream, typename = typename traits::nstream<Stream>::type>
+void add_cellview(Stream &stream, const std::string &netlist) {
+    traits::nstream<Stream>::append_netlist(stream, netlist);
 }
 
 class nstream_file {
