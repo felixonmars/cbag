@@ -17,7 +17,7 @@ namespace cbag {
 namespace netlist {
 
 void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc_list,
-                    netlist_map_t &netlist_map, design_output out_type) {
+                    netlist_map_t &netlist_map, std::string &append_file, design_output out_type) {
     if (prim_fname.empty())
         return;
 
@@ -38,6 +38,14 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
                                 std::to_string(static_cast<uint8_t>(out_type)));
     }
     inc_list = iter->second;
+
+    auto app_file_map = n["prim_files"].as<std::unordered_map<design_output, std::string>>();
+    auto iter2 = app_file_map.find(out_type);
+    if (iter2 == app_file_map.end()) {
+        throw std::out_of_range("Cannot find append primitive file for netlist output code " +
+                                std::to_string(static_cast<uint8_t>(out_type)));
+    }
+    append_file = iter2->second;
 }
 
 } // namespace netlist

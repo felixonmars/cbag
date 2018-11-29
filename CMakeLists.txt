@@ -1,11 +1,14 @@
-# Version 3.8 required because of C++17 support.
-cmake_minimum_required(VERSION 3.8)
+# Version 3.9 required because of C++17 / LTO support.
+cmake_minimum_required(VERSION 3.9)
 project(cbag)
 
 # Boost Spirit X3 requires C++14
 # std::variant requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Set build shared library for fmt
+SET(BUILD_SHARED_LIBS ON)
+
 # control compiler warnings
 add_compile_options(-fexceptions)
 add_compile_options(-g)
@@ -25,6 +28,16 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined")
 # add rpaths to the final install executable
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# check for link time optimization
+include(CheckIPOSupported)
+
+check_ipo_supported(RESULT ipo_result)
+if(ipo_result AND CMAKE_BUILD_TYPE MATCHES Release)
+  message("Enabling interprocedural optimization")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+  message("Interprocedural optimization disabled")
+endif()
 
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
@@ -135,12 +148,12 @@ target_link_libraries(cbag
   PUBLIC
   # for Spirit X3 error code
   boost_system
+  fmt
   PRIVATE
   # for netlist generation
   boost_filesystem
   # for reading layout tech file
   yaml-cpp
-  fmt-header-only
   )
 
 set(SRC_FILES_LIB_CBAGOA
@@ -158,12 +171,12 @@ target_link_libraries(cbagoa
   oaBase
   oaCommon
   oaPlugIn
+  fmt
   PRIVATE
   cbag
   boost_filesystem
   boost_system
   yaml-cpp
-  fmt-header-only
   oaDM
   oaDMFileSysBase
   oaTech
