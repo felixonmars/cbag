@@ -29,7 +29,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
     traits::nstream<N>::write_header(stream, inc_list, shell);
 
-    if (!append_file.empty()) {
+    if (!shell && !append_file.empty()) {
         if (util::is_file(append_file)) {
             std::ifstream text(append_file);
             std::stringstream buffer;
