@@ -18,8 +18,7 @@ target_include_directories(test_main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test_main
   PRIVATE
   cbag
-  cbagoa
-  fmt-header-only
+  fmt
   )
 
 install(TARGETS

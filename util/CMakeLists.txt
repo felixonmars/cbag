@@ -6,8 +6,7 @@ add_executable(write_tech_info
 target_link_libraries(write_tech_info
   PRIVATE
   cbag
-  cbagoa
-  fmt-header-only
+  fmt
   )
 
 add_executable(write_cv_yaml
@@ -18,9 +17,7 @@ add_executable(write_cv_yaml
 target_link_libraries(write_cv_yaml
   PRIVATE
   cbag
-  cbagyaml
-  cbagoa
-  fmt-header-only
+  fmt
   )
 
 install(TARGETS

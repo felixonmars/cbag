@@ -68,25 +68,10 @@ message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
 # Include Catch2
 find_package(Catch2 REQUIRED)
 
-# setup global include directories and link libraries
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
-  $ENV{OA_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
-  ${YAML_CPP_INCLUDE_DIR}
-  )
-
-# setup link library path.  Must call before defining target.
-link_directories($ENV{OA_LINK_DIR})
-
-message("OA include directory: " $ENV{OA_INCLUDE_DIR})
-message("OA link directory: " $ENV{OA_LINK_DIR})
-
-message("install prefix: " ${CMAKE_INSTALL_PREFIX})
-
 # set variable storing binary/library location
+message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)
 set(CBAG_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/lib)
-
 message("install rpath: " ${CMAKE_INSTALL_RPATH})
 
 set(SRC_FILES_LIB_CBAG
@@ -141,6 +126,57 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/figures.cpp
   )
+
+set(SRC_FILES_LIB_CBAG_OA
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read_lib.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_util.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_write.cpp
+  )
+
+
+if(DEFINED ENV{OA_LINK_DIR})
+message("OA include directory: " $ENV{OA_INCLUDE_DIR})
+message("OA link directory: " $ENV{OA_LINK_DIR})
+
+# setup global include directories and link libraries
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${Boost_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
+  $ENV{OA_INCLUDE_DIR}
+  )
+link_directories($ENV{OA_LINK_DIR})
+
+add_library(cbag SHARED ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
+
+# shared library dependencies
+target_link_libraries(cbag
+  PUBLIC
+  boost_system
+  fmt
+  oaBase
+  oaCommon
+  oaPlugIn
+  PRIVATE
+  boost_filesystem
+  yaml-cpp
+  oaDM
+  oaDMFileSysBase
+  oaTech
+  oaDesign
+  ${CMAKE_DL_LIBS}
+  )
+
+else()
+message("WARNING: building without OpenAccess support.")
+
+# setup global include directories and link libraries
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${Boost_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
+  )
+
 add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
@@ -156,33 +192,7 @@ target_link_libraries(cbag
   yaml-cpp
   )
 
-set(SRC_FILES_LIB_CBAGOA
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read_lib.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_util.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_write.cpp
-  )
-add_library(cbagoa SHARED EXCLUDE_FROM_ALL ${SRC_FILES_LIB_CBAGOA})
-
-# shared library dependencies
-target_link_libraries(cbagoa
-  PUBLIC
-  oaBase
-  oaCommon
-  oaPlugIn
-  fmt
-  PRIVATE
-  cbag
-  boost_filesystem
-  boost_system
-  yaml-cpp
-  oaDM
-  oaDMFileSysBase
-  oaTech
-  oaDesign
-  ${CMAKE_DL_LIBS}
-  )
+endif()
 
 # add utility binaries
 add_subdirectory(util EXCLUDE_FROM_ALL)
