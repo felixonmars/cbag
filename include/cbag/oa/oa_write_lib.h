@@ -1,12 +1,12 @@
-#ifndef CBAGOA_OA_WRITE_LIB_H
-#define CBAGOA_OA_WRITE_LIB_H
+#ifndef CBAG_OA_OA_WRITE_LIB_H
+#define CBAG_OA_OA_WRITE_LIB_H
 
 #include <cbag/logging/spdlog.h>
 
 #include <cbag/schematic/cellview_fwd.h>
 
-#include <cbagoa/oa_util.h>
-#include <cbagoa/oa_write.h>
+#include <cbag/oa/oa_util.h>
+#include <cbag/oa/oa_write.h>
 
 namespace cbagoa {
 

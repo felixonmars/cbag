@@ -1,5 +1,5 @@
-#ifndef CBAGOA_OA_UTIL_H
-#define CBAGOA_OA_UTIL_H
+#ifndef CBAG_OA_OA_UTIL_H
+#define CBAG_OA_OA_UTIL_H
 
 #include <cstdint>
 #include <string>

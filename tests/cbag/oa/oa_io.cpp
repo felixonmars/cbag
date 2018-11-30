@@ -5,7 +5,7 @@
 #include <fmt/core.h>
 
 #include <cbag/cbag.h>
-#include <cbagoa/cbagoa.h>
+#include <cbag/oa/oa_database.h>
 
 #include "util/io.h"
 

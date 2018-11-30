@@ -1,5 +1,5 @@
-#ifndef CBAGOA_OA_POLYGON_H
-#define CBAGOA_OA_POLYGON_H
+#ifndef CBAG_OA_OA_POLYGON_H
+#define CBAG_OA_OA_POLYGON_H
 
 #include <boost/polygon/polygon.hpp>
 

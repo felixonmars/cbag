@@ -3,8 +3,8 @@
 
 #include <cbag/schematic/cellview.h>
 
-#include <cbagoa/oa_read.h>
-#include <cbagoa/oa_read_lib.h>
+#include <cbag/oa/oa_read.h>
+#include <cbag/oa/oa_read_lib.h>
 
 namespace fs = boost::filesystem;
 

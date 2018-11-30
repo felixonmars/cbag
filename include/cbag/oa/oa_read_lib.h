@@ -1,5 +1,5 @@
-#ifndef CBAGOA_OA_READ_LIB_H
-#define CBAGOA_OA_READ_LIB_H
+#ifndef CBAG_OA_OA_READ_LIB_H
+#define CBAG_OA_OA_READ_LIB_H
 
 #include <unordered_set>
 
@@ -12,7 +12,7 @@
 #include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/instance.h>
 
-#include <cbagoa/oa_util.h>
+#include <cbag/oa/oa_util.h>
 
 namespace cbagoa {
 

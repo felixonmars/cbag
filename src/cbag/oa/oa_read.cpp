@@ -13,8 +13,8 @@
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
 
-#include <cbagoa/oa_read.h>
-#include <cbagoa/oa_util.h>
+#include <cbag/oa/oa_read.h>
+#include <cbag/oa/oa_util.h>
 
 namespace cbagoa {
 

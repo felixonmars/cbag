@@ -3,7 +3,7 @@
 
 #include <oa/oaDesignDB.h>
 
-#include <cbagoa/oa_util.h>
+#include <cbag/oa/oa_util.h>
 
 namespace cbagoa {
 

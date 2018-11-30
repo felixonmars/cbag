@@ -1,5 +1,5 @@
 #include <cbag/cbag.h>
-#include <cbagoa/cbagoa.h>
+#include <cbag/oa/oa_database.h>
 
 void write_cv_yaml(const char *lib_name, const char *cell_name, const char *view_name = "symbol",
                    const char *output = nullptr, const char *lib_file = "cds.lib") {

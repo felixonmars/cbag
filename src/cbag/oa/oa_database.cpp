@@ -21,12 +21,12 @@
 #include <cbag/schematic/instance.h>
 #include <cbag/util/io.h>
 
-#include <cbagoa/oa_database.h>
-#include <cbagoa/oa_read.h>
-#include <cbagoa/oa_read_lib.h>
-#include <cbagoa/oa_util.h>
-#include <cbagoa/oa_write.h>
-#include <cbagoa/oa_write_lib.h>
+#include <cbag/oa/oa_database.h>
+#include <cbag/oa/oa_read.h>
+#include <cbag/oa/oa_read_lib.h>
+#include <cbag/oa/oa_util.h>
+#include <cbag/oa/oa_write.h>
+#include <cbag/oa/oa_write_lib.h>
 
 namespace fs = boost::filesystem;
 

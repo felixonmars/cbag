@@ -1,5 +1,5 @@
 #include <cbag/cbag.h>
-#include <cbagoa/cbagoa.h>
+#include <cbag/oa/oa_database.h>
 
 void write_tech_info_file(const char *fname, const char *tech_lib, const char *lib_file = nullptr,
                           const char *pin_purpose = "pin") {

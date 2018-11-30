@@ -5,8 +5,8 @@
  *  \date   2018/07/13
  */
 
-#ifndef CBAGOA_OA_READ_H
-#define CBAGOA_OA_READ_H
+#ifndef CBAG_OA_OA_READ_H
+#define CBAG_OA_OA_READ_H
 
 #include <string>
 #include <unordered_set>

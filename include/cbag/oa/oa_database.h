@@ -6,8 +6,8 @@
  *  \date   2018/07/10
  */
 
-#ifndef CBAGOA_OA_DATABASE_H
-#define CBAGOA_OA_DATABASE_H
+#ifndef CBAG_OA_OA_DATABASE_H
+#define CBAG_OA_OA_DATABASE_H
 
 #include <string>
 #include <unordered_map>

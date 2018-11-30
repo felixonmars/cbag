@@ -5,8 +5,8 @@
  *  \date   2018/07/14
  */
 
-#ifndef CBAGOA_OA_WRITE_H
-#define CBAGOA_OA_WRITE_H
+#ifndef CBAG_OA_OA_WRITE_H
+#define CBAG_OA_OA_WRITE_H
 
 #include <unordered_map>
 

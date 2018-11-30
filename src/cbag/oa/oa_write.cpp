@@ -30,9 +30,9 @@
 #include <cbag/spirit/ast.h>
 #include <cbag/util/name_convert.h>
 
-#include <cbagoa/oa_polygon.h>
-#include <cbagoa/oa_util.h>
-#include <cbagoa/oa_write.h>
+#include <cbag/oa/oa_polygon.h>
+#include <cbag/oa/oa_util.h>
+#include <cbag/oa/oa_write.h>
 
 namespace cbagoa {
 

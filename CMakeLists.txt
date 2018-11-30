@@ -128,11 +128,11 @@ set(SRC_FILES_LIB_CBAG
   )
 
 set(SRC_FILES_LIB_CBAG_OA
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_database.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_read_lib.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_util.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbagoa/oa_write.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/oa/oa_database.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/oa/oa_read.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/oa/oa_read_lib.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/oa/oa_util.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/oa/oa_write.cpp
   )
 
 
