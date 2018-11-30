@@ -8,7 +8,7 @@ add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/interval.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_map.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_vector.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/cbagoa/oa_io.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/cbag/oa/oa_io.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/io.cpp
 
   )
