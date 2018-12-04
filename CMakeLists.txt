@@ -6,8 +6,6 @@ project(cbag)
 # std::variant requires C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# Set build shared library for fmt
-SET(BUILD_SHARED_LIBS ON)
 
 # control compiler warnings
 add_compile_options(-fexceptions)
@@ -53,6 +51,7 @@ message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 
 # Include fmt library
 # use add_subdirectory, as they do not support find_package
+# set to build static library and enable fPIC
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # Include spdlog
@@ -148,7 +147,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
   )
 link_directories($ENV{OA_LINK_DIR})
 
-add_library(cbag SHARED ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
+add_library(cbag ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
 
 # shared library dependencies
 target_link_libraries(cbag
@@ -177,7 +176,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
   ${YAML_CPP_INCLUDE_DIR}
   )
 
-add_library(cbag SHARED ${SRC_FILES_LIB_CBAG})
+add_library(cbag ${SRC_FILES_LIB_CBAG})
 
 # shared library dependencies
 target_link_libraries(cbag
