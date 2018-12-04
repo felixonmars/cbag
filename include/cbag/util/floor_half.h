@@ -6,7 +6,7 @@
 namespace cbag {
 namespace util {
 
-coord_t floor_half(coord_t a) { return a >> 1; }
+inline coord_t floor_half(coord_t a) { return a >> 1; }
 
 } // namespace util
 } // namespace cbag
