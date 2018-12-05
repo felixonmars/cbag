@@ -25,12 +25,12 @@ struct via::helper {
 
 via::via() = default;
 
-via::via(cbag::transformation xform, const char *via_id, const uint32_t (&num)[2],
+via::via(cbag::transformation xform, std::string via_id, const uint32_t (&num)[2],
          const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
          const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
          const offset_t (&lay2_off)[2], bool add_layers, bool bot_horiz, bool top_horiz)
-    : xform(std::move(xform)), via_id(via_id), add_layers(add_layers), bot_horiz(bot_horiz),
-      top_horiz(top_horiz) {
+    : xform(std::move(xform)), via_id(std::move(via_id)), add_layers(add_layers),
+      bot_horiz(bot_horiz), top_horiz(top_horiz) {
     params.num[0] = num[0];
     params.num[1] = num[1];
     params.cut_dim[0] = cut_dim[0];

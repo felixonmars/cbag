@@ -21,7 +21,7 @@ class pin : public box_t {
 
     pin();
 
-    pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net, const char *label);
+    pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, std::string net, std::string label);
 };
 
 } // namespace layout

@@ -23,7 +23,7 @@ struct cellview_ref {
     std::string view;
     param_map params;
 
-    cellview_ref(const char *lib, const char *cell, const char *view);
+    cellview_ref(std::string lib, std::string cell, std::string view);
 };
 
 using str_map_t = std::unordered_map<std::string, std::string>;
@@ -33,7 +33,7 @@ class instance {
     std::variant<const cellview *, cellview_ref> master = nullptr;
 
   public:
-    const char *name;
+    const std::string name;
     cbag::transformation xform;
     uint32_t nx = 1;
     uint32_t ny = 1;
@@ -42,36 +42,31 @@ class instance {
 
     instance();
 
-    instance(const char *name, const char *lib, const char *cell, const char *view,
+    instance(std::string name, std::string lib, std::string cell, std::string view,
              cbag::transformation xform, uint32_t nx = 1, uint32_t ny = 1, offset_t spx = 0,
              offset_t spy = 0);
 
-    instance(const char *name, const cellview *master, cbag::transformation xform, uint32_t nx = 1,
+    instance(std::string name, const cellview *master, cbag::transformation xform, uint32_t nx = 1,
              uint32_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
     bool is_reference() const;
 
     const cellview *get_cellview() const;
 
-    const char *get_lib_name(const char *output_lib) const;
+    const std::string &get_lib_name(const std::string &output_lib) const;
 
-    const char *get_cell_name(const str_map_t *rename_map) const;
+    const std::string &get_cell_name(const str_map_t *rename_map) const;
 
-    const char *get_view_name(const char *default_view) const;
+    const std::string &get_view_name(const std::string &default_view) const;
 
     const param_map *get_params() const;
 
-    box_t get_bbox(const char *layer, const char *purpose) const;
+    box_t get_bbox(const std::string &layer, const std::string &purpose) const;
 
     void set_master(const cellview *new_master);
 
-    void set_int_param(const char *name, int value);
-
-    void set_double_param(const char *name, double value);
-
-    void set_bool_param(const char *name, bool value);
-
-    void set_string_param(const char *name, const char *value);
+    void set_param(const std::string &name,
+                   const std::variant<int32_t, double, bool, std::string> &val);
 };
 
 } // namespace layout

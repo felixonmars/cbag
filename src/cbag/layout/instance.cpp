@@ -8,20 +8,21 @@
 namespace cbag {
 namespace layout {
 
-cellview_ref::cellview_ref(const char *lib, const char *cell, const char *view)
-    : lib(lib), cell(cell), view(view) {}
+cellview_ref::cellview_ref(std::string lib, std::string cell, std::string view)
+    : lib(std::move(lib)), cell(std::move(cell)), view(std::move(view)) {}
 
 instance::instance() = default;
 
-instance::instance(const char *name, const char *lib, const char *cell, const char *view,
+instance::instance(std::string name, std::string lib, std::string cell, std::string view,
                    cbag::transformation xform, uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
-    : master(std::in_place_type_t<cellview_ref>{}, lib, cell, view), name(name),
-      xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
+    : master(std::in_place_type_t<cellview_ref>{}, std::move(lib), std::move(cell),
+             std::move(view)),
+      name(std::move(name)), xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
-instance::instance(const char *name, const cellview *master, cbag::transformation xform,
+instance::instance(std::string name, const cellview *master, cbag::transformation xform,
                    uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
-    : master(std::in_place_type_t<const cellview *>{}, master), name(name), xform(std::move(xform)),
-      nx(nx), ny(ny), spx(spx), spy(spy) {}
+    : master(std::in_place_type_t<const cellview *>{}, master), name(std::move(name)),
+      xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
 bool instance::is_reference() const { return std::holds_alternative<cellview_ref>(master); }
 
@@ -30,37 +31,37 @@ const cellview *instance::get_cellview() const {
     return (ptr == nullptr) ? nullptr : *ptr;
 }
 
-const char *instance::get_lib_name(const char *output_lib) const {
+const std::string &instance::get_lib_name(const std::string &output_lib) const {
     return std::visit(
         overload{
-            [&output_lib](const cellview *v) { return output_lib; },
-            [](const cellview_ref &v) { return v.lib.c_str(); },
+            [&output_lib](const cellview *v) -> const std::string & { return output_lib; },
+            [](const cellview_ref &v) -> const std::string & { return v.lib; },
         },
         master);
 }
 
-const char *instance::get_cell_name(const str_map_t *rename_map) const {
+const std::string &instance::get_cell_name(const str_map_t *rename_map) const {
     return std::visit(
         overload{
-            [&rename_map](const cellview *v) {
+            [&rename_map](const cellview *v) -> const std::string & {
                 if (rename_map == nullptr) {
-                    return v->cell_name.c_str();
+                    return v->cell_name;
                 }
                 auto iter = rename_map->find(v->cell_name);
                 if (iter == rename_map->end())
-                    return v->cell_name.c_str();
-                return iter->second.c_str();
+                    return v->cell_name;
+                return iter->second;
             },
-            [](const cellview_ref &v) { return v.cell.c_str(); },
+            [](const cellview_ref &v) -> const std::string & { return v.cell; },
         },
         master);
-}
+} // namespace layout
 
-const char *instance::get_view_name(const char *default_view) const {
+const std::string &instance::get_view_name(const std::string &default_view) const {
     return std::visit(
         overload{
-            [&default_view](const cellview *v) { return default_view; },
-            [](const cellview_ref &v) { return v.view.c_str(); },
+            [&default_view](const cellview *v) -> const std::string & { return default_view; },
+            [](const cellview_ref &v) -> const std::string & { return v.view; },
         },
         master);
 }
@@ -74,7 +75,7 @@ const param_map *instance::get_params() const {
         master);
 }
 
-box_t instance::get_bbox(const char *layer, const char *purpose) const {
+box_t instance::get_bbox(const std::string &layer, const std::string &purpose) const {
     box_t r = std::visit(
         overload{
             [&layer, &purpose](const cellview *v) { return v->get_bbox(layer, purpose); },
@@ -87,31 +88,11 @@ box_t instance::get_bbox(const char *layer, const char *purpose) const {
 
 void instance::set_master(const cellview *new_master) { master = new_master; }
 
-void instance::set_int_param(const char *name, int value) {
+void instance::set_param(const std::string &name,
+                         const std::variant<int32_t, double, bool, std::string> &val) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
-        cv_ref->params.insert_or_assign(std::string(name), value);
-    }
-}
-
-void instance::set_double_param(const char *name, double value) {
-    auto *cv_ref = std::get_if<cellview_ref>(&master);
-    if (cv_ref != nullptr) {
-        cv_ref->params.insert_or_assign(std::string(name), value);
-    }
-}
-
-void instance::set_bool_param(const char *name, bool value) {
-    auto *cv_ref = std::get_if<cellview_ref>(&master);
-    if (cv_ref != nullptr) {
-        cv_ref->params.insert_or_assign(std::string(name), value);
-    }
-}
-
-void instance::set_string_param(const char *name, const char *value) {
-    auto *cv_ref = std::get_if<cellview_ref>(&master);
-    if (cv_ref != nullptr) {
-        cv_ref->params.insert_or_assign(std::string(name), std::string(value));
+        cbag::set_param(cv_ref->params, name, val);
     }
 }
 

@@ -585,9 +585,9 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string &name,
                      const cbag::layout::instance &inst, const char *lib_name,
                      const char *view_name, const str_map_t *rename_map) {
-    oa::oaScalarName lib_oa(ns, inst.get_lib_name(lib_name));
-    oa::oaScalarName cell_oa(ns, inst.get_cell_name(rename_map));
-    oa::oaScalarName view_oa(ns, inst.get_view_name(view_name));
+    oa::oaScalarName lib_oa(ns, inst.get_lib_name(lib_name).c_str());
+    oa::oaScalarName cell_oa(ns, inst.get_cell_name(rename_map).c_str());
+    oa::oaScalarName view_oa(ns, inst.get_view_name(view_name).c_str());
     oa::oaScalarName inst_name(ns, name.c_str());
 
     // create oa ParamArray

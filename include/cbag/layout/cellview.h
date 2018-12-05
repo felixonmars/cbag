@@ -49,62 +49,62 @@ class cellview {
     std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
 
-    explicit cellview(tech *tech_ptr, const char *cell_name, uint8_t geo_mode = 0);
+    explicit cellview(tech *tech_ptr, std::string cell_name, uint8_t geo_mode = 0);
 
     void set_geometry_mode(uint8_t new_mode);
 
     bool empty() const;
 
-    layer_t get_lay_purp_key(const char *layer, const char *purpose) const;
+    layer_t get_lay_purp_key(const std::string &layer, const std::string &purpose) const;
 
-    box_t get_bbox(const char *layer, const char *purpose) const;
+    box_t get_bbox(const std::string &layer, const std::string &purpose) const;
 
     geo_iterator begin_intersect(const layer_t &key, const box_t &r, offset_t spx,
                                  offset_t spy) const;
 
     geo_iterator end_intersect() const;
 
-    void add_pin(const char *layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh, const char *net,
-                 const char *label);
+    void add_pin(const std::string &layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
+                 std::string net, std::string label);
 
-    shape_ref<box_t> add_rect(const char *layer, const char *purpose, bool is_horiz, coord_t xl,
-                              coord_t yl, coord_t xh, coord_t yh, bool commit);
+    shape_ref<box_t> add_rect(const std::string &layer, const std::string &purpose, bool is_horiz,
+                              coord_t xl, coord_t yl, coord_t xh, coord_t yh, bool commit);
 
-    shape_ref<polygon90> add_poly90(const char *layer, const char *purpose, bool is_horiz,
-                                    const pt_vector &data, bool commit);
+    shape_ref<polygon90> add_poly90(const std::string &layer, const std::string &purpose,
+                                    bool is_horiz, const pt_vector &data, bool commit);
 
-    shape_ref<polygon45> add_poly45(const char *layer, const char *purpose, bool is_horiz,
-                                    const pt_vector &data, bool commit);
+    shape_ref<polygon45> add_poly45(const std::string &layer, const std::string &purpose,
+                                    bool is_horiz, const pt_vector &data, bool commit);
 
-    shape_ref<polygon> add_poly(const char *layer, const char *purpose, bool is_horiz,
+    shape_ref<polygon> add_poly(const std::string &layer, const std::string &purpose, bool is_horiz,
                                 const pt_vector &data, bool commit);
 
-    shape_ref<polygon45_set> add_path(const char *layer, const char *purpose, bool is_horiz,
-                                      const pt_vector &data, offset_t half_width, uint8_t style0,
-                                      uint8_t style1, uint8_t stylem, bool commit);
+    shape_ref<polygon45_set> add_path(const std::string &layer, const std::string &purpose,
+                                      bool is_horiz, const pt_vector &data, offset_t half_width,
+                                      uint8_t style0, uint8_t style1, uint8_t stylem, bool commit);
 
-    shape_ref<polygon45_set> add_path45_bus(const char *layer, const char *purpose, bool is_horiz,
-                                            const pt_vector &data,
+    shape_ref<polygon45_set> add_path45_bus(const std::string &layer, const std::string &purpose,
+                                            bool is_horiz, const pt_vector &data,
                                             const std::vector<offset_t> &widths,
                                             const std::vector<offset_t> &spaces, uint8_t style0,
                                             uint8_t style1, uint8_t stylem, bool commit);
 
-    cv_obj_ref<blockage> add_blockage(const char *layer, uint8_t blk_code, const pt_vector &data,
-                                      bool commit);
+    cv_obj_ref<blockage> add_blockage(const std::string &layer, uint8_t blk_code,
+                                      const pt_vector &data, bool commit);
 
     cv_obj_ref<boundary> add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit);
 
-    cv_obj_ref<via> add_via(transformation xform, const char *via_id, const uint32_t (&num)[2],
+    cv_obj_ref<via> add_via(transformation xform, std::string via_id, const uint32_t (&num)[2],
                             const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
                             const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
                             const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
                             bool add_layers, bool bot_horiz, bool top_horiz, bool commit);
 
-    cv_obj_ref<instance> add_prim_instance(const char *lib, const char *cell, const char *view,
-                                           const char *name, transformation xform, uint32_t nx,
+    cv_obj_ref<instance> add_prim_instance(std::string lib, std::string cell, std::string view,
+                                           std::string name, transformation xform, uint32_t nx,
                                            uint32_t ny, offset_t spx, offset_t spy, bool commit);
 
-    cv_obj_ref<instance> add_instance(const cellview *cv, const char *name, transformation xform,
+    cv_obj_ref<instance> add_instance(const cellview *cv, std::string name, transformation xform,
                                       uint32_t nx, uint32_t ny, offset_t spx, offset_t spy,
                                       bool commit);
 
