@@ -3,8 +3,6 @@
 
 #include <unordered_set>
 
-#include <boost/functional/hash.hpp>
-
 #include <fmt/core.h>
 
 #include <oa/oaDesignDB.h>
@@ -13,12 +11,9 @@
 #include <cbag/schematic/instance.h>
 
 #include <cbag/oa/oa_util.h>
+#include <cbag/oa/typedef.h>
 
 namespace cbagoa {
-
-using cell_key_t = std::pair<std::string, std::string>;
-using str_map_t = std::unordered_map<std::string, std::string>;
-using cell_set_t = std::unordered_set<cell_key_t, boost::hash<cell_key_t>>;
 
 cbag::sch::cellview cell_to_yaml(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                  spdlog::logger &logger, const std::string &lib_name,

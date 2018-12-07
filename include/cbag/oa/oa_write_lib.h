@@ -7,11 +7,9 @@
 
 #include <cbag/oa/oa_util.h>
 #include <cbag/oa/oa_write.h>
+#include <cbag/oa/typedef.h>
 
 namespace cbagoa {
-
-using sch_cv_info = std::pair<std::string, cbag::sch::cellview *>;
-using lay_cv_info = std::pair<std::string, cbag::layout::cellview *>;
 
 template <class Vector>
 void implement_sch_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
@@ -22,14 +20,16 @@ void implement_sch_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         str_map_t rename_map;
 
         for (const auto &cv_info : cv_list) {
-            write_sch_cellview(ns_native, ns, logger, lib_name, cv_info.first, sch_view, true,
-                               *(cv_info.second), &rename_map);
-            if (cv_info.second->sym_ptr != nullptr && !sym_view.empty()) {
-                write_sch_cellview(ns_native, ns, logger, lib_name, cv_info.first, sym_view, false,
-                                   *(cv_info.second->sym_ptr));
+            const std::string &name = cv_info.first;
+            const auto cv_ptr = cv_info.second.first;
+            write_sch_cellview(ns_native, ns, logger, lib_name, name, sch_view, true, *cv_ptr,
+                               &rename_map);
+            if (cv_ptr->sym_ptr != nullptr && !sym_view.empty()) {
+                write_sch_cellview(ns_native, ns, logger, lib_name, name, sym_view, false,
+                                   *(cv_ptr->sym_ptr));
             }
-            logger.info("cell name {} maps to {}", cv_info.second->cell_name, cv_info.first);
-            rename_map[cv_info.second->cell_name] = cv_info.first;
+            logger.info("cell name {} maps to {}", cv_ptr->cell_name, name);
+            rename_map[cv_ptr->cell_name] = name;
         }
     } catch (...) {
         handle_oa_exceptions(logger);

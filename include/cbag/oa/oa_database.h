@@ -16,6 +16,8 @@
 
 #include <oa/oaDesignDB.h>
 
+#include <cbag/oa/typedef.h>
+
 // forward declare structures to reduce dependencies
 namespace spdlog {
 class logger;
@@ -23,13 +25,9 @@ class logger;
 
 namespace cbag {
 namespace sch {
-struct cellview;
 struct instance;
 } // namespace sch
 
-namespace layout {
-struct cellview;
-}
 } // namespace cbag
 
 namespace cbagoa {
@@ -37,11 +35,6 @@ namespace cbagoa {
 // forward declare structures to reduce dependencies
 class oa_reader;
 class oa_writer;
-
-using cell_key_t = std::pair<std::string, std::string>;
-using str_map_t = std::unordered_map<std::string, std::string>;
-using sch_cv_info = std::pair<std::string, cbag::sch::cellview *>;
-using lay_cv_info = std::pair<std::string, cbag::layout::cellview *>;
 
 class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
   public:

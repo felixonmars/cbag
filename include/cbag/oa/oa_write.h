@@ -12,24 +12,14 @@
 
 #include <oa/oaDesignDB.h>
 
+#include <cbag/oa/typedef.h>
+
 // forward declare structures to reduce dependencies
 namespace spdlog {
 class logger;
 } // namespace spdlog
 
-namespace cbag {
-namespace sch {
-class cellview;
-} // namespace sch
-
-namespace layout {
-class cellview;
-} // namespace layout
-} // namespace cbag
-
 namespace cbagoa {
-
-using str_map_t = std::unordered_map<std::string, std::string>;
 
 // Write method for schematic/symbol cell view
 
