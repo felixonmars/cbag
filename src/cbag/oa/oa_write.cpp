@@ -474,11 +474,13 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     oa::oaScalarName lib, cell, view, name;
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
-        logger.info("Writing instance {}", pair.first);
-        cbag::spirit::ast::name_unit nu = cbag::util::parse_cdba_name_unit(pair.first);
+        const std::string &inst_name = pair.first;
         cbag::sch::instance *inst = pair.second.get();
+        logger.info("Writing instance {}", inst_name);
+        cbag::spirit::ast::name_unit nu = cbag::util::parse_cdba_name_unit(inst_name);
+
         oa::oaTransform inst_xform = get_xform(inst->xform);
-        if (pair.second->is_primitive) {
+        if (inst->is_primitive) {
             lib.init(ns, inst->lib_name.c_str());
             cell.init(ns, inst->cell_name.c_str());
         } else {
@@ -496,7 +498,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             ptr = oa::oaScalarInst::create(block, lib, cell, view, name, inst_xform);
         }
         for (auto const &term_net_pair : inst->connections) {
-            logger.info("Connecting inst {} terminal {} to {}", pair.first, term_net_pair.first,
+            logger.info("Connecting inst {} terminal {} to {}", inst_name, term_net_pair.first,
                         term_net_pair.second);
             term_name.init(ns, term_net_pair.first.c_str());
             net_name.init(ns, term_net_pair.second.c_str());
@@ -530,11 +532,11 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             text->addToNet(term_net);
         }
 
-        logger.info("Writing instance {} params", pair.first);
+        logger.info("Writing instance {} params", inst_name);
         for (auto const &prop_pair : inst->params) {
             std::visit(make_prop_visitor(ptr, prop_pair.first), prop_pair.second);
         }
-        logger.info("Writing instance {} done", pair.first);
+        logger.info("Writing instance {} done", inst_name);
     }
 
     logger.info("Writing properties");

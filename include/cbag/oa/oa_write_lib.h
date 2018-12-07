@@ -26,7 +26,7 @@ void implement_sch_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                                &rename_map);
             if (cv_ptr->sym_ptr != nullptr && !sym_view.empty()) {
                 write_sch_cellview(ns_native, ns, logger, lib_name, name, sym_view, false,
-                                   *(cv_ptr->sym_ptr));
+                                   *(cv_ptr->sym_ptr), &rename_map);
             }
             logger.info("cell name {} maps to {}", cv_ptr->cell_name, name);
             rename_map[cv_ptr->cell_name] = name;

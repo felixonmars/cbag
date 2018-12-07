@@ -126,7 +126,7 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
             // we just do it by hand.
             std::ofstream outfile;
             outfile.open(lib_def_file, std::ios_base::app);
-            outfile << "DEFINE " << lib_name << " " << new_lib_path << std::endl;
+            outfile << "DEFINE " << lib_name << " " << new_lib_path.string() << std::endl;
             outfile.close();
 
             // Create cdsinfo.tag file
