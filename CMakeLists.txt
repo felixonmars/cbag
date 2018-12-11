@@ -42,9 +42,8 @@ endif()
 include(GNUInstallDirs)
 
 # Include Boost as an imported target
-find_package(Boost REQUIRED)
-add_library(boost INTERFACE IMPORTED)
-set_property(TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
@@ -152,13 +151,12 @@ add_library(cbag ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  boost_system
   fmt
   oaBase
   oaCommon
   oaPlugIn
   PRIVATE
-  boost_filesystem
+  ${Boost_LIBRARIES}
   yaml-cpp
   oaDM
   oaDMFileSysBase
@@ -181,12 +179,10 @@ add_library(cbag ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  # for Spirit X3 error code
-  boost_system
   fmt
   PRIVATE
   # for netlist generation
-  boost_filesystem
+  ${Boost_LIBRARIES}
   # for reading layout tech file
   yaml-cpp
   )
