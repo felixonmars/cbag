@@ -139,7 +139,6 @@ message("OA link directory: " $ENV{OA_LINK_DIR})
 # setup global include directories and link libraries
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
   ${Boost_INCLUDE_DIRS}
-  ${YAML_CPP_INCLUDE_DIR}
   $ENV{OA_INCLUDE_DIR}
   )
 link_directories($ENV{OA_LINK_DIR})
@@ -169,7 +168,6 @@ message("WARNING: building without OpenAccess support.")
 # setup global include directories and link libraries
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include
   ${Boost_INCLUDE_DIRS}
-  ${YAML_CPP_INCLUDE_DIR}
   )
 
 add_library(cbag ${SRC_FILES_LIB_CBAG})
