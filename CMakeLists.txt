@@ -59,9 +59,7 @@ find_package(spdlog CONFIG REQUIRED)
 # find_package(Threads REQUIRED)
 
 # Include yaml-cpp
-find_package(yaml-cpp)
-message("yaml-cpp include directory: " ${YAML_CPP_INCLUDE_DIR})
-message("yaml-cpp library: " ${YAML_CPP_LIBRARIES})
+add_subdirectory(yaml-cpp EXCLUDE_FROM_ALL)
 
 # Include Catch2
 find_package(Catch2 REQUIRED)
