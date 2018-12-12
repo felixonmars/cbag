@@ -1,7 +1,7 @@
 
-# Use gcc 7; latest gcc 8 has internal compiler error
-export CC=/usr/bin/gcc-7
-export CXX=/usr/bin/g++-7
+# latest gcc 8 (8.2.1) fixed internal compiler errors
+export CC=/usr/bin/gcc
+export CXX=/usr/bin/g++
 export CBAG_PYTHON=$(which python)
 export CBAG_PYTEST=$(which pytest)
 
