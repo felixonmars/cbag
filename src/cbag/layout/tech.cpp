@@ -45,12 +45,12 @@ tech::tech(const std::string &tech_fname) {
     std::string def_purp = node["default_purpose"].as<std::string>();
     try {
         default_purpose = purp_map.at(def_purp);
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find default purpose: {}", def_purp));
     }
     try {
         pin_purpose = purp_map.at(pin_purp);
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find pin purpose: {}", pin_purp));
     }
 
@@ -60,7 +60,7 @@ tech::tech(const std::string &tech_fname) {
         try {
             lay_t lay_id = lay_map.at(lay_name);
             lay_type_map[lay_id] = pair.second.as<std::string>();
-        } catch (std::out_of_range) {
+        } catch (const std::out_of_range &) {
             throw std::out_of_range(
                 fmt::format("Cannot find layer ID for layer {} in type map", lay_name));
         }
@@ -94,7 +94,7 @@ std::string tech::get_purpose_name(purp_t purp_id) const {
 lay_t tech::get_layer_id(const std::string &layer) const {
     try {
         return lay_map.at(layer);
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find layer: {}", layer));
     }
 }
@@ -105,7 +105,7 @@ purp_t tech::get_purpose_id(const std::string &purpose) const {
     }
     try {
         return purp_map.at(purpose);
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find purpose: {}", purpose));
     }
 }
@@ -120,7 +120,7 @@ void tech::get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const 
         auto temp = via_map.at(key);
         bot = temp.first;
         top = temp.second;
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find via ID: {}", key));
     }
 }
@@ -137,7 +137,7 @@ offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
                 return pair.second[idx];
         }
         return pair.second[pair.second.size() - 1];
-    } catch (std::out_of_range) {
+    } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find layer type {} or space type {}",
                                             layer_type, (uint32_t)sp_type));
     }

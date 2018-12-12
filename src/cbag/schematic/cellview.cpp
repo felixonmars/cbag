@@ -1,6 +1,4 @@
 
-#include <boost/filesystem.hpp>
-
 #include <fmt/core.h>
 
 #include <cbag/spirit/name.h>
@@ -12,8 +10,6 @@
 #include <cbag/schematic/instance.h>
 #include <cbag/util/io.h>
 #include <cbag/yaml/cellviews.h>
-
-namespace fs = boost::filesystem;
 
 namespace cbag {
 namespace sch {
@@ -31,9 +27,9 @@ cellview::cellview(const std::string &yaml_fname, const std::string &sym_view) {
 
     if (!sym_view.empty()) {
         // load symbol cellview
-        fs::path yaml_path(yaml_fname);
-        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().string()));
-        if (fs::is_regular_file(yaml_path)) {
+        auto yaml_path = cbag::util::get_canonical_path(yaml_fname);
+        yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
+        if (cbag::util::is_file(yaml_path)) {
             YAML::Node s = YAML::LoadFile(yaml_path.string());
             sym_ptr = std::make_unique<cellview>(s.as<cellview>());
         }

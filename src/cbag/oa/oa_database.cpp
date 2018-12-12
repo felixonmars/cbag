@@ -8,8 +8,6 @@
 
 #include <fstream>
 
-#include <boost/filesystem.hpp>
-
 #include <cbag/logging/logging.h>
 
 #include <yaml-cpp/yaml.h>
@@ -27,8 +25,6 @@
 #include <cbag/oa/oa_util.h>
 #include <cbag/oa/oa_write.h>
 #include <cbag/oa/oa_write_lib.h>
-
-namespace fs = boost::filesystem;
 
 namespace cbagoa {
 
@@ -110,9 +106,8 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
         oa::oaLib *lib_ptr = oa::oaLib::find(lib_name_oa);
         if (lib_ptr == nullptr) {
             // append library name to lib_path
-            fs::path new_lib_path(lib_path);
-            new_lib_path /= lib_name;
-            cbag::util::make_parent_dirs(new_lib_path.string());
+            auto new_lib_path = cbag::util::join(lib_path, lib_name);
+            cbag::util::make_parent_dirs(new_lib_path);
 
             // create new library
             logger->info("Creating library {} at path {}, with tech lib {}", lib_name,
@@ -126,11 +121,12 @@ void oa_database::create_lib(const std::string &lib_name, const std::string &lib
             // we just do it by hand.
             std::ofstream outfile;
             outfile.open(lib_def_file, std::ios_base::app);
-            outfile << "DEFINE " << lib_name << " " << new_lib_path.string() << std::endl;
+            outfile << "DEFINE " << lib_name << " " << new_lib_path.c_str() << std::endl;
             outfile.close();
 
             // Create cdsinfo.tag file
-            outfile.open((new_lib_path / "cdsinfo.tag").string(), std::ios_base::out);
+            new_lib_path /= "cdsinfo.tag";
+            outfile.open(new_lib_path.c_str(), std::ios_base::out);
             outfile << "CDSLIBRARY" << std::endl;
             outfile << "NAMESPACE LibraryUnix" << std::endl;
             outfile.close();

@@ -1,6 +1,4 @@
 
-#include <boost/filesystem.hpp>
-
 #include <fmt/core.h>
 
 #include "yaml-cpp/unordered_map.h"
@@ -8,10 +6,9 @@
 
 #include <cbag/common/design_output.h>
 #include <cbag/netlist/netlist.h>
+#include <cbag/util/io.h>
 #include <cbag/yaml/cellviews.h>
 #include <cbag/yaml/enum.h>
-
-namespace fs = boost::filesystem;
 
 namespace cbag {
 namespace netlist {
@@ -21,9 +18,7 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
     if (prim_fname.empty())
         return;
 
-    fs::path fpath(prim_fname);
-
-    if (!fs::is_regular_file(fpath)) {
+    if (!util::is_file(prim_fname)) {
         throw std::invalid_argument(
             fmt::format("{} does not point to a netlist primitive file.", prim_fname));
     }

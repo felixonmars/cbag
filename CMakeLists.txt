@@ -43,10 +43,11 @@ include(GNUInstallDirs)
 
 # Include Boost as an imported target
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 message("Boost include directory: " ${Boost_INCLUDE_DIRS})
 message("Boost library directory: " ${Boost_LIBRARY_DIRS})
+message("Boost libraries: " ${Boost_LIBRARIES})
 
 # Include fmt library
 # use add_subdirectory, as they do not support find_package
@@ -153,6 +154,7 @@ target_link_libraries(cbag
   oaCommon
   oaPlugIn
   PRIVATE
+  stdc++fs
   ${Boost_LIBRARIES}
   yaml-cpp
   oaDM
@@ -177,9 +179,8 @@ target_link_libraries(cbag
   PUBLIC
   fmt
   PRIVATE
-  # for netlist generation
+  stdc++fs
   ${Boost_LIBRARIES}
-  # for reading layout tech file
   yaml-cpp
   )
 

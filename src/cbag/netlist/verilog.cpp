@@ -5,8 +5,6 @@
  *  \date   2018/07/10
  */
 
-#include <boost/filesystem.hpp>
-
 #include <fmt/core.h>
 
 #include <cbag/netlist/lstream.h>
@@ -16,6 +14,7 @@
 #include <cbag/schematic/instance.h>
 #include <cbag/spirit/ast.h>
 #include <cbag/spirit/util.h>
+#include <cbag/util/io.h>
 #include <cbag/util/name_convert.h>
 
 namespace cbag {
@@ -31,9 +30,8 @@ void traits::nstream<verilog_stream>::write_header(type &stream,
     if (!shell) {
         if (!inc_list.empty()) {
             for (auto const &fname : inc_list) {
-                boost::filesystem::path fpath(fname);
-                stream.out_file << "`include \"" << boost::filesystem::canonical(fpath).string()
-                                << '"' << std::endl;
+                stream.out_file << "`include \"" << util::get_canonical_path(fname).c_str() << '"'
+                                << std::endl;
             }
         }
     }
