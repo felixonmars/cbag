@@ -17,11 +17,9 @@ namespace cbag {
  */
 class transformation : public bp::transformation<coord_t> {
   public:
-    transformation();
-    explicit transformation(orientation orient);
-    transformation(coord_t dx, coord_t dy);
+    explicit transformation(coord_t dx = 0, coord_t dy = 0,
+                            uint32_t mode = static_cast<uint32_t>(oR0));
     transformation(coord_t dx, coord_t dy, orientation orient);
-    transformation(coord_t dx, coord_t dy, uint32_t mode);
 
     coord_t x() const;
     coord_t y() const;

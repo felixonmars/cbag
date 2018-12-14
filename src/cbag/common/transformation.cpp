@@ -2,13 +2,6 @@
 
 namespace cbag {
 
-transformation::transformation() = default;
-
-transformation::transformation(orientation orient) : bp::transformation<coord_t>(orient) {}
-
-transformation::transformation(coord_t dx, coord_t dy)
-    : bp::transformation<coord_t>(bp::point_data<coord_t>(-dx, -dy)) {}
-
 transformation::transformation(coord_t dx, coord_t dy, orientation orient)
     : bp::transformation<coord_t>(orient) {
     auto tmp = bp::axis_transformation(orient);
@@ -17,11 +10,7 @@ transformation::transformation(coord_t dx, coord_t dy, orientation orient)
 }
 
 transformation::transformation(coord_t dx, coord_t dy, uint32_t mode)
-    : bp::transformation<coord_t>(static_cast<orientation>((mode))) {
-    bp::axis_transformation tmp(static_cast<orientation>((mode)));
-    tmp.invert().transform(dx, dy);
-    set_translation(bp::point_data<coord_t>(-dx, -dy));
-}
+    : transformation(dx, dy, static_cast<orientation>(mode)) {}
 
 coord_t transformation::x() const {
     coord_t x = 0, y = 0;
