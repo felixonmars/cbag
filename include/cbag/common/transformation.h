@@ -30,10 +30,12 @@ class transformation : public bp::transformation<coord_t> {
 
     transformation get_move_by(offset_t dx, offset_t dy) const;
     transformation get_inverse() const;
+    transformation get_transform_by(const transformation &xform) const;
 
     void set_location(coord_t x, coord_t y);
     void set_orient_code(uint32_t code);
-    void move_by(offset_t dx, offset_t dy);
+    transformation &move_by(offset_t dx, offset_t dy);
+    transformation &transform_by(const transformation &xform);
 };
 
 } // namespace cbag

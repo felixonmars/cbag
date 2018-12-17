@@ -44,10 +44,24 @@ bool transformation::flips_xy() const {
     return code == bp::direction_2d_enum::NORTH || code == bp::direction_2d_enum::SOUTH;
 }
 
-transformation transformation::get_move_by(offset_t dx, offset_t dy) const {
+transformation &transformation::move_by(offset_t dx, offset_t dy) {
     coord_t x, y;
     get_location(x, y);
-    return {x + dx, y + dy, orient()};
+    set_location(x + dx, y + dy);
+    return *this;
+}
+
+transformation transformation::get_move_by(offset_t dx, offset_t dy) const {
+    return transformation(*this).move_by(dx, dy);
+}
+
+transformation &transformation::transform_by(const transformation &xform) {
+    operator+=(xform);
+    return *this;
+}
+
+transformation transformation::get_transform_by(const transformation &xform) const {
+    return transformation(*this).transform_by(xform);
 }
 
 transformation transformation::get_inverse() const {
@@ -70,12 +84,6 @@ void transformation::set_orient_code(uint32_t code) {
     set_axis_transformation(bp::axis_transformation(static_cast<orientation>(code)));
     // set origin
     set_location(x, y);
-}
-
-void transformation::move_by(offset_t dx, offset_t dy) {
-    coord_t x, y;
-    get_location(x, y);
-    set_location(x + dx, y + dy);
 }
 
 } // namespace cbag
