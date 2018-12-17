@@ -36,32 +36,68 @@ const box_t::interval_type &box_t::get_interval(bp::orientation_2d_enum orient) 
     return intvs[static_cast<unsigned int>(orient)];
 }
 
+box_t &box_t::merge(const box_t &other) {
+    if (!other.is_valid())
+        return *this;
+    if (!is_valid())
+        *this = other;
+    bp::encompass(*this, other);
+    return *this;
+}
+
 box_t box_t::get_merge(const box_t &other) const { return box_t(*this).merge(other); }
 
-box_t box_t::get_intersect(const box_t &other) const {
-    return {std::max(xl(), other.xl()), std::max(yl(), other.yl()), std::min(xh(), other.xh()),
-            std::min(yh(), other.yh())};
+box_t &box_t::intersect(const box_t &other) {
+    set(std::max(xl(), other.xl()), std::max(yl(), other.yl()), std::min(xh(), other.xh()),
+        std::min(yh(), other.yh()));
+    return *this;
+}
+
+box_t box_t::get_intersect(const box_t &other) const { return box_t(*this).intersect(other); }
+
+box_t &box_t::extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) {
+    if (is_valid()) {
+        coord_t xv = x ? *x : xl();
+        coord_t yv = y ? *y : yl();
+        set(std::min(xl(), xv), std::min(yl(), yv), std::max(xh(), xv), std::max(yh(), yv));
+    }
+    return *this;
 }
 
 box_t box_t::get_extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) const {
-    coord_t xv = x ? *x : xl();
-    coord_t yv = y ? *y : yl();
-    return {std::min(xl(), xv), std::min(yl(), yv), std::max(xh(), xv), std::max(yh(), yv)};
+    return box_t(*this).extend(x, y);
 }
 
-box_t box_t::get_expand(coord_t dx, coord_t dy) const {
-    return {xl() - dx, yl() - dy, xh() + dx, yh() + dy};
+box_t &box_t::expand(coord_t dx, coord_t dy) {
+    if (is_valid()) {
+        set(xl() - dx, yl() - dy, xh() + dx, yh() + dy);
+    }
+    return *this;
 }
+
+box_t box_t::get_expand(coord_t dx, coord_t dy) const { return box_t(*this).expand(dx, dy); }
+
+box_t &box_t::transform(const transformation &xform) { return bp::transform(*this, xform); }
 
 box_t box_t::get_transform(const transformation &xform) const {
     return box_t(*this).transform(xform);
 }
 
-box_t box_t::get_move_by(offset_t dx, offset_t dy) const {
-    return {xl() + dx, yl() + dy, xh() + dx, yh() + dy};
+box_t &box_t::move_by(offset_t dx, offset_t dy) {
+    set(xl() + dx, yl() + dy, xh() + dx, yh() + dy);
+    return *this;
 }
 
-box_t box_t::get_flip_xy() const { return {intvs[1], intvs[0]}; }
+box_t box_t::get_move_by(offset_t dx, offset_t dy) const { return box_t(*this).move_by(dx, dy); }
+
+box_t &box_t::flip_xy() {
+    auto tmp = intvs[0];
+    intvs[0] = intvs[1];
+    intvs[1] = tmp;
+    return *this;
+}
+
+box_t box_t::get_flip_xy() const { return box_t(*this).flip_xy(); }
 
 box_t box_t::get_with_interval(bp::orientation_2d_enum orient, interval_type intv) const {
     box_t ans(*this);
@@ -78,16 +114,6 @@ void box_t::set(coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
 
 void box_t::set_interval(bp::orientation_2d_enum orient, interval_type interval) {
     intvs[static_cast<unsigned int>(orient)] = std::move(interval);
-}
-
-box_t &box_t::transform(const transformation &xform) { return bp::transform(*this, xform); }
-box_t &box_t::merge(const box_t &other) {
-    if (!other.is_valid())
-        return *this;
-    if (!is_valid())
-        *this = other;
-    bp::encompass(*this, other);
-    return *this;
 }
 
 bool box_t::operator==(const box_t &other) const {

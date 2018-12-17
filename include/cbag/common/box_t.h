@@ -58,7 +58,12 @@ class box_t {
     void set(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
     void set_interval(bp::orientation_2d_enum orient, interval_type interval);
     box_t &merge(const box_t &other);
+    box_t &intersect(const box_t &other);
+    box_t &extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y);
+    box_t &expand(coord_t dx = 0, coord_t dy = 0);
     box_t &transform(const transformation &xform);
+    box_t &move_by(offset_t dx = 0, offset_t dy = 0);
+    box_t &flip_xy();
 
     bool operator==(const box_t &other) const;
 
