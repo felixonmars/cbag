@@ -17,12 +17,8 @@
 #include <cbag/util/sorted_map.h>
 #include <cbag/util/sorted_vector.h>
 
-#include <cbag/layout/blockage.h>
-#include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
-#include <cbag/layout/pin.h>
-#include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>

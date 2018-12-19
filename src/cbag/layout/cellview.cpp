@@ -4,16 +4,10 @@
 
 #include <cbag/util/binary_iterator.h>
 
-#include <cbag/common/blockage_type.h>
-#include <cbag/common/boundary_type.h>
 #include <cbag/common/box_t.h>
-#include <cbag/layout/blockage.h>
-#include <cbag/layout/boundary.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/geo_iterator.h>
-#include <cbag/layout/pin.h>
-#include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
@@ -113,6 +107,17 @@ shape_ref<box_t> cellview::add_rect(const std::string &layer, const std::string 
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, box_t(xl, yl, xh, yh), commit};
+}
+
+void cellview::add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
+                            bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
+    layer_t key = get_lay_purp_key(layer, purpose);
+    auto geo_iter = helper::make_geometry(*this, key);
+    for (uint32_t xidx = 0; xidx < nx; ++xidx) {
+        for (uint32_t yidx = 0; yidx < ny; ++yidx) {
+            geo_iter->second.add_shape(box.get_move_by(spx * xidx, spy * yidx), is_horiz);
+        }
+    }
 }
 
 shape_ref<polygon90> cellview::add_poly90(const std::string &layer, const std::string &purpose,

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <cbag/layout/cellview.h>
+#include <cbag/layout/cellview_fwd.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
