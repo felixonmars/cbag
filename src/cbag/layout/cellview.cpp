@@ -113,9 +113,11 @@ void cellview::add_rect_arr(const std::string &layer, const std::string &purpose
                             bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
     layer_t key = get_lay_purp_key(layer, purpose);
     auto geo_iter = helper::make_geometry(*this, key);
-    for (uint32_t xidx = 0; xidx < nx; ++xidx) {
-        for (uint32_t yidx = 0; yidx < ny; ++yidx) {
-            geo_iter->second.add_shape(box.get_move_by(spx * xidx, spy * yidx), is_horiz);
+    offset_t dx = 0;
+    for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
+        offset_t dy = 0;
+        for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
+            geo_iter->second.add_shape(box.get_move_by(dx, dy), is_horiz);
         }
     }
 }
@@ -180,16 +182,36 @@ cv_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, const pt_vector &d
     return {this, boundary(data, btype), commit};
 }
 
-cv_obj_ref<via> cellview::add_via(cbag::transformation xform, std::string via_id,
-                                  const uint32_t (&num)[2], const dist_t (&cut_dim)[2],
-                                  const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
-                                  const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
-                                  const offset_t (&lay2_off)[2], bool add_layers, bool bot_horiz,
-                                  bool top_horiz, bool commit) {
+cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool add_layers,
+                                  bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny,
+                                  dist_t w, dist_t h, offset_t vspx, offset_t vspy, offset_t enc1x,
+                                  offset_t enc1y, offset_t off1x, offset_t off1y, offset_t enc2x,
+                                  offset_t enc2y, offset_t off2x, offset_t off2y, bool commit) {
     return {this,
-            via(std::move(xform), std::move(via_id), num, cut_dim, cut_sp, lay1_enc, lay1_off,
-                lay2_enc, lay2_off, add_layers, bot_horiz, top_horiz),
+            via(std::move(xform), std::move(via_id),
+                via_param(vnx, vny, w, h, vspx, vspy, enc1x, enc1y, off1x, off1y, enc2x, enc2y,
+                          off2x, off2y),
+                add_layers, bot_horiz, top_horiz),
             commit};
+}
+
+void cellview::add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
+                           bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,
+                           dist_t h, offset_t vspx, offset_t vspy, offset_t enc1x, offset_t enc1y,
+                           offset_t off1x, offset_t off1y, offset_t enc2x, offset_t enc2y,
+                           offset_t off2x, offset_t off2y, uint32_t nx, uint32_t ny, offset_t spx,
+                           offset_t spy) {
+    via_param param(vnx, vny, w, h, vspx, vspy, enc1x, enc1y, off1x, off1y, enc2x, enc2y, off2x,
+                    off2y);
+
+    offset_t dx = 0;
+    for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
+        offset_t dy = 0;
+        for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
+            add_object(
+                via(xform.get_move_by(dx, dy), via_id, param, add_layers, bot_horiz, top_horiz));
+        }
+    }
 }
 
 cv_obj_ref<instance> cellview::add_prim_instance(std::string lib, std::string cell,

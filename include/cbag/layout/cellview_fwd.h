@@ -97,11 +97,17 @@ class cellview {
 
     cv_obj_ref<boundary> add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit);
 
-    cv_obj_ref<via> add_via(transformation xform, std::string via_id, const uint32_t (&num)[2],
-                            const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2],
-                            const offset_t (&lay1_enc)[2], const offset_t (&lay1_off)[2],
-                            const offset_t (&lay2_enc)[2], const offset_t (&lay2_off)[2],
-                            bool add_layers, bool bot_horiz, bool top_horiz, bool commit);
+    cv_obj_ref<via> add_via(transformation xform, std::string via_id, bool add_layers,
+                            bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,
+                            dist_t h, offset_t vspx, offset_t vspy, offset_t enc1x, offset_t enc1y,
+                            offset_t off1x, offset_t off1y, offset_t enc2x, offset_t enc2y,
+                            offset_t off2x, offset_t off2y, bool commit);
+
+    void add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
+                     bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w, dist_t h,
+                     offset_t vspx, offset_t vspy, offset_t enc1x, offset_t enc1y, offset_t off1x,
+                     offset_t off1y, offset_t enc2x, offset_t enc2y, offset_t off2x, offset_t off2y,
+                     uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
 
     cv_obj_ref<instance> add_prim_instance(std::string lib, std::string cell, std::string view,
                                            std::string name, transformation xform, uint32_t nx,

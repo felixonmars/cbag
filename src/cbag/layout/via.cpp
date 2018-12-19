@@ -25,22 +25,10 @@ struct via::helper {
 
 via::via() = default;
 
-via::via(cbag::transformation xform, std::string via_id, const uint32_t (&num)[2],
-         const dist_t (&cut_dim)[2], const offset_t (&cut_sp)[2], const offset_t (&lay1_enc)[2],
-         const offset_t (&lay1_off)[2], const offset_t (&lay2_enc)[2],
-         const offset_t (&lay2_off)[2], bool add_layers, bool bot_horiz, bool top_horiz)
-    : xform(std::move(xform)), via_id(std::move(via_id)), add_layers(add_layers),
-      bot_horiz(bot_horiz), top_horiz(top_horiz) {
-    params.num[0] = num[0];
-    params.num[1] = num[1];
-    params.cut_dim[0] = cut_dim[0];
-    params.cut_dim[1] = cut_dim[1];
-    params.cut_spacing = {cut_sp[0], cut_sp[1]};
-    params.lay1_enc = {lay1_enc[0], lay1_enc[1]};
-    params.lay2_enc = {lay2_enc[0], lay2_enc[1]};
-    params.lay1_off = {lay1_off[0], lay1_off[1]};
-    params.lay2_off = {lay2_off[0], lay2_off[1]};
-}
+via::via(cbag::transformation xform, std::string via_id, via_param params, bool add_layers,
+         bool bot_horiz, bool top_horiz)
+    : xform(std::move(xform)), via_id(std::move(via_id)), params(std::move(params)),
+      add_layers(add_layers), bot_horiz(bot_horiz), top_horiz(top_horiz) {}
 
 box_t via::bot_box() const { return helper::get_box(*this, params.lay1_off, params.lay1_enc); }
 
