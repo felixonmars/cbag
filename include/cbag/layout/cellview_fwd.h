@@ -9,7 +9,6 @@
 
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
-#include <cbag/layout/pt_vector.h>
 
 namespace cbag {
 
@@ -74,21 +73,20 @@ class cellview {
                       bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
 
     shape_ref<polygon90> add_poly90(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, const pt_vector &data, bool commit);
+                                    bool is_horiz, polygon90 &&poly, bool commit);
 
     shape_ref<polygon45> add_poly45(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, const pt_vector &data, bool commit);
+                                    bool is_horiz, polygon45 &&poly, bool commit);
 
     shape_ref<polygon45_set> add_poly45_set(const std::string &layer, const std::string &purpose,
                                             bool is_horiz, polygon45_set &&poly, bool commit);
 
     shape_ref<polygon> add_poly(const std::string &layer, const std::string &purpose, bool is_horiz,
-                                const pt_vector &data, bool commit);
+                                polygon &&poly, bool commit);
 
-    cv_obj_ref<blockage> add_blockage(const std::string &layer, uint8_t blk_code,
-                                      const pt_vector &data, bool commit);
+    cv_obj_ref<blockage> add_blockage(blockage &&data, bool commit);
 
-    cv_obj_ref<boundary> add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit);
+    cv_obj_ref<boundary> add_boundary(boundary &&data, bool commit);
 
     cv_obj_ref<via> add_via(transformation xform, std::string via_id, bool add_layers,
                             bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,

@@ -121,21 +121,17 @@ void cellview::add_rect_arr(const std::string &layer, const std::string &purpose
 }
 
 shape_ref<polygon90> cellview::add_poly90(const std::string &layer, const std::string &purpose,
-                                          bool is_horiz, const pt_vector &data, bool commit) {
+                                          bool is_horiz, polygon90 &&poly, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
-    polygon90 val;
-    val.set(data.begin(), data.end());
-    return {this, std::move(key), is_horiz, std::move(val), commit};
+    return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::string &purpose,
-                                          bool is_horiz, const pt_vector &data, bool commit) {
+                                          bool is_horiz, polygon45 &&poly, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
-    polygon45 val;
-    val.set(data.begin(), data.end());
-    return {this, std::move(key), is_horiz, std::move(val), commit};
+    return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
@@ -147,24 +143,18 @@ shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
 }
 
 shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::string &purpose,
-                                      bool is_horiz, const pt_vector &data, bool commit) {
+                                      bool is_horiz, polygon &&poly, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
-    polygon val;
-    val.set(data.begin(), data.end());
-    return {this, std::move(key), is_horiz, std::move(val), commit};
+    return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
-cv_obj_ref<blockage> cellview::add_blockage(const std::string &layer, uint8_t blk_code,
-                                            const pt_vector &data, bool commit) {
-    auto btype = static_cast<blockage_type>(blk_code);
-    lay_t lay_id = (layer.empty()) ? 0 : tech_ptr->get_layer_id(layer);
-    return {this, blockage(data, btype, lay_id), commit};
+cv_obj_ref<blockage> cellview::add_blockage(blockage &&data, bool commit) {
+    return {this, std::move(data), commit};
 }
 
-cv_obj_ref<boundary> cellview::add_boundary(uint8_t bnd_code, const pt_vector &data, bool commit) {
-    auto btype = static_cast<boundary_type>(bnd_code);
-    return {this, boundary(data, btype), commit};
+cv_obj_ref<boundary> cellview::add_boundary(boundary &&data, bool commit) {
+    return {this, std::move(data), commit};
 }
 
 cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool add_layers,
