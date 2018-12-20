@@ -9,6 +9,7 @@
 
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
+#include <cbag/layout/pt_vector.h>
 
 namespace cbag {
 
@@ -78,18 +79,11 @@ class cellview {
     shape_ref<polygon45> add_poly45(const std::string &layer, const std::string &purpose,
                                     bool is_horiz, const pt_vector &data, bool commit);
 
+    shape_ref<polygon45_set> add_poly45_set(const std::string &layer, const std::string &purpose,
+                                            bool is_horiz, polygon45_set &&poly, bool commit);
+
     shape_ref<polygon> add_poly(const std::string &layer, const std::string &purpose, bool is_horiz,
                                 const pt_vector &data, bool commit);
-
-    shape_ref<polygon45_set> add_path(const std::string &layer, const std::string &purpose,
-                                      bool is_horiz, const pt_vector &data, offset_t half_width,
-                                      uint8_t style0, uint8_t style1, uint8_t stylem, bool commit);
-
-    shape_ref<polygon45_set> add_path45_bus(const std::string &layer, const std::string &purpose,
-                                            bool is_horiz, const pt_vector &data,
-                                            const std::vector<offset_t> &widths,
-                                            const std::vector<offset_t> &spaces, uint8_t style0,
-                                            uint8_t style1, uint8_t stylem, bool commit);
 
     cv_obj_ref<blockage> add_blockage(const std::string &layer, uint8_t blk_code,
                                       const pt_vector &data, bool commit);

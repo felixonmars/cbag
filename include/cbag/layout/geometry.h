@@ -12,7 +12,6 @@
 #include <cbag/layout/polygon90_set_fwd.h>
 #include <cbag/layout/polygon_fwd.h>
 #include <cbag/layout/polygon_set.h>
-#include <cbag/layout/pt_vector_fwd.h>
 #include <cbag/util/overload.h>
 
 namespace bgi = boost::geometry::index;
@@ -70,13 +69,6 @@ class geometry {
             },
             data);
     }
-
-    static polygon45_set make_path(const pt_vector &data, offset_t half_width, uint8_t style0,
-                                   uint8_t style1, uint8_t stylem);
-
-    static polygon45_set make_path45_bus(const pt_vector &data, const std::vector<offset_t> &widths,
-                                         const std::vector<offset_t> &spaces, uint8_t style0,
-                                         uint8_t style1, uint8_t stylem);
 };
 
 } // namespace layout

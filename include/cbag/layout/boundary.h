@@ -3,7 +3,7 @@
 
 #include <cbag/common/boundary_type.h>
 #include <cbag/layout/polygon.h>
-#include <cbag/layout/pt_vector_fwd.h>
+#include <cbag/layout/pt_vector.h>
 
 namespace cbag {
 namespace layout {

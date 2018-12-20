@@ -138,6 +138,14 @@ shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::s
     return {this, std::move(key), is_horiz, std::move(val), commit};
 }
 
+shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
+                                                  const std::string &purpose, bool is_horiz,
+                                                  polygon45_set &&poly, bool commit) {
+    layer_t key = get_lay_purp_key(layer, purpose);
+    helper::make_geometry(*this, key);
+    return {this, std::move(key), is_horiz, std::move(poly), commit};
+}
+
 shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::string &purpose,
                                       bool is_horiz, const pt_vector &data, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
@@ -145,27 +153,6 @@ shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::strin
     polygon val;
     val.set(data.begin(), data.end());
     return {this, std::move(key), is_horiz, std::move(val), commit};
-}
-
-shape_ref<polygon45_set> cellview::add_path(const std::string &layer, const std::string &purpose,
-                                            bool is_horiz, const pt_vector &data,
-                                            offset_t half_width, uint8_t style0, uint8_t style1,
-                                            uint8_t stylem, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
-    return {this, std::move(key), is_horiz,
-            geometry::make_path(data, half_width, style0, style1, stylem), commit};
-}
-
-shape_ref<polygon45_set>
-cellview::add_path45_bus(const std::string &layer, const std::string &purpose, bool is_horiz,
-                         const pt_vector &data, const std::vector<offset_t> &widths,
-                         const std::vector<offset_t> &spaces, uint8_t style0, uint8_t style1,
-                         uint8_t stylem, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
-    return {this, std::move(key), is_horiz,
-            geometry::make_path45_bus(data, widths, spaces, style0, style1, stylem), commit};
 }
 
 cv_obj_ref<blockage> cellview::add_blockage(const std::string &layer, uint8_t blk_code,

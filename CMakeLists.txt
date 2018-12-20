@@ -85,6 +85,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/path_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp

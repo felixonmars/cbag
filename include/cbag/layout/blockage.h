@@ -4,7 +4,7 @@
 #include <cbag/common/blockage_type.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/layout/polygon.h>
-#include <cbag/layout/pt_vector_fwd.h>
+#include <cbag/layout/pt_vector.h>
 
 namespace cbag {
 namespace layout {
