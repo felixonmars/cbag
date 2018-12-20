@@ -64,11 +64,10 @@ class cellview {
 
     geo_iterator end_intersect() const;
 
-    void add_pin(const std::string &layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                 std::string net, std::string label);
+    void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
 
     shape_ref<box_t> add_rect(const std::string &layer, const std::string &purpose, bool is_horiz,
-                              coord_t xl, coord_t yl, coord_t xh, coord_t yh, bool commit);
+                              box_t bbox, bool commit);
 
     void add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
                       bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);

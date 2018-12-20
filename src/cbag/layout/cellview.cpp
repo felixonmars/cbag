@@ -91,22 +91,20 @@ geo_iterator cellview::begin_intersect(const layer_t &key, const box_t &r, offse
 
 geo_iterator cellview::end_intersect() const { return {}; }
 
-void cellview::add_pin(const std::string &layer, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                       std::string net, std::string label) {
+void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
     lay_t lay_id = tech_ptr->get_layer_id(layer);
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
     }
-    iter->second.emplace_back(xl, yl, xh, yh, std::move(net), std::move(label));
+    iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
 }
 
 shape_ref<box_t> cellview::add_rect(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, coord_t xl, coord_t yl, coord_t xh, coord_t yh,
-                                    bool commit) {
+                                    bool is_horiz, box_t bbox, bool commit) {
     layer_t key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
-    return {this, std::move(key), is_horiz, box_t(xl, yl, xh, yh), commit};
+    return {this, std::move(key), is_horiz, std::move(bbox), commit};
 }
 
 void cellview::add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,

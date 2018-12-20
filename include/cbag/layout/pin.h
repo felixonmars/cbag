@@ -20,8 +20,8 @@ class pin : public box_t {
     std::string label;
 
     pin();
-
     pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, std::string net, std::string label);
+    pin(box_t box, std::string net, std::string label);
 };
 
 } // namespace layout
