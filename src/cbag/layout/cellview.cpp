@@ -159,25 +159,25 @@ cv_obj_ref<boundary> cellview::add_boundary(boundary &&data, bool commit) {
 
 cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool add_layers,
                                   bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny,
-                                  dist_t w, dist_t h, offset_t vspx, offset_t vspy, offset_t enc1x,
-                                  offset_t enc1y, offset_t off1x, offset_t off1y, offset_t enc2x,
-                                  offset_t enc2y, offset_t off2x, offset_t off2y, bool commit) {
+                                  dist_t w, dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l,
+                                  offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
+                                  offset_t enc2r, offset_t enc2t, offset_t enc2b, bool commit) {
     return {this,
             via(std::move(xform), std::move(via_id),
-                via_param(vnx, vny, w, h, vspx, vspy, enc1x, enc1y, off1x, off1y, enc2x, enc2y,
-                          off2x, off2y),
+                via_param(vnx, vny, w, h, vspx, vspy, enc1l, enc1r, enc1t, enc1b, enc2l, enc2r,
+                          enc2t, enc2b),
                 add_layers, bot_horiz, top_horiz),
             commit};
 }
 
 void cellview::add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
                            bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,
-                           dist_t h, offset_t vspx, offset_t vspy, offset_t enc1x, offset_t enc1y,
-                           offset_t off1x, offset_t off1y, offset_t enc2x, offset_t enc2y,
-                           offset_t off2x, offset_t off2y, uint32_t nx, uint32_t ny, offset_t spx,
+                           dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
+                           offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r,
+                           offset_t enc2t, offset_t enc2b, uint32_t nx, uint32_t ny, offset_t spx,
                            offset_t spy) {
-    via_param param(vnx, vny, w, h, vspx, vspy, enc1x, enc1y, off1x, off1y, enc2x, enc2y, off2x,
-                    off2y);
+    via_param param(vnx, vny, w, h, vspx, vspy, enc1l, enc1r, enc1t, enc1b, enc2l, enc2r, enc2t,
+                    enc2b);
 
     offset_t dx = 0;
     for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {

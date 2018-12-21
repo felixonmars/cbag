@@ -21,8 +21,8 @@ class via_param {
     via_param();
 
     via_param(uint32_t vnx, uint32_t vny, dist_t w, dist_t h, offset_t vspx, offset_t vspy,
-              offset_t enc1x, offset_t enc1y, offset_t off1x, offset_t off1y, offset_t enc2x,
-              offset_t enc2y, offset_t off2x, offset_t off2y);
+              offset_t enc1l, offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
+              offset_t enc2r, offset_t enc2t, offset_t enc2b);
 };
 
 } // namespace cbag
