@@ -7,9 +7,6 @@
 namespace cbag {
 
 enum class text_disp_format : uint8_t { name = 0, value = 1, nameValue = 2 };
-constexpr text_disp_format tdfName = text_disp_format::name;
-constexpr text_disp_format tdfValue = text_disp_format::value;
-constexpr text_disp_format tdfNameValue = text_disp_format::nameValue;
 
 } // namespace cbag
 

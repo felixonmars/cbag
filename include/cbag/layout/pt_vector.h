@@ -30,19 +30,30 @@ template <> struct point_traits<std::pair<cbag::coord_t, cbag::coord_t>> {
 namespace cbag {
 namespace layout {
 
-namespace traits {
-template <typename T> struct pt_list {
-    using coordinate_type = coord_t;
+using pt_vector = std::vector<std::pair<coord_t, coord_t>>;
 
-    static std::size_t size(const T &vec) { return vec.size(); }
-    static coordinate_type x(const T &vec, std::size_t idx) { return vec[idx].first; }
-    static coordinate_type y(const T &vec, std::size_t idx) { return vec[idx].second; }
-    static void set_x(const T &vec, std::size_t idx, coordinate_type val) { vec[idx].first = val; }
-    static void set_y(const T &vec, std::size_t idx, coordinate_type val) { vec[idx].second = val; }
+namespace traits {
+
+template <typename T> struct pt_list {};
+template <> struct pt_list<pt_vector> {
+    using coordinate_type = coord_t;
+    using point_type = std::pair<coord_t, coord_t>;
+
+    static std::size_t size(const pt_vector &vec) { return vec.size(); }
+    static coordinate_type x(const pt_vector &vec, std::size_t idx) { return vec[idx].first; }
+    static coordinate_type y(const pt_vector &vec, std::size_t idx) { return vec[idx].second; }
+    static void set_x(pt_vector &vec, std::size_t idx, coordinate_type val) {
+        vec[idx].first = val;
+    }
+    static void set_y(pt_vector &vec, std::size_t idx, coordinate_type val) {
+        vec[idx].second = val;
+    }
+    static auto begin(const pt_vector &vec) -> decltype(vec.begin()) { return vec.begin(); }
+    static auto end(const pt_vector &vec) -> decltype(vec.end()) { return vec.end(); }
 };
 } // namespace traits
 
-using pt_vector = std::vector<std::pair<coord_t, coord_t>>;
+template <typename T> using IsPtVec = typename traits::pt_list<T>::coordinate_type;
 
 } // namespace layout
 } // namespace cbag

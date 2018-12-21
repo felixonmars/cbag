@@ -20,9 +20,9 @@ namespace sch {
 struct text_base : public shape_base {
   public:
     point origin;
-    text_align alignment = taCC;
+    text_align alignment = text_align::centerCenter;
     orientation orient = oR0;
-    font_t font = fRoman;
+    font_t font = font_t::roman;
     dist_t height = 0;
     bool overbar = false;
     bool visible = true;

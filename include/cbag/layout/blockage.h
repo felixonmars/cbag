@@ -4,18 +4,16 @@
 #include <cbag/common/blockage_type.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/layout/polygon.h>
-#include <cbag/layout/pt_vector.h>
 
 namespace cbag {
 namespace layout {
 
 class blockage : public polygon {
   public:
-    blockage_type type = blkRoute;
+    blockage_type type;
     lay_t layer;
 
-    blockage();
-    blockage(const pt_vector &data, blockage_type type, lay_t layer);
+    explicit blockage(blockage_type type = blockage_type::routing, lay_t layer = 0);
 };
 
 } // namespace layout

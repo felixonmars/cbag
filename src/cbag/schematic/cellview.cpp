@@ -46,10 +46,10 @@ cellview_info cellview::get_info(const std::string &name) const {
 
     for (auto const &pair : terminals) {
         switch (pair.second.ttype) {
-        case trmInput:
+        case term_type::input:
             ans.in_terms.push_back(pair.first);
             break;
-        case trmOutput:
+        case term_type::output:
             ans.out_terms.push_back(pair.first);
             break;
         default:

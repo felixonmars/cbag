@@ -22,8 +22,8 @@ using pin_fig_t = std::variant<rectangle, pin_object>;
 struct pin_figure {
   public:
     pin_fig_t obj;
-    sig_type stype = stSignal;
-    term_type ttype = trmInout;
+    sig_type stype = sig_type::signal;
+    term_type ttype = term_type::inout;
 
     pin_figure();
 

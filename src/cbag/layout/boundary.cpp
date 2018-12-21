@@ -3,11 +3,7 @@
 namespace cbag {
 namespace layout {
 
-boundary::boundary() = default;
-
-boundary::boundary(const pt_vector &data, boundary_type type) : type(type) {
-    set(data.begin(), data.end());
-}
+boundary::boundary(boundary_type type) : type(type) {}
 
 } // namespace layout
 } // namespace cbag

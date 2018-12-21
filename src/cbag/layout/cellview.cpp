@@ -207,7 +207,7 @@ cv_obj_ref<instance> cellview::add_instance(const cellview *cv, std::string name
 }
 
 void cellview::add_object(const blockage &obj) {
-    if (obj.type == blkPlacement) {
+    if (obj.type == blockage_type::placement) {
         // area blockage
         area_block_list.push_back(obj);
     } else {

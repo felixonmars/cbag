@@ -1,8 +1,6 @@
 #ifndef CBAG_LAYOUT_PATH_UTIL_H
 #define CBAG_LAYOUT_PATH_UTIL_H
 
-#include <type_traits>
-
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/end_style.h>
 #include <cbag/layout/polygon45_fwd.h>
