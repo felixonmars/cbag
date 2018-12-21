@@ -14,12 +14,10 @@ namespace layout {
 
 constexpr double root2 = cbag::math::sqrt(2);
 
-template <typename T> using IsPtVec = typename traits::pt_list<T>::coordinate_type;
-
 pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_t half_width,
                          end_style sty0, end_style sty1);
 
-template <typename T, typename = IsPtVec<T>>
+template <typename T, typename = IsPtList<T>>
 polygon45_set make_path(const T &data, offset_t half_width, uint8_t style0, uint8_t style1,
                         uint8_t stylem) {
     auto n = traits::pt_list<T>::size(data);
@@ -48,7 +46,7 @@ polygon45_set make_path(const T &data, offset_t half_width, uint8_t style0, uint
     return ans;
 }
 
-template <typename T, typename L, typename = IsPtVec<T>>
+template <typename T, typename L, typename = IsPtList<T>>
 polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, uint8_t style0,
                               uint8_t style1, uint8_t stylem) {
     auto n_pts = traits::pt_list<T>::size(data);
@@ -187,7 +185,7 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, u
     return ans;
 }
 
-template <typename T, typename = IsPtVec<T>>
+template <typename T, typename = IsPtList<T>>
 shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
                                   const std::string &purpose, bool is_horiz, const T &data,
                                   offset_t half_width, uint8_t style0, uint8_t style1,
@@ -196,7 +194,7 @@ shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
                              make_path(data, half_width, style0, style1, stylem), commit);
 }
 
-template <typename T, typename L, typename = IsPtVec<T>>
+template <typename T, typename L, typename = IsPtList<T>>
 shape_ref<polygon45_set> add_path45_bus(cellview &cv, const std::string &layer,
                                         const std::string &purpose, bool is_horiz, const T &data,
                                         const L &widths, const L &spaces, uint8_t style0,

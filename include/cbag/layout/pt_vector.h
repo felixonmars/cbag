@@ -7,6 +7,7 @@
 #include <boost/polygon/polygon.hpp>
 
 #include <cbag/common/typedefs.h>
+#include <cbag/layout/pt_list.h>
 
 namespace boost {
 namespace polygon {
@@ -34,10 +35,8 @@ using pt_vector = std::vector<std::pair<coord_t, coord_t>>;
 
 namespace traits {
 
-template <typename T> struct pt_list {};
 template <> struct pt_list<pt_vector> {
     using coordinate_type = coord_t;
-    using point_type = std::pair<coord_t, coord_t>;
 
     static std::size_t size(const pt_vector &vec) { return vec.size(); }
     static coordinate_type x(const pt_vector &vec, std::size_t idx) { return vec[idx].first; }
@@ -51,9 +50,8 @@ template <> struct pt_list<pt_vector> {
     static auto begin(const pt_vector &vec) -> decltype(vec.begin()) { return vec.begin(); }
     static auto end(const pt_vector &vec) -> decltype(vec.end()) { return vec.end(); }
 };
-} // namespace traits
 
-template <typename T> using IsPtVec = typename traits::pt_list<T>::coordinate_type;
+} // namespace traits
 
 } // namespace layout
 } // namespace cbag
