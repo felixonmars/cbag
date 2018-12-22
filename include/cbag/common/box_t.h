@@ -43,11 +43,13 @@ class box_t {
     offset_t w() const;
     offset_t h() const;
 
+    offset_t get_dim(uint8_t orient_code) const;
+    const interval_type &get_interval(uint8_t orient_code) const;
+
     std::string to_string() const;
     bool is_physical() const;
     bool is_valid() const;
     bool overlaps(const box_t &other) const;
-    const interval_type &get_interval(bp::orientation_2d_enum orient) const;
     box_t get_merge(const box_t &other) const;
     box_t get_intersect(const box_t &other) const;
     box_t get_extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) const;

@@ -32,6 +32,14 @@ coord_t box_t::ym() const { return cbag::util::floor_half(yl() + yh()); }
 coord_t box_t::w() const { return xh() - xl(); }
 coord_t box_t::h() const { return yh() - yl(); }
 
+offset_t box_t::get_dim(uint8_t orient_code) const {
+    return intvs[orient_code][1] - intvs[orient_code][0];
+}
+
+auto box_t::get_interval(uint8_t orient_code) const -> const interval_type & {
+    return intvs[orient_code];
+}
+
 std::string box_t::to_string() const {
     return fmt::format("BBox({}, {}, {}, {})", xl(), yl(), xh(), yh());
 }
@@ -39,9 +47,6 @@ std::string box_t::to_string() const {
 bool box_t::is_physical() const { return w() > 0 && h() > 0; }
 bool box_t::is_valid() const { return w() >= 0 && h() >= 0; }
 bool box_t::overlaps(const box_t &other) const { return bp::intersects(*this, other, true); }
-const box_t::interval_type &box_t::get_interval(bp::orientation_2d_enum orient) const {
-    return intvs[static_cast<unsigned int>(orient)];
-}
 
 box_t &box_t::merge(const box_t &other) {
     if (!other.is_valid())
