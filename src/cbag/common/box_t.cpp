@@ -36,6 +36,10 @@ offset_t box_t::get_dim(uint8_t orient_code) const {
     return intvs[orient_code][1] - intvs[orient_code][0];
 }
 
+coord_t box_t::get_coord(uint8_t orient_code, uint8_t bnd_code) const {
+    return get_interval(orient_code)[bnd_code];
+}
+
 auto box_t::get_interval(uint8_t orient_code) const -> const interval_type & {
     return intvs[orient_code];
 }

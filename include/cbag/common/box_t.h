@@ -44,6 +44,7 @@ class box_t {
     offset_t h() const;
 
     offset_t get_dim(uint8_t orient_code) const;
+    coord_t get_coord(uint8_t orient_code, uint8_t bnd_code) const;
     const interval_type &get_interval(uint8_t orient_code) const;
 
     std::string to_string() const;
