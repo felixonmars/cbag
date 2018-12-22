@@ -32,6 +32,8 @@ class box_t {
 
     box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh);
 
+    box_t(uint8_t orient_code, coord_t tl, coord_t th, coord_t pl, coord_t ph);
+
     coord_t xl() const;
     coord_t yl() const;
     coord_t xh() const;

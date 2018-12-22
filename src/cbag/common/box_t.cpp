@@ -16,6 +16,13 @@ box_t::box_t(interval_type horizontal, interval_type vertical)
 
 box_t::box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) : intvs{{xl, xh}, {yl, yh}} {}
 
+box_t::box_t(uint8_t orient_code, coord_t tl, coord_t th, coord_t pl, coord_t ph) {
+    intvs[orient_code][0] = tl;
+    intvs[orient_code][1] = th;
+    intvs[1 - orient_code][0] = pl;
+    intvs[1 - orient_code][1] = ph;
+}
+
 coord_t box_t::xl() const { return intvs[0][0]; }
 coord_t box_t::yl() const { return intvs[1][0]; }
 coord_t box_t::xh() const { return intvs[0][1]; }
