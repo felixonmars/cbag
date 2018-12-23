@@ -27,10 +27,10 @@ coord_t box_t::xl() const { return intvs[0][0]; }
 coord_t box_t::yl() const { return intvs[1][0]; }
 coord_t box_t::xh() const { return intvs[0][1]; }
 coord_t box_t::yh() const { return intvs[1][1]; }
-coord_t box_t::xm() const { return cbag::util::floor_half(xl() + xh()); }
-coord_t box_t::ym() const { return cbag::util::floor_half(yl() + yh()); }
-coord_t box_t::w() const { return xh() - xl(); }
-coord_t box_t::h() const { return yh() - yl(); }
+coord_t box_t::xm() const { return get_center(0); }
+coord_t box_t::ym() const { return get_center(1); }
+coord_t box_t::w() const { return get_dim(0); }
+coord_t box_t::h() const { return get_dim(1); }
 
 offset_t box_t::get_dim(uint8_t orient_code) const {
     return intvs[orient_code][1] - intvs[orient_code][0];
@@ -38,6 +38,10 @@ offset_t box_t::get_dim(uint8_t orient_code) const {
 
 coord_t box_t::get_coord(uint8_t orient_code, uint8_t bnd_code) const {
     return get_interval(orient_code)[bnd_code];
+}
+
+coord_t box_t::get_center(uint8_t orient_code) const {
+    return cbag::util::floor_half(intvs[orient_code][0] + intvs[orient_code][1]);
 }
 
 auto box_t::get_interval(uint8_t orient_code) const -> const interval_type & {
