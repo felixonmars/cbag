@@ -1,6 +1,8 @@
 
-#ifndef CBAG_COMMON_TRANSFORM_H
-#define CBAG_COMMON_TRANSFORM_H
+#ifndef CBAG_COMMON_TRANSFORMATION_H
+#define CBAG_COMMON_TRANSFORMATION_H
+
+#include <utility>
 
 #include <cbag/common/orientation.h>
 #include <cbag/common/typedefs.h>
@@ -25,8 +27,9 @@ class transformation : public bp::transformation<coord_t> {
     coord_t y() const;
     orientation orient() const;
     uint32_t orient_code() const;
-    void get_location(coord_t &x, coord_t &y) const;
     bool flips_xy() const;
+    std::pair<int8_t, int8_t> axis_scale() const;
+    void get_location(coord_t &x, coord_t &y) const;
 
     transformation get_move_by(offset_t dx, offset_t dy) const;
     transformation get_inverse() const;

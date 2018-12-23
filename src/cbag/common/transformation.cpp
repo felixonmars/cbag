@@ -37,11 +37,11 @@ void transformation::get_location(coord_t &x, coord_t &y) const {
     transform(x, y);
 }
 
-bool transformation::flips_xy() const {
-    bp::direction_2d x, y;
-    get_directions(x, y);
-    auto code = x.to_int();
-    return code == bp::direction_2d_enum::NORTH || code == bp::direction_2d_enum::SOUTH;
+bool transformation::flips_xy() const { return (orient_code() & 0b100) == 0b100; }
+
+std::pair<int8_t, int8_t> transformation::axis_scale() const {
+    auto ocode = orient_code();
+    return {1 - ((ocode & 0b001) << 1), 1 - (ocode & 0b010)};
 }
 
 transformation &transformation::move_by(offset_t dx, offset_t dy) {
