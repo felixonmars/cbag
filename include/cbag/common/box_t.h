@@ -57,6 +57,7 @@ class box_t {
     box_t get_expand(coord_t dx = 0, coord_t dy = 0) const;
     box_t get_transform(const transformation &xform) const;
     box_t get_move_by(offset_t dx = 0, offset_t dy = 0) const;
+    box_t get_move_by_orient(uint8_t orient_code, offset_t dt = 0, offset_t dp = 0) const;
     box_t get_flip_xy() const;
     box_t get_with_interval(bp::orientation_2d_enum orient, interval_type intv) const;
 
@@ -68,6 +69,7 @@ class box_t {
     box_t &expand(coord_t dx = 0, coord_t dy = 0);
     box_t &transform(const transformation &xform);
     box_t &move_by(offset_t dx = 0, offset_t dy = 0);
+    box_t &move_by_orient(uint8_t orient_code, offset_t dt = 0, offset_t dp = 0);
     box_t &flip_xy();
 
     bool operator==(const box_t &other) const;

@@ -100,11 +100,26 @@ box_t box_t::get_transform(const transformation &xform) const {
 }
 
 box_t &box_t::move_by(offset_t dx, offset_t dy) {
-    set(xl() + dx, yl() + dy, xh() + dx, yh() + dy);
+    intvs[0][0] += dx;
+    intvs[0][1] += dx;
+    intvs[1][0] += dy;
+    intvs[1][1] += dy;
     return *this;
 }
 
 box_t box_t::get_move_by(offset_t dx, offset_t dy) const { return box_t(*this).move_by(dx, dy); }
+
+box_t &box_t::move_by_orient(uint8_t orient_code, offset_t dt, offset_t dp) {
+    intvs[orient_code][0] += dt;
+    intvs[orient_code][1] += dt;
+    intvs[1 - orient_code][0] += dp;
+    intvs[1 - orient_code][1] += dp;
+    return *this;
+}
+
+box_t box_t::get_move_by_orient(uint8_t orient_code, offset_t dt, offset_t dp) const {
+    return box_t(*this).move_by_orient(orient_code, dt, dp);
+}
 
 box_t &box_t::flip_xy() {
     auto tmp = intvs[0];
