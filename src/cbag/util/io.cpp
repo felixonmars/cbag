@@ -11,9 +11,12 @@ void make_parent_dirs(const std::filesystem::path &path) {
     }
 }
 
-std::ofstream open_file_write(const std::string &fname) {
+std::ofstream open_file_write(const std::string &fname, bool binary) {
     make_parent_dirs(fname);
-    return std::ofstream(fname, std::ios_base::out);
+    auto mode = std::ios_base::out;
+    if (binary)
+        mode |= std::ios_base::binary;
+    return std::ofstream{fname, mode};
 }
 
 bool is_file(const std::string &fname) { return is_file(std::filesystem::path(fname)); }

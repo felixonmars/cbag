@@ -76,6 +76,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/datatypes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/via_param.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp

@@ -2,12 +2,11 @@
 #define CBAG_UTIL_BINARY_ITERATOR_H
 
 #include <optional>
-#include <type_traits>
+
+#include <cbag/util/sfinae.h>
 
 namespace cbag {
 namespace util {
-
-template <typename T> using IsInt = std::enable_if_t<std::is_integral_v<T>>;
 
 template <typename T, typename = IsInt<T>> class binary_iterator {
   private:
