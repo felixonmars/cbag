@@ -72,16 +72,31 @@ box_t &box_t::intersect(const box_t &other) {
 box_t box_t::get_intersect(const box_t &other) const { return box_t(*this).intersect(other); }
 
 box_t &box_t::extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) {
+    return extend_orient(0, x, y);
+}
+
+box_t &box_t::extend_orient(uint8_t orient_code, const std::optional<coord_t> &ct,
+                            const std::optional<coord_t> &cp) {
     if (is_valid()) {
-        coord_t xv = x ? *x : xl();
-        coord_t yv = y ? *y : yl();
-        set(std::min(xl(), xv), std::min(yl(), yv), std::max(xh(), xv), std::max(yh(), yv));
+        if (ct) {
+            intvs[orient_code][0] = std::min(intvs[orient_code][0], *ct);
+            intvs[orient_code][1] = std::max(intvs[orient_code][1], *ct);
+        }
+        if (cp) {
+            intvs[1 - orient_code][0] = std::min(intvs[1 - orient_code][0], *cp);
+            intvs[1 - orient_code][1] = std::max(intvs[1 - orient_code][1], *cp);
+        }
     }
     return *this;
 }
 
 box_t box_t::get_extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) const {
     return box_t(*this).extend(x, y);
+}
+
+box_t box_t::get_extend_orient(uint8_t orient_code, const std::optional<coord_t> &ct,
+                               const std::optional<coord_t> &cp) const {
+    return box_t(*this).extend_orient(orient_code, ct, cp);
 }
 
 box_t &box_t::expand(coord_t dx, coord_t dy) {
@@ -99,13 +114,7 @@ box_t box_t::get_transform(const transformation &xform) const {
     return box_t(*this).transform(xform);
 }
 
-box_t &box_t::move_by(offset_t dx, offset_t dy) {
-    intvs[0][0] += dx;
-    intvs[0][1] += dx;
-    intvs[1][0] += dy;
-    intvs[1][1] += dy;
-    return *this;
-}
+box_t &box_t::move_by(offset_t dx, offset_t dy) { return move_by_orient(0, dx, dy); }
 
 box_t box_t::get_move_by(offset_t dx, offset_t dy) const { return box_t(*this).move_by(dx, dy); }
 

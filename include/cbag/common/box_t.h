@@ -54,6 +54,8 @@ class box_t {
     box_t get_merge(const box_t &other) const;
     box_t get_intersect(const box_t &other) const;
     box_t get_extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y) const;
+    box_t get_extend_orient(uint8_t orient_code, const std::optional<coord_t> &ct,
+                            const std::optional<coord_t> &cp) const;
     box_t get_expand(coord_t dx = 0, coord_t dy = 0) const;
     box_t get_transform(const transformation &xform) const;
     box_t get_move_by(offset_t dx = 0, offset_t dy = 0) const;
@@ -66,6 +68,8 @@ class box_t {
     box_t &merge(const box_t &other);
     box_t &intersect(const box_t &other);
     box_t &extend(const std::optional<coord_t> &x, const std::optional<coord_t> &y);
+    box_t &extend_orient(uint8_t orient_code, const std::optional<coord_t> &ct,
+                         const std::optional<coord_t> &cp);
     box_t &expand(coord_t dx = 0, coord_t dy = 0);
     box_t &transform(const transformation &xform);
     box_t &move_by(offset_t dx = 0, offset_t dy = 0);
