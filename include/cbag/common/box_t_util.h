@@ -10,8 +10,6 @@ namespace cbag {
 
 class transformation;
 
-box_t get_invalid_box() noexcept;
-
 offset_t get_dim(const box_t &box, uint8_t orient_code);
 coord_t get_center(const box_t &box, uint8_t orient_code);
 
