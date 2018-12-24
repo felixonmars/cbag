@@ -18,6 +18,7 @@
 #include <cbag/util/sorted_vector.h>
 
 #include <cbag/common/box_t_util.h>
+#include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
 #include <cbag/layout/via.h>
@@ -120,7 +121,7 @@ oa::oaPointArray get_point_arr(const cbag::point_array &pt_arr) {
 }
 
 oa::oaTransform get_xform(const cbag::transformation &xform) {
-    return {xform.x(), xform.y(), get_orient(xform.orient())};
+    return {cbag::x(xform), cbag::y(xform), get_orient(cbag::orient(xform))};
 }
 
 oa::oaTermAttrType get_attr_type(cbag::term_attr_type cbag_enum) {

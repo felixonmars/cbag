@@ -74,7 +74,7 @@ message("install rpath: " ${CMAKE_INSTALL_RPATH})
 set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/box_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/box_t_util.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/transformation.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/transformation_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/via_param.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp

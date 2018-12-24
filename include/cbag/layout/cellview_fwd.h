@@ -7,13 +7,13 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <cbag/common/transformation_fwd.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
 
 namespace cbag {
 
 class box_t;
-class transformation;
 
 namespace layout {
 

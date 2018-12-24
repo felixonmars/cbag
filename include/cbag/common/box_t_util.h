@@ -5,10 +5,9 @@
 #include <optional>
 
 #include <cbag/common/box_t.h>
+#include <cbag/common/transformation_fwd.h>
 
 namespace cbag {
-
-class transformation;
 
 offset_t get_dim(const box_t &box, uint8_t orient_code);
 coord_t get_center(const box_t &box, uint8_t orient_code);

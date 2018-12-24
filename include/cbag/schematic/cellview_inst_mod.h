@@ -15,6 +15,7 @@
 #include <cbag/spirit/parsers.h>
 
 #include <cbag/common/box_t_util.h>
+#include <cbag/common/transformation_util.h>
 #include <cbag/schematic/cellview_fwd.h>
 #include <cbag/schematic/instance.h>
 
@@ -46,7 +47,7 @@ void copy_instance(inst_map_t &instances, const instance &inst, uint32_t old_siz
 
     // shift and update connections
 
-    cur_ptr->xform.move_by(dx, dy);
+    move_by(cur_ptr->xform, dx, dy);
     for (auto const &p : conns) {
         cur_ptr->update_connection(new_name, new_ast.size(), p.first, p.second);
     }

@@ -1,13 +1,13 @@
 #ifndef CBAG_LAYOUT_GEO_INDEX_H
 #define CBAG_LAYOUT_GEO_INDEX_H
 
+#include <cbag/common/transformation_fwd.h>
 #include <cbag/layout/geo_index_impl.h>
 #include <cbag/layout/polygon45_set_fwd.h>
 
 namespace cbag {
 
 class box_t;
-class transformation;
 
 namespace layout {
 

@@ -10,6 +10,7 @@
 
 #include <cbag/logging/spdlog.h>
 
+#include <cbag/common/transformation_util.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/instance.h>
 
@@ -303,7 +304,7 @@ cbag::sch::shape_t read_shape(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa
 
 // Read method for references
 cbag::transformation get_xform(const oa::oaTransform &xform) {
-    return {xform.xOffset(), xform.yOffset(), get_orientation(xform.orient())};
+    return cbag::make_xform(xform.xOffset(), xform.yOffset(), get_orientation(xform.orient()));
 }
 
 cbag::sch::instance read_instance(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaInst *p,

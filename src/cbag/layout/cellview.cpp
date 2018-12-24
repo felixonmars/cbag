@@ -5,6 +5,7 @@
 #include <cbag/util/binary_iterator.h>
 
 #include <cbag/common/box_t_util.h>
+#include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/geo_iterator.h>
@@ -184,7 +185,7 @@ void cellview::add_via_arr(const transformation &xform, const std::string &via_i
         offset_t dy = 0;
         for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
             add_object(
-                via(xform.get_move_by(dx, dy), via_id, param, add_layers, bot_horiz, top_horiz));
+                via(get_move_by(xform, dx, dy), via_id, param, add_layers, bot_horiz, top_horiz));
         }
     }
 }
@@ -246,7 +247,7 @@ void cellview::add_object(const instance &obj) {
                 for (uint32_t iy = 0; iy < obj.ny; ++iy) {
                     // unordered map does not invalidate pointers to elements
                     geo_iter->second.record_instance(
-                        &pair.second, obj.xform.get_move_by(obj.spx * ix, obj.spy * iy));
+                        &pair.second, get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));
                 }
             }
         }

@@ -10,7 +10,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/transformation.h>
+#include <cbag/common/transformation_fwd.h>
 
 namespace YAML {
 

@@ -5,6 +5,7 @@
 #include <variant>
 #include <vector>
 
+#include <cbag/common/transformation.h>
 #include <cbag/layout/geo_index.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set_fwd.h>
@@ -19,7 +20,6 @@ namespace bgi = boost::geometry::index;
 namespace cbag {
 
 class box_t;
-class transformation;
 
 namespace layout {
 
@@ -47,7 +47,7 @@ class geometry {
     box_t &get_index_bbox(box_t &r) const;
 
     geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
-                                 const transformation &xform = transformation(0, 0)) const;
+                                 const transformation &xform = transformation()) const;
     geo_iterator end_intersect() const;
 
     void reset_to_mode(uint8_t m);
