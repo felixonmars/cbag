@@ -4,7 +4,8 @@
 
 #include <cstdint>
 
-#include <boost/polygon/polygon.hpp>
+#include <boost/polygon/point_data.hpp>
+#include <boost/polygon/transform.hpp>
 
 namespace cbag {
 
