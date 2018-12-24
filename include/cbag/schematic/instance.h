@@ -10,7 +10,7 @@
 #include <memory>
 
 #include <cbag/common/box_t.h>
-#include <cbag/common/datatypes.h>
+#include <cbag/common/param_map.h>
 #include <cbag/common/transformation.h>
 
 #include <cbag/util/sorted_map.h>

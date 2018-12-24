@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include <cbag/common/datatypes.h>
+#include <cbag/common/param_map.h>
 
 namespace cbag {
 namespace sch {

@@ -2,9 +2,10 @@
 #define CBAG_LAYOUT_INSTANCE_H
 
 #include <string>
+#include <unordered_map>
 #include <variant>
 
-#include <cbag/common/datatypes.h>
+#include <cbag/common/param_map.h>
 #include <cbag/common/transformation.h>
 #include <cbag/common/typedefs.h>
 

@@ -12,7 +12,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/datatypes.h>
+#include <cbag/common/param_data.h>
 
 #include <cbag/yaml/fusion.h>
 

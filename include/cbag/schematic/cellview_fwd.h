@@ -14,7 +14,7 @@
 #include <cbag/util/sorted_map.h>
 
 #include <cbag/common/box_t.h>
-#include <cbag/common/datatypes.h>
+#include <cbag/common/param_map.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/schematic/shape_t.h>
 #include <cbag/schematic/term_t.h>

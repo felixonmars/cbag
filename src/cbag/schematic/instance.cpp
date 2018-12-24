@@ -15,6 +15,7 @@
 #include <cbag/util/name_convert.h>
 
 #include <cbag/common/box_t_util.h>
+#include <cbag/common/param_map_util.h>
 #include <cbag/schematic/instance.h>
 
 namespace cbag {
