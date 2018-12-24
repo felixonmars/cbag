@@ -3,6 +3,7 @@
 
 #include <cbag/common/typedefs.h>
 
+#include <cbag/common/box_t_util.h>
 #include <cbag/yaml/box_t.h>
 #include <cbag/yaml/common.h>
 
@@ -10,10 +11,10 @@ namespace YAML {
 
 Node convert<cbag::box_t>::encode(const cbag::box_t &rhs) {
     Node root;
-    root.push_back(rhs.xl());
-    root.push_back(rhs.yl());
-    root.push_back(rhs.xh());
-    root.push_back(rhs.yh());
+    root.push_back(xl(rhs));
+    root.push_back(yl(rhs));
+    root.push_back(xh(rhs));
+    root.push_back(yh(rhs));
     return root;
 }
 
@@ -25,8 +26,8 @@ bool convert<cbag::box_t>::decode(const Node &node, cbag::box_t &rhs) {
         return false;
     }
     try {
-        rhs.set(node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
-                node[2].as<cbag::coord_t>(), node[3].as<cbag::coord_t>());
+        set(rhs, node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>(),
+            node[2].as<cbag::coord_t>(), node[3].as<cbag::coord_t>());
     } catch (...) {
         logger->warn("cbag::box_t YAML decode exception.  Node:\n{}", cbagyaml::node_to_str(node));
         return false;

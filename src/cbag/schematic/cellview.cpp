@@ -5,6 +5,7 @@
 #include <cbag/spirit/name_rep.h>
 #include <cbag/spirit/parsers.h>
 
+#include <cbag/common/box_t_util.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
@@ -21,7 +22,7 @@ cellview::cellview(const std::string &yaml_fname, const std::string &sym_view) {
         throw std::invalid_argument(yaml_fname + " is not a file.");
     }
 
-    YAML::Node n = YAML::LoadFile(yaml_fname);
+    auto n = YAML::LoadFile(yaml_fname);
 
     *this = n.as<cellview>();
 
@@ -30,7 +31,7 @@ cellview::cellview(const std::string &yaml_fname, const std::string &sym_view) {
         auto yaml_path = cbag::util::get_canonical_path(yaml_fname);
         yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
         if (cbag::util::is_file(yaml_path)) {
-            YAML::Node s = YAML::LoadFile(yaml_path.string());
+            auto s = YAML::LoadFile(yaml_path.string());
             sym_ptr = std::make_unique<cellview>(s.as<cellview>());
         }
     }
@@ -62,7 +63,7 @@ cellview_info cellview::get_info(const std::string &name) const {
 
 void cellview::to_file(const std::string &fname) const {
     // create root directory if not exist.
-    std::ofstream outfile = util::open_file_write(fname);
+    auto outfile = util::open_file_write(fname);
     YAML::Node node(*this);
     YAML::Emitter emitter;
     emitter << node;
@@ -72,7 +73,7 @@ void cellview::to_file(const std::string &fname) const {
 
 std::unique_ptr<cellview> cellview::get_copy() const {
     // copy easily copiable attributes
-    cellview ans(lib_name, cell_name, view_name, bbox.xl(), bbox.yl(), bbox.xh(), bbox.yh());
+    cellview ans(lib_name, cell_name, view_name, xl(bbox), yl(bbox), xh(bbox), yh(bbox));
     ans.terminals = terminals;
     ans.shapes = shapes;
     ans.props = props;
@@ -151,7 +152,7 @@ void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
 }
 
 bool cellview::remove_pin(const std::string &name) {
-    bool success = terminals.erase(name) > 0;
+    auto success = terminals.erase(name) > 0;
     // remove symbol pin
     if (success && sym_ptr != nullptr) {
         sym_ptr->remove_pin(name);
@@ -175,8 +176,8 @@ void cellview::rename_instance(const std::string &old_name, std::string new_name
     // resize nets if necessary
     spirit::ast::name_rep old_ast;
     parse(old_name, spirit::name_rep(), old_ast);
-    uint32_t old_size = old_ast.size();
-    uint32_t new_size = new_ast.size();
+    auto old_size = old_ast.size();
+    auto new_size = new_ast.size();
     if (old_size != new_size) {
         iter->second->resize_nets(old_size, new_size);
     }

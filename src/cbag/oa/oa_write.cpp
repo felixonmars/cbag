@@ -17,6 +17,7 @@
 #include <cbag/util/sorted_map.h>
 #include <cbag/util/sorted_vector.h>
 
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
 #include <cbag/layout/via.h>
@@ -37,10 +38,10 @@ constexpr oa::oaLayerNum sch_conn_layer = 228;
 constexpr oa::oaPurposeNum sch_conn_purpose = 4294967295;
 constexpr oa::oaPurposeNum sch_net_purpose = 237;
 constexpr oa::oaCoord sch_stub_len2 = 5;
-constexpr oa::oaTextAlignEnum sch_net_align = oa::oacCenterCenterTextAlign;
-constexpr oa::oaOrientEnum sch_net_orient = oa::oacR0;
-constexpr oa::oaFontEnum sch_net_font = oa::oacStickFont;
-constexpr oa::oaDist sch_net_height = 10;
+constexpr auto sch_net_align = oa::oacCenterCenterTextAlign;
+constexpr auto sch_net_orient = oa::oacR0;
+constexpr auto sch_net_font = oa::oacStickFont;
+constexpr auto sch_net_height = 10;
 
 constexpr auto prop_app_type = "ILList";
 constexpr auto cell_data_name = "cdfData";
@@ -82,7 +83,7 @@ constexpr auto cell_data = "(promptWidth nil "
 constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
 oa::oaBox get_box(const cbag::box_t &cbag_obj) {
-    return {cbag_obj.xl(), cbag_obj.yl(), cbag_obj.xh(), cbag_obj.yh()};
+    return {xl(cbag_obj), yl(cbag_obj), xh(cbag_obj), yh(cbag_obj)};
 }
 
 oa::oaPoint get_point(const cbag::point &cbag_obj) { return {cbag_obj.first, cbag_obj.second}; }
@@ -180,7 +181,7 @@ class make_pin_fig_visitor {
         : ns(ns), block(block), pin(pin), term(term), cnt(cnt) {}
 
     void operator()(const cbag::sch::rectangle &operand) const {
-        oa::oaRect *rect =
+        auto rect =
             oa::oaRect::create(block, operand.layer, operand.purpose, get_box(operand.bbox));
         rect->addToPin(pin);
     }
@@ -191,7 +192,7 @@ class make_pin_fig_visitor {
         oa::oaScalarName view(ns, obj.inst.view_name.c_str());
         oa::oaScalarName name(ns, fmt::format("P__{}", (*cnt)++).c_str());
 
-        oa::oaScalarInst *inst =
+        auto inst =
             oa::oaScalarInst::create(block, lib, cell, view, name, get_xform(obj.inst.xform));
         inst->addToPin(pin);
 
@@ -214,57 +215,61 @@ class make_shape_visitor {
         : block(block), ns(ns) {}
 
     void operator()(const cbag::sch::rectangle &v) const {
-        oa::oaShape *p = oa::oaRect::create(block, v.layer, v.purpose, get_box(v.bbox));
+        auto p = dynamic_cast<oa::oaShape *>(
+            oa::oaRect::create(block, v.layer, v.purpose, get_box(v.bbox)));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::polygon &v) const {
-        oa::oaShape *p = oa::oaPolygon::create(block, v.layer, v.purpose, get_point_arr(v.points));
+        auto p = dynamic_cast<oa::oaShape *>(
+            oa::oaPolygon::create(block, v.layer, v.purpose, get_point_arr(v.points)));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::arc &v) const {
-        oa::oaShape *p =
-            oa::oaArc::create(block, v.layer, v.purpose, get_box(v.bbox), v.ang_start, v.ang_stop);
+        auto p = dynamic_cast<oa::oaShape *>(
+            oa::oaArc::create(block, v.layer, v.purpose, get_box(v.bbox), v.ang_start, v.ang_stop));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::donut &v) const {
-        oa::oaShape *p = oa::oaDonut::create(block, v.layer, v.purpose, get_point(v.center),
-                                             v.radius, v.hole_radius);
+        auto p = dynamic_cast<oa::oaShape *>(oa::oaDonut::create(
+            block, v.layer, v.purpose, get_point(v.center), v.radius, v.hole_radius));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::ellipse &v) const {
-        oa::oaShape *p = oa::oaEllipse::create(block, v.layer, v.purpose, get_box(v.bbox));
+        auto p = dynamic_cast<oa::oaShape *>(
+            oa::oaEllipse::create(block, v.layer, v.purpose, get_box(v.bbox)));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::line &v) const {
-        oa::oaShape *p = oa::oaLine::create(block, v.layer, v.purpose, get_point_arr(v.points));
+        auto p = dynamic_cast<oa::oaShape *>(
+            oa::oaLine::create(block, v.layer, v.purpose, get_point_arr(v.points)));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::path &v) const {
-        oa::oaShape *p =
+        auto p = dynamic_cast<oa::oaShape *>(
             oa::oaPath::create(block, v.layer, v.purpose, v.width, get_point_arr(v.points),
-                               get_path_style(v.style), v.begin_ext, v.end_ext);
+                               get_path_style(v.style), v.begin_ext, v.end_ext));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::text_t &v) const {
-        oa::oaShape *p =
+        auto p = dynamic_cast<oa::oaShape *>(
             oa::oaText::create(block, v.layer, v.purpose, v.text.c_str(), get_point(v.origin),
                                get_text_align(v.alignment), get_orient(v.orient), get_font(v.font),
-                               v.height, v.overbar, v.visible, v.drafting);
+                               v.height, v.overbar, v.visible, v.drafting));
         add_shape_to_net(p, v.net);
     }
 
     void operator()(const cbag::sch::eval_text &v) const {
-        oa::oaShape *p = oa::oaEvalText::create(
+        auto p = dynamic_cast<oa::oaShape *>(oa::oaEvalText::create(
             block, v.layer, v.purpose, v.text.c_str(), get_point(v.origin),
             get_text_align(v.alignment), get_orient(v.orient), get_font(v.font), v.height,
-            v.evaluator.c_str(), v.overbar, v.visible, v.drafting);
+            v.evaluator.c_str(), v.overbar, v.visible, v.drafting));
         add_shape_to_net(p, v.net);
     }
 
@@ -272,7 +277,7 @@ class make_shape_visitor {
     void add_shape_to_net(oa::oaShape *ptr, const std::string &net) const {
         if (!net.empty()) {
             oa::oaName net_name(ns, net.c_str());
-            oa::oaNet *np = oa::oaNet::find(block, net_name);
+            auto np = oa::oaNet::find(block, net_name);
             if (np == nullptr || np->isImplicit()) {
                 np = oa::oaNet::create(block, net_name);
             }
@@ -359,15 +364,14 @@ void create_terminal_pin(const oa::oaCdbaNS &ns, spdlog::logger &logger, oa::oaB
         logger.info("Creating terminal {}", pair.first);
         term_name.init(ns, pair.first.c_str());
         logger.info("Creating terminal net");
-        oa::oaNet *term_net = oa::oaNet::find(block, term_name);
+        auto term_net = oa::oaNet::find(block, term_name);
         if (term_net == nullptr || term_net->isImplicit()) {
             term_net = oa::oaNet::create(block, term_name, get_sig_type(pair.second.stype));
         }
         logger.info("Creating terminal");
-        oa::oaTerm *term =
-            oa::oaTerm::create(term_net, term_name, get_term_type(pair.second.ttype));
+        auto term = oa::oaTerm::create(term_net, term_name, get_term_type(pair.second.ttype));
         logger.info("Creating terminal pin");
-        oa::oaPin *pin = oa::oaPin::create(term);
+        auto pin = oa::oaPin::create(term);
         logger.info("Creating terminal shape");
         std::visit(make_pin_fig_visitor(ns, block, pin, term, &pin_cnt), pair.second.obj);
         logger.info("Create terminal done");
@@ -402,10 +406,10 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
     dependencies << ')';
 
     // create cell data
-    std::string cdf_data_str = fmt::format(cell_data, term_order);
+    auto cdf_data_str = fmt::format(cell_data, term_order);
     oa::oaByteArray cdf_data(reinterpret_cast<const oa::oaByte *>(cdf_data_str.c_str()),
                              cdf_data_str.size());
-    oa::oaCellDMData *data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
+    auto data = oa::oaCellDMData::open(lib_name, cell_name, 'w');
     oa::oaAppProp::create(data, cell_data_name, prop_app_type, cdf_data);
     data->save();
     data->close();
@@ -414,8 +418,8 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
     std::string cv_cdf_data_str = dependencies.str();
     oa::oaByteArray cv_cdf_data(reinterpret_cast<const oa::oaByte *>(cv_cdf_data_str.c_str()),
                                 cv_cdf_data_str.size());
-    oa::oaCellViewDMData *cv_data = oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
-    oa::oaHierProp *cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
+    auto cv_data = oa::oaCellViewDMData::open(lib_name, cell_name, view_name, 'w');
+    auto cv_prop_parent = oa::oaHierProp::create(cv_data, sch_data_parent_name);
     oa::oaAppProp::create(cv_prop_parent, sch_data_name, prop_app_type, cv_cdf_data);
     cv_data->save();
     cv_data->close();
@@ -426,8 +430,8 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         const std::string &cell_name, const std::string &view_name, bool is_sch,
                         const cbag::sch::cellview &cv, const str_map_t *rename_map) {
 
-    oa::oaDesign *dsn = open_design(ns_native, logger, lib_name, cell_name, view_name, 'w',
-                                    is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
+    auto dsn = open_design(ns_native, logger, lib_name, cell_name, view_name, 'w',
+                           is_sch ? oa::oacSchematic : oa::oacSchematicSymbol);
     logger.info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
 
     oa::oaScalarName dsn_lib;
@@ -451,7 +455,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         term_order << " \"" << *cursor << '"';
     }
     term_order << ')';
-    std::string term_order_str = term_order.str();
+    auto term_order_str = term_order.str();
 
     int pin_cnt = 0;
     logger.info("Writing terminals");
@@ -470,12 +474,12 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     oa::oaScalarName lib, cell, view, name;
     oa::oaName term_name, net_name;
     for (auto const &pair : cv.instances) {
-        const std::string &inst_name = pair.first;
-        cbag::sch::instance *inst = pair.second.get();
+        const auto &inst_name = pair.first;
+        auto inst = pair.second.get();
         logger.info("Writing instance {}", inst_name);
-        cbag::spirit::ast::name_unit nu = cbag::util::parse_cdba_name_unit(inst_name);
+        auto nu = cbag::util::parse_cdba_name_unit(inst_name);
 
-        oa::oaTransform inst_xform = get_xform(inst->xform);
+        auto inst_xform = get_xform(inst->xform);
         if (inst->is_primitive) {
             lib.init(ns, inst->lib_name.c_str());
             cell.init(ns, inst->cell_name.c_str());
@@ -498,33 +502,33 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         term_net_pair.second);
             term_name.init(ns, term_net_pair.first.c_str());
             net_name.init(ns, term_net_pair.second.c_str());
-            oa::oaNet *term_net = oa::oaNet::find(block, net_name);
+            auto term_net = oa::oaNet::find(block, net_name);
             if (term_net == nullptr || term_net->isImplicit()) {
                 term_net = oa::oaNet::create(block, net_name);
             }
-            oa::oaInstTerm *inst_term = oa::oaInstTerm::create(term_net, ptr, term_name);
-            oa::oaTerm *term = inst_term->getTerm();
+            auto inst_term = oa::oaInstTerm::create(term_net, ptr, term_name);
+            auto term = inst_term->getTerm();
             oa::oaIter<oa::oaPin> pin_iter(term->getPins());
-            oa::oaPin *pin = pin_iter.getNext();
+            auto pin = pin_iter.getNext();
             oa::oaIter<oa::oaPinFig> pin_fig_iter(pin->getFigs());
-            oa::oaPinFig *pin_fig = pin_fig_iter.getNext();
+            auto pin_fig = pin_fig_iter.getNext();
             oa::oaBox pin_box;
             oa::oaPoint pts[2];
             pin_fig->getBBox(pin_box);
             pin_box.transform(inst_xform);
             pin_box.getCenter(pts[0]);
-            oa::oaCoord x = pts[0].x();
-            oa::oaCoord y = pts[0].y();
+            auto x = pts[0].x();
+            auto y = pts[0].y();
 
             // create stub connection
             pts[1] = {x + 2 * sch_stub_len2, y + 2 * sch_stub_len2};
             oa::oaPointArray pt_arr(pts, 2);
-            oa::oaLine *line = oa::oaLine::create(block, sch_conn_layer, sch_conn_purpose, pt_arr);
+            auto line = oa::oaLine::create(block, sch_conn_layer, sch_conn_purpose, pt_arr);
             line->addToNet(term_net);
             oa::oaPoint mid(x + sch_stub_len2, y + sch_stub_len2);
-            oa::oaText *text = oa::oaText::create(block, sch_conn_layer, sch_net_purpose,
-                                                  term_net_pair.second.c_str(), mid, sch_net_align,
-                                                  sch_net_orient, sch_net_font, sch_net_height);
+            auto text = oa::oaText::create(block, sch_conn_layer, sch_net_purpose,
+                                           term_net_pair.second.c_str(), mid, sch_net_align,
+                                           sch_net_orient, sch_net_font, sch_net_height);
             text->addToNet(term_net);
         }
 
@@ -569,7 +573,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 
         // update extraction timestamp
         uint32_t num_op = 2;
-        oa::oaTime timestamp = dsn->getTimeStamp(oa::oacDesignDataType);
+        auto timestamp = dsn->getTimeStamp(oa::oacDesignDataType);
         auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
         (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp + num_op);
         pptr = oa::oaProp::find(dsn, "schGeometryLastUpdated");
@@ -591,8 +595,8 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
     // create oa ParamArray
     oa::oaParamArray oa_params;
 
-    const oa::oaParamArray *params_ptr = (oa_params.getNumElements() == 0) ? nullptr : &oa_params;
-    oa::oaTransform xform = get_xform(inst.xform);
+    auto params_ptr = (oa_params.getNumElements() == 0) ? nullptr : &oa_params;
+    auto xform = get_xform(inst.xform);
     if (inst.nx > 1 || inst.ny > 1) {
         oa::oaArrayInst::create(blk, lib_oa, cell_oa, view_oa, inst_name, xform, inst.spx, inst.spy,
                                 inst.ny, inst.nx, params_ptr);
@@ -602,7 +606,7 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
 }
 
 void set_point_array(const cbag::layout::polygon &poly, oa::oaPointArray &arr) {
-    std::size_t size = poly.size();
+    auto size = poly.size();
     arr.setSize(size);
     auto start = poly.begin();
     for (std::size_t idx = 0; idx < size; ++start, ++idx) {
@@ -626,13 +630,13 @@ void create_lay_geometry(spdlog::logger &logger, oa::oaBlock *blk, cbag::lay_t l
 
 void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
                     const cbag::layout::via &v) {
-    auto *via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, v.via_id.c_str()));
+    auto via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, v.via_id.c_str()));
     if (via_def == nullptr) {
         logger.warn("unknown via ID {}, skipping.", v.via_id);
         return;
     }
 
-    oa::oaViaParam via_params = get_via_params(v.params);
+    auto via_params = get_via_params(v.params);
     oa::oaStdVia::create(blk, via_def, get_xform(v.xform), &via_params);
 }
 
@@ -642,12 +646,12 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         const cbag::layout::cellview &cv, oa::oaTech *tech,
                         const str_map_t *rename_map) {
 
-    oa::oaDesign *dsn =
+    auto dsn =
         open_design(ns_native, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
     logger.info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
 
     // create top block
-    oa::oaBlock *blk = oa::oaBlock::create(dsn);
+    auto blk = oa::oaBlock::create(dsn);
 
     logger.info("Making layout instances.");
     for (auto const &inst_pair : cv.inst_map) {
@@ -693,20 +697,20 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     }
 
     logger.info("Making layout pins.");
-    cbag::purp_t purp = cv.tech_ptr->pin_purpose;
-    bool make_pin_obj = cv.tech_ptr->make_pin_obj;
+    auto purp = cv.tech_ptr->pin_purpose;
+    auto make_pin_obj = cv.tech_ptr->make_pin_obj;
     for (auto const &pin_pair : cv.pin_map) {
         cbag::lay_t lay = pin_pair.first;
         for (auto const &pin : pin_pair.second) {
-            if (!pin.is_physical()) {
+            if (!is_physical(pin)) {
                 logger.warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
-                            pin.xl(), pin.yl(), pin.xh(), pin.yh(), lay, purp);
+                            xl(pin), yl(pin), xh(pin), yh(pin), lay, purp);
             }
-            oa::oaPoint center(pin.xm(), pin.ym());
-            cbag::offset_t w = pin.w();
-            cbag::offset_t h = pin.h();
+            oa::oaPoint center(xm(pin), ym(pin));
+            auto w = width(pin);
+            auto h = height(pin);
             oa::oaOrient orient(oa::oacR0);
-            cbag::dist_t height = h;
+            auto height = h;
             if (h > w) {
                 orient = oa::oacR90;
                 height = w;
@@ -715,19 +719,19 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
                                oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
             if (make_pin_obj) {
-                auto *r = oa::oaRect::create(blk, lay, purp,
-                                             oa::oaBox(pin.xl(), pin.yl(), pin.xh(), pin.yh()));
+                auto r = oa::oaRect::create(blk, lay, purp,
+                                            oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
 
                 oa::oaName term_name(ns, pin.net.c_str());
-                auto *term = oa::oaTerm::find(blk, term_name);
+                auto term = oa::oaTerm::find(blk, term_name);
                 if (term == nullptr) {
-                    auto *net = oa::oaNet::find(blk, term_name);
+                    auto net = oa::oaNet::find(blk, term_name);
                     if (net == nullptr) {
                         net = oa::oaNet::create(blk, term_name);
                     }
                     term = oa::oaTerm::create(net, term_name);
                 }
-                auto *pin = oa::oaPin::create(term, pin_dir);
+                auto pin = oa::oaPin::create(term, pin_dir);
                 r->addToPin(pin);
             }
         }

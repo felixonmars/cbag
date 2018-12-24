@@ -1,4 +1,5 @@
 #include <cbag/common/box_t.h>
+#include <cbag/common/box_t_adapt.h>
 #include <cbag/common/transformation.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/geometry.h>

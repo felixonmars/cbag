@@ -1,6 +1,9 @@
 #include <algorithm>
 
-#include <cbag/common/box_t.h>
+#include <boost/polygon/polygon.hpp>
+
+#include <cbag/common/box_t_adapt.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/util/overload.h>
 
@@ -33,8 +36,8 @@ struct geo_iterator::helper {
         }
 
         template <typename T> bool operator()(const T &v) {
-            box_t test_box = self.box.get_expand(std::max(self.spx, self.cur->spx),
-                                                 std::max(self.spy, self.cur->spy));
+            auto test_box = get_expand(self.box, std::max(self.spx, self.cur->spx),
+                                       std::max(self.spy, self.cur->spy));
             if (bp::empty(v & test_box)) {
                 ++self.cur;
                 return true;
@@ -47,7 +50,7 @@ struct geo_iterator::helper {
 
     // advance the iterator to the next point that
     static void get_val_reference(geo_iterator &self) {
-        for (bool repeat = true; repeat;) {
+        for (auto repeat = true; repeat;) {
             if (self.inner == nullptr) {
                 // no inner loop
                 if (self.cur == self.end) {
@@ -94,7 +97,7 @@ geo_iterator &geo_iterator::operator++() {
 }
 
 geo_iterator geo_iterator::operator++(int) {
-    geo_iterator ans = *this;
+    auto ans = *this;
     ++(*this);
     return ans;
 }
@@ -102,8 +105,8 @@ geo_iterator geo_iterator::operator++(int) {
 geo_iterator::reference geo_iterator::operator*() const { return cur_val; }
 
 bool geo_iterator::operator==(const geo_iterator &rhs) const {
-    bool a = has_next();
-    bool b = rhs.has_next();
+    auto a = has_next();
+    auto b = rhs.has_next();
     return (!a && !b) ||
            (a && b && box == rhs.box && spx == rhs.spx && spy == rhs.spy && cur == rhs.cur &&
             end == rhs.end && xform == rhs.xform && inner == rhs.inner);

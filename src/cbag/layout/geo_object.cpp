@@ -1,7 +1,11 @@
+#include <boost/polygon/polygon.hpp>
 
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_adapt.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/geo_object.h>
 #include <cbag/util/overload.h>
+
+namespace bp = boost::polygon;
 
 namespace cbag {
 namespace layout {
@@ -21,10 +25,9 @@ geo_object::box_type geo_object::get_bnd_box(const value_type &val, offset_t spx
                         [&box](const geo_instance &v) { v.get_bbox(box); }},
                val);
 
-    if (!box.is_valid())
+    if (!is_valid(box))
         throw std::invalid_argument("Cannot add geometry object with invalid bound box.");
-    return bg_box(bg_point(box.xl() - spx, box.yl() - spy),
-                  bg_point(box.xh() + spx, box.yh() + spy));
+    return bg_box(bg_point(xl(box) - spx, yl(box) - spy), bg_point(xh(box) + spx, yh(box) + spy));
 }
 
 } // namespace layout

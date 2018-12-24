@@ -4,7 +4,7 @@
 
 #include <cbag/util/binary_iterator.h>
 
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/geo_iterator.h>
@@ -62,21 +62,21 @@ bool cellview::empty() const {
 }
 
 layer_t cellview::get_lay_purp_key(const std::string &layer, const std::string &purpose) const {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
-    purp_t purp_id = tech_ptr->get_purpose_id(purpose);
+    auto lay_id = tech_ptr->get_layer_id(layer);
+    auto purp_id = tech_ptr->get_purpose_id(purpose);
     return {lay_id, purp_id};
 }
 
 box_t cellview::get_bbox(const std::string &layer, const std::string &purpose) const {
-    box_t ans(0, 0, -1, -1);
+    box_t ans{0, 0, -1, -1};
     // merge geometry bounding box
     auto iter = geo_map.find(get_lay_purp_key(layer, purpose));
     if (iter != geo_map.end()) {
-        ans.merge(iter->second.get_bbox());
+        merge(ans, iter->second.get_bbox());
     }
     // merge instance bounding box
     for (const auto &p : inst_map) {
-        ans.merge(p.second.get_bbox(layer, purpose));
+        merge(ans, p.second.get_bbox(layer, purpose));
     }
     return ans;
 }
@@ -92,7 +92,7 @@ geo_iterator cellview::begin_intersect(const layer_t &key, const box_t &r, offse
 geo_iterator cellview::end_intersect() const { return {}; }
 
 void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
-    lay_t lay_id = tech_ptr->get_layer_id(layer);
+    auto lay_id = tech_ptr->get_layer_id(layer);
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
@@ -102,34 +102,34 @@ void cellview::add_pin(const std::string &layer, std::string net, std::string la
 
 shape_ref<box_t> cellview::add_rect(const std::string &layer, const std::string &purpose,
                                     bool is_horiz, box_t bbox, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, std::move(bbox), commit};
 }
 
 void cellview::add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
                             bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     auto geo_iter = helper::make_geometry(*this, key);
     offset_t dx = 0;
     for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
         offset_t dy = 0;
         for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
-            geo_iter->second.add_shape(box.get_move_by(dx, dy), is_horiz);
+            geo_iter->second.add_shape(get_move_by(box, dx, dy), is_horiz);
         }
     }
 }
 
 shape_ref<polygon90> cellview::add_poly90(const std::string &layer, const std::string &purpose,
                                           bool is_horiz, polygon90 &&poly, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::string &purpose,
                                           bool is_horiz, polygon45 &&poly, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
@@ -137,14 +137,14 @@ shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::s
 shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
                                                   const std::string &purpose, bool is_horiz,
                                                   polygon45_set &&poly, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::string &purpose,
                                       bool is_horiz, polygon &&poly, bool commit) {
-    layer_t key = get_lay_purp_key(layer, purpose);
+    auto key = get_lay_purp_key(layer, purpose);
     helper::make_geometry(*this, key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
@@ -176,8 +176,8 @@ void cellview::add_via_arr(const transformation &xform, const std::string &via_i
                            offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r,
                            offset_t enc2t, offset_t enc2b, uint32_t nx, uint32_t ny, offset_t spx,
                            offset_t spy) {
-    via_param param(vnx, vny, w, h, vspx, vspy, enc1l, enc1r, enc1t, enc1b, enc2l, enc2r, enc2t,
-                    enc2b);
+    via_param param{vnx,   vny,   w,     h,     vspx,  vspy,  enc1l,
+                    enc1r, enc1t, enc1b, enc2l, enc2r, enc2t, enc2b};
 
     offset_t dx = 0;
     for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
@@ -224,7 +224,7 @@ void cellview::add_object(const boundary &obj) { boundary_list.push_back(obj); }
 void cellview::add_object(const via &obj) {
     via_list.push_back(obj);
     if (obj.add_layers) {
-        purp_t purpose = tech_ptr->get_purpose_id(nullptr);
+        auto purpose = tech_ptr->get_purpose_id(nullptr);
         lay_t bot_lay, top_lay;
         tech_ptr->get_via_layers(obj.via_id, bot_lay, top_lay);
         layer_t bot_key(bot_lay, purpose);
@@ -238,7 +238,7 @@ void cellview::add_object(const via &obj) {
 
 void cellview::add_object(const instance &obj) {
     helper::add_inst(*this, obj);
-    const cellview *master = obj.get_cellview();
+    auto master = obj.get_cellview();
     if (master != nullptr) {
         for (const auto &pair : master->geo_map) {
             auto geo_iter = helper::make_geometry(*this, pair.first);

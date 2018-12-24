@@ -1,4 +1,4 @@
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/common/vector.h>
 #include <cbag/layout/via.h>
 
@@ -17,8 +17,8 @@ struct via::helper {
         coord_t xh = xl + via_w + enc.first;
         coord_t yh = yl + via_h + enc.second;
 
-        box_t r(xl, yl, xh, yh);
-        bp::transform(r, self.xform);
+        box_t r{xl, yl, xh, yh};
+        transform(r, self.xform);
         return r;
     }
 };

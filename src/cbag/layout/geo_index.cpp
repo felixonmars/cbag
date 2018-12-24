@@ -1,4 +1,4 @@
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/geo_index.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/tech.h>
@@ -44,8 +44,8 @@ bool geo_index::empty() const { return index.empty(); }
 
 box_t &geo_index::get_bbox(box_t &r) const {
     auto box = index.bounds();
-    r.set(box.min_corner().get<0>(), box.min_corner().get<1>(), box.max_corner().get<0>(),
-          box.max_corner().get<1>());
+    set(r, box.min_corner().get<0>(), box.min_corner().get<1>(), box.max_corner().get<0>(),
+        box.max_corner().get<1>());
     return r;
 }
 
@@ -55,8 +55,8 @@ geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t s
     return {r,
             spx,
             spy,
-            index.qbegin(bgi::intersects(bg_box(bg_point(r.xl() - spx, r.yl() - spy),
-                                                bg_point(r.xh() + spx, r.yh() + spy)))),
+            index.qbegin(bgi::intersects(
+                bg_box(bg_point(xl(r) - spx, yl(r) - spy), bg_point(xh(r) + spx, yh(r) + spy)))),
             index.qend(),
             xform};
 }
@@ -69,13 +69,13 @@ void geo_index::insert(const box_t &obj, bool is_horiz) {
         spx = spy = 0;
     } else {
         if (is_horiz) {
-            offset_t w = obj.h();
-            spx = tech_ptr->get_min_space(lay_type, w, space_type::LINE_END);
-            spy = tech_ptr->get_min_space(lay_type, w, space_type::DIFF_COLOR);
+            auto wid = get_dim(obj, 1);
+            spx = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
+            spy = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
         } else {
-            offset_t w = obj.w();
-            spx = tech_ptr->get_min_space(lay_type, w, space_type::DIFF_COLOR);
-            spy = tech_ptr->get_min_space(lay_type, w, space_type::LINE_END);
+            auto wid = get_dim(obj, 0);
+            spx = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
+            spy = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
         }
     }
 

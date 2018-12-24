@@ -1,6 +1,6 @@
 #include <utility>
 
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/instance.h>
 #include <cbag/util/overload.h>
@@ -76,14 +76,16 @@ const param_map *instance::get_params() const {
 }
 
 box_t instance::get_bbox(const std::string &layer, const std::string &purpose) const {
-    box_t r = std::visit(
+    auto r = std::visit(
         overload{
             [&layer, &purpose](const cellview *v) { return v->get_bbox(layer, purpose); },
-            [](const cellview_ref &v) { return box_t(0, 0, 0, 0); },
+            [](const cellview_ref &v) {
+                return box_t{0, 0, 0, 0};
+            },
         },
         master);
 
-    return r.transform(xform);
+    return transform(r, xform);
 }
 
 void instance::set_master(const cellview *new_master) { master = new_master; }

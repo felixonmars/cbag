@@ -1,4 +1,4 @@
-#include <cbag/common/box_t.h>
+#include <cbag/common/box_t_util.h>
 #include <cbag/layout/geo_instance.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/geometry.h>
@@ -15,13 +15,13 @@ bool geo_instance::empty() const { return master->index_empty(); }
 
 box_t &geo_instance::get_bbox(box_t &r) const {
     master->get_index_bbox(r);
-    return r.transform(xform);
+    return transform(r, xform);
 }
 
 geo_iterator geo_instance::begin_intersect(const box_t &r, offset_t spx, offset_t spy) const {
-    offset_t spx_new = spx;
-    offset_t spy_new = spy;
-    box_t test_r = r.get_transform(xform.get_inverse());
+    auto spx_new = spx;
+    auto spy_new = spy;
+    auto test_r = get_transform(r, xform.get_inverse());
     if (xform.flips_xy()) {
         spx_new = spy;
         spy_new = spx;
