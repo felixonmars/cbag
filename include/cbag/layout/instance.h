@@ -66,8 +66,7 @@ class instance {
 
     void set_master(const cellview *new_master);
 
-    void set_param(const std::string &name,
-                   const std::variant<int32_t, double, bool, std::string> &val);
+    void set_param(const std::string &name, const param_t &val);
 };
 
 } // namespace layout

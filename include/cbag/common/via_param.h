@@ -9,7 +9,7 @@ namespace cbag {
 
 class via_param {
   public:
-    uint32_t num[2] = {1, 1};
+    cnt_t num[2] = {1, 1};
     dist_t cut_dim[2] = {0, 0};
     vector cut_spacing;
     vector lay1_enc;
@@ -20,7 +20,7 @@ class via_param {
   public:
     via_param();
 
-    via_param(uint32_t vnx, uint32_t vny, dist_t w, dist_t h, offset_t vspx, offset_t vspy,
+    via_param(cnt_t vnx, cnt_t vny, dist_t w, dist_t h, offset_t vspx, offset_t vspy,
               offset_t enc1l, offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
               offset_t enc2r, offset_t enc2t, offset_t enc2b);
 };

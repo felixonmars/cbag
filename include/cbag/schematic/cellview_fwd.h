@@ -58,7 +58,7 @@ struct cellview {
 
     void clear_params();
 
-    void set_param(std::string name, const std::variant<int32_t, double, bool, std::string> &val);
+    void set_param(std::string name, const param_t &val);
 
     void rename_pin(const std::string &old_name, const std::string &new_name);
 

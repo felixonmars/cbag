@@ -12,7 +12,7 @@ void set_via_enc_offset(vector &enc, vector &off, offset_t encl, offset_t encr, 
 
 via_param::via_param() = default;
 
-via_param::via_param(uint32_t vnx, uint32_t vny, dist_t w, dist_t h, offset_t vspx, offset_t vspy,
+via_param::via_param(cnt_t vnx, cnt_t vny, dist_t w, dist_t h, offset_t vspx, offset_t vspy,
                      offset_t enc1l, offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
                      offset_t enc2r, offset_t enc2t, offset_t enc2b)
     : num{vnx, vny}, cut_dim{w, h}, cut_spacing(vspx, vspy) {

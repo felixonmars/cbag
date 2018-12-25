@@ -2,11 +2,11 @@
 #ifndef CBAG_COMMON_FONT_H
 #define CBAG_COMMON_FONT_H
 
-#include <cstdint>
+#include <cbag/common/typedefs.h>
 
 namespace cbag {
 
-enum class font_t : uint8_t {
+enum class font_t : enum_t {
     euroStyle = 0,
     gothic = 1,
     math = 2,

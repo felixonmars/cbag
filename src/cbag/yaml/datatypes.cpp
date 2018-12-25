@@ -23,10 +23,10 @@ bool convert<cbag::value_t>::decode(const Node &node, cbag::value_t &rhs) {
         int value = node[0].as<int>();
         switch (value) {
         case 0:
-            rhs = node[1].as<int32_t>();
+            rhs = node[1].as<int_fast32_t>();
             return true;
         case 1:
-            rhs = node[1].as<double>();
+            rhs = node[1].as<double_t>();
             return true;
         case 2:
             rhs = node[1].as<bool>();

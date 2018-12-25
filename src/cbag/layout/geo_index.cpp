@@ -69,11 +69,11 @@ void geo_index::insert(const box_t &obj, bool is_horiz) {
         spx = spy = 0;
     } else {
         if (is_horiz) {
-            auto wid = get_dim(obj, 1);
+            auto wid = get_dim(obj, orient_2d::VERTICAL);
             spx = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
             spy = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
         } else {
-            auto wid = get_dim(obj, 0);
+            auto wid = get_dim(obj, orient_2d::HORIZONTAL);
             spx = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
             spy = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
         }

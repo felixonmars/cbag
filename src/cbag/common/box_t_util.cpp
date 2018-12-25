@@ -14,10 +14,12 @@ namespace cbag {
 
 box_t invalid_box() noexcept { return {0, 0, -1, -1}; }
 
-offset_t get_dim(const box_t &box, uint8_t orient_code) {
+offset_t get_dim(const box_t &box, orient_2d orient) {
+    auto orient_code = static_cast<orient_2d_t>(orient);
     return box.intvs[orient_code][1] - box.intvs[orient_code][0];
 }
-coord_t get_center(const box_t &box, uint8_t orient_code) {
+coord_t get_center(const box_t &box, orient_2d orient) {
+    auto orient_code = static_cast<orient_2d_t>(orient);
     return cbag::util::floor_half(box.intvs[orient_code][0] + box.intvs[orient_code][1]);
 }
 
@@ -31,7 +33,8 @@ void set(box_t &box, coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
     box.intvs[1][0] = yl;
     box.intvs[1][1] = yh;
 }
-void set_interval(box_t &box, uint8_t orient_code, coord_t tl, coord_t th) {
+void set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th) {
+    auto orient_code = static_cast<orient_2d_t>(orient);
     box.intvs[orient_code][0] = tl;
     box.intvs[orient_code][1] = th;
 }
@@ -40,10 +43,10 @@ coord_t xl(const box_t &box) { return box.intvs[0][0]; }
 coord_t yl(const box_t &box) { return box.intvs[1][0]; }
 coord_t xh(const box_t &box) { return box.intvs[0][1]; }
 coord_t yh(const box_t &box) { return box.intvs[1][1]; }
-coord_t xm(const box_t &box) { return get_center(box, 0); }
-coord_t ym(const box_t &box) { return get_center(box, 1); }
-coord_t width(const box_t &box) { return get_dim(box, 0); }
-coord_t height(const box_t &box) { return get_dim(box, 1); }
+coord_t xm(const box_t &box) { return get_center(box, orient_2d::HORIZONTAL); }
+coord_t ym(const box_t &box) { return get_center(box, orient_2d::VERTICAL); }
+coord_t width(const box_t &box) { return get_dim(box, orient_2d::HORIZONTAL); }
+coord_t height(const box_t &box) { return get_dim(box, orient_2d::VERTICAL); }
 
 std::string to_string(const box_t &box) {
     return fmt::format("BBox({}, {}, {}, {})", xl(box), yl(box), xh(box), yh(box));
@@ -71,8 +74,9 @@ box_t &intersect(box_t &box, const box_t &other) {
 }
 box_t get_intersect(box_t box, const box_t &other) { return intersect(box, other); }
 
-box_t &extend_orient(box_t &box, uint8_t orient_code, const std::optional<coord_t> &ct,
+box_t &extend_orient(box_t &box, orient_2d orient, const std::optional<coord_t> &ct,
                      const std::optional<coord_t> &cp) {
+    auto orient_code = static_cast<orient_2d_t>(orient);
     if (is_valid(box)) {
         if (ct) {
             box.intvs[orient_code][0] = std::min(box.intvs[orient_code][0], *ct);
@@ -85,16 +89,16 @@ box_t &extend_orient(box_t &box, uint8_t orient_code, const std::optional<coord_
     }
     return box;
 }
-box_t get_extend_orient(box_t box, uint8_t orient_code, const std::optional<coord_t> &ct,
+box_t get_extend_orient(box_t box, orient_2d orient, const std::optional<coord_t> &ct,
                         const std::optional<coord_t> &cp) {
-    return extend_orient(box, orient_code, ct, cp);
+    return extend_orient(box, orient, ct, cp);
 }
 
 box_t &extend(box_t &box, const std::optional<coord_t> &x, const std::optional<coord_t> &y) {
-    return extend_orient(box, 0, x, y);
+    return extend_orient(box, orient_2d::HORIZONTAL, x, y);
 }
 box_t get_extend(box_t box, const std::optional<coord_t> &x, const std::optional<coord_t> &y) {
-    return extend_orient(box, 0, x, y);
+    return extend_orient(box, orient_2d::HORIZONTAL, x, y);
 }
 
 box_t &expand(box_t &box, coord_t dx, coord_t dy) {
@@ -108,19 +112,24 @@ box_t get_expand(box_t box, coord_t dx, coord_t dy) { return expand(box, dx, dy)
 box_t &transform(box_t &box, const transformation &xform) { return bp::transform(box, xform); }
 box_t get_transform(box_t box, const transformation &xform) { return bp::transform(box, xform); }
 
-box_t &move_by_orient(box_t &box, uint8_t orient_code, offset_t dt, offset_t dp) {
+box_t &move_by_orient(box_t &box, orient_2d orient, offset_t dt, offset_t dp) {
+    auto orient_code = static_cast<orient_2d_t>(orient);
     box.intvs[orient_code][0] += dt;
     box.intvs[orient_code][1] += dt;
     box.intvs[1 - orient_code][0] += dp;
     box.intvs[1 - orient_code][1] += dp;
     return box;
 }
-box_t get_move_by_orient(box_t box, uint8_t orient_code, offset_t dt, offset_t dp) {
-    return move_by_orient(box, orient_code, dt, dp);
+box_t get_move_by_orient(box_t box, orient_2d orient, offset_t dt, offset_t dp) {
+    return move_by_orient(box, orient, dt, dp);
 }
 
-box_t &move_by(box_t &box, offset_t dx, offset_t dy) { return move_by_orient(box, 0, dx, dy); }
-box_t get_move_by(box_t box, offset_t dx, offset_t dy) { return move_by_orient(box, 0, dx, dy); }
+box_t &move_by(box_t &box, offset_t dx, offset_t dy) {
+    return move_by_orient(box, orient_2d::HORIZONTAL, dx, dy);
+}
+box_t get_move_by(box_t box, offset_t dx, offset_t dy) {
+    return move_by_orient(box, orient_2d::HORIZONTAL, dx, dy);
+}
 
 box_t &flip_xy(box_t &box) {
     auto tmp = box.intvs[0];

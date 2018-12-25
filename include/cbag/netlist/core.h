@@ -102,11 +102,11 @@ template <class OutIter> class write_param_visitor {
     write_param_visitor(OutIter &iter, const std::string &key) : iter_(iter), key_(key) {}
 
     void operator()(const std::string &v) const { *iter_ = fmt::format("{}={}", key_, v); }
-    void operator()(const int32_t &v) const {
+    void operator()(const int_fast32_t &v) const {
         auto logger = cbag::get_cbag_logger();
         logger->warn("integer parameter, do nothing.");
     }
-    void operator()(const double &v) const {
+    void operator()(const double_t &v) const {
         auto logger = cbag::get_cbag_logger();
         logger->warn("integer parameter, do nothing.");
     }

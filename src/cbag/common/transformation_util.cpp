@@ -18,7 +18,7 @@ std::pair<coord_t, coord_t> location(const transformation &xform) {
 }
 coord_t x(const transformation &xform) { return location(xform).first; }
 coord_t y(const transformation &xform) { return location(xform).second; }
-uint32_t orient_code(const transformation &xform) {
+orient_t orient_code(const transformation &xform) {
     bp::direction_2d hdir, vdir;
     xform.get_directions(hdir, vdir);
     return ((~vdir.to_int() & 0b11) << 1) | (~hdir.to_int() & 0b01);
@@ -45,9 +45,9 @@ void set_orient_code(transformation &xform, uint32_t code) {
 }
 
 bool flips_xy(const transformation &xform) { return (orient_code(xform) & 0b100) == 0b100; }
-std::pair<int8_t, int8_t> axis_scale(const transformation &xform) {
+std::pair<bool, bool> axis_scale(const transformation &xform) {
     auto ocode = orient_code(xform);
-    return {1 - ((ocode & 0b001) << 1), 1 - (ocode & 0b010)};
+    return {(ocode & 0b001) == 0b001, (ocode & 0b010) == 0b010};
 }
 
 transformation &move_by(transformation &xform, offset_t dx, offset_t dy) {

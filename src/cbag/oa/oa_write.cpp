@@ -296,9 +296,9 @@ class make_prop_visitor {
     explicit make_prop_visitor(oa::oaObject *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
 
-    void operator()(const int32_t &v) const { oa::oaIntProp::create(obj, name, v); }
+    void operator()(const int_fast32_t &v) const { oa::oaIntProp::create(obj, name, v); }
 
-    void operator()(const double &v) const { oa::oaDoubleProp::create(obj, name, v); }
+    void operator()(const double_t &v) const { oa::oaDoubleProp::create(obj, name, v); }
 
     void operator()(const bool &v) const {
         oa::oaBooleanProp::create(obj, name, static_cast<oa::oaBoolean>(v));
@@ -327,7 +327,7 @@ class make_app_def_visitor {
     explicit make_app_def_visitor(oa::oaDesign *obj, const std::string &name)
         : obj(obj), name(name.c_str()) {}
 
-    void operator()(const int32_t &v) const {
+    void operator()(const int_fast32_t &v) const {
         auto ptr = oa::oaIntAppDef<oa::oaDesign>::find(name);
         if (ptr == nullptr) {
             ptr = oa::oaIntAppDef<oa::oaDesign>::get(name);
@@ -335,7 +335,9 @@ class make_app_def_visitor {
         ptr->set(obj, v);
     }
 
-    void operator()(const double &v) const {
+    void operator()(const bool &v) const { operator()(static_cast<int_fast32_t>(v)); }
+
+    void operator()(const double_t &v) const {
         throw std::invalid_argument("double AppDef not supported yet.");
     }
 

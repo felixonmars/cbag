@@ -2,7 +2,6 @@
 #ifndef CBAG_COMMON_POINT_ARRAY_H
 #define CBAG_COMMON_POINT_ARRAY_H
 
-#include <cbag/common/point.h>
 #include <vector>
 
 #include <cbag/common/point.h>

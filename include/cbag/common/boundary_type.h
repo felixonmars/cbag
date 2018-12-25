@@ -2,12 +2,12 @@
 #ifndef CBAG_COMMON_BOUNDARY_TYPE_H
 #define CBAG_COMMON_BOUNDARY_TYPE_H
 
-#include <cstdint>
+#include <cbag/common/typedefs.h>
 
 namespace cbag {
 // common primitive types
 
-enum boundary_type : uint8_t {
+enum boundary_type : enum_t {
     PR = 0,
     snap = 1,
 };

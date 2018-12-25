@@ -2,11 +2,11 @@
 #ifndef CBAG_COMMON_SIG_TYPE_H
 #define CBAG_COMMON_SIG_TYPE_H
 
-#include <cstdint>
+#include <cbag/common/typedefs.h>
 
 namespace cbag {
 
-enum class sig_type : uint32_t {
+enum class sig_type : enum_t {
     signal = 0,
     power = 1,
     ground = 2,
@@ -16,7 +16,7 @@ enum class sig_type : uint32_t {
     tieLo = 6,
     analog = 7,
     scan = 8,
-    reset = 9
+    reset = 9,
 };
 
 } // namespace cbag

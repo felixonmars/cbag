@@ -2,11 +2,11 @@
 #ifndef CBAG_COMMON_BLOCKAGE_TYPE_H
 #define CBAG_COMMON_BLOCKAGE_TYPE_H
 
-#include <cstdint>
+#include <cbag/common/typedefs.h>
 
 namespace cbag {
 
-enum class blockage_type : uint32_t {
+enum class blockage_type : enum_t {
     routing = 0,
     via = 1,
     placement = 2,

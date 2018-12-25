@@ -36,8 +36,7 @@ std::unique_ptr<instance> instance::get_copy() const { return std::make_unique<i
 
 void instance::clear_params() { params.clear(); }
 
-void instance::set_param(const std::string &name,
-                         const std::variant<int32_t, double, bool, std::string> &val) {
+void instance::set_param(const std::string &name, const param_t &val) {
     cbag::set_param(params, name, val);
 }
 

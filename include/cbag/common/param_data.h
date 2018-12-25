@@ -1,6 +1,7 @@
 #ifndef CBAG_COMMON_PARAM_DATA_H
 #define CBAG_COMMON_PARAM_DATA_H
 
+#include <cmath>
 #include <cstdint>
 #include <ctime>
 #include <string>
@@ -28,8 +29,10 @@ struct binary_t {
 
 /** Type definition for a parameter value type.
  */
-using value_t = std::variant<int32_t, double, bool, std::string, time_struct, binary_t>;
+using value_t = std::variant<int_fast32_t, double_t, bool, std::string, time_struct, binary_t>;
+
+using param_t = std::variant<int_fast32_t, double_t, bool, std::string>;
 
 } // namespace cbag
 
-#endif // CBAG_COMMON_DATATYPES_H
+#endif

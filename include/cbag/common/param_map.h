@@ -12,4 +12,4 @@ using param_map = util::sorted_map<std::string, value_t>;
 
 } // namespace cbag
 
-#endif // CBAG_COMMON_DATATYPES_H
+#endif

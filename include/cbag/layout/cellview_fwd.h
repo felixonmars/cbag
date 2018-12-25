@@ -7,6 +7,7 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <cbag/common/layer_t.h>
 #include <cbag/common/transformation_fwd.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
@@ -34,8 +35,9 @@ using inst_map_t = std::unordered_map<std::string, instance>;
 
 class cellview {
   private:
-    uint32_t inst_name_cnt = 0;
-    uint8_t geo_mode = 0;
+    cnt_t inst_name_cnt = 0;
+    enum_t geo_mode = 0;
+
     struct helper;
 
   public:

@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include <cbag/common/orient_2d.h>
 #include <cbag/common/typedefs.h>
 
 namespace cbag {
@@ -14,7 +15,7 @@ struct box_t {
 
     box_t() noexcept;
     box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) noexcept;
-    box_t(uint8_t orient_code, coord_t tl, coord_t th, coord_t pl, coord_t ph) noexcept;
+    box_t(orient_2d orient, coord_t tl, coord_t th, coord_t pl, coord_t ph) noexcept;
 
     static box_t get_invalid_box() noexcept;
 };

@@ -11,6 +11,8 @@ namespace cbag {
 
 using orientation = boost::polygon::axis_transformation::ATR;
 
+using orient_t = uint32_t;
+
 constexpr orientation oR0 = orientation::NULL_TRANSFORM;
 constexpr orientation oR90 = orientation::ROTATE_RIGHT;
 constexpr orientation oR180 = orientation::FLIP_XY;

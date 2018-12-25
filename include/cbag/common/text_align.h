@@ -2,11 +2,11 @@
 #ifndef CBAG_COMMON_TEXT_ALIGN_H
 #define CBAG_COMMON_TEXT_ALIGN_H
 
-#include <cstdint>
+#include <cbag/common/typedefs.h>
 
 namespace cbag {
 
-enum class text_align : uint8_t {
+enum class text_align : enum_t {
     upperLeft = 0,
     centerLeft = 1,
     lowerLeft = 2,

@@ -94,8 +94,7 @@ std::unique_ptr<cellview> cellview::get_copy() const {
 
 void cellview::clear_params() { props.clear(); }
 
-void cellview::set_param(std::string name,
-                         const std::variant<int32_t, double, bool, std::string> &val) {
+void cellview::set_param(std::string name, const param_t &val) {
     cbag::set_param(props, std::move(name), val);
 }
 

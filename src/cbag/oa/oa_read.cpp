@@ -83,10 +83,12 @@ std::pair<std::string, cbag::value_t> read_prop(oa::oaProp *p) {
         return {std::move(key), std::string(tmp_str)};
     }
     case oa::oacIntPropType: {
-        return {std::move(key), static_cast<oa::oaIntProp *>(p)->getValue()};
+        return {std::move(key),
+                static_cast<int_fast32_t>(static_cast<oa::oaIntProp *>(p)->getValue())};
     }
     case oa::oacDoublePropType: {
-        return {std::move(key), static_cast<oa::oaDoubleProp *>(p)->getValue()};
+        return {std::move(key),
+                static_cast<double_t>(static_cast<oa::oaDoubleProp *>(p)->getValue())};
     }
     case oa::oacTimePropType: {
         return {std::move(key), cbag::time_struct{static_cast<oa::oaTimeProp *>(p)->getValue()}};
@@ -120,7 +122,8 @@ std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppD
     // NOTE: static_cast for down-casting is bad, but openaccess API sucks...
     switch (p->getType()) {
     case oa::oacIntAppDefType: {
-        return {std::move(key), (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn)};
+        return {std::move(key), static_cast<int_fast32_t>(
+                                    (static_cast<oa::oaIntAppDef<oa::oaDesign> *>(p))->get(dsn))};
     }
     case oa::oacStringAppDefType: {
         (static_cast<oa::oaStringAppDef<oa::oaDesign> *>(p))->get(dsn, tmp_str);

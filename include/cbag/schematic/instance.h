@@ -44,8 +44,7 @@ struct instance {
 
     void clear_params();
 
-    void set_param(const std::string &name,
-                   const std::variant<int32_t, double, bool, std::string> &val);
+    void set_param(const std::string &name, const param_t &val);
 
     void update_connection(const std::string &inst_name, uint32_t inst_size, std::string term_str,
                            std::string net_str);

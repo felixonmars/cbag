@@ -91,8 +91,7 @@ box_t instance::get_bbox(const std::string &layer, const std::string &purpose) c
 
 void instance::set_master(const cellview *new_master) { master = new_master; }
 
-void instance::set_param(const std::string &name,
-                         const std::variant<int32_t, double, bool, std::string> &val) {
+void instance::set_param(const std::string &name, const param_t &val) {
     auto *cv_ref = std::get_if<cellview_ref>(&master);
     if (cv_ref != nullptr) {
         cbag::set_param(cv_ref->params, name, val);
