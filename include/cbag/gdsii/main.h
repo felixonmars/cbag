@@ -14,9 +14,9 @@
 namespace cbag {
 namespace gdsii {
 
-void write_header(std::ofstream &stream, const std::string &lib_name);
+void write_gds_start(std::ofstream &stream, const std::string &lib_name);
 
-void write_footer(std::ofstream &stream);
+void write_gds_stop(std::ofstream &stream);
 
 void write_lay_cellview(spdlog::logger &logger, const std::string &lib_name,
                         const std::string &cell_name, const std::string &view_name,
@@ -29,7 +29,7 @@ void implement_lay_list(spdlog::logger &logger, const std::string &fname,
                         const Vector &cv_list) {
     // get gds file stream
     auto stream = util::open_file_write(fname, true);
-    write_header(stream, lib_name);
+    write_gds_start(stream, lib_name);
 
     std::unordered_map<std::string, std::string> rename_map{};
     for (const auto &cv_info : cv_list) {
@@ -38,7 +38,7 @@ void implement_lay_list(spdlog::logger &logger, const std::string &fname,
         rename_map[cv_info.second->cell_name] = cv_info.first;
     }
 
-    write_footer(stream);
+    write_gds_stop(stream);
 }
 
 } // namespace gdsii

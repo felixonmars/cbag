@@ -49,7 +49,6 @@ class geometry {
 
     geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                  const transformation &xform = transformation()) const;
-    geo_iterator end_intersect() const;
 
     void reset_to_mode(geometry_mode m);
 

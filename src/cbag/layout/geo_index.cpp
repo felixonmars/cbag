@@ -61,8 +61,6 @@ geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t s
             xform};
 }
 
-geo_iterator geo_index::end_intersect() const { return {}; }
-
 void geo_index::insert(const box_t &obj, bool is_horiz) {
     coord_t spx, spy;
     if (lay_type.empty()) {

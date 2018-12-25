@@ -28,8 +28,6 @@ class geo_instance {
 
     geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy) const;
 
-    geo_iterator end_intersect() const;
-
     bool operator==(const geo_instance &rhs) const;
 };
 

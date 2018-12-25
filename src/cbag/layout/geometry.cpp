@@ -41,8 +41,6 @@ geo_iterator geometry::begin_intersect(const box_t &r, offset_t spx, offset_t sp
     return index.begin_intersect(r, spx, spy, xform);
 }
 
-geo_iterator geometry::end_intersect() const { return {}; }
-
 void geometry::reset_to_mode(geometry_mode m) {
     switch (m) {
     case geometry_mode::POLY90:

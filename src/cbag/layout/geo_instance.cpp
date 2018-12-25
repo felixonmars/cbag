@@ -30,8 +30,6 @@ geo_iterator geo_instance::begin_intersect(const box_t &r, offset_t spx, offset_
     return master->begin_intersect(test_r, spx_new, spy_new, xform);
 }
 
-geo_iterator geo_instance::end_intersect() const { return {}; }
-
 bool geo_instance::operator==(const geo_instance &rhs) const {
     return master == rhs.master && xform == rhs.xform;
 }

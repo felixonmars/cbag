@@ -34,7 +34,6 @@ class geo_index {
 
     const_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                    const cbag::transformation &xform) const;
-    const_iterator end_intersect() const;
 
     void insert(const box_t &obj, bool is_horiz);
     void insert(const polygon90 &obj, bool is_horiz);
