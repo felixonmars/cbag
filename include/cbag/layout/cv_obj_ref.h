@@ -13,14 +13,12 @@ template <typename T> class shape_ref {
   private:
     layer_t key{0, 0};
     bool is_horiz = true;
+    cellview *parent = nullptr;
 
   public:
-    cellview *parent = nullptr;
     T obj;
 
     shape_ref() = default;
-
-    shape_ref(const layer_t &key, T *ptr) : key(key), obj(std::move(*ptr)) {}
 
     shape_ref(cellview *parent, layer_t &&key, bool is_horiz, T &&obj, bool add)
         : key(std::move(key)), is_horiz(is_horiz), parent(parent), obj(std::move(obj)) {
@@ -29,16 +27,20 @@ template <typename T> class shape_ref {
     }
 
     void commit() {
-        if (parent != nullptr) {
+        if (editable()) {
             parent->make_geometry(key).add_shape(obj, is_horiz);
             parent = nullptr;
         }
     }
+
+    bool editable() const noexcept { return parent != nullptr; }
 };
 
 template <typename T> class cv_obj_ref {
-  public:
+  private:
     cellview *parent = nullptr;
+
+  public:
     T obj;
 
     cv_obj_ref() = default;
@@ -49,11 +51,13 @@ template <typename T> class cv_obj_ref {
     }
 
     void commit() {
-        if (parent != nullptr) {
+        if (editable()) {
             parent->add_object(obj);
             parent = nullptr;
         }
     }
+
+    bool editable() const noexcept { return parent != nullptr; }
 };
 
 } // namespace layout

@@ -24,7 +24,6 @@ class blockage;
 class pin;
 class via;
 class tech;
-class geo_iterator;
 
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
