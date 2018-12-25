@@ -58,7 +58,7 @@ class cellview {
 
     geometry &get_geometry(layer_t key);
 
-    std::string name() const;
+    std::string get_name() const;
     tech *get_tech() const;
 
     bool empty() const;

@@ -46,11 +46,11 @@ std::string instance::get_cell_name(const str_map_t *rename_map) const {
         overload{
             [&rename_map](const cellview *v) {
                 if (rename_map == nullptr) {
-                    return v->name();
+                    return v->get_name();
                 }
-                auto iter = rename_map->find(v->name());
+                auto iter = rename_map->find(v->get_name());
                 if (iter == rename_map->end())
-                    return v->name();
+                    return v->get_name();
                 return iter->second;
             },
             [](const cellview_ref &v) { return v.cell; },

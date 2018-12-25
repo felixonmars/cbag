@@ -67,7 +67,7 @@ geometry &cellview::get_geometry(layer_t key) {
     return iter->second;
 }
 
-std::string cellview::name() const { return cell_name; }
+std::string cellview::get_name() const { return cell_name; }
 tech *cellview::get_tech() const { return tech_ptr; }
 
 bool cellview::empty() const {

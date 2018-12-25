@@ -48,9 +48,9 @@ void implement_lay_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             const auto cv_ptr = cv_info.second;
             write_lay_cellview(ns_native, ns, logger, lib_name, cv_info.first, view, *cv_ptr,
                                tech_ptr, &rename_map);
-            auto cell_name = cv_ptr->name();
+            auto cell_name = cv_ptr->get_name();
             logger.info("cell name {} maps to {}", cell_name, cv_info.first);
-            rename_map[cell_name] = cv_info.first;
+            rename_map[std::move(cell_name)] = cv_info.first;
         }
     } catch (...) {
         handle_oa_exceptions(logger);

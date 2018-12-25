@@ -40,7 +40,7 @@ shape_ref<polygon> add_poly(cellview &cv, const std::string &layer, const std::s
 template <typename T, typename = IsPtList<T>>
 cv_obj_ref<blockage> add_blockage(cellview &cv, const std::string &layer, enum_t blk_code,
                                   const T &data, bool commit) {
-    auto lay_id = cv.tech_ptr->get_layer_id(layer);
+    auto lay_id = cv.get_tech()->get_layer_id(layer);
     blockage obj(static_cast<blockage_type>(blk_code), lay_id);
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
     return cv.add_blockage(std::move(obj), commit);
