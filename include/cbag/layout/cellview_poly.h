@@ -56,14 +56,14 @@ cv_obj_ref<blockage> add_blockage(cellview &cv, const std::string &layer, enum_t
     auto lay_id = cv.get_tech()->get_layer_id(layer);
     blockage obj(static_cast<blockage_type>(blk_code), lay_id);
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
-    return cv.add_blockage(std::move(obj), commit);
+    return {&cv, std::move(obj), commit};
 }
 
 template <typename T, typename = IsPtList<T>>
 cv_obj_ref<boundary> add_boundary(cellview &cv, enum_t bnd_code, const T &data, bool commit) {
     boundary obj(static_cast<boundary_type>(bnd_code));
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
-    return cv.add_boundary(std::move(obj), commit);
+    return {&cv, std::move(obj), commit};
 }
 
 } // namespace layout

@@ -1,15 +1,8 @@
-#include <cstring>
-
-#include <fmt/core.h>
-
 #include <cbag/util/binary_iterator.h>
 
-#include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/cv_obj_ref.h>
-#include <cbag/layout/geo_iterator.h>
-#include <cbag/layout/tech_util.h>
+#include <cbag/layout/tech.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
@@ -25,7 +18,7 @@ struct cellview::helper {
         auto map_end = self.inst_map.end();
         cbag::util::binary_iterator<cnt_t> iter(self.inst_name_cnt);
         while (iter.has_next()) {
-            if (self.inst_map.find(fmt::format("X{:d}", *iter)) == map_end) {
+            if (self.inst_map.find("X" + std::to_string(*iter)) == map_end) {
                 iter.save();
                 iter.down();
             } else {
@@ -34,7 +27,7 @@ struct cellview::helper {
         }
 
         self.inst_name_cnt = *(iter.get_save());
-        self.inst_map.emplace(fmt::format("X{:d}", self.inst_name_cnt), inst);
+        self.inst_map.emplace("X" + std::to_string(self.inst_name_cnt), inst);
     }
 };
 
@@ -105,62 +98,6 @@ void cellview::add_pin(const std::string &layer, std::string net, std::string la
     iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
 }
 
-cv_obj_ref<blockage> cellview::add_blockage(blockage &&data, bool commit) {
-    return {this, std::move(data), commit};
-}
-
-cv_obj_ref<boundary> cellview::add_boundary(boundary &&data, bool commit) {
-    return {this, std::move(data), commit};
-}
-
-cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool add_layers,
-                                  bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w,
-                                  dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l,
-                                  offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
-                                  offset_t enc2r, offset_t enc2t, offset_t enc2b, bool commit) {
-    return {this,
-            via(std::move(xform), std::move(via_id),
-                via_param(vnx, vny, w, h, vspx, vspy, enc1l, enc1r, enc1t, enc1b, enc2l, enc2r,
-                          enc2t, enc2b),
-                add_layers, bot_horiz, top_horiz),
-            commit};
-}
-
-void cellview::add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
-                           bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w, dist_t h,
-                           offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
-                           offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r,
-                           offset_t enc2t, offset_t enc2b, cnt_t nx, cnt_t ny, offset_t spx,
-                           offset_t spy) {
-    via_param param{vnx,   vny,   w,     h,     vspx,  vspy,  enc1l,
-                    enc1r, enc1t, enc1b, enc2l, enc2r, enc2t, enc2b};
-
-    offset_t dx = 0;
-    for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
-        offset_t dy = 0;
-        for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
-            add_object(
-                via(get_move_by(xform, dx, dy), via_id, param, add_layers, bot_horiz, top_horiz));
-        }
-    }
-}
-
-cv_obj_ref<instance> cellview::add_prim_instance(std::string lib, std::string cell,
-                                                 std::string view, std::string name,
-                                                 cbag::transformation xform, cnt_t nx, cnt_t ny,
-                                                 offset_t spx, offset_t spy, bool commit) {
-    return {this,
-            instance(std::move(name), std::move(lib), std::move(cell), std::move(view),
-                     std::move(xform), nx, ny, spx, spy),
-            commit};
-}
-
-cv_obj_ref<instance> cellview::add_instance(const cellview *cv, std::string name,
-                                            cbag::transformation xform, cnt_t nx, cnt_t ny,
-                                            offset_t spx, offset_t spy, bool commit) {
-    return {this, instance(std::move(name), cv, std::move(xform), nx, ny, spx, spy), commit};
-}
-
 void cellview::add_object(const blockage &obj) {
     if (obj.get_type() == blockage_type::placement) {
         // area blockage
@@ -185,10 +122,8 @@ void cellview::add_object(const via &obj) {
         tech_ptr->get_via_layers(obj.via_id, bot_lay, top_lay);
         layer_t bot_key(bot_lay, purpose);
         layer_t top_key(top_lay, purpose);
-        auto &bot_geo = make_geometry(bot_key);
-        auto &top_geo = make_geometry(top_key);
-        bot_geo.add_shape(obj.bot_box(), obj.bot_horiz);
-        top_geo.add_shape(obj.top_box(), obj.top_horiz);
+        make_geometry(bot_key).add_shape(obj.bot_box(), obj.bot_horiz);
+        make_geometry(top_key).add_shape(obj.top_box(), obj.top_horiz);
     }
 }
 
