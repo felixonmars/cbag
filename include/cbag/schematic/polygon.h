@@ -19,7 +19,7 @@ struct polygon : public shape_base {
 
     polygon();
 
-    polygon(lay_t lay, purp_t purp, std::string net, uint32_t n);
+    polygon(lay_t lay, purp_t purp, std::string net, cnt_t n);
 };
 
 } // namespace sch

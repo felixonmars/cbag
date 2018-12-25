@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 
+#include <cbag/common/typedefs.h>
 #include <cbag/netlist/netlist.h>
 
 #include "util/io.h"
@@ -71,7 +72,7 @@ SCENARIO("netlist generation", "[cbag]") {
         std::unordered_set<std::string> recorded;
         populate_name_cv_list(fmt_str, yaml_dir, cell_name, "TEST", name_cv_list, recorded);
         bool flat = false;
-        uint32_t rmin = 2000;
+        cbag::cnt_t rmin = 2000;
 
         std::string ext_str = get_extension(format);
         std::string fname = fmt::format("{}/{}_{:d}.{}", output_dir, cell_name, shell, ext_str);

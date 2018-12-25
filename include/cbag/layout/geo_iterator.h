@@ -11,7 +11,7 @@
 namespace cbag {
 namespace layout {
 
-enum geo_union_enum : uint8_t {
+enum geo_union_enum : enum_t {
     RECT = 0,
     POLY90 = 1,
     POLY45 = 2,

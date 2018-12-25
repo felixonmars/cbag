@@ -30,7 +30,7 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
     auto iter = inc_list_map.find(out_type);
     if (iter == inc_list_map.end()) {
         throw std::out_of_range("Cannot find include files for netlist output code " +
-                                std::to_string(static_cast<uint8_t>(out_type)));
+                                std::to_string(static_cast<enum_t>(out_type)));
     }
     inc_list = iter->second;
 
@@ -38,7 +38,7 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
     auto iter2 = app_file_map.find(out_type);
     if (iter2 == app_file_map.end()) {
         throw std::out_of_range("Cannot find append primitive file for netlist output code " +
-                                std::to_string(static_cast<uint8_t>(out_type)));
+                                std::to_string(static_cast<enum_t>(out_type)));
     }
     append_file = iter2->second;
 }

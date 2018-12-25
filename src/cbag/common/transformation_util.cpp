@@ -40,7 +40,7 @@ void set_orient(transformation &xform, orientation orient) {
     // set origin
     set_location(xform, loc.first, loc.second);
 }
-void set_orient_code(transformation &xform, uint32_t code) {
+void set_orient_code(transformation &xform, orient_t code) {
     set_orient(xform, static_cast<orientation>(code));
 }
 

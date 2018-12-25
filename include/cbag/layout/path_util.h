@@ -1,8 +1,8 @@
 #ifndef CBAG_LAYOUT_PATH_UTIL_H
 #define CBAG_LAYOUT_PATH_UTIL_H
 
+#include <cbag/enum/end_style.h>
 #include <cbag/layout/cv_obj_ref.h>
-#include <cbag/layout/end_style.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set_fwd.h>
 #include <cbag/layout/pt_vector.h>
@@ -18,8 +18,8 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
                          end_style sty0, end_style sty1);
 
 template <typename T, typename = IsPtList<T>>
-polygon45_set make_path(const T &data, offset_t half_width, uint8_t style0, uint8_t style1,
-                        uint8_t stylem) {
+polygon45_set make_path(const T &data, offset_t half_width, enum_t style0, enum_t style1,
+                        enum_t stylem) {
     auto n = traits::pt_list<T>::size(data);
     if (n < 2) {
         throw std::invalid_argument("Cannot draw path with less than 2 points.");
@@ -47,8 +47,8 @@ polygon45_set make_path(const T &data, offset_t half_width, uint8_t style0, uint
 }
 
 template <typename T, typename L, typename = IsPtList<T>>
-polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, uint8_t style0,
-                              uint8_t style1, uint8_t stylem) {
+polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, enum_t style0,
+                              enum_t style1, enum_t stylem) {
     auto n_pts = traits::pt_list<T>::size(data);
     if (n_pts < 2) {
         throw std::invalid_argument("Cannot draw path with less than 2 points.");
@@ -188,8 +188,8 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, u
 template <typename T, typename = IsPtList<T>>
 shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
                                   const std::string &purpose, bool is_horiz, const T &data,
-                                  offset_t half_width, uint8_t style0, uint8_t style1,
-                                  uint8_t stylem, bool commit) {
+                                  offset_t half_width, enum_t style0, enum_t style1, enum_t stylem,
+                                  bool commit) {
     return cv.add_poly45_set(layer, purpose, is_horiz,
                              make_path(data, half_width, style0, style1, stylem), commit);
 }
@@ -197,8 +197,8 @@ shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
 template <typename T, typename L, typename = IsPtList<T>>
 shape_ref<polygon45_set> add_path45_bus(cellview &cv, const std::string &layer,
                                         const std::string &purpose, bool is_horiz, const T &data,
-                                        const L &widths, const L &spaces, uint8_t style0,
-                                        uint8_t style1, uint8_t stylem, bool commit) {
+                                        const L &widths, const L &spaces, enum_t style0,
+                                        enum_t style1, enum_t stylem, bool commit) {
     return cv.add_poly45_set(layer, purpose, is_horiz,
                              make_path45_bus(data, widths, spaces, style0, style1, stylem), commit);
 }

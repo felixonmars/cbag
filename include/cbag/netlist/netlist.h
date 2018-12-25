@@ -110,7 +110,7 @@ void write_netlist(const ContentList &name_cv_list, const std::string &fname, de
         break;
     default:
         throw std::invalid_argument(
-            fmt::format("Unrecognized design output code: {}", static_cast<uint8_t>(format)));
+            fmt::format("Unrecognized design output code: {}", static_cast<enum_t>(format)));
     }
 }
 

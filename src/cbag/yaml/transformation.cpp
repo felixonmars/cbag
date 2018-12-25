@@ -26,7 +26,7 @@ bool convert<cbag::transformation>::decode(const Node &node, cbag::transformatio
     }
     try {
         cbag::set_location(rhs, node[0].as<cbag::coord_t>(), node[1].as<cbag::coord_t>());
-        cbag::set_orient_code(rhs, node[2].as<uint32_t>());
+        cbag::set_orient_code(rhs, node[2].as<cbag::orient_t>());
     } catch (...) {
         logger->warn("cbag::transformation YAML decode exception.  Node:\n{}",
                      cbagyaml::node_to_str(node));

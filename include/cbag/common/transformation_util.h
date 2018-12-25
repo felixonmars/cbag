@@ -21,7 +21,7 @@ orient_t orient_code(const transformation &xform);
 
 void set_location(transformation &xform, coord_t x, coord_t y);
 void set_orient(transformation &xform, orientation orient);
-void set_orient_code(transformation &xform, uint32_t orient);
+void set_orient_code(transformation &xform, orient_t orient);
 
 bool flips_xy(const transformation &xform);
 std::pair<bool, bool> axis_scale(const transformation &xform);

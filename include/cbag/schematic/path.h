@@ -25,7 +25,7 @@ struct path : public shape_base {
 
     path();
 
-    path(lay_t lay, purp_t purp, std::string net, dist_t width, uint32_t n, path_style style,
+    path(lay_t lay, purp_t purp, std::string net, dist_t width, cnt_t n, path_style style,
          dist_t begin_ext, dist_t end_ext);
 };
 

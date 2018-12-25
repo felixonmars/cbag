@@ -19,7 +19,7 @@ struct line : public shape_base {
 
     line();
 
-    line(lay_t lay, purp_t purp, std::string net, uint32_t n);
+    line(lay_t lay, purp_t purp, std::string net, cnt_t n);
 };
 
 } // namespace sch
