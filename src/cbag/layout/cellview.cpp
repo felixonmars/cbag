@@ -247,13 +247,14 @@ cv_obj_ref<instance> cellview::add_instance(const cellview *cv, std::string name
 }
 
 void cellview::add_object(const blockage &obj) {
-    if (obj.type == blockage_type::placement) {
+    if (obj.get_type() == blockage_type::placement) {
         // area blockage
         area_block_list.push_back(obj);
     } else {
-        auto iter = lay_block_map.find(obj.layer);
+        auto layer = obj.get_layer();
+        auto iter = lay_block_map.find(layer);
         if (iter == lay_block_map.end()) {
-            iter = lay_block_map.emplace(obj.layer, std::vector<blockage>()).first;
+            iter = lay_block_map.emplace(layer, std::vector<blockage>()).first;
         }
         iter->second.push_back(obj);
     }

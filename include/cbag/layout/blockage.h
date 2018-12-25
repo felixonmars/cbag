@@ -9,11 +9,15 @@ namespace cbag {
 namespace layout {
 
 class blockage : public polygon {
-  public:
+  private:
     blockage_type type;
     lay_t layer;
 
+  public:
     explicit blockage(blockage_type type = blockage_type::routing, lay_t layer = 0);
+
+    blockage_type get_type() const;
+    lay_t get_layer() const;
 };
 
 } // namespace layout

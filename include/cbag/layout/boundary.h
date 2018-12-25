@@ -8,10 +8,13 @@ namespace cbag {
 namespace layout {
 
 class boundary : public polygon {
-  public:
+  private:
     boundary_type type;
 
+  public:
     explicit boundary(boundary_type type = boundary_type::PR);
+
+    boundary_type get_type() const;
 };
 
 } // namespace layout

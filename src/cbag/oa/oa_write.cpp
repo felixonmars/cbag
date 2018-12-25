@@ -681,7 +681,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         auto const &block_pair = *iter;
         for (auto const &block : block_pair.second) {
             set_point_array(block, pt_arr);
-            oa::oaLayerBlockage::create(blk, get_blockage_type(block.type), block_pair.first,
+            oa::oaLayerBlockage::create(blk, get_blockage_type(block.get_type()), block_pair.first,
                                         pt_arr);
         }
     }
@@ -695,7 +695,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     logger.info("Making layout boundaries.");
     for (auto iter = cv.begin_boundary(); iter != cv.end_boundary(); ++iter) {
         set_point_array(*iter, pt_arr);
-        switch (iter->type) {
+        switch (iter->get_type()) {
         case cbag::PR:
             oa::oaPRBoundary::create(blk, pt_arr);
         case cbag::snap:
