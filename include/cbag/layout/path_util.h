@@ -2,6 +2,7 @@
 #define CBAG_LAYOUT_PATH_UTIL_H
 
 #include <cbag/enum/end_style.h>
+#include <cbag/layout/cellview_poly.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set_fwd.h>
@@ -188,8 +189,8 @@ shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
                                   const std::string &purpose, bool is_horiz, const T &data,
                                   offset_t half_width, enum_t style0, enum_t style1, enum_t stylem,
                                   bool commit) {
-    return cv.add_poly45_set(layer, purpose, is_horiz,
-                             make_path(data, half_width, style0, style1, stylem), commit);
+    return add_polygon(cv, layer, purpose, is_horiz,
+                       make_path(data, half_width, style0, style1, stylem), commit);
 }
 
 template <typename T, typename L, typename = IsPtList<T>>
@@ -197,8 +198,8 @@ shape_ref<polygon45_set> add_path45_bus(cellview &cv, const std::string &layer,
                                         const std::string &purpose, bool is_horiz, const T &data,
                                         const L &widths, const L &spaces, enum_t style0,
                                         enum_t style1, enum_t stylem, bool commit) {
-    return cv.add_poly45_set(layer, purpose, is_horiz,
-                             make_path45_bus(data, widths, spaces, style0, style1, stylem), commit);
+    return add_polygon(cv, layer, purpose, is_horiz,
+                       make_path45_bus(data, widths, spaces, style0, style1, stylem), commit);
 }
 
 } // namespace layout

@@ -81,18 +81,6 @@ class cellview {
 
     void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
 
-    shape_ref<polygon90> add_poly90(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, polygon90 &&poly, bool commit);
-
-    shape_ref<polygon45> add_poly45(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, polygon45 &&poly, bool commit);
-
-    shape_ref<polygon45_set> add_poly45_set(const std::string &layer, const std::string &purpose,
-                                            bool is_horiz, polygon45_set &&poly, bool commit);
-
-    shape_ref<polygon> add_poly(const std::string &layer, const std::string &purpose, bool is_horiz,
-                                polygon &&poly, bool commit);
-
     cv_obj_ref<blockage> add_blockage(blockage &&data, bool commit);
 
     cv_obj_ref<boundary> add_boundary(boundary &&data, bool commit);

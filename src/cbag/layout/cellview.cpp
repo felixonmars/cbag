@@ -105,35 +105,6 @@ void cellview::add_pin(const std::string &layer, std::string net, std::string la
     iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
 }
 
-shape_ref<polygon90> cellview::add_poly90(const std::string &layer, const std::string &purpose,
-                                          bool is_horiz, polygon90 &&poly, bool commit) {
-    auto key = get_layer_t(*tech_ptr, layer, purpose);
-    make_geometry(key);
-    return {this, std::move(key), is_horiz, std::move(poly), commit};
-}
-
-shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::string &purpose,
-                                          bool is_horiz, polygon45 &&poly, bool commit) {
-    auto key = get_layer_t(*tech_ptr, layer, purpose);
-    make_geometry(key);
-    return {this, std::move(key), is_horiz, std::move(poly), commit};
-}
-
-shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
-                                                  const std::string &purpose, bool is_horiz,
-                                                  polygon45_set &&poly, bool commit) {
-    auto key = get_layer_t(*tech_ptr, layer, purpose);
-    make_geometry(key);
-    return {this, std::move(key), is_horiz, std::move(poly), commit};
-}
-
-shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::string &purpose,
-                                      bool is_horiz, polygon &&poly, bool commit) {
-    auto key = get_layer_t(*tech_ptr, layer, purpose);
-    make_geometry(key);
-    return {this, std::move(key), is_horiz, std::move(poly), commit};
-}
-
 cv_obj_ref<blockage> cellview::add_blockage(blockage &&data, bool commit) {
     return {this, std::move(data), commit};
 }
