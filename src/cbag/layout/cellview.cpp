@@ -48,10 +48,10 @@ struct cellview::helper {
     }
 };
 
-cellview::cellview(tech *tech_ptr, std::string cell_name, uint8_t geo_mode)
+cellview::cellview(tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
     : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(std::move(cell_name)) {}
 
-void cellview::set_geometry_mode(uint8_t new_mode) {
+void cellview::set_geometry_mode(geometry_mode new_mode) {
     if (!empty())
         throw std::runtime_error("Cannot change geometry mode of non-empty layout.");
     geo_mode = new_mode;

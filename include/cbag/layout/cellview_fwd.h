@@ -9,6 +9,7 @@
 
 #include <cbag/common/layer_t.h>
 #include <cbag/common/transformation_fwd.h>
+#include <cbag/enum/geometry_mode.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
 
@@ -36,7 +37,7 @@ using inst_map_t = std::unordered_map<std::string, instance>;
 class cellview {
   private:
     cnt_t inst_name_cnt = 0;
-    enum_t geo_mode = 0;
+    geometry_mode geo_mode = geometry_mode::POLY90;
 
     struct helper;
 
@@ -51,9 +52,10 @@ class cellview {
     std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
 
-    explicit cellview(tech *tech_ptr, std::string cell_name, enum_t geo_mode = 0);
+    explicit cellview(tech *tech_ptr, std::string cell_name,
+                      geometry_mode geo_mode = geometry_mode::POLY90);
 
-    void set_geometry_mode(uint8_t new_mode);
+    void set_geometry_mode(geometry_mode new_mode);
 
     bool empty() const;
 

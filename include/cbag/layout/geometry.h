@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <cbag/common/transformation.h>
+#include <cbag/enum/geometry_mode.h>
 #include <cbag/layout/geo_index.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon45_set_fwd.h>
@@ -31,7 +32,7 @@ class geometry {
   private:
     using geometry_data = std::variant<polygon90_set, polygon45_set, polygon_set>;
 
-    uint8_t mode = 0;
+    geometry_mode mode = geometry_mode::POLY90;
     geometry_data data;
     geo_index index;
     struct helper;
@@ -39,7 +40,7 @@ class geometry {
   public:
     geometry();
 
-    geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode = 0);
+    geometry(std::string &&lay_type, tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
 
     bool index_empty() const;
     box_t get_bbox() const;
@@ -50,7 +51,7 @@ class geometry {
                                  const transformation &xform = transformation()) const;
     geo_iterator end_intersect() const;
 
-    void reset_to_mode(uint8_t m);
+    void reset_to_mode(geometry_mode m);
 
     void add_shape(const box_t &obj, bool is_horiz);
     void add_shape(const polygon90 &obj, bool is_horiz);

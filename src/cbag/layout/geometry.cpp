@@ -11,9 +11,9 @@ struct geometry::helper {};
 
 geometry::geometry() = default;
 
-geometry::geometry(std::string &&lay_type, tech *tech_ptr, uint8_t mode)
+geometry::geometry(std::string &&lay_type, tech *tech_ptr, geometry_mode mode)
     : mode(mode), index(std::move(lay_type), tech_ptr) {
-    if (mode != 0)
+    if (mode != geometry_mode::POLY90)
         reset_to_mode(mode);
 }
 
@@ -43,19 +43,20 @@ geo_iterator geometry::begin_intersect(const box_t &r, offset_t spx, offset_t sp
 
 geo_iterator geometry::end_intersect() const { return {}; }
 
-void geometry::reset_to_mode(uint8_t m) {
+void geometry::reset_to_mode(geometry_mode m) {
     switch (m) {
-    case 0:
-        data.emplace<0>();
+    case geometry_mode::POLY90:
+        data.emplace<polygon90_set>();
         break;
-    case 1:
-        data.emplace<1>();
+    case geometry_mode::POLY45:
+        data.emplace<polygon45_set>();
         break;
-    case 2:
-        data.emplace<2>();
+    case geometry_mode::POLY:
+        data.emplace<polygon_set>();
         break;
     default:
-        throw std::invalid_argument("Unknown geometry mode: " + std::to_string(m));
+        throw std::invalid_argument("Unknown geometry mode: " +
+                                    std::to_string(static_cast<enum_t>(m)));
     }
     mode = m;
 }
