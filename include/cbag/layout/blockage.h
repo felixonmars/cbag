@@ -14,10 +14,10 @@ class blockage : public polygon {
     lay_t layer;
 
   public:
-    explicit blockage(blockage_type type = blockage_type::routing, lay_t layer = 0);
+    explicit blockage(blockage_type type = blockage_type::routing, lay_t layer = 0) noexcept;
 
-    blockage_type get_type() const;
-    lay_t get_layer() const;
+    blockage_type get_type() const noexcept;
+    lay_t get_layer() const noexcept;
 };
 
 } // namespace layout

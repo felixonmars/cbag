@@ -9,6 +9,7 @@
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/geo_iterator.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/via.h>
 
 namespace cbag {
@@ -35,17 +36,6 @@ struct cellview::helper {
         self.inst_name_cnt = *(iter.get_save());
         self.inst_map.emplace(fmt::format("X{:d}", self.inst_name_cnt), inst);
     }
-
-    static geo_map_t::iterator make_geometry(cellview &self, const layer_t &key) {
-        auto iter = self.geo_map.find(key);
-        if (iter == self.geo_map.end()) {
-            iter = self.geo_map
-                       .emplace(key, geometry(self.tech_ptr->get_layer_type(key.first),
-                                              self.tech_ptr, self.geo_mode))
-                       .first;
-        }
-        return iter;
-    }
 };
 
 cellview::cellview(tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
@@ -57,7 +47,11 @@ void cellview::set_geometry_mode(geometry_mode new_mode) {
     geo_mode = new_mode;
 }
 
-geometry &cellview::get_geometry(layer_t key) {
+auto cellview::find_geometry(const layer_t &key) const -> decltype(geo_map.find(key)) {
+    return geo_map.find(key);
+}
+
+geometry &cellview::make_geometry(const layer_t &key) {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end()) {
         iter =
@@ -67,43 +61,13 @@ geometry &cellview::get_geometry(layer_t key) {
     return iter->second;
 }
 
-std::string cellview::get_name() const { return cell_name; }
-tech *cellview::get_tech() const { return tech_ptr; }
+std::string cellview::get_name() const noexcept { return cell_name; }
+tech *cellview::get_tech() const noexcept { return tech_ptr; }
 
-bool cellview::empty() const {
+bool cellview::empty() const noexcept {
     return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
            area_block_list.empty() && boundary_list.empty() && pin_map.empty();
 }
-
-layer_t cellview::get_lay_purp_key(const std::string &layer, const std::string &purpose) const {
-    auto lay_id = tech_ptr->get_layer_id(layer);
-    auto purp_id = tech_ptr->get_purpose_id(purpose);
-    return {lay_id, purp_id};
-}
-
-box_t cellview::get_bbox(const std::string &layer, const std::string &purpose) const {
-    box_t ans{0, 0, -1, -1};
-    // merge geometry bounding box
-    auto iter = geo_map.find(get_lay_purp_key(layer, purpose));
-    if (iter != geo_map.end()) {
-        merge(ans, iter->second.get_bbox());
-    }
-    // merge instance bounding box
-    for (const auto &p : inst_map) {
-        merge(ans, p.second.get_bbox(layer, purpose));
-    }
-    return ans;
-}
-
-geo_iterator cellview::begin_intersect(const layer_t &key, const box_t &r, offset_t spx,
-                                       offset_t spy) const {
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end())
-        return {};
-    return iter->second.begin_intersect(r, spx, spy);
-}
-
-geo_iterator cellview::end_intersect() const { return {}; }
 
 auto cellview::begin_inst() const -> decltype(inst_map.cbegin()) { return inst_map.cbegin(); }
 auto cellview::end_inst() const -> decltype(inst_map.cend()) { return inst_map.cend(); }
@@ -141,52 +105,32 @@ void cellview::add_pin(const std::string &layer, std::string net, std::string la
     iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
 }
 
-shape_ref<box_t> cellview::add_rect(const std::string &layer, const std::string &purpose,
-                                    bool is_horiz, box_t bbox, bool commit) {
-    auto key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
-    return {this, std::move(key), is_horiz, std::move(bbox), commit};
-}
-
-void cellview::add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
-                            bool is_horiz, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
-    auto key = get_lay_purp_key(layer, purpose);
-    auto geo_iter = helper::make_geometry(*this, key);
-    offset_t dx = 0;
-    for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
-        offset_t dy = 0;
-        for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
-            geo_iter->second.add_shape(get_move_by(box, dx, dy), is_horiz);
-        }
-    }
-}
-
 shape_ref<polygon90> cellview::add_poly90(const std::string &layer, const std::string &purpose,
                                           bool is_horiz, polygon90 &&poly, bool commit) {
-    auto key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
+    auto key = get_layer_t(*tech_ptr, layer, purpose);
+    make_geometry(key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon45> cellview::add_poly45(const std::string &layer, const std::string &purpose,
                                           bool is_horiz, polygon45 &&poly, bool commit) {
-    auto key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
+    auto key = get_layer_t(*tech_ptr, layer, purpose);
+    make_geometry(key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon45_set> cellview::add_poly45_set(const std::string &layer,
                                                   const std::string &purpose, bool is_horiz,
                                                   polygon45_set &&poly, bool commit) {
-    auto key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
+    auto key = get_layer_t(*tech_ptr, layer, purpose);
+    make_geometry(key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
 shape_ref<polygon> cellview::add_poly(const std::string &layer, const std::string &purpose,
                                       bool is_horiz, polygon &&poly, bool commit) {
-    auto key = get_lay_purp_key(layer, purpose);
-    helper::make_geometry(*this, key);
+    auto key = get_layer_t(*tech_ptr, layer, purpose);
+    make_geometry(key);
     return {this, std::move(key), is_horiz, std::move(poly), commit};
 }
 
@@ -270,10 +214,10 @@ void cellview::add_object(const via &obj) {
         tech_ptr->get_via_layers(obj.via_id, bot_lay, top_lay);
         layer_t bot_key(bot_lay, purpose);
         layer_t top_key(top_lay, purpose);
-        auto bot_iter = helper::make_geometry(*this, bot_key);
-        auto top_iter = helper::make_geometry(*this, top_key);
-        bot_iter->second.add_shape(obj.bot_box(), obj.bot_horiz);
-        top_iter->second.add_shape(obj.top_box(), obj.top_horiz);
+        auto &bot_geo = make_geometry(bot_key);
+        auto &top_geo = make_geometry(top_key);
+        bot_geo.add_shape(obj.bot_box(), obj.bot_horiz);
+        top_geo.add_shape(obj.top_box(), obj.top_horiz);
     }
 }
 
@@ -282,12 +226,12 @@ void cellview::add_object(const instance &obj) {
     auto master = obj.get_cellview();
     if (master != nullptr) {
         for (const auto &pair : master->geo_map) {
-            auto geo_iter = helper::make_geometry(*this, pair.first);
+            auto &geo = make_geometry(pair.first);
             for (decltype(obj.nx) ix = 0; ix < obj.nx; ++ix) {
                 for (decltype(obj.ny) iy = 0; iy < obj.ny; ++iy) {
                     // unordered map does not invalidate pointers to elements
-                    geo_iter->second.record_instance(
-                        &pair.second, get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));
+                    geo.record_instance(&pair.second,
+                                        get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));
                 }
             }
         }

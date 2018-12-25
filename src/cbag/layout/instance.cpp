@@ -2,7 +2,7 @@
 
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/param_map_util.h>
-#include <cbag/layout/cellview.h>
+#include <cbag/layout/cellview_util.h>
 #include <cbag/layout/instance.h>
 #include <cbag/util/overload.h>
 
@@ -79,7 +79,9 @@ const param_map *instance::get_params() const {
 box_t instance::get_bbox(const std::string &layer, const std::string &purpose) const {
     auto r = std::visit(
         overload{
-            [&layer, &purpose](const cellview *v) { return v->get_bbox(layer, purpose); },
+            [&layer, &purpose](const cellview *v) {
+                return cbag::layout::get_bbox(*v, layer, purpose);
+            },
             [](const cellview_ref &v) {
                 return box_t{0, 0, 0, 0};
             },

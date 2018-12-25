@@ -30,7 +30,7 @@ template <typename T> class shape_ref {
 
     void commit() {
         if (parent != nullptr) {
-            parent->get_geometry(key).add_shape(obj, is_horiz);
+            parent->make_geometry(key).add_shape(obj, is_horiz);
             parent = nullptr;
         }
     }

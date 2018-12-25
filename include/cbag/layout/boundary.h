@@ -12,9 +12,9 @@ class boundary : public polygon {
     boundary_type type;
 
   public:
-    explicit boundary(boundary_type type = boundary_type::PR);
+    explicit boundary(boundary_type type = boundary_type::PR) noexcept;
 
-    boundary_type get_type() const;
+    boundary_type get_type() const noexcept;
 };
 
 } // namespace layout

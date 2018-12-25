@@ -79,6 +79,8 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_poly.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_index.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp
@@ -88,6 +90,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/path_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_param.cpp

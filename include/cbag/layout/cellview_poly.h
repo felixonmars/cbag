@@ -13,6 +13,12 @@
 namespace cbag {
 namespace layout {
 
+shape_ref<box_t> add_rect(cellview *cv, const std::string &layer, const std::string &purpose,
+                          bool is_horiz, box_t bbox, bool commit);
+
+void add_rect_arr(cellview &cv, const std::string &layer, const std::string &purpose,
+                  const box_t &box, bool is_horiz, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
+
 template <typename T, typename = IsPtList<T>>
 shape_ref<polygon90> add_poly90(cellview &cv, const std::string &layer, const std::string &purpose,
                                 bool is_horiz, const T &data, bool commit) {

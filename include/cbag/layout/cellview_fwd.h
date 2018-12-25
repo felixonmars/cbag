@@ -56,21 +56,13 @@ class cellview {
 
     void set_geometry_mode(geometry_mode new_mode);
 
-    geometry &get_geometry(layer_t key);
+    auto find_geometry(const layer_t &key) const -> decltype(geo_map.find(key));
+    geometry &make_geometry(const layer_t &key);
 
-    std::string get_name() const;
-    tech *get_tech() const;
+    std::string get_name() const noexcept;
+    tech *get_tech() const noexcept;
 
-    bool empty() const;
-
-    layer_t get_lay_purp_key(const std::string &layer, const std::string &purpose) const;
-
-    box_t get_bbox(const std::string &layer, const std::string &purpose) const;
-
-    geo_iterator begin_intersect(const layer_t &key, const box_t &r, offset_t spx,
-                                 offset_t spy) const;
-
-    geo_iterator end_intersect() const;
+    bool empty() const noexcept;
 
     auto begin_inst() const -> decltype(inst_map.cbegin());
     auto end_inst() const -> decltype(inst_map.cend());
@@ -88,12 +80,6 @@ class cellview {
     auto end_pin() const -> decltype(pin_map.cend());
 
     void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
-
-    shape_ref<box_t> add_rect(const std::string &layer, const std::string &purpose, bool is_horiz,
-                              box_t bbox, bool commit);
-
-    void add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
-                      bool is_horiz, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
 
     shape_ref<polygon90> add_poly90(const std::string &layer, const std::string &purpose,
                                     bool is_horiz, polygon90 &&poly, bool commit);
