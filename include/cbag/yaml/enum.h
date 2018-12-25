@@ -10,15 +10,15 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/design_output.h>
-#include <cbag/common/font_t.h>
-#include <cbag/common/orientation.h>
-#include <cbag/common/path_style.h>
-#include <cbag/common/sig_type.h>
-#include <cbag/common/term_attr_type.h>
-#include <cbag/common/term_type.h>
-#include <cbag/common/text_align.h>
-#include <cbag/common/text_disp_format.h>
+#include <cbag/enum/design_output.h>
+#include <cbag/enum/font_t.h>
+#include <cbag/enum/orientation.h>
+#include <cbag/enum/path_style.h>
+#include <cbag/enum/sig_type.h>
+#include <cbag/enum/term_attr_type.h>
+#include <cbag/enum/term_type.h>
+#include <cbag/enum/text_align.h>
+#include <cbag/enum/text_disp_format.h>
 
 namespace YAML {
 

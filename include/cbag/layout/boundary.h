@@ -1,7 +1,7 @@
 #ifndef CBAG_LAYOUT_BOUNDARY_H
 #define CBAG_LAYOUT_BOUNDARY_H
 
-#include <cbag/common/boundary_type.h>
+#include <cbag/enum/boundary_type.h>
 #include <cbag/layout/polygon.h>
 
 namespace cbag {

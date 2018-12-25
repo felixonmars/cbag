@@ -1,4 +1,4 @@
-#include <cbag/common/via_param.h>
+#include <cbag/layout/via_param.h>
 
 namespace cbag {
 

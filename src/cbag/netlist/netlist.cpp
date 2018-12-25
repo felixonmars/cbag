@@ -4,7 +4,7 @@
 #include "yaml-cpp/unordered_map.h"
 #include <yaml-cpp/yaml.h>
 
-#include <cbag/common/design_output.h>
+#include <cbag/enum/design_output.h>
 #include <cbag/netlist/netlist.h>
 #include <cbag/util/io.h>
 #include <cbag/yaml/cellviews.h>

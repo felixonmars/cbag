@@ -4,8 +4,8 @@
 
 #include <utility>
 
-#include <cbag/common/orientation.h>
 #include <cbag/common/transformation_fwd.h>
+#include <cbag/enum/orientation.h>
 
 namespace bp = boost::polygon;
 

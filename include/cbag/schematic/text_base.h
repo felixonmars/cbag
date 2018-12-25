@@ -7,11 +7,11 @@
 #ifndef CBAG_SCHEMATIC_TEXT_BASE_H
 #define CBAG_SCHEMATIC_TEXT_BASE_H
 
-#include <cbag/common/font_t.h>
-#include <cbag/common/orientation.h>
 #include <cbag/common/point.h>
-#include <cbag/common/text_align.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/font_t.h>
+#include <cbag/enum/orientation.h>
+#include <cbag/enum/text_align.h>
 #include <cbag/schematic/shape_base.h>
 
 namespace cbag {

@@ -9,8 +9,8 @@
 
 #include <variant>
 
-#include <cbag/common/sig_type.h>
-#include <cbag/common/term_type.h>
+#include <cbag/enum/sig_type.h>
+#include <cbag/enum/term_type.h>
 #include <cbag/schematic/pin_object.h>
 #include <cbag/schematic/rectangle.h>
 

@@ -4,8 +4,8 @@
 
 #include <array>
 
-#include <cbag/common/orient_2d.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/orient_2d.h>
 
 namespace cbag {
 

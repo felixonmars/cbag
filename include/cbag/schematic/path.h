@@ -7,9 +7,9 @@
 #ifndef CBAG_SCHEMATIC_PATH_H
 #define CBAG_SCHEMATIC_PATH_H
 
-#include <cbag/common/path_style.h>
 #include <cbag/common/point_array.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/path_style.h>
 #include <cbag/schematic/shape_base.h>
 
 namespace cbag {

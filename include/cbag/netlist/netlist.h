@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include <cbag/common/design_output.h>
+#include <cbag/enum/design_output.h>
 #include <cbag/logging/logging.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/core.h>

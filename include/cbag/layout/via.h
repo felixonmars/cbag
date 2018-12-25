@@ -4,7 +4,7 @@
 #include <string>
 
 #include <cbag/common/transformation.h>
-#include <cbag/common/via_param.h>
+#include <cbag/layout/via_param.h>
 
 namespace cbag {
 

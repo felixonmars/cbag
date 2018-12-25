@@ -7,8 +7,8 @@
 #ifndef CBAG_SCHEMATIC_TERM_ATTR_H
 #define CBAG_SCHEMATIC_TERM_ATTR_H
 
-#include <cbag/common/term_attr_type.h>
-#include <cbag/common/text_disp_format.h>
+#include <cbag/enum/term_attr_type.h>
+#include <cbag/enum/text_disp_format.h>
 #include <cbag/schematic/text_base.h>
 
 namespace cbag {

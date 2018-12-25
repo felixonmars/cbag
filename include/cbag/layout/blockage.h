@@ -1,8 +1,8 @@
 #ifndef CBAG_LAYOUT_BLOCKAGE_H
 #define CBAG_LAYOUT_BLOCKAGE_H
 
-#include <cbag/common/blockage_type.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/blockage_type.h>
 #include <cbag/layout/polygon.h>
 
 namespace cbag {

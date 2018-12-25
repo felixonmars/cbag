@@ -51,7 +51,7 @@ class cellview {
     std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
 
-    explicit cellview(tech *tech_ptr, std::string cell_name, uint8_t geo_mode = 0);
+    explicit cellview(tech *tech_ptr, std::string cell_name, enum_t geo_mode = 0);
 
     void set_geometry_mode(uint8_t new_mode);
 
