@@ -22,12 +22,13 @@ void add_via_arr(cellview &cv, const transformation &xform, const std::string &v
                  offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r, offset_t enc2t,
                  offset_t enc2b, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
 
-cv_obj_ref<instance> add_prim_instance(std::string lib, std::string cell, std::string view,
-                                       std::string name, transformation xform, cnt_t nx, cnt_t ny,
-                                       offset_t spx, offset_t spy, bool commit);
+cv_obj_ref<instance> add_prim_instance(cellview &cv, std::string lib, std::string cell,
+                                       std::string view, std::string name, transformation xform,
+                                       cnt_t nx, cnt_t ny, offset_t spx, offset_t spy, bool commit);
 
-cv_obj_ref<instance> add_instance(const cellview *cv, std::string name, transformation xform,
-                                  cnt_t nx, cnt_t ny, offset_t spx, offset_t spy, bool commit);
+cv_obj_ref<instance> add_instance(cellview &cv, const cellview *master, std::string name,
+                                  transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
+                                  offset_t spy, bool commit);
 
 } // namespace layout
 } // namespace cbag

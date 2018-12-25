@@ -5,9 +5,9 @@
 namespace cbag {
 namespace layout {
 
-shape_ref<box_t> add_rect(cellview *cv, const std::string &layer, const std::string &purpose,
+shape_ref<box_t> add_rect(cellview &cv, const std::string &layer, const std::string &purpose,
                           bool is_horiz, box_t bbox, bool commit) {
-    return {cv, get_layer_t(*(cv->get_tech()), layer, purpose), is_horiz, std::move(bbox), commit};
+    return {&cv, get_layer_t(*(cv.get_tech()), layer, purpose), is_horiz, std::move(bbox), commit};
 }
 
 void add_rect_arr(cellview &cv, const std::string &layer, const std::string &purpose,
