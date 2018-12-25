@@ -20,7 +20,7 @@ void implement_sch_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         str_map_t rename_map;
 
         for (const auto &cv_info : cv_list) {
-            const std::string &name = cv_info.first;
+            const auto &name = cv_info.first;
             const auto cv_ptr = cv_info.second.first;
             write_sch_cellview(ns_native, ns, logger, lib_name, name, sch_view, true, *cv_ptr,
                                &rename_map);
@@ -45,10 +45,12 @@ void implement_lay_list(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         auto *tech_ptr = read_tech(ns_native, lib_name);
 
         for (const auto &cv_info : cv_list) {
-            write_lay_cellview(ns_native, ns, logger, lib_name, cv_info.first, view,
-                               *(cv_info.second), tech_ptr, &rename_map);
-            logger.info("cell name {} maps to {}", cv_info.second->cell_name, cv_info.first);
-            rename_map[cv_info.second->cell_name] = cv_info.first;
+            const auto cv_ptr = cv_info.second;
+            write_lay_cellview(ns_native, ns, logger, lib_name, cv_info.first, view, *cv_ptr,
+                               tech_ptr, &rename_map);
+            auto cell_name = cv_ptr->name();
+            logger.info("cell name {} maps to {}", cell_name, cv_info.first);
+            rename_map[cell_name] = cv_info.first;
         }
     } catch (...) {
         handle_oa_exceptions(logger);

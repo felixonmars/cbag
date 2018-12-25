@@ -57,6 +57,19 @@ void cellview::set_geometry_mode(geometry_mode new_mode) {
     geo_mode = new_mode;
 }
 
+geometry &cellview::get_geometry(layer_t key) {
+    auto iter = geo_map.find(key);
+    if (iter == geo_map.end()) {
+        iter =
+            geo_map.emplace(key, geometry(tech_ptr->get_layer_type(key.first), tech_ptr, geo_mode))
+                .first;
+    }
+    return iter->second;
+}
+
+std::string cellview::name() const { return cell_name; }
+tech *cellview::get_tech() const { return tech_ptr; }
+
 bool cellview::empty() const {
     return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
            area_block_list.empty() && boundary_list.empty() && pin_map.empty();
@@ -91,6 +104,33 @@ geo_iterator cellview::begin_intersect(const layer_t &key, const box_t &r, offse
 }
 
 geo_iterator cellview::end_intersect() const { return {}; }
+
+auto cellview::begin_inst() const -> decltype(inst_map.cbegin()) { return inst_map.cbegin(); }
+auto cellview::end_inst() const -> decltype(inst_map.cend()) { return inst_map.cend(); }
+auto cellview::begin_geometry() const -> decltype(geo_map.cbegin()) { return geo_map.cbegin(); }
+auto cellview::end_geometry() const -> decltype(geo_map.cend()) { return geo_map.cend(); }
+auto cellview::begin_via() const -> decltype(via_list.cbegin()) { return via_list.cbegin(); }
+auto cellview::end_via() const -> decltype(via_list.cend()) { return via_list.cend(); }
+auto cellview::begin_lay_block() const -> decltype(lay_block_map.cbegin()) {
+    return lay_block_map.cbegin();
+}
+auto cellview::end_lay_block() const -> decltype(lay_block_map.cend()) {
+    return lay_block_map.cend();
+}
+auto cellview::begin_area_block() const -> decltype(area_block_list.cbegin()) {
+    return area_block_list.cbegin();
+}
+auto cellview::end_area_block() const -> decltype(area_block_list.cend()) {
+    return area_block_list.cend();
+}
+auto cellview::begin_boundary() const -> decltype(boundary_list.cbegin()) {
+    return boundary_list.cbegin();
+}
+auto cellview::end_boundary() const -> decltype(boundary_list.cend()) {
+    return boundary_list.cend();
+}
+auto cellview::begin_pin() const -> decltype(pin_map.cbegin()) { return pin_map.cbegin(); }
+auto cellview::end_pin() const -> decltype(pin_map.cend()) { return pin_map.cend(); }
 
 void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
     auto lay_id = tech_ptr->get_layer_id(layer);

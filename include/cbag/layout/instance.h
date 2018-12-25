@@ -54,11 +54,11 @@ class instance {
 
     const cellview *get_cellview() const;
 
-    const std::string &get_lib_name(const std::string &output_lib) const;
+    std::string get_lib_name(const std::string &output_lib) const;
 
-    const std::string &get_cell_name(const str_map_t *rename_map) const;
+    std::string get_cell_name(const str_map_t *rename_map) const;
 
-    const std::string &get_view_name(const std::string &default_view) const;
+    std::string get_view_name(const std::string &default_view) const;
 
     const param_map *get_params() const;
 

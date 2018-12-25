@@ -38,10 +38,6 @@ class cellview {
   private:
     cnt_t inst_name_cnt = 0;
     geometry_mode geo_mode = geometry_mode::POLY90;
-
-    struct helper;
-
-  public:
     tech *tech_ptr = nullptr;
     std::string cell_name;
     geo_map_t geo_map;
@@ -52,10 +48,18 @@ class cellview {
     std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
 
+    struct helper;
+
+  public:
     explicit cellview(tech *tech_ptr, std::string cell_name,
                       geometry_mode geo_mode = geometry_mode::POLY90);
 
     void set_geometry_mode(geometry_mode new_mode);
+
+    geometry &get_geometry(layer_t key);
+
+    std::string name() const;
+    tech *get_tech() const;
 
     bool empty() const;
 
@@ -67,6 +71,21 @@ class cellview {
                                  offset_t spy) const;
 
     geo_iterator end_intersect() const;
+
+    auto begin_inst() const -> decltype(inst_map.cbegin());
+    auto end_inst() const -> decltype(inst_map.cend());
+    auto begin_geometry() const -> decltype(geo_map.cbegin());
+    auto end_geometry() const -> decltype(geo_map.cend());
+    auto begin_via() const -> decltype(via_list.cbegin());
+    auto end_via() const -> decltype(via_list.cend());
+    auto begin_lay_block() const -> decltype(lay_block_map.cbegin());
+    auto end_lay_block() const -> decltype(lay_block_map.cend());
+    auto begin_area_block() const -> decltype(area_block_list.cbegin());
+    auto end_area_block() const -> decltype(area_block_list.cend());
+    auto begin_boundary() const -> decltype(boundary_list.cbegin());
+    auto end_boundary() const -> decltype(boundary_list.cend());
+    auto begin_pin() const -> decltype(pin_map.cbegin());
+    auto end_pin() const -> decltype(pin_map.cend());
 
     void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
 
