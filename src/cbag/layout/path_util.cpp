@@ -7,11 +7,11 @@ namespace cbag {
 namespace layout {
 
 void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, const vector45 &n,
-                     bool is_45, end_style style, uint32_t w_main, uint32_t w_norm) {
+                     bool is_45, end_style style, offset_t w_main, offset_t w_norm) {
     switch (style) {
     case end_style::truncate: {
-        uint32_t xw = n.dx * w_main;
-        uint32_t yw = n.dy * w_main;
+        auto xw = n.dx * w_main;
+        auto yw = n.dy * w_main;
         vec.emplace_back(x + xw, y + yw);
         vec.emplace_back(x - xw, y - yw);
         break;
@@ -21,22 +21,22 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
         vec.emplace_back(x - (p.dx + n.dx) * w_main, y - (p.dy + n.dy) * w_main);
         break;
     case end_style::triangle: {
-        uint32_t xw = n.dx * w_main;
-        uint32_t yw = n.dy * w_main;
+        auto xw = n.dx * w_main;
+        auto yw = n.dy * w_main;
         vec.emplace_back(x + xw, y + yw);
         vec.emplace_back(x - w_main * p.dx, y - w_main * p.dy);
         vec.emplace_back(x - xw, y - yw);
         break;
     }
     default: {
-        uint32_t xnm = n.dx * w_main;
-        uint32_t ynm = n.dy * w_main;
-        uint32_t xpm = p.dx * w_main;
-        uint32_t ypm = p.dy * w_main;
-        uint32_t xnn = n.dx * w_norm;
-        uint32_t ynn = n.dy * w_norm;
-        uint32_t xpn = p.dx * w_norm;
-        uint32_t ypn = p.dy * w_norm;
+        auto xnm = n.dx * w_main;
+        auto ynm = n.dy * w_main;
+        auto xpm = p.dx * w_main;
+        auto ypm = p.dy * w_main;
+        auto xnn = n.dx * w_norm;
+        auto ynn = n.dy * w_norm;
+        auto xpn = p.dx * w_norm;
+        auto ypn = p.dy * w_norm;
         vec.emplace_back(x - xpn + xnm, y - ypn + ynm);
         vec.emplace_back(x - xpm + xnn, y - ypm + ynn);
         vec.emplace_back(x - xpm - xnn, y - ypm - ynn);
@@ -81,8 +81,8 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
     ans.reserve(8);
 
     vector45 n_norm = p_norm.get_rotate90();
-    uint32_t half_diag = round(half_width / root2);
-    uint32_t w_main, w_norm;
+    auto half_diag = round(half_width / root2);
+    offset_t w_main, w_norm;
     if (is_45) {
         w_main = half_diag;
         w_norm = half_width - half_diag;

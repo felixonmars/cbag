@@ -25,7 +25,7 @@
 namespace cbag {
 namespace netlist {
 
-cdl_stream::cdl_stream(const std::string &fname, uint32_t rmin) : nstream_file(fname), rmin(rmin) {}
+cdl_stream::cdl_stream(const std::string &fname, cnt_t rmin) : nstream_file(fname), rmin(rmin) {}
 
 void traits::nstream<cdl_stream>::close(type &stream) { stream.close(); }
 
@@ -68,8 +68,8 @@ void get_cv_term_bits(lstream &b, lstream &b2, const std::vector<std::string> &n
                       const std::string &term_type) {
     for (auto const &name : names) {
         spirit::ast::name_unit ast = cbag::util::parse_cdba_name_unit(name);
-        uint32_t n = ast.size();
-        for (uint32_t idx = 0; idx < n; ++idx) {
+        auto n = ast.size();
+        for (decltype(n) idx = 0; idx < n; ++idx) {
             std::string tmp = ast.get_name_bit(idx, false, spirit::namespace_cdba{});
             b << tmp;
             tmp.append(term_type);
@@ -130,7 +130,7 @@ void write_instance_cell_name(OutIter &&iter, const sch::instance &inst,
     }
 }
 
-using term_net_vec_t = std::vector<std::pair<uint32_t, std::vector<std::string>>>;
+using term_net_vec_t = std::vector<std::pair<cnt_t, std::vector<std::string>>>;
 
 void get_term_net_pairs(term_net_vec_t &term_net_vec, const std::string &inst_name,
                         const sch::instance &inst, const std::vector<std::string> &terms) {
@@ -153,7 +153,7 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
                                                  const sch::instance &inst,
                                                  const sch::cellview_info &info) {
     spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
-    uint32_t n = inst_ast.size();
+    auto n = inst_ast.size();
 
     if (n == 1) {
         // normal instance, just write normally
@@ -176,15 +176,15 @@ void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string
         tokens.reserve(2);
         cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
         // array instance
-        for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
+        for (decltype(n) inst_idx = 0; inst_idx < n; ++inst_idx) {
             lstream b;
             // write instance name
             b << inst_ast.get_name_bit(inst_idx, true, spirit::namespace_cdba{});
             // write instance nets
             for (const auto &pair : term_net_vec) {
-                uint32_t term_n = pair.first;
-                std::size_t net_idx = inst_idx * term_n;
-                std::size_t stop_idx = net_idx + term_n;
+                auto term_n = pair.first;
+                auto net_idx = inst_idx * term_n;
+                auto stop_idx = net_idx + term_n;
                 for (; net_idx < stop_idx; ++net_idx) {
                     b << pair.second[net_idx];
                 }

@@ -36,19 +36,19 @@ class instance {
   public:
     const std::string name;
     cbag::transformation xform;
-    uint32_t nx = 1;
-    uint32_t ny = 1;
+    cnt_t nx = 1;
+    cnt_t ny = 1;
     offset_t spx = 0;
     offset_t spy = 0;
 
     instance();
 
     instance(std::string name, std::string lib, std::string cell, std::string view,
-             cbag::transformation xform, uint32_t nx = 1, uint32_t ny = 1, offset_t spx = 0,
+             cbag::transformation xform, cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0,
              offset_t spy = 0);
 
-    instance(std::string name, const cellview *master, cbag::transformation xform, uint32_t nx = 1,
-             uint32_t ny = 1, offset_t spx = 0, offset_t spy = 0);
+    instance(std::string name, const cellview *master, cbag::transformation xform, cnt_t nx = 1,
+             cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
     bool is_reference() const;
 

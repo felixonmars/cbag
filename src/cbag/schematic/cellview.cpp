@@ -117,7 +117,7 @@ void cellview::rename_pin(const std::string &old_name, const std::string &new_na
     }
 }
 
-void cellview::add_pin(const std::string &new_name, uint32_t term_type) {
+void cellview::add_pin(const std::string &new_name, enum_t term_type) {
     // check the pin name is legal.  Parse will throw exception if not passed
     spirit::ast::name ast;
     parse(new_name, spirit::name(), ast);

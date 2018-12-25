@@ -7,15 +7,15 @@ namespace layout {
 
 struct via::helper {
     static box_t get_box(const via &self, const vector &offset, const vector &enc) {
-        uint32_t nx = self.params.num[0];
-        uint32_t ny = self.params.num[1];
-        dist_t via_w = nx * self.params.cut_dim[0] + (nx - 1) * self.params.cut_spacing.first;
-        dist_t via_h = ny * self.params.cut_dim[1] + (ny - 1) * self.params.cut_spacing.second;
+        auto nx = self.params.num[0];
+        auto ny = self.params.num[1];
+        auto via_w = nx * self.params.cut_dim[0] + (nx - 1) * self.params.cut_spacing.first;
+        auto via_h = ny * self.params.cut_dim[1] + (ny - 1) * self.params.cut_spacing.second;
 
-        coord_t xl = offset.first - (via_w / 2) - enc.first;
-        coord_t yl = offset.second - (via_h / 2) - enc.second;
-        coord_t xh = xl + via_w + enc.first;
-        coord_t yh = yl + via_h + enc.second;
+        auto xl = static_cast<coord_t>(offset.first - (via_w / 2) - enc.first);
+        auto yl = static_cast<coord_t>(offset.second - (via_h / 2) - enc.second);
+        auto xh = static_cast<coord_t>(xl + via_w + enc.first);
+        auto yh = static_cast<coord_t>(yl + via_h + enc.second);
 
         box_t r{xl, yl, xh, yh};
         transform(r, self.xform);

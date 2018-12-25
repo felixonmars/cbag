@@ -22,7 +22,7 @@ namespace ast {
 
 range::const_iterator::const_iterator() = default;
 
-range::const_iterator::const_iterator(uint32_t val, uint32_t step, bool up)
+range::const_iterator::const_iterator(cnt_t val, cnt_t step, bool up)
     : val_(val), step_(step), up_(up) {}
 
 range::const_iterator &range::const_iterator::operator++() {
@@ -45,11 +45,11 @@ bool range::const_iterator::operator!=(const range::const_iterator &rhs) const {
 
 range::range() {}
 
-range::range(uint32_t start, uint32_t stop, uint32_t step) : start(start), stop(stop), step(step) {}
+range::range(cnt_t start, cnt_t stop, cnt_t step) : start(start), stop(stop), step(step) {}
 
 bool range::empty() const { return step == 0; }
 
-uint32_t range::size() const {
+cnt_t range::size() const {
     if (step == 0) {
         return 0;
     } else if (stop >= start) {
@@ -59,18 +59,18 @@ uint32_t range::size() const {
     }
 }
 
-uint32_t range::get_stop_include() const {
+cnt_t range::get_stop_include() const {
     auto n = size();
     assert(n > 0);
     return operator[](n - 1);
 }
 
-uint32_t range::get_stop_exclude() const { return operator[](size()); }
+cnt_t range::get_stop_exclude() const { return operator[](size()); }
 
 range::const_iterator range::begin() const { return {start, step, stop >= start}; }
 range::const_iterator range::end() const { return {get_stop_exclude(), step, stop >= start}; }
 
-uint32_t range::operator[](uint32_t index) const {
+cnt_t range::operator[](cnt_t index) const {
     return (stop >= start) ? start + step * index : start - step * index;
 }
 
@@ -81,7 +81,7 @@ name_unit::name_unit(std::string base, range idx_range)
 
 bool name_unit::empty() const { return base.empty(); }
 
-uint32_t name_unit::size() const { return std::max(idx_range.size(), 1u); }
+cnt_t name_unit::size() const { return std::max(idx_range.size(), static_cast<cnt_t>(1)); }
 
 bool name_unit::is_vector() const { return !idx_range.empty(); }
 
@@ -126,8 +126,7 @@ std::string name_unit::to_string(namespace_verilog) const {
     }
 }
 
-std::string get_name_bit_helper(const name_unit &nu, uint32_t index, bool is_id,
-                                const char *fmt_str) {
+std::string get_name_bit_helper(const name_unit &nu, cnt_t index, bool is_id, const char *fmt_str) {
     assert(0 <= index && index < nu.size());
     if (nu.is_vector()) {
         if (is_id)
@@ -137,22 +136,22 @@ std::string get_name_bit_helper(const name_unit &nu, uint32_t index, bool is_id,
     return nu.base;
 }
 
-std::string name_unit::get_name_bit(uint32_t index, bool is_id, namespace_cdba) const {
+std::string name_unit::get_name_bit(cnt_t index, bool is_id, namespace_cdba) const {
     return get_name_bit_helper(*this, index, is_id, "{}<{}>");
 }
 
-std::string name_unit::get_name_bit(uint32_t index, bool is_id, namespace_verilog) const {
+std::string name_unit::get_name_bit(cnt_t index, bool is_id, namespace_verilog) const {
     return get_name_bit_helper(*this, index, is_id, "{}[{}]");
 }
 
 name_rep::name_rep() = default;
 
-name_rep::name_rep(uint32_t mult, std::variant<name_unit, name> data)
+name_rep::name_rep(cnt_t mult, std::variant<name_unit, name> data)
     : mult(mult), data(std::move(data)) {}
 
-name_rep::name_rep(uint32_t mult, name_unit nu) : mult(mult), data(std::move(nu)) {}
+name_rep::name_rep(cnt_t mult, name_unit nu) : mult(mult), data(std::move(nu)) {}
 
-name_rep::name_rep(uint32_t mult, name na) : mult(mult), data(std::move(na)) {}
+name_rep::name_rep(cnt_t mult, name na) : mult(mult), data(std::move(na)) {}
 
 bool name_rep::empty() const { return mult == 0; }
 
@@ -160,9 +159,9 @@ bool name_rep::is_name_unit() const {
     return mult == 0 || (mult == 1 && std::holds_alternative<name_unit>(data));
 }
 
-uint32_t name_rep::size() const { return mult * data_size(); }
+cnt_t name_rep::size() const { return mult * data_size(); }
 
-uint32_t name_rep::data_size() const {
+cnt_t name_rep::data_size() const {
     return std::visit([](const auto &arg) { return arg.size(); }, data);
 }
 
@@ -181,7 +180,7 @@ std::string name_rep::to_string(namespace_cdba ns) const {
 std::string name_rep::to_string(namespace_verilog ns) const {
     if (empty())
         return "";
-    uint32_t m = mult;
+    cnt_t m = mult;
     return std::visit(
         overload{
             [&m, &ns](const name_unit &arg) {
@@ -214,8 +213,8 @@ bool name::is_name_rep() const { return rep_list.size() == 1; }
 
 bool name::is_name_unit() const { return rep_list.size() == 1 && rep_list[0].is_name_unit(); }
 
-uint32_t name::size() const {
-    uint32_t tot = 0;
+cnt_t name::size() const {
+    cnt_t tot = 0;
     for (auto const &nr : rep_list) {
         tot += nr.size();
     }
@@ -243,7 +242,7 @@ std::string name::to_string(namespace_verilog ns) const {
     return fmt::format("{{{}}}", base);
 }
 
-name &name::repeat(uint32_t mult) {
+name &name::repeat(cnt_t mult) {
     if (!empty()) {
         switch (mult) {
         case 0:

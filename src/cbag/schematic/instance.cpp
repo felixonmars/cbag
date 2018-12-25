@@ -28,9 +28,9 @@ instance::instance(std::string lib, std::string cell, std::string view, transfor
     : lib_name(std::move(lib)), cell_name(std::move(cell)), view_name(std::move(view)),
       xform(std::move(xform)), bbox(xl, yl, xh, yh), connections(), params() {}
 
-uint32_t instance::width() const { return cbag::width(bbox); }
+offset_t instance::width() const { return cbag::width(bbox); }
 
-uint32_t instance::height() const { return cbag::height(bbox); }
+offset_t instance::height() const { return cbag::height(bbox); }
 
 std::unique_ptr<instance> instance::get_copy() const { return std::make_unique<instance>(*this); }
 
@@ -40,7 +40,7 @@ void instance::set_param(const std::string &name, const param_t &val) {
     cbag::set_param(params, name, val);
 }
 
-void instance::update_connection(const std::string &inst_name, uint32_t inst_size,
+void instance::update_connection(const std::string &inst_name, cnt_t inst_size,
                                  std::string term_str, std::string net_str) {
     // check number of bits match
     auto n_term = cbag::util::parse_cdba_name_unit(term_str);
@@ -81,7 +81,7 @@ void instance::update_master(std::string lib, std::string cell, bool prim) {
     connections.clear();
 }
 
-void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
+void instance::resize_nets(cnt_t old_size, cnt_t new_size) {
     auto result = std::div(static_cast<long>(new_size), static_cast<long>(old_size));
     if (result.rem != 0) {
         // new size not multiple of old size, just clear connections
@@ -91,7 +91,7 @@ void instance::resize_nets(uint32_t old_size, uint32_t new_size) {
         for (auto &pair : connections) {
             auto net = cbag::util::parse_cdba_name(pair.second);
             pair.second =
-                net.repeat(static_cast<uint32_t>(result.quot)).to_string(spirit::namespace_cdba{});
+                net.repeat(static_cast<cnt_t>(result.quot)).to_string(spirit::namespace_cdba{});
         }
     }
 }

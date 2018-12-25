@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_GEOMETRY_MODE_H
-#define CBAG_COMMON_GEOMETRY_MODE_H
+#ifndef CBAG_ENUM_GEOMETRY_MODE_H
+#define CBAG_ENUM_GEOMETRY_MODE_H
 
 #include <cbag/common/typedefs.h>
 

@@ -62,7 +62,7 @@ struct cellview {
 
     void rename_pin(const std::string &old_name, const std::string &new_name);
 
-    void add_pin(const std::string &new_name, uint32_t term_type);
+    void add_pin(const std::string &new_name, enum_t term_type);
 
     bool remove_pin(const std::string &name);
 

@@ -139,12 +139,11 @@ offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
         return pair.second[pair.second.size() - 1];
     } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find layer type {} or space type {}",
-                                            layer_type, (uint32_t)sp_type));
+                                            layer_type, static_cast<enum_t>(sp_type)));
     }
 }
 
-offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
-                             uint32_t sp_type) const {
+offset_t tech::get_min_space(const std::string &layer_type, offset_t width, enum_t sp_type) const {
     return get_min_space(layer_type, width, static_cast<space_type>(sp_type));
 }
 

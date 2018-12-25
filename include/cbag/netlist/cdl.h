@@ -15,9 +15,9 @@ namespace netlist {
 
 class cdl_stream : public nstream_file {
   public:
-    uint32_t rmin;
+    cnt_t rmin;
 
-    cdl_stream(const std::string &fname, uint32_t rmin);
+    cdl_stream(const std::string &fname, cnt_t rmin);
 };
 
 template <> struct traits::nstream<cdl_stream> {

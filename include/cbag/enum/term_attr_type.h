@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_TERM_ATTR_TYPE_H
-#define CBAG_COMMON_TERM_ATTR_TYPE_H
+#ifndef CBAG_ENUM_TERM_ATTR_TYPE_H
+#define CBAG_ENUM_TERM_ATTR_TYPE_H
 
 #include <cbag/common/typedefs.h>
 

@@ -6,6 +6,8 @@
 
 #include <oa/oaDesignDB.h>
 
+#include <cbag/common/typedefs.h>
+
 namespace spdlog {
 class logger;
 }
@@ -13,7 +15,7 @@ class logger;
 namespace cbagoa {
 
 // constants
-constexpr uint32_t LIB_ACCESS_TIMEOUT = 1;
+constexpr cbag::cnt_t LIB_ACCESS_TIMEOUT = 1;
 
 oa::oaTech *read_tech(const oa::oaNativeNS &ns, const std::string &lib_name);
 

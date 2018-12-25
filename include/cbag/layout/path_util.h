@@ -85,13 +85,13 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     vector45 s0{x1 - x0, y1 - y0};
     s0.rotate90_norm();
     if (s0.is_45_or_invalid()) {
-        for (std::size_t idx = 0; idx < n_paths; ++idx) {
-            int32_t scale = round(deltas[idx] / root2);
+        for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+            auto scale = round(deltas[idx] / root2);
             prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
         }
     } else {
-        for (std::size_t idx = 0; idx < n_paths; ++idx) {
-            int32_t scale = deltas[idx];
+        for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+            auto scale = deltas[idx];
             prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
         }
     }
@@ -100,7 +100,7 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     polygon45_set ans;
     polygon45 tmp;
     auto sty1 = static_cast<end_style>(stylem);
-    for (pt_vector::size_type nidx = 2; nidx < n_pts; ++nidx) {
+    for (decltype(n_pts) nidx = 2; nidx < n_pts; ++nidx) {
         auto sty0 = static_cast<end_style>((nidx == 2) ? style0 : stylem);
 
         auto xc = traits::pt_list<T>::x(data, nidx);
@@ -116,34 +116,32 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
         s1.normalize();
         vector45 dir1 = s1.get_rotate90();
         if (dir1.is_45_or_invalid()) {
-            for (std::size_t idx = 0; idx < n_paths; ++idx) {
-                int32_t scale = round(deltas[idx] / root2);
+            for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+                auto scale = round(deltas[idx] / root2);
                 auto prevx = traits::pt_list<pt_vector>::x(prev_pts, idx);
                 auto prevy = traits::pt_list<pt_vector>::y(prev_pts, idx);
-                coord_t pdx = xc + dir1.dx * scale - prevx;
-                coord_t pdy = yc + dir1.dy * scale - prevy;
-                int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
-                coord_t newx = prevx + k * s0.dx;
-                coord_t newy = prevy + k * s0.dy;
-                pt_vector vec =
-                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
+                auto pdx = xc + dir1.dx * scale - prevx;
+                auto pdy = yc + dir1.dy * scale - prevy;
+                auto k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
+                auto newx = prevx + k * s0.dx;
+                auto newy = prevy + k * s0.dy;
+                auto vec = path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
                 tmp.set(vec.begin(), vec.end());
                 ans.insert(tmp);
                 traits::pt_list<pt_vector>::set_x(prev_pts, idx, newx);
                 traits::pt_list<pt_vector>::set_y(prev_pts, idx, newy);
             }
         } else {
-            for (std::size_t idx = 0; idx < n_paths; ++idx) {
-                int32_t scale = deltas[idx];
+            for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+                auto scale = deltas[idx];
                 auto prevx = traits::pt_list<pt_vector>::x(prev_pts, idx);
                 auto prevy = traits::pt_list<pt_vector>::y(prev_pts, idx);
-                coord_t pdx = xc + dir1.dx * scale - prevx;
-                coord_t pdy = yc + dir1.dy * scale - prevy;
-                int32_t k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
-                coord_t newx = prevx + k * s0.dx;
-                coord_t newy = prevy + k * s0.dy;
-                pt_vector vec =
-                    path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
+                auto pdx = xc + dir1.dx * scale - prevx;
+                auto pdy = yc + dir1.dy * scale - prevy;
+                auto k = (pdx * s1.dy - pdy * s1.dx) / (s0.dx * s1.dy - s0.dy * s1.dx);
+                auto newx = prevx + k * s0.dx;
+                auto newy = prevy + k * s0.dy;
+                auto vec = path_to_poly45(prevx, prevy, newx, newy, widths[idx] / 2, sty0, sty1);
                 tmp.set(vec.begin(), vec.end());
                 ans.insert(tmp);
                 traits::pt_list<pt_vector>::set_x(prev_pts, idx, newx);
@@ -161,22 +159,22 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     s0.dy = y0 - traits::pt_list<T>::y(data, n_pts - 2);
     s0.rotate90_norm();
     if (s0.is_45_or_invalid()) {
-        for (std::size_t idx = 0; idx < n_paths; ++idx) {
-            int32_t scale = round(deltas[idx] / root2);
+        for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+            auto scale = round(deltas[idx] / root2);
             auto xt = traits::pt_list<pt_vector>::x(prev_pts, idx);
             auto yt = traits::pt_list<pt_vector>::y(prev_pts, idx);
-            pt_vector vec = path_to_poly45(xt, yt, x0 + s0.dx * scale, y0 + s0.dy * scale,
-                                           widths[idx] / 2, sty0, sty1);
+            auto vec = path_to_poly45(xt, yt, x0 + s0.dx * scale, y0 + s0.dy * scale,
+                                      widths[idx] / 2, sty0, sty1);
             tmp.set(vec.begin(), vec.end());
             ans.insert(tmp);
         }
     } else {
-        for (std::size_t idx = 0; idx < n_paths; ++idx) {
-            int32_t scale = deltas[idx];
+        for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
+            auto scale = deltas[idx];
             auto xt = traits::pt_list<pt_vector>::x(prev_pts, idx);
             auto yt = traits::pt_list<pt_vector>::y(prev_pts, idx);
-            pt_vector vec = path_to_poly45(xt, yt, x0 + s0.dx * scale, y0 + s0.dy * scale,
-                                           widths[idx] / 2, sty0, sty1);
+            auto vec = path_to_poly45(xt, yt, x0 + s0.dx * scale, y0 + s0.dy * scale,
+                                      widths[idx] / 2, sty0, sty1);
             tmp.set(vec.begin(), vec.end());
             ans.insert(tmp);
         }

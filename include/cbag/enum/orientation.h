@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_ORIENTATION_H
-#define CBAG_COMMON_ORIENTATION_H
+#ifndef CBAG_ENUM_ORIENTATION_H
+#define CBAG_ENUM_ORIENTATION_H
 
 #include <cstdint>
 

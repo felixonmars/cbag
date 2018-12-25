@@ -17,6 +17,7 @@
 
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
+#include <cbag/common/typedefs.h>
 #include <cbag/spirit/namespace_info.h>
 
 namespace x3 = boost::spirit::x3;
@@ -36,27 +37,27 @@ namespace ast {
  */
 struct range : x3::position_tagged {
   public:
-    uint32_t start = 0;
-    uint32_t stop = 0;
-    uint32_t step = 0;
+    cnt_t start = 0;
+    cnt_t stop = 0;
+    cnt_t step = 0;
 
     class const_iterator {
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = uint32_t;
+        using value_type = cnt_t;
         using difference_type = std::ptrdiff_t;
         using pointer = value_type *;
         using reference = const value_type &;
 
       private:
-        uint32_t val_ = 0;
-        uint32_t step_ = 0;
+        cnt_t val_ = 0;
+        cnt_t step_ = 0;
         bool up_ = false;
 
       public:
         const_iterator();
 
-        const_iterator(uint32_t val, uint32_t step, bool up);
+        const_iterator(cnt_t val, cnt_t step, bool up);
 
         const_iterator &operator++();
         reference operator*() const;
@@ -66,22 +67,22 @@ struct range : x3::position_tagged {
 
     range();
 
-    range(uint32_t start, uint32_t stop, uint32_t step);
+    range(cnt_t start, cnt_t stop, cnt_t step);
 
     bool empty() const;
 
-    uint32_t size() const;
+    cnt_t size() const;
 
-    uint32_t get_stop_include() const;
+    cnt_t get_stop_include() const;
 
-    uint32_t get_stop_exclude() const;
+    cnt_t get_stop_exclude() const;
 
     const_iterator begin() const;
 
     const_iterator end() const;
 
     // no bounds checking
-    uint32_t operator[](uint32_t index) const;
+    cnt_t operator[](cnt_t index) const;
 };
 
 /** Represents a unit name; either a scalar or vector name.
@@ -101,7 +102,7 @@ struct name_unit : x3::position_tagged {
 
     bool empty() const;
 
-    uint32_t size() const;
+    cnt_t size() const;
 
     bool is_vector() const;
 
@@ -109,8 +110,8 @@ struct name_unit : x3::position_tagged {
     std::string to_string(namespace_verilog) const;
 
     // precondition: 0 <= idx < size
-    std::string get_name_bit(uint32_t index, bool is_id, namespace_cdba) const;
-    std::string get_name_bit(uint32_t index, bool is_id, namespace_verilog) const;
+    std::string get_name_bit(cnt_t index, bool is_id, namespace_cdba) const;
+    std::string get_name_bit(cnt_t index, bool is_id, namespace_verilog) const;
 };
 
 struct name_rep;
@@ -133,12 +134,12 @@ struct name : x3::position_tagged {
 
     bool is_name_unit() const;
 
-    uint32_t size() const;
+    cnt_t size() const;
 
     std::string to_string(namespace_cdba) const;
     std::string to_string(namespace_verilog) const;
 
-    name &repeat(uint32_t mult);
+    name &repeat(cnt_t mult);
 };
 
 /** Represents a repeated name
@@ -148,24 +149,24 @@ struct name : x3::position_tagged {
  */
 struct name_rep : x3::position_tagged {
   public:
-    uint32_t mult = 1;
+    cnt_t mult = 1;
     std::variant<name_unit, name> data;
 
     name_rep();
 
-    name_rep(uint32_t mult, std::variant<name_unit, name> data);
+    name_rep(cnt_t mult, std::variant<name_unit, name> data);
 
-    name_rep(uint32_t mult, name_unit nu);
+    name_rep(cnt_t mult, name_unit nu);
 
-    name_rep(uint32_t mult, name na);
+    name_rep(cnt_t mult, name na);
 
     bool empty() const;
 
     bool is_name_unit() const;
 
-    uint32_t size() const;
+    cnt_t size() const;
 
-    uint32_t data_size() const;
+    cnt_t data_size() const;
 
     std::string to_string(namespace_cdba) const;
     std::string to_string(namespace_verilog) const;

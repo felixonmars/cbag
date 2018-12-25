@@ -22,7 +22,7 @@ struct cellview::helper {
                 return;
         }
         auto map_end = self.inst_map.end();
-        cbag::util::binary_iterator<uint32_t> iter(self.inst_name_cnt);
+        cbag::util::binary_iterator<cnt_t> iter(self.inst_name_cnt);
         while (iter.has_next()) {
             if (self.inst_map.find(fmt::format("X{:d}", *iter)) == map_end) {
                 iter.save();
@@ -109,13 +109,13 @@ shape_ref<box_t> cellview::add_rect(const std::string &layer, const std::string 
 }
 
 void cellview::add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
-                            bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy) {
+                            bool is_horiz, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
     auto key = get_lay_purp_key(layer, purpose);
     auto geo_iter = helper::make_geometry(*this, key);
     offset_t dx = 0;
-    for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
+    for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
         offset_t dy = 0;
-        for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
+        for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
             geo_iter->second.add_shape(get_move_by(box, dx, dy), is_horiz);
         }
     }
@@ -159,8 +159,8 @@ cv_obj_ref<boundary> cellview::add_boundary(boundary &&data, bool commit) {
 }
 
 cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool add_layers,
-                                  bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny,
-                                  dist_t w, dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l,
+                                  bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w,
+                                  dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l,
                                   offset_t enc1r, offset_t enc1t, offset_t enc1b, offset_t enc2l,
                                   offset_t enc2r, offset_t enc2t, offset_t enc2b, bool commit) {
     return {this,
@@ -172,18 +172,18 @@ cv_obj_ref<via> cellview::add_via(transformation xform, std::string via_id, bool
 }
 
 void cellview::add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
-                           bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,
-                           dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
+                           bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w, dist_t h,
+                           offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
                            offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r,
-                           offset_t enc2t, offset_t enc2b, uint32_t nx, uint32_t ny, offset_t spx,
+                           offset_t enc2t, offset_t enc2b, cnt_t nx, cnt_t ny, offset_t spx,
                            offset_t spy) {
     via_param param{vnx,   vny,   w,     h,     vspx,  vspy,  enc1l,
                     enc1r, enc1t, enc1b, enc2l, enc2r, enc2t, enc2b};
 
     offset_t dx = 0;
-    for (uint32_t xidx = 0; xidx < nx; ++xidx, dx += spx) {
+    for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
         offset_t dy = 0;
-        for (uint32_t yidx = 0; yidx < ny; ++yidx, dy += spy) {
+        for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
             add_object(
                 via(get_move_by(xform, dx, dy), via_id, param, add_layers, bot_horiz, top_horiz));
         }
@@ -192,9 +192,8 @@ void cellview::add_via_arr(const transformation &xform, const std::string &via_i
 
 cv_obj_ref<instance> cellview::add_prim_instance(std::string lib, std::string cell,
                                                  std::string view, std::string name,
-                                                 cbag::transformation xform, uint32_t nx,
-                                                 uint32_t ny, offset_t spx, offset_t spy,
-                                                 bool commit) {
+                                                 cbag::transformation xform, cnt_t nx, cnt_t ny,
+                                                 offset_t spx, offset_t spy, bool commit) {
     return {this,
             instance(std::move(name), std::move(lib), std::move(cell), std::move(view),
                      std::move(xform), nx, ny, spx, spy),
@@ -202,7 +201,7 @@ cv_obj_ref<instance> cellview::add_prim_instance(std::string lib, std::string ce
 }
 
 cv_obj_ref<instance> cellview::add_instance(const cellview *cv, std::string name,
-                                            cbag::transformation xform, uint32_t nx, uint32_t ny,
+                                            cbag::transformation xform, cnt_t nx, cnt_t ny,
                                             offset_t spx, offset_t spy, bool commit) {
     return {this, instance(std::move(name), cv, std::move(xform), nx, ny, spx, spy), commit};
 }
@@ -243,8 +242,8 @@ void cellview::add_object(const instance &obj) {
     if (master != nullptr) {
         for (const auto &pair : master->geo_map) {
             auto geo_iter = helper::make_geometry(*this, pair.first);
-            for (uint32_t ix = 0; ix < obj.nx; ++ix) {
-                for (uint32_t iy = 0; iy < obj.ny; ++iy) {
+            for (decltype(obj.nx) ix = 0; ix < obj.nx; ++ix) {
+                for (decltype(obj.ny) iy = 0; iy < obj.ny; ++iy) {
                     // unordered map does not invalidate pointers to elements
                     geo_iter->second.record_instance(
                         &pair.second, get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));

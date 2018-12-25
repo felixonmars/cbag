@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_FONT_H
-#define CBAG_COMMON_FONT_H
+#ifndef CBAG_ENUM_FONT_H
+#define CBAG_ENUM_FONT_H
 
 #include <cbag/common/typedefs.h>
 

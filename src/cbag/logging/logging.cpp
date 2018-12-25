@@ -1,3 +1,4 @@
+#include <cbag/common/typedefs.h>
 #include <cbag/logging/logging.h>
 
 #include "spdlog/details/signal_handler.h"
@@ -6,8 +7,8 @@
 
 namespace cbag {
 
-constexpr uint32_t max_log_size = 1024 * 1024 * 10;
-constexpr uint32_t num_log_file = 3;
+constexpr cnt_t max_log_size = 1024 * 1024 * 10;
+constexpr cnt_t num_log_file = 3;
 
 void init_logging() {
     if (spdlog::get("bag") == nullptr) {

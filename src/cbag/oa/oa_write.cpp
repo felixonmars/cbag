@@ -575,7 +575,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         write_sch_cell_data(cv, dsn_lib, dsn_cell, dsn_view, term_order_str);
 
         // update extraction timestamp
-        uint32_t num_op = 2;
+        auto num_op = 2;
         auto timestamp = dsn->getTimeStamp(oa::oacDesignDataType);
         auto pptr = oa::oaProp::find(dsn, "connectivityLastUpdated");
         (static_cast<oa::oaIntProp *>(pptr))->setValue(timestamp + num_op);

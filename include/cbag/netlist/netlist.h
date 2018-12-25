@@ -83,7 +83,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
 template <class ContentList>
 void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
-                   bool flat = true, bool shell = false, uint32_t rmin = 2000,
+                   bool flat = true, bool shell = false, cnt_t rmin = 2000,
                    const std::string &prim_fname = "") {
     auto logger = cbag::get_cbag_logger();
 

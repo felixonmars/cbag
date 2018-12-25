@@ -1,5 +1,5 @@
-#ifndef CBAG_COMMON_END_STYLE_H
-#define CBAG_COMMON_END_STYLE_H
+#ifndef CBAG_ENUM_END_STYLE_H
+#define CBAG_ENUM_END_STYLE_H
 
 #include <cbag/common/typedefs.h>
 

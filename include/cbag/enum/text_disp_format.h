@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_TEXT_DISP_FORMAT_H
-#define CBAG_COMMON_TEXT_DISP_FORMAT_H
+#ifndef CBAG_ENUM_TEXT_DISP_FORMAT_H
+#define CBAG_ENUM_TEXT_DISP_FORMAT_H
 
 #include <cbag/common/typedefs.h>
 

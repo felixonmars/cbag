@@ -36,9 +36,9 @@ struct instance {
     instance(std::string lib, std::string cell, std::string view, transformation xform, coord_t xl,
              coord_t yl, coord_t xh, coord_t yh);
 
-    uint32_t width() const;
+    offset_t width() const;
 
-    uint32_t height() const;
+    offset_t height() const;
 
     std::unique_ptr<instance> get_copy() const;
 
@@ -46,14 +46,14 @@ struct instance {
 
     void set_param(const std::string &name, const param_t &val);
 
-    void update_connection(const std::string &inst_name, uint32_t inst_size, std::string term_str,
+    void update_connection(const std::string &inst_name, cnt_t inst_size, std::string term_str,
                            std::string net_str);
 
     void update_connection(const std::string &inst_name, std::string term, std::string net);
 
     void update_master(std::string lib, std::string cell, bool prim = false);
 
-    void resize_nets(uint32_t old_size, uint32_t new_size);
+    void resize_nets(cnt_t old_size, cnt_t new_size);
 };
 
 } // namespace sch

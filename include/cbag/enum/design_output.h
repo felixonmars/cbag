@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_DESIGN_OUTPUT_H
-#define CBAG_COMMON_DESIGN_OUTPUT_H
+#ifndef CBAG_ENUM_DESIGN_OUTPUT_H
+#define CBAG_ENUM_DESIGN_OUTPUT_H
 
 #include <cbag/common/typedefs.h>
 

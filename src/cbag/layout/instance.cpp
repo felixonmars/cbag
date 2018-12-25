@@ -15,13 +15,13 @@ cellview_ref::cellview_ref(std::string lib, std::string cell, std::string view)
 instance::instance() = default;
 
 instance::instance(std::string name, std::string lib, std::string cell, std::string view,
-                   cbag::transformation xform, uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
+                   cbag::transformation xform, cnt_t nx, cnt_t ny, coord_t spx, coord_t spy)
     : master(std::in_place_type_t<cellview_ref>{}, std::move(lib), std::move(cell),
              std::move(view)),
       name(std::move(name)), xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
-instance::instance(std::string name, const cellview *master, cbag::transformation xform,
-                   uint32_t nx, uint32_t ny, coord_t spx, coord_t spy)
+instance::instance(std::string name, const cellview *master, cbag::transformation xform, cnt_t nx,
+                   cnt_t ny, coord_t spx, coord_t spy)
     : master(std::in_place_type_t<const cellview *>{}, master), name(std::move(name)),
       xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 

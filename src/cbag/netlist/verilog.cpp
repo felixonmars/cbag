@@ -113,7 +113,7 @@ void append_inst_nets(verilog_stream &stream, const std::string &inst_name,
 using term_net_vec_t = std::vector<std::pair<std::string, std::vector<spirit::ast::name>>>;
 
 void split_array_inst_nets(term_net_vec_t &term_net_vec, const std::string &inst_name,
-                           uint32_t inst_size, const sch::instance &inst,
+                           cnt_t inst_size, const sch::instance &inst,
                            const std::vector<std::string> &terms) {
     for (const auto &term : terms) {
         auto term_iter = inst.connections.find(term);
@@ -135,8 +135,8 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
                                                      const sch::instance &inst,
                                                      const sch::cellview_info &info) {
     auto tag = spirit::namespace_verilog{};
-    spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
-    uint32_t n = inst_ast.size();
+    auto inst_ast = cbag::util::parse_cdba_name_unit(name);
+    auto n = inst_ast.size();
 
     if (n == 1) {
         // normal instance, just write normally
@@ -145,7 +145,7 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
         b << inst.cell_name << name << "(";
         b.to_file(stream.out_file, tag);
 
-        bool has_prev_term = false;
+        auto has_prev_term = false;
         append_inst_nets(stream, name, inst, info.in_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.out_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.io_terms, has_prev_term);
@@ -162,7 +162,7 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
         // write each instance
         auto stop = term_net_vec.end();
         auto last_check = stop - 1;
-        for (uint32_t inst_idx = 0; inst_idx < n; ++inst_idx) {
+        for (decltype(n) inst_idx = 0; inst_idx < n; ++inst_idx) {
             lstream b;
             stream.out_file << std::endl;
             b << inst.cell_name << inst_ast.get_name_bit(inst_idx, true, tag) << "(";

@@ -160,8 +160,8 @@ SCENARIO("get_name_bits_test", "[name_class]") {
 }
 
 SCENARIO("get_partition_test", "[name_class]") {
-    std::tuple<std::string, std::vector<std::string>, uint32_t> data =
-        GENERATE(values<std::tuple<std::string, std::vector<std::string>, uint32_t>>({
+    std::tuple<std::string, std::vector<std::string>, cbag::cnt_t> data =
+        GENERATE(values<std::tuple<std::string, std::vector<std::string>, cbag::cnt_t>>({
             // name_unit tests
             {"foo", {"foo"}, 1},
             {"foo<1>", {"foo<1>"}, 1},
@@ -217,8 +217,8 @@ SCENARIO("get_partition_test", "[name_class]") {
 }
 
 SCENARIO("repeat_test", "[name_class]") {
-    std::tuple<std::string, std::string, uint32_t> data =
-        GENERATE(values<std::tuple<std::string, std::string, uint32_t>>({
+    std::tuple<std::string, std::string, cbag::cnt_t> data =
+        GENERATE(values<std::tuple<std::string, std::string, cbag::cnt_t>>({
             {"foo", "", 0},
             {"foo", "foo", 1},
             {"foo", "<*2>foo", 2},
@@ -231,9 +231,9 @@ SCENARIO("repeat_test", "[name_class]") {
             {"<*2>a,b", "<*3>(<*2>a,b)", 3},
         }));
 
-    std::string start = std::get<0>(data);
-    std::string expect = std::get<1>(data);
-    uint32_t mult = std::get<2>(data);
+    auto start = std::get<0>(data);
+    auto expect = std::get<1>(data);
+    auto mult = std::get<2>(data);
 
     CAPTURE(start);
     CAPTURE(expect);

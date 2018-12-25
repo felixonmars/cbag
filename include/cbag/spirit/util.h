@@ -47,7 +47,7 @@ void get_name_bits(const name &obj, OutIter &&iter, NS ns);
 
 template <class OutIter, class NS, typename = IsNameSpace<NS>>
 void get_name_bits(const name_rep &obj, OutIter &&iter, NS ns) {
-    uint32_t n = obj.size();
+    auto n = obj.size();
     if (n == 0)
         return;
     else if (obj.mult == 1) {
@@ -63,7 +63,7 @@ void get_name_bits(const name_rep &obj, OutIter &&iter, NS ns) {
                 return ans;
             },
             obj.data);
-        for (uint32_t cnt = 0; cnt < obj.mult; ++cnt) {
+        for (decltype(obj.mult) cnt = 0; cnt < obj.mult; ++cnt) {
             for (auto &name_bit : cache) {
                 *iter = name_bit;
             }
@@ -80,15 +80,15 @@ void get_name_bits(const name &obj, OutIter &&iter, NS ns) {
 
 template <class OutIter>
 void get_partition_helper(OutIter &&iter, const name_unit &obj, std::vector<name_rep> &rep_list,
-                          uint32_t &cum_size, uint32_t chunk) {
-    uint32_t cur_size = obj.idx_range.size();
+                          cnt_t &cum_size, cnt_t chunk) {
+    auto cur_size = obj.idx_range.size();
     if (cur_size > 0) {
         // this is a vector name unit
-        uint32_t step = obj.idx_range.step;
-        uint32_t start_idx = 0;
+        auto step = obj.idx_range.step;
+        cnt_t start_idx = 0;
         // this vector name could be very long, use for loop to partition
         // into chunks
-        for (uint32_t stop_idx = chunk - cum_size; stop_idx <= cur_size;
+        for (decltype(cur_size) stop_idx = chunk - cum_size; stop_idx <= cur_size;
              start_idx = stop_idx, stop_idx += chunk) {
             rep_list.emplace_back(1, name_unit(obj.base, {obj.idx_range[start_idx],
                                                           obj.idx_range[stop_idx - 1], step}));
@@ -117,18 +117,17 @@ void get_partition_helper(OutIter &&iter, const name_unit &obj, std::vector<name
 
 template <class OutIter>
 void get_partition_helper(OutIter &&iter, const name &obj, std::vector<name_rep> &rep_list,
-                          uint32_t &cum_size, uint32_t chunk);
+                          cnt_t &cum_size, cnt_t chunk);
 
 template <class OutIter>
 void get_partition_helper(OutIter &&iter, const name_rep &obj, std::vector<name_rep> &rep_list,
-                          uint32_t &cum_size, uint32_t chunk) {
-    uint32_t data_n = obj.data_size();
+                          cnt_t &cum_size, cnt_t chunk) {
+    auto data_n = obj.data_size();
 
-    uint32_t remain_rep = obj.mult;
+    auto remain_rep = obj.mult;
     while (remain_rep > 0) {
-        std::ldiv_t result =
-            std::div(static_cast<long>(chunk - cum_size), static_cast<long>(data_n));
-        uint32_t mult1 = static_cast<uint32_t>(result.quot);
+        auto result = std::div(static_cast<long>(chunk - cum_size), static_cast<long>(data_n));
+        auto mult1 = static_cast<cnt_t>(result.quot);
         if (mult1 >= remain_rep) {
             // this name_rep is used up
             rep_list.emplace_back(remain_rep, obj.data);
@@ -162,15 +161,15 @@ void get_partition_helper(OutIter &&iter, const name_rep &obj, std::vector<name_
 
 template <class OutIter>
 void get_partition_helper(OutIter &&iter, const name &obj, std::vector<name_rep> &rep_list,
-                          uint32_t &cum_size, uint32_t chunk) {
+                          cnt_t &cum_size, cnt_t chunk) {
     for (const auto &nr : obj.rep_list) {
         get_partition_helper(iter, nr, rep_list, cum_size, chunk);
     }
 }
 
-template <class OutIter> void get_partition(const name &obj, uint32_t chunk, OutIter &&iter) {
+template <class OutIter> void get_partition(const name &obj, cnt_t chunk, OutIter &&iter) {
     std::vector<name_rep> temp;
-    uint32_t cum_size = 0;
+    cnt_t cum_size = 0;
     get_partition_helper(std::forward<OutIter>(iter), obj, temp, cum_size, chunk);
     if (cum_size != 0) {
         *iter = name(std::move(temp));

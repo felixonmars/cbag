@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_TEXT_ALIGN_H
-#define CBAG_COMMON_TEXT_ALIGN_H
+#ifndef CBAG_ENUM_TEXT_ALIGN_H
+#define CBAG_ENUM_TEXT_ALIGN_H
 
 #include <cbag/common/typedefs.h>
 

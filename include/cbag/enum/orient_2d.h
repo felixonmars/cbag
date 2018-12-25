@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_ORIENT_2D_H
-#define CBAG_COMMON_ORIENT_2D_H
+#ifndef CBAG_ENUM_ORIENT_2D_H
+#define CBAG_ENUM_ORIENT_2D_H
 
 #include <boost/polygon/isotropy.hpp>
 

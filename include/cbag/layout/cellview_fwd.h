@@ -74,7 +74,7 @@ class cellview {
                               box_t bbox, bool commit);
 
     void add_rect_arr(const std::string &layer, const std::string &purpose, const box_t &box,
-                      bool is_horiz, uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
+                      bool is_horiz, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
 
     shape_ref<polygon90> add_poly90(const std::string &layer, const std::string &purpose,
                                     bool is_horiz, polygon90 &&poly, bool commit);
@@ -93,24 +93,23 @@ class cellview {
     cv_obj_ref<boundary> add_boundary(boundary &&data, bool commit);
 
     cv_obj_ref<via> add_via(transformation xform, std::string via_id, bool add_layers,
-                            bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w,
+                            bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w,
                             dist_t h, offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
                             offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r,
                             offset_t enc2t, offset_t enc2b, bool commit);
 
     void add_via_arr(const transformation &xform, const std::string &via_id, bool add_layers,
-                     bool bot_horiz, bool top_horiz, uint32_t vnx, uint32_t vny, dist_t w, dist_t h,
+                     bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, dist_t w, dist_t h,
                      offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r, offset_t enc1t,
                      offset_t enc1b, offset_t enc2l, offset_t enc2r, offset_t enc2t, offset_t enc2b,
-                     uint32_t nx, uint32_t ny, offset_t spx, offset_t spy);
+                     cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
 
     cv_obj_ref<instance> add_prim_instance(std::string lib, std::string cell, std::string view,
-                                           std::string name, transformation xform, uint32_t nx,
-                                           uint32_t ny, offset_t spx, offset_t spy, bool commit);
+                                           std::string name, transformation xform, cnt_t nx,
+                                           cnt_t ny, offset_t spx, offset_t spy, bool commit);
 
     cv_obj_ref<instance> add_instance(const cellview *cv, std::string name, transformation xform,
-                                      uint32_t nx, uint32_t ny, offset_t spx, offset_t spy,
-                                      bool commit);
+                                      cnt_t nx, cnt_t ny, offset_t spx, offset_t spy, bool commit);
 
     void add_object(const blockage &obj);
     void add_object(const boundary &obj);

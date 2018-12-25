@@ -7,15 +7,10 @@
 #include <vector>
 
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/space_type.h>
 
 namespace cbag {
 namespace layout {
-
-enum class space_type : uint32_t {
-    LINE_END = 0,
-    DIFF_COLOR = 1,
-    SAME_COLOR = 2,
-};
 
 using lay_map_t = std::unordered_map<std::string, lay_t>;
 using purp_map_t = std::unordered_map<std::string, purp_t>;
@@ -57,7 +52,7 @@ class tech {
 
     offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
 
-    offset_t get_min_space(const std::string &layer_type, offset_t width, uint32_t sp_type) const;
+    offset_t get_min_space(const std::string &layer_type, offset_t width, enum_t sp_type) const;
 };
 
 } // namespace layout

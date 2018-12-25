@@ -1,6 +1,6 @@
 
-#ifndef CBAG_COMMON_SIG_TYPE_H
-#define CBAG_COMMON_SIG_TYPE_H
+#ifndef CBAG_ENUM_SIG_TYPE_H
+#define CBAG_ENUM_SIG_TYPE_H
 
 #include <cbag/common/typedefs.h>
 
