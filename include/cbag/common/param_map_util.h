@@ -6,7 +6,7 @@
 
 namespace cbag {
 
-template <class S, typename = util::IsString<S>>
+template <class S, util::IsString<S> = 0>
 void set_param(param_map &params, S &&name, const param_t &val) {
     std::visit([&](auto &arg) { params.insert_or_assign(std::forward<S>(name), arg); }, val);
 }

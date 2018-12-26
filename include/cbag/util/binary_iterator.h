@@ -8,7 +8,7 @@
 namespace cbag {
 namespace util {
 
-template <typename T, typename = IsInt<T>> class binary_iterator {
+template <typename T, IsInt<T> = 0> class binary_iterator {
   private:
     T low;
     std::optional<T> high;

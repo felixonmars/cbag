@@ -5,6 +5,7 @@
 
 #include <cbag/gdsii/write.h>
 #include <cbag/util/io.h>
+#include <cbag/util/sfinae.h>
 
 namespace cbag {
 namespace gdsii {
@@ -24,11 +25,26 @@ constexpr auto type_size = sizeof(record_type);
 constexpr auto size_size = sizeof(size_type);
 constexpr auto version = static_cast<int16_t>(5);
 
+template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ofstream &stream, T val) {
+    constexpr auto unit_size = sizeof(T);
+    for (std::size_t bidx = 0, shft = 0; bidx < unit_size; ++bidx, shft += 8) {
+        stream.put(static_cast<char>(val >> shft));
+    }
+}
+
+template <typename T, util::IsNotUInt<T> = 0> void write_bytes(std::ofstream &stream, T val) {
+    constexpr auto unit_size = sizeof(T);
+    for (std::size_t bidx = 0, shft = 0; bidx < unit_size; ++bidx, shft += 8) {
+        stream.put('\0');
+    }
+}
+
 template <typename T>
 void write(std::ofstream &stream, record_type rtype, const std::vector<T> &vec) {
     constexpr auto unit_size = sizeof(T);
 
-    auto size_test = unit_size * vec.size() + size_size + type_size;
+    auto num_data = vec.size();
+    auto size_test = unit_size * num_data + size_size + type_size;
     if (size_test > max_size)
         throw std::runtime_error("Maximum GDS record size exceeded.");
 
@@ -38,14 +54,13 @@ void write(std::ofstream &stream, record_type rtype, const std::vector<T> &vec) 
         ++size;
         add_zero = true;
     }
-    stream.write(reinterpret_cast<char *>(&size), size_size);
-    stream.write(reinterpret_cast<char *>(&rtype), type_size);
-    if (!vec.empty()) {
-        stream.write(reinterpret_cast<const char *>(vec.data()), sizeof(T) * vec.size());
-        if (add_zero) {
-            char zero = '\0';
-            stream.write(&zero, 1);
-        }
+    write_bytes(stream, size);
+    write_bytes(stream, rtype);
+    for (auto val : vec) {
+        write_bytes(stream, val);
+    }
+    if (add_zero) {
+        stream.put('\0');
     }
 }
 
