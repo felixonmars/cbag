@@ -25,18 +25,21 @@ void write_lay_cellview(spdlog::logger &logger, const std::string &lib_name,
                         const std::unordered_map<std::string, std::string> &rename_map);
 
 template <class Vector>
-void implement_lay_list(spdlog::logger &logger, const std::string &fname,
-                        const std::string &lib_name, const std::string &view, double resolution,
-                        double user_unit, const Vector &cv_list) {
+void implement_gds(const std::string &fname, const std::string &lib_name, const std::string &view,
+                   double resolution, double user_unit, const Vector &cv_list) {
+    auto logger = get_cbag_logger();
+
     // get gds file stream
     auto stream = util::open_file_write(fname, true);
     write_gds_start(stream, lib_name, resolution, user_unit);
 
     std::unordered_map<std::string, std::string> rename_map{};
     for (const auto &cv_info : cv_list) {
-        write_lay_cellview(logger, lib_name, cv_info.first, view, *(cv_info.second), rename_map);
-        logger.info("cell name {} maps to {}", cv_info.second->cell_name, cv_info.first);
-        rename_map[cv_info.second->cell_name] = cv_info.first;
+        auto cv_ptr = cv_info.second;
+        auto cell_name = cv_ptr->get_name();
+        write_lay_cellview(*logger, lib_name, cv_info.first, view, *cv_ptr, rename_map);
+        logger->info("cell name {} maps to {}", cell_name, cv_info.first);
+        rename_map[cell_name] = cv_info.first;
     }
 
     write_gds_stop(stream);

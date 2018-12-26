@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstdint>
+#include <ctime>
 #include <vector>
 
 #include <cbag/gdsii/write.h>
@@ -53,7 +54,15 @@ void write_header(std::ofstream &stream) {
     write(stream, record_type::HEADER, data);
 }
 
-std::vector<uint16_t> get_gds_time() { return {0, 0, 0, 0, 0, 0}; }
+std::vector<uint16_t> get_gds_time() {
+    auto ep_time = std::time(nullptr);
+    auto loc_time = std::localtime(&ep_time);
+    return {
+        static_cast<uint16_t>(loc_time->tm_year), static_cast<uint16_t>(loc_time->tm_mon + 1),
+        static_cast<uint16_t>(loc_time->tm_mday), static_cast<uint16_t>(loc_time->tm_hour),
+        static_cast<uint16_t>(loc_time->tm_min),  static_cast<uint16_t>(loc_time->tm_sec),
+    };
+}
 
 void write_bgn_lib(std::ofstream &stream) {
     auto time_vec = get_gds_time();
