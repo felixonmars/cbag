@@ -10,12 +10,13 @@ namespace gdsii {
 // from IEEE double standard
 // I did not use cfloat macro because it counts a hidden bit.
 constexpr auto dbl_mantissa = 52;
-constexpr auto gds_mantissa = 56;
-constexpr auto gds_exp = 7;
-constexpr auto gds_exp_max = ((1 << gds_exp) - 1) << 2;
 constexpr auto one_64b = static_cast<uint64_t>(1);
+constexpr auto msb_64b = one_64b << 63;
 
-uint64_t convert_double(double val) {
+uint64_t double_to_gds(double val) {
+    if (val == 0)
+        return 0;
+
     int exp_dbl;
     auto frac = std::frexp(val, &exp_dbl);
 
@@ -23,7 +24,7 @@ uint64_t convert_double(double val) {
 
     // get sign bit
     auto frac_bits = *reinterpret_cast<uint64_t *>(&frac);
-    auto sgn = frac_bits & (one_64b << 63);
+    auto sgn = frac_bits & msb_64b;
 
     // get mantissa bits (adding implicit 1), and convert number of
     // bits to gds_mantissa
@@ -46,6 +47,22 @@ uint64_t convert_double(double val) {
     auto exp = (((uint64_t)exp_dbl) >> 2) << gds_mantissa;
 
     return sgn | exp | mantissa;
+}
+
+double gds_to_double(uint64_t val) {
+    if (val == 0)
+        return 0;
+
+    constexpr auto man_flag = one_64b << gds_mantissa;
+
+    auto sgn = val & msb_64b;
+    auto mantissa = val & (man_flag - 1);
+    auto exp = static_cast<int64_t>((val & (~msb_64b)) >> gds_mantissa);
+    double ans = ((double)mantissa) * std::pow(16.0, exp - 64 - (gds_mantissa / 4));
+    if (sgn != 0) {
+        ans *= -1;
+    }
+    return ans;
 }
 
 std::vector<uint16_t> get_gds_time() {

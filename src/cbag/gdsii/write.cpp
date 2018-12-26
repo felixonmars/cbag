@@ -78,8 +78,7 @@ void write_lib_name(spdlog::logger &logger, std::ofstream &stream, const std::st
 
 void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
                  double user_unit) {
-    std::vector<uint64_t> data(
-        {convert_double(resolution), convert_double(resolution * user_unit)});
+    std::vector<uint64_t> data({double_to_gds(resolution), double_to_gds(resolution * user_unit)});
     write(stream, record_type::UNITS, data);
 }
 
