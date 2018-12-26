@@ -5,18 +5,21 @@
 #include <fstream>
 #include <string>
 
+#include <cbag/logging/logging.h>
+
 namespace cbag {
 namespace gdsii {
 
-void write_header(std::ofstream &stream);
+void write_header(spdlog::logger &logger, std::ofstream &stream);
 
-void write_bgn_lib(std::ofstream &stream);
+void write_bgn_lib(spdlog::logger &logger, std::ofstream &stream);
 
-void write_lib_name(std::ofstream &stream, const std::string &name);
+void write_lib_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name);
 
-void write_units(std::ofstream &stream, double resolution, double user_unit);
+void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
+                 double user_unit);
 
-void write_end_lib(std::ofstream &stream);
+void write_end_lib(spdlog::logger &logger, std::ofstream &stream);
 
 } // namespace gdsii
 } // namespace cbag

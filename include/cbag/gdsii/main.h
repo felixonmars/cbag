@@ -14,10 +14,10 @@
 namespace cbag {
 namespace gdsii {
 
-void write_gds_start(std::ofstream &stream, const std::string &lib_name, double resolution,
-                     double user_unit);
+void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::string &lib_name,
+                     double resolution, double user_unit);
 
-void write_gds_stop(std::ofstream &stream);
+void write_gds_stop(spdlog::logger &logger, std::ofstream &stream);
 
 void write_lay_cellview(spdlog::logger &logger, const std::string &lib_name,
                         const std::string &cell_name, const cbag::layout::cellview &cv,
@@ -30,7 +30,7 @@ void implement_gds(const std::string &fname, const std::string &lib_name, double
 
     // get gds file stream
     auto stream = util::open_file_write(fname, true);
-    write_gds_start(stream, lib_name, resolution, user_unit);
+    write_gds_start(*logger, stream, lib_name, resolution, user_unit);
 
     std::unordered_map<std::string, std::string> rename_map{};
     for (const auto &cv_info : cv_list) {
@@ -41,7 +41,7 @@ void implement_gds(const std::string &fname, const std::string &lib_name, double
         rename_map[cell_name] = cv_info.first;
     }
 
-    write_gds_stop(stream);
+    write_gds_stop(*logger, stream);
 }
 
 } // namespace gdsii
