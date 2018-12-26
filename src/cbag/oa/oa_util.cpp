@@ -14,7 +14,9 @@ oa::oaTech *read_tech(const oa::oaNativeNS &ns, const std::string &lib_name) {
     if (tech_ptr == nullptr) {
         // opened tech not found, attempt to open
         if (!oa::oaTech::exists(lib_name_oa)) {
-            throw std::runtime_error(fmt::format("Cannot find technology library: {}", lib_name));
+            throw std::runtime_error(fmt::format(
+                "Cannot find technology library {}, or it has no valid technology library attached",
+                lib_name));
         } else {
             tech_ptr = oa::oaTech::open(lib_name_oa, 'r');
             if (tech_ptr == nullptr) {
