@@ -16,8 +16,6 @@ uint64_t double_to_gds(double val);
 
 double gds_to_double(uint64_t val);
 
-std::vector<uint16_t> get_gds_time();
-
 } // namespace gdsii
 } // namespace cbag
 

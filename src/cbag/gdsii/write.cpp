@@ -14,14 +14,6 @@ namespace gdsii {
 
 using size_type = uint16_t;
 
-enum class record_type : uint16_t {
-    HEADER = 0x0002,
-    BGNLIB = 0x0102,
-    LIBNAME = 0x0206,
-    UNITS = 0x0305,
-    ENDLIB = 0x0400,
-};
-
 constexpr auto max_size = UINT16_MAX;
 constexpr auto type_size = sizeof(record_type);
 constexpr auto size_size = sizeof(size_type);
@@ -64,16 +56,17 @@ void write_header(spdlog::logger &logger, std::ofstream &stream) {
     write(stream, record_type::HEADER, data);
 }
 
-void write_bgn_lib(spdlog::logger &logger, std::ofstream &stream) {
-    auto time_vec = get_gds_time();
-    decltype(time_vec) data(time_vec.begin(), time_vec.end());
+void write_begin(spdlog::logger &logger, std::ofstream &stream, record_type rec_type,
+                 const std::vector<uint16_t> &time_vec) {
+    std::vector<uint16_t> data(time_vec.begin(), time_vec.end());
     data.insert(data.end(), time_vec.begin(), time_vec.end());
-    write(stream, record_type::BGNLIB, data);
+    write(stream, rec_type, data);
 }
 
-void write_lib_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name) {
+void write_name(spdlog::logger &logger, std::ofstream &stream, record_type rec_type,
+                const std::string &name) {
     std::vector<unsigned char> data(name.begin(), name.end());
-    write(stream, record_type::LIBNAME, data);
+    write(stream, rec_type, data);
 }
 
 void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
@@ -82,9 +75,9 @@ void write_units(spdlog::logger &logger, std::ofstream &stream, double resolutio
     write(stream, record_type::UNITS, data);
 }
 
-void write_end_lib(spdlog::logger &logger, std::ofstream &stream) {
+void write_end(spdlog::logger &logger, std::ofstream &stream, record_type rec_type) {
     std::vector<uint16_t> data;
-    write(stream, record_type::ENDLIB, data);
+    write(stream, rec_type, data);
 }
 
 } // namespace gdsii

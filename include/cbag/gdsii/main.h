@@ -14,29 +14,33 @@
 namespace cbag {
 namespace gdsii {
 
+std::vector<uint16_t> get_gds_time();
+
 void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::string &lib_name,
-                     double resolution, double user_unit);
+                     double resolution, double user_unit, const std::vector<uint16_t> &time_vec);
 
 void write_gds_stop(spdlog::logger &logger, std::ofstream &stream);
 
-void write_lay_cellview(spdlog::logger &logger, const std::string &lib_name,
-                        const std::string &cell_name, const cbag::layout::cellview &cv,
-                        const std::unordered_map<std::string, std::string> &rename_map);
+void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+                        const cbag::layout::cellview &cv,
+                        const std::unordered_map<std::string, std::string> &rename_map,
+                        const std::vector<uint16_t> &time_vec);
 
 template <class Vector>
 void implement_gds(const std::string &fname, const std::string &lib_name, double resolution,
                    double user_unit, const Vector &cv_list) {
     auto logger = get_cbag_logger();
+    auto time_vec = get_gds_time();
 
     // get gds file stream
     auto stream = util::open_file_write(fname, true);
-    write_gds_start(*logger, stream, lib_name, resolution, user_unit);
+    write_gds_start(*logger, stream, lib_name, resolution, user_unit, time_vec);
 
     std::unordered_map<std::string, std::string> rename_map{};
     for (const auto &cv_info : cv_list) {
         auto cv_ptr = cv_info.second;
         auto cell_name = cv_ptr->get_name();
-        write_lay_cellview(*logger, lib_name, cv_info.first, *cv_ptr, rename_map);
+        write_lay_cellview(*logger, stream, cv_info.first, *cv_ptr, rename_map, time_vec);
         logger->info("cell name {} maps to {}", cell_name, cv_info.first);
         rename_map[cell_name] = cv_info.first;
     }
