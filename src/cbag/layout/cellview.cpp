@@ -117,7 +117,7 @@ void cellview::add_object(const boundary &obj) { boundary_list.push_back(obj); }
 void cellview::add_object(const via &obj) {
     via_list.push_back(obj);
     if (obj.add_layers) {
-        auto purpose = tech_ptr->get_purpose_id(nullptr);
+        auto purpose = tech_ptr->get_purpose_id("");
         lay_t bot_lay, top_lay;
         tech_ptr->get_via_layers(obj.via_id, bot_lay, top_lay);
         layer_t bot_key(bot_lay, purpose);
