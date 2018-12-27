@@ -32,9 +32,9 @@ using str_map_t = std::unordered_map<std::string, std::string>;
 class instance {
   private:
     std::variant<const cellview *, cellview_ref> master = nullptr;
+    std::string name;
 
   public:
-    const std::string name;
     cbag::transformation xform;
     cnt_t nx = 1;
     cnt_t ny = 1;
@@ -54,11 +54,13 @@ class instance {
 
     const cellview *get_cellview() const;
 
-    std::string get_lib_name(const std::string &output_lib) const;
+    const std::string &get_inst_name() const;
 
-    std::string get_cell_name(const str_map_t *rename_map) const;
+    const std::string &get_lib_name(const std::string &output_lib) const;
 
-    std::string get_view_name(const std::string &default_view) const;
+    const std::string &get_cell_name(const str_map_t *rename_map) const;
+
+    const std::string &get_view_name(const std::string &default_view) const;
 
     const param_map *get_params() const;
 

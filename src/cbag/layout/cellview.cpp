@@ -3,7 +3,7 @@
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/tech.h>
-#include <cbag/layout/via.h>
+#include <cbag/layout/via_util.h>
 #include <cbag/layout/via_wrapper.h>
 
 namespace cbag {
@@ -11,9 +11,10 @@ namespace layout {
 
 struct cellview::helper {
     static void add_inst(cellview &self, const instance &inst) {
-        if (!inst.name.empty()) {
+        auto &inst_name = inst.get_inst_name();
+        if (!inst_name.empty()) {
             // test if given name is valid
-            if (self.inst_map.emplace(std::string(inst.name), inst).second)
+            if (self.inst_map.emplace(inst_name, inst).second)
                 return;
         }
         auto map_end = self.inst_map.end();
@@ -55,7 +56,7 @@ geometry &cellview::make_geometry(const layer_t &key) {
     return iter->second;
 }
 
-std::string cellview::get_name() const noexcept { return cell_name; }
+const std::string &cellview::get_name() const noexcept { return cell_name; }
 tech *cellview::get_tech() const noexcept { return tech_ptr; }
 
 bool cellview::empty() const noexcept {
@@ -120,11 +121,11 @@ void cellview::add_object(const via_wrapper &obj) {
     if (obj.add_layers) {
         auto purpose = tech_ptr->get_purpose_id("");
         lay_t bot_lay, top_lay;
-        tech_ptr->get_via_layers(obj.v.via_id, bot_lay, top_lay);
+        tech_ptr->get_via_layers(obj.v.get_via_id(), bot_lay, top_lay);
         layer_t bot_key(bot_lay, purpose);
         layer_t top_key(top_lay, purpose);
-        make_geometry(bot_key).add_shape(obj.v.bot_box(), obj.bot_horiz);
-        make_geometry(top_key).add_shape(obj.v.top_box(), obj.top_horiz);
+        make_geometry(bot_key).add_shape(get_bot_box(obj.v), obj.bot_horiz);
+        make_geometry(top_key).add_shape(get_top_box(obj.v), obj.top_horiz);
     }
 }
 

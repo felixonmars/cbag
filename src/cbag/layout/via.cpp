@@ -26,11 +26,11 @@ struct via::helper {
 via::via() = default;
 
 via::via(cbag::transformation xform, std::string via_id, via_param params)
-    : xform(std::move(xform)), via_id(std::move(via_id)), params(std::move(params)) {}
+    : via_id(std::move(via_id)), params(std::move(params)), xform(std::move(xform)) {}
 
-box_t via::bot_box() const { return helper::get_box(*this, params.lay1_off, params.lay1_enc); }
+const std::string &via::get_via_id() const { return via_id; }
 
-box_t via::top_box() const { return helper::get_box(*this, params.lay2_off, params.lay2_enc); }
+const via_param &via::get_params() const { return params; }
 
 } // namespace layout
 } // namespace cbag

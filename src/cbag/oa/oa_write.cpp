@@ -636,13 +636,15 @@ void create_lay_geometry(spdlog::logger &logger, oa::oaBlock *blk, cbag::lay_t l
 
 void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
                     const cbag::layout::via &v) {
-    auto via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, v.via_id.c_str()));
+    auto &via_id = v.get_via_id();
+    auto &v_params = v.get_params();
+    auto via_def = static_cast<oa::oaStdViaDef *>(oa::oaViaDef::find(tech, via_id.c_str()));
     if (via_def == nullptr) {
-        logger.warn("unknown via ID {}, skipping.", v.via_id);
+        logger.warn("unknown via ID {}, skipping.", via_id);
         return;
     }
 
-    auto via_params = get_via_params(v.params);
+    auto via_params = get_via_params(v_params);
     oa::oaStdVia::create(blk, via_def, get_xform(v.xform), &via_params);
 }
 

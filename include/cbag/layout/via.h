@@ -14,21 +14,21 @@ namespace layout {
 
 class via {
   private:
+    std::string via_id;
+    via_param params;
     struct helper;
 
   public:
     cbag::transformation xform;
-    std::string via_id;
-    via_param params;
 
   public:
     via();
 
     via(cbag::transformation xform, std::string via_id, via_param params);
 
-    box_t bot_box() const;
+    const std::string &get_via_id() const;
 
-    box_t top_box() const;
+    const via_param &get_params() const;
 };
 
 } // namespace layout

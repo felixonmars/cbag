@@ -32,19 +32,21 @@ const cellview *instance::get_cellview() const {
     return (ptr == nullptr) ? nullptr : *ptr;
 }
 
-std::string instance::get_lib_name(const std::string &output_lib) const {
+const std::string &instance::get_inst_name() const { return name; }
+
+const std::string &instance::get_lib_name(const std::string &output_lib) const {
     return std::visit(
         overload{
-            [&output_lib](const cellview *v) { return output_lib; },
-            [](const cellview_ref &v) { return v.lib; },
+            [&output_lib](const cellview *v) -> const std::string & { return output_lib; },
+            [](const cellview_ref &v) -> const std::string & { return v.lib; },
         },
         master);
 }
 
-std::string instance::get_cell_name(const str_map_t *rename_map) const {
+const std::string &instance::get_cell_name(const str_map_t *rename_map) const {
     return std::visit(
         overload{
-            [&rename_map](const cellview *v) {
+            [&rename_map](const cellview *v) -> const std::string & {
                 if (rename_map == nullptr) {
                     return v->get_name();
                 }
@@ -53,16 +55,16 @@ std::string instance::get_cell_name(const str_map_t *rename_map) const {
                     return v->get_name();
                 return iter->second;
             },
-            [](const cellview_ref &v) { return v.cell; },
+            [](const cellview_ref &v) -> const std::string & { return v.cell; },
         },
         master);
 } // namespace layout
 
-std::string instance::get_view_name(const std::string &default_view) const {
+const std::string &instance::get_view_name(const std::string &default_view) const {
     return std::visit(
         overload{
-            [&default_view](const cellview *v) { return default_view; },
-            [](const cellview_ref &v) { return v.view; },
+            [&default_view](const cellview *v) -> const std::string & { return default_view; },
+            [](const cellview_ref &v) -> const std::string & { return v.view; },
         },
         master);
 }
