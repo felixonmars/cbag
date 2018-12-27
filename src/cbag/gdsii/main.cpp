@@ -90,8 +90,8 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     }
 
     logger.info("Export layout pins.");
-    auto purp = tech_ptr->pin_purpose;
-    auto make_pin_obj = tech_ptr->make_pin_obj;
+    auto purp = tech_ptr->get_pin_purpose();
+    auto make_pin_obj = tech_ptr->get_make_pin();
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
         auto &[lay, pin_list] = *iter;
         for (const auto &pin : pin_list) {

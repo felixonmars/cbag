@@ -81,9 +81,11 @@ tech::tech(const std::string &tech_fname) {
     }
 }
 
-std::string tech::get_pin_purpose_name() const { return get_purpose_name(pin_purpose); }
+purp_t tech::get_pin_purpose() const { return pin_purpose; }
 
-std::string tech::get_default_purpose_name() const { return get_purpose_name(default_purpose); }
+purp_t tech::get_default_purpose() const { return default_purpose; }
+
+bool tech::get_make_pin() const { return make_pin_obj; }
 
 std::string tech::get_purpose_name(purp_t purp_id) const {
     auto iter = std::find_if(
@@ -140,10 +142,6 @@ offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
         throw std::out_of_range(fmt::format("Cannot find layer type {} or space type {}",
                                             layer_type, static_cast<enum_t>(sp_type)));
     }
-}
-
-offset_t tech::get_min_space(const std::string &layer_type, offset_t width, enum_t sp_type) const {
-    return get_min_space(layer_type, width, static_cast<space_type>(sp_type));
 }
 
 } // namespace layout

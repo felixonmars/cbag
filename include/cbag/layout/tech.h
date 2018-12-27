@@ -32,16 +32,17 @@ class tech {
     lay_type_map_t lay_type_map;
     purp_t default_purpose;
     space_type sp_sc_type;
-
-  public:
     purp_t pin_purpose;
     bool make_pin_obj = true;
 
+  public:
     tech(const std::string &tech_fname);
 
-    std::string get_pin_purpose_name() const;
+    purp_t get_pin_purpose() const;
 
-    std::string get_default_purpose_name() const;
+    purp_t get_default_purpose() const;
+
+    bool get_make_pin() const;
 
     std::string get_purpose_name(purp_t purp_id) const;
 
@@ -54,8 +55,6 @@ class tech {
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 
     offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
-
-    offset_t get_min_space(const std::string &layer_type, offset_t width, enum_t sp_type) const;
 };
 
 } // namespace layout

@@ -744,8 +744,8 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 
     logger.info("Export layout pins.");
     auto tech_ptr = cv.get_tech();
-    auto purp = tech_ptr->pin_purpose;
-    auto make_pin_obj = tech_ptr->make_pin_obj;
+    auto purp = tech_ptr->get_pin_purpose();
+    auto make_pin_obj = tech_ptr->get_make_pin();
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
         auto &[lay, pin_list] = *iter;
         for (auto const &pin : pin_list) {
