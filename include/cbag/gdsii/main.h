@@ -38,11 +38,12 @@ void implement_gds(const std::string &fname, const std::string &lib_name, double
 
     std::unordered_map<std::string, std::string> rename_map{};
     for (const auto &cv_info : cv_list) {
-        auto cv_ptr = cv_info.second;
+        auto &[cv_cell_name, cv_ptr] = cv_info;
         auto cell_name = cv_ptr->get_name();
-        write_lay_cellview(*logger, stream, cv_info.first, *cv_ptr, rename_map, time_vec);
-        logger->info("cell name {} maps to {}", cell_name, cv_info.first);
-        rename_map[cell_name] = cv_info.first;
+        logger->info("Creating layout cell {}", cv_cell_name);
+        write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec);
+        logger->info("cell name {} maps to {}", cell_name, cv_cell_name);
+        rename_map[cell_name] = cv_cell_name;
     }
 
     write_gds_stop(*logger, stream);

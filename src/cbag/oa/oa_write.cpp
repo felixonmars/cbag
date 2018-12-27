@@ -659,26 +659,24 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     // create top block
     auto blk = oa::oaBlock::create(dsn);
 
-    logger.info("Making layout instances.");
+    logger.info("Export layout instances.");
     for (auto iter = cv.begin_inst(); iter != cv.end_inst(); ++iter) {
-        auto const &inst_pair = *iter;
-        create_lay_inst(ns, blk, inst_pair.first, inst_pair.second, lib_name.c_str(),
-                        view_name.c_str(), rename_map);
+        auto &[inst_name, inst] = *iter;
+        create_lay_inst(ns, blk, inst_name, inst, lib_name.c_str(), view_name.c_str(), rename_map);
     }
 
-    logger.info("Making layout geometries.");
+    logger.info("Export layout geometries.");
     for (auto iter = cv.begin_geometry(); iter != cv.end_geometry(); ++iter) {
-        auto const &geo_pair = *iter;
-        create_lay_geometry(logger, blk, geo_pair.first.first, geo_pair.first.second,
-                            geo_pair.second);
+        auto &[layer_key, geo] = *iter;
+        create_lay_geometry(logger, blk, layer_key.first, layer_key.second, geo);
     }
 
-    logger.info("Making layout vias.");
+    logger.info("Export layout vias.");
     for (auto iter = cv.begin_via(); iter != cv.end_via(); ++iter) {
         create_lay_via(logger, blk, tech, *iter);
     }
 
-    logger.info("Making layout blockages.");
+    logger.info("Export layout blockages.");
     oa::oaPointArray pt_arr;
     for (auto iter = cv.begin_lay_block(); iter != cv.end_lay_block(); ++iter) {
         auto const &block_pair = *iter;
@@ -689,13 +687,13 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         }
     }
 
-    logger.info("Making layout area blockages.");
+    logger.info("Export layout area blockages.");
     for (auto iter = cv.begin_area_block(); iter != cv.end_area_block(); ++iter) {
         set_point_array(*iter, pt_arr);
         oa::oaAreaBlockage::create(blk, pt_arr);
     }
 
-    logger.info("Making layout boundaries.");
+    logger.info("Export layout boundaries.");
     for (auto iter = cv.begin_boundary(); iter != cv.end_boundary(); ++iter) {
         set_point_array(*iter, pt_arr);
         switch (iter->get_type()) {
@@ -706,13 +704,13 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         }
     }
 
-    logger.info("Making layout pins.");
+    logger.info("Export layout pins.");
     auto tech_ptr = cv.get_tech();
     auto purp = tech_ptr->pin_purpose;
     auto make_pin_obj = tech_ptr->make_pin_obj;
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
-        auto lay = iter->first;
-        for (auto const &pin : iter->second) {
+        auto &[lay, pin_list] = *iter;
+        for (auto const &pin : pin_list) {
             if (!is_physical(pin)) {
                 logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin),
                             lay, purp);
