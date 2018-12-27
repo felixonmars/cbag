@@ -74,7 +74,7 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
         }
     }
 
-    // TODO: Figure out how
+    // TODO: Figure out how to add boundaries and blockages
 
     write_struct_end(logger, stream);
 }

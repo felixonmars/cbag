@@ -646,6 +646,43 @@ void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
     oa::oaStdVia::create(blk, via_def, get_xform(v.xform), &via_params);
 }
 
+void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock *blk,
+                    cbag::lay_t lay, cbag::purp_t purp, const cbag::layout::pin &pin,
+                    bool make_pin_obj) {
+    if (!is_physical(pin)) {
+        logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin), lay,
+                    purp);
+        return;
+    }
+    oa::oaPoint center(xm(pin), ym(pin));
+    auto w = width(pin);
+    auto h = height(pin);
+    oa::oaOrient orient(oa::oacR0);
+    auto height = h;
+    if (h > w) {
+        orient = oa::oacR90;
+        height = w;
+    }
+
+    oa::oaText::create(blk, lay, purp, pin.label.c_str(), center, oa::oacCenterCenterTextAlign,
+                       orient, oa::oacRomanFont, height);
+    if (make_pin_obj) {
+        auto r = oa::oaRect::create(blk, lay, purp, oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
+
+        oa::oaName term_name(ns, pin.net.c_str());
+        auto term = oa::oaTerm::find(blk, term_name);
+        if (term == nullptr) {
+            auto net = oa::oaNet::find(blk, term_name);
+            if (net == nullptr) {
+                net = oa::oaNet::create(blk, term_name);
+            }
+            term = oa::oaTerm::create(net, term_name);
+        }
+        auto pin = oa::oaPin::create(term, pin_dir);
+        r->addToPin(pin);
+    }
+}
+
 void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         spdlog::logger &logger, const std::string &lib_name,
                         const std::string &cell_name, const std::string &view_name,
@@ -711,38 +748,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
         auto &[lay, pin_list] = *iter;
         for (auto const &pin : pin_list) {
-            if (!is_physical(pin)) {
-                logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin),
-                            lay, purp);
-            }
-            oa::oaPoint center(xm(pin), ym(pin));
-            auto w = width(pin);
-            auto h = height(pin);
-            oa::oaOrient orient(oa::oacR0);
-            auto height = h;
-            if (h > w) {
-                orient = oa::oacR90;
-                height = w;
-            }
-
-            oa::oaText::create(blk, lay, purp, pin.label.c_str(), center,
-                               oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, height);
-            if (make_pin_obj) {
-                auto r = oa::oaRect::create(blk, lay, purp,
-                                            oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
-
-                oa::oaName term_name(ns, pin.net.c_str());
-                auto term = oa::oaTerm::find(blk, term_name);
-                if (term == nullptr) {
-                    auto net = oa::oaNet::find(blk, term_name);
-                    if (net == nullptr) {
-                        net = oa::oaNet::create(blk, term_name);
-                    }
-                    term = oa::oaTerm::create(net, term_name);
-                }
-                auto pin = oa::oaPin::create(term, pin_dir);
-                r->addToPin(pin);
-            }
+            create_lay_pin(logger, ns, blk, lay, purp, pin, make_pin_obj);
         }
     }
 
