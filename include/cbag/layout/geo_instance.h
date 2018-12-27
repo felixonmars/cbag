@@ -24,7 +24,7 @@ class geo_instance {
 
     bool empty() const;
 
-    box_t &get_bbox(box_t &r) const;
+    box_t get_bbox() const;
 
     geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy) const;
 

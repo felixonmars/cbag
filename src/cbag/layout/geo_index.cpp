@@ -42,11 +42,12 @@ geo_index::geo_index(std::string &&lay_type, tech *tech_ptr)
 
 bool geo_index::empty() const { return index.empty(); }
 
-box_t &geo_index::get_bbox(box_t &r) const {
+box_t geo_index::get_bbox() const {
+    box_t ans;
     auto box = index.bounds();
-    set(r, box.min_corner().get<0>(), box.min_corner().get<1>(), box.max_corner().get<0>(),
+    set(ans, box.min_corner().get<0>(), box.min_corner().get<1>(), box.max_corner().get<0>(),
         box.max_corner().get<1>());
-    return r;
+    return ans;
 }
 
 geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t spy,

@@ -16,13 +16,25 @@ bool geo_object::operator==(const geo_object &v) const {
 
 const geo_instance *geo_object::get_instance() const { return std::get_if<geo_instance>(&val); }
 
-geo_object::box_type geo_object::get_bnd_box(const value_type &val, offset_t spx, offset_t spy) {
+bg_box get_bnd_box(const geo_object::value_type &val, offset_t spx, offset_t spy) {
     box_t box;
     std::visit(overload{[&box](const box_t &v) { box = v; },
-                        [&box](const polygon90 &v) { bp::extents(box, v); },
-                        [&box](const polygon45 &v) { bp::extents(box, v); },
-                        [&box](const polygon &v) { bp::extents(box, v); },
-                        [&box](const geo_instance &v) { v.get_bbox(box); }},
+                        [&box](const polygon90 &v) {
+                            bool success = bp::extents(box, v);
+                            if (!success)
+                                box = box_t::get_invalid_box();
+                        },
+                        [&box](const polygon45 &v) {
+                            bool success = bp::extents(box, v);
+                            if (!success)
+                                box = box_t::get_invalid_box();
+                        },
+                        [&box](const polygon &v) {
+                            bool success = bp::extents(box, v);
+                            if (!success)
+                                box = box_t::get_invalid_box();
+                        },
+                        [&box](const geo_instance &v) { box = v.get_bbox(); }},
                val);
 
     if (!is_valid(box))

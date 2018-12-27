@@ -30,7 +30,7 @@ class geo_index {
 
     bool empty() const;
 
-    box_t &get_bbox(box_t &r) const;
+    box_t get_bbox() const;
 
     const_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                    const cbag::transformation &xform) const;

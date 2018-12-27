@@ -14,9 +14,9 @@ geo_instance::geo_instance(const geometry *master, cbag::transformation xform)
 
 bool geo_instance::empty() const { return master->index_empty(); }
 
-box_t &geo_instance::get_bbox(box_t &r) const {
-    master->get_index_bbox(r);
-    return transform(r, xform);
+box_t geo_instance::get_bbox() const {
+    box_t ans = master->get_index_bbox();
+    return transform(ans, xform);
 }
 
 geo_iterator geo_instance::begin_intersect(const box_t &r, offset_t spx, offset_t spy) const {

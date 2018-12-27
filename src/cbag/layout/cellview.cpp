@@ -132,12 +132,12 @@ void cellview::add_object(const instance &obj) {
     helper::add_inst(*this, obj);
     auto master = obj.get_cellview();
     if (master != nullptr) {
-        for (const auto &pair : master->geo_map) {
-            auto &geo = make_geometry(pair.first);
+        for (const auto &[layer_key, inst_geo] : master->geo_map) {
+            auto &geo = make_geometry(layer_key);
             for (decltype(obj.nx) ix = 0; ix < obj.nx; ++ix) {
                 for (decltype(obj.ny) iy = 0; iy < obj.ny; ++iy) {
                     // unordered map does not invalidate pointers to elements
-                    geo.record_instance(&pair.second,
+                    geo.record_instance(&inst_geo,
                                         get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));
                 }
             }

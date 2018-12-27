@@ -21,20 +21,18 @@ bool geometry::index_empty() const { return index.empty(); }
 
 box_t geometry::get_bbox() const {
     box_t ans;
-    return get_bbox(ans);
-}
-
-box_t &geometry::get_bbox(box_t &r) const {
-    std::visit(
+    bool success = std::visit(
         overload{
-            [&r](const auto &d) { bp::extents(r, d); },
+            [&ans](const auto &d) { return bp::extents(ans, d); },
         },
         data);
 
-    return r;
+    if (!success)
+        return box_t::get_invalid_box();
+    return ans;
 }
 
-box_t &geometry::get_index_bbox(box_t &r) const { return index.get_bbox(r); }
+box_t geometry::get_index_bbox() const { return index.get_bbox(); }
 
 geo_iterator geometry::begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                        const transformation &xform) const {

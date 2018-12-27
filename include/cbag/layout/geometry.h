@@ -44,8 +44,7 @@ class geometry {
 
     bool index_empty() const;
     box_t get_bbox() const;
-    box_t &get_bbox(box_t &r) const;
-    box_t &get_index_bbox(box_t &r) const;
+    box_t get_index_bbox() const;
 
     geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                  const transformation &xform = transformation()) const;
