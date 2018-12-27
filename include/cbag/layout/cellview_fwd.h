@@ -23,6 +23,7 @@ class boundary;
 class blockage;
 class pin;
 class via;
+class via_wrapper;
 class tech;
 
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
@@ -79,7 +80,7 @@ class cellview {
 
     void add_object(const blockage &obj);
     void add_object(const boundary &obj);
-    void add_object(const via &obj);
+    void add_object(const via_wrapper &obj);
     void add_object(const instance &obj);
 };
 

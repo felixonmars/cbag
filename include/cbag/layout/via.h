@@ -20,15 +20,11 @@ class via {
     cbag::transformation xform;
     std::string via_id;
     via_param params;
-    bool add_layers;
-    bool bot_horiz;
-    bool top_horiz;
 
   public:
     via();
 
-    via(cbag::transformation xform, std::string via_id, via_param params, bool add_layers,
-        bool bot_horiz, bool top_horiz);
+    via(cbag::transformation xform, std::string via_id, via_param params);
 
     box_t bot_box() const;
 
@@ -38,4 +34,4 @@ class via {
 } // namespace layout
 } // namespace cbag
 
-#endif // CBAG_LAYOUT_GEOMETRIES_H
+#endif

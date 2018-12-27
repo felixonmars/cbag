@@ -25,10 +25,8 @@ struct via::helper {
 
 via::via() = default;
 
-via::via(cbag::transformation xform, std::string via_id, via_param params, bool add_layers,
-         bool bot_horiz, bool top_horiz)
-    : xform(std::move(xform)), via_id(std::move(via_id)), params(std::move(params)),
-      add_layers(add_layers), bot_horiz(bot_horiz), top_horiz(top_horiz) {}
+via::via(cbag::transformation xform, std::string via_id, via_param params)
+    : xform(std::move(xform)), via_id(std::move(via_id)), params(std::move(params)) {}
 
 box_t via::bot_box() const { return helper::get_box(*this, params.lay1_off, params.lay1_enc); }
 
