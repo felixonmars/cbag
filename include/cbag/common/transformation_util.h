@@ -2,6 +2,7 @@
 #ifndef CBAG_COMMON_TRANSFORMATION_UTIL_H
 #define CBAG_COMMON_TRANSFORMATION_UTIL_H
 
+#include <tuple>
 #include <utility>
 
 #include <cbag/common/transformation_fwd.h>
@@ -32,6 +33,9 @@ transformation &invert(transformation &xform);
 transformation get_invert(transformation xform);
 transformation &transform_by(transformation &xform, const transformation &rhs);
 transformation get_transform_by(transformation xform, const transformation &rhs);
+
+std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_array(const transformation &xform, cnt_t nx,
+                                                           cnt_t ny, offset_t spx, offset_t spy);
 
 } // namespace cbag
 

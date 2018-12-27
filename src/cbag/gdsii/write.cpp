@@ -4,10 +4,8 @@
 #include <vector>
 
 #include <cbag/common/transformation_util.h>
-#include <cbag/common/typedefs.h>
 #include <cbag/gdsii/math.h>
 #include <cbag/gdsii/write.h>
-#include <cbag/layout/instance.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/util/io.h>
 #include <cbag/util/sfinae.h>
@@ -153,11 +151,30 @@ void write_points(spdlog::logger &logger, std::ofstream &stream, std::size_t num
     write<record_type::XY>(stream, 2 * num_pts, point_xy_iter(begin), point_xy_iter(end));
 }
 
+std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
+    switch (orient) {
+    case oR90:
+        return {90, 0x4000};
+    case oR180:
+        return {180, 0x4000};
+    case oR270:
+        return {270, 0x4000};
+    case oMX:
+        return {0, 0x4001};
+    case oMXR90:
+        return {90, 0x4001};
+    case oMY:
+        return {180, 0x4001};
+    case oMYR90:
+        return {270, 0x4001};
+    default:
+        return {0, 0x4000};
+    }
+}
+
 void write_transform(spdlog::logger &logger, std::ofstream &stream, const transformation &xform,
                      cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0) {
-    // TODO: figure out angle and bit flag
-    int angle = 0;
-    uint16_t bit_flag = 0;
+    auto [angle, bit_flag] = get_angle_flag(orient(xform));
 
     write_int<record_type::STRANS>(logger, stream, bit_flag);
     if (angle != 0) {
@@ -165,11 +182,20 @@ void write_transform(spdlog::logger &logger, std::ofstream &stream, const transf
         write<record_type::ANGLE>(stream, data.size(), data.begin(), data.end());
     }
     if (nx > 1 || ny > 1) {
-        std::array<uint16_t, 2> nxy{static_cast<uint16_t>(nx), static_cast<uint16_t>(ny)};
+        // convert BAG array parameters to GDS array parameters
+        auto [gds_nx, gds_ny, gds_spx, gds_spy] = cbag::convert_array(xform, nx, ny, spx, spy);
+        std::array<uint16_t, 2> nxy{static_cast<uint16_t>(gds_nx), static_cast<uint16_t>(gds_ny)};
         write<record_type::COLROW>(stream, nxy.size(), nxy.begin(), nxy.end());
-        // TODO: figure out xy array
-        std::array<uint32_t, 6> xy{
-            static_cast<uint32_t>(x(xform)), static_cast<uint32_t>(y(xform)), 0, 0, 0, 0};
+        auto [x1, y1] = location(xform);
+        decltype(spx) x2 = gds_spx * nx;
+        decltype(spx) y2 = 0;
+        decltype(spx) x3 = 0;
+        decltype(spx) y3 = gds_spy * ny;
+        xform.transform(x2, y2);
+        xform.transform(x3, y3);
+        std::array<uint32_t, 6> xy{static_cast<uint32_t>(x1), static_cast<uint32_t>(y1),
+                                   static_cast<uint32_t>(x2), static_cast<uint32_t>(y2),
+                                   static_cast<uint32_t>(x3), static_cast<uint32_t>(y3)};
         write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
     } else {
         std::array<uint32_t, 2> xy{static_cast<uint32_t>(x(xform)),
@@ -222,21 +248,22 @@ void write_polygon(spdlog::logger &logger, std::ofstream &stream, lay_t layer, p
     write_points(logger, stream, poly.size(), poly.begin(), poly.end());
 }
 
-void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const layout::instance &inst,
-                        const std::unordered_map<std::string, std::string> &rename_map) {
+void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+                        const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx,
+                        offset_t spy) {
     write_empty<record_type::AREF>(logger, stream);
-    write_name<record_type::SNAME>(logger, stream, inst.get_cell_name(&rename_map));
-    write_transform(logger, stream, inst.xform, inst.nx, inst.ny, inst.spx, inst.spy);
+    write_name<record_type::SNAME>(logger, stream, cell_name);
+    write_transform(logger, stream, xform, nx, ny, spx, spy);
 }
 
-void write_instance(spdlog::logger &logger, std::ofstream &stream, const layout::instance &inst,
-                    const std::unordered_map<std::string, std::string> &rename_map) {
-    if (inst.nx > 1 || inst.ny > 1) {
-        write_arr_instance(logger, stream, inst, rename_map);
+void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+                    const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
+    if (nx > 1 || ny > 1) {
+        write_arr_instance(logger, stream, cell_name, xform, nx, ny, spx, spy);
     } else {
         write_empty<record_type::SREF>(logger, stream);
-        write_name<record_type::SNAME>(logger, stream, inst.get_cell_name(&rename_map));
-        write_transform(logger, stream, inst.xform);
+        write_name<record_type::SNAME>(logger, stream, cell_name);
+        write_transform(logger, stream, xform);
     }
 }
 

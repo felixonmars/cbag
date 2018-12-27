@@ -73,4 +73,11 @@ transformation get_transform_by(transformation xform, const transformation &rhs)
     return transform_by(xform, rhs);
 }
 
+std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_array(const transformation &xform, cnt_t nx,
+                                                           cnt_t ny, offset_t spx, offset_t spy) {
+    get_invert(xform).transform(spx, spy);
+    return (flips_xy(xform)) ? std::make_tuple(ny, nx, spx, spy)
+                             : std::make_tuple(nx, ny, spx, spy);
+}
+
 } // namespace cbag
