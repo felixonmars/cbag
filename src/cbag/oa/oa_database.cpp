@@ -7,6 +7,7 @@
  */
 
 #include <fstream>
+#include <tuple>
 
 #include <cbag/logging/logging.h>
 
@@ -27,6 +28,9 @@
 #include <cbag/oa/oa_write_lib.h>
 
 namespace cbagoa {
+
+using oa_lay_purp_t = std::pair<oa::oaLayerNum, oa::oaPurposeNum>;
+using oa_via_lay_purp_t = std::tuple<oa_lay_purp_t, oa_lay_purp_t, oa_lay_purp_t>;
 
 oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                              oa::oaLibDefListWarningTypeEnum type) {
@@ -210,7 +214,7 @@ void oa_database::write_tech_info_file(const std::string &fname, const std::stri
     // read layer/purpose/via mappings
     cbag::util::sorted_map<oa::oaLayerNum, std::string> lay_map;
     cbag::util::sorted_map<oa::oaPurposeNum, std::string> pur_map;
-    cbag::util::sorted_map<std::pair<oa::oaLayerNum, oa::oaLayerNum>, std::string> via_map;
+    cbag::util::sorted_map<oa_via_lay_purp_t, std::string> via_map;
 
     oa::oaString tmp;
     oa::oaIter<oa::oaLayer> lay_iter(tech_ptr->getLayers());
@@ -228,10 +232,16 @@ void oa_database::write_tech_info_file(const std::string &fname, const std::stri
     }
 
     oa::oaIter<oa::oaViaDef> via_iter(tech_ptr->getViaDefs());
-    oa::oaViaDef *via;
-    while ((via = via_iter.getNext()) != nullptr) {
+    oa::oaStdViaDef *via;
+    auto def_purp = oa::oaPurpose::get(tech_ptr, oa::oacDrawingPurposeType)->getNumber();
+    while ((via = reinterpret_cast<oa::oaStdViaDef *>(via_iter.getNext())) != nullptr) {
         via->getName(tmp);
-        via_map.emplace(std::make_pair(via->getLayer1Num(), via->getLayer2Num()), std::string(tmp));
+        oa::oaViaParam via_params;
+        via->getParams(via_params);
+        via_map.emplace(std::make_tuple(std::make_pair(via->getLayer1Num(), def_purp),
+                                        std::make_pair(via_params.getCutLayer(), def_purp),
+                                        std::make_pair(via->getLayer2Num(), def_purp)),
+                        std::string(tmp));
     }
 
     // emit to YAML
@@ -248,23 +258,31 @@ void oa_database::write_tech_info_file(const std::string &fname, const std::stri
 
     out << YAML::Key << "layer" << YAML::Value;
     out << YAML::BeginMap;
-    for (auto const &p : lay_map) {
-        out << YAML::Key << p.second << YAML::Value << p.first;
+    for (auto const &[lay_id, lay_name] : lay_map) {
+        out << YAML::Key << lay_name << YAML::Value << lay_id;
     }
     out << YAML::EndMap;
 
     out << YAML::Key << "purpose" << YAML::Value;
     out << YAML::BeginMap;
-    for (auto const &p : pur_map) {
-        out << YAML::Key << p.second << YAML::Value << p.first;
+    for (auto const &[purp_id, purp_name] : pur_map) {
+        out << YAML::Key << purp_name << YAML::Value << purp_id;
     }
     out << YAML::EndMap;
 
     out << YAML::Key << "via_layers" << YAML::Value;
     out << YAML::BeginMap;
-    for (auto const &p : via_map) {
-        out << YAML::Key << p.second << YAML::Value;
-        out << YAML::BeginSeq << p.first.first << p.first.second << YAML::EndSeq;
+    for (auto const &[v_lay_purp_tuple, via_id] : via_map) {
+        auto &[lay1_key, cut_key, lay2_key] = v_lay_purp_tuple;
+        out << YAML::Key << via_id << YAML::Value;
+        out << YAML::Block << YAML::BeginSeq;
+        out << YAML::Flow << YAML::BeginSeq << lay1_key.first << lay1_key.second << YAML::EndSeq
+            << YAML::Block;
+        out << YAML::Flow << YAML::BeginSeq << cut_key.first << cut_key.second << YAML::EndSeq
+            << YAML::Block;
+        out << YAML::Flow << YAML::BeginSeq << lay2_key.first << lay2_key.second << YAML::EndSeq
+            << YAML::Block;
+        out << YAML::EndSeq << YAML::Flow;
     }
     out << YAML::EndMap;
 

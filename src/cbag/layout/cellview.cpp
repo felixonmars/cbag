@@ -1,3 +1,5 @@
+#include <tuple>
+
 #include <cbag/util/binary_iterator.h>
 
 #include <cbag/common/transformation_util.h>
@@ -119,11 +121,8 @@ void cellview::add_object(const boundary &obj) { boundary_list.push_back(obj); }
 void cellview::add_object(const via_wrapper &obj) {
     via_list.push_back(obj.v);
     if (obj.add_layers) {
-        auto purpose = tech_ptr->get_purpose_id("");
-        lay_t bot_lay, top_lay;
-        tech_ptr->get_via_layers(obj.v.get_via_id(), bot_lay, top_lay);
-        layer_t bot_key(bot_lay, purpose);
-        layer_t top_key(top_lay, purpose);
+        auto [bot_key, unused, top_key] = tech_ptr->get_via_layer_purpose(obj.v.get_via_id());
+        (void)unused;
         make_geometry(bot_key).add_shape(get_bot_box(obj.v), obj.bot_horiz);
         make_geometry(top_key).add_shape(get_top_box(obj.v), obj.top_horiz);
     }

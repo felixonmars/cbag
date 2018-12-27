@@ -10,7 +10,7 @@
 namespace YAML {
 
 Node convert<cbag::transformation>::encode(const cbag::transformation &rhs) {
-    Node root;
+    Node root(NodeType::Sequence);
     root.push_back(cbag::x(rhs));
     root.push_back(cbag::y(rhs));
     root.push_back(cbag::orient_code(rhs));

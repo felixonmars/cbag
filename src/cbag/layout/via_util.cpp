@@ -33,5 +33,24 @@ box_t get_top_box(const via &v) {
     return get_via_box(v.xform, param, param.lay2_off, param.lay2_enc);
 }
 
+template <typename It> void get_via_cuts(const via &v, It out_iter) {
+    auto &params = v.get_params();
+    auto &[nx, ny] = params.num;
+    auto &[vw, vh] = params.cut_dim;
+    auto &[spx, spy] = params.cut_spacing;
+
+    auto xoff = (nx * (vw + spx) - spx) / 2;
+    auto yoff = (ny * (vh + spy) - spy) / 2;
+
+    offset_t dx = xoff;
+    box_t cut_box{0, 0, static_cast<coord_t>(vw), static_cast<coord_t>(vh)};
+    for (std::remove_const_t<decltype(nx)> xidx = 0; xidx != nx; ++xidx, dx += spx) {
+        offset_t dy = yoff;
+        for (std::remove_const_t<decltype(nx)> yidx = 0; yidx != ny; ++yidx, dy += spy) {
+            *out_iter = get_move_by(get_transform(cut_box, v.xform), dx, dy);
+        }
+    }
+}
+
 } // namespace layout
 } // namespace cbag

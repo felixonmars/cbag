@@ -35,7 +35,8 @@ void write_gds_stop(spdlog::logger &logger, std::ofstream &stream) {
 void write_lay_geometry(spdlog::logger &logger, std::ofstream &stream, lay_t lay, purp_t purp,
                         const layout::geometry &geo) {}
 
-void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::via &v) {}
+void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::tech &tech,
+                   const layout::via &v) {}
 
 void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, lay_t lay, purp_t purp,
                    const layout::pin &pin, bool make_pin_obj) {
@@ -83,12 +84,12 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     }
 
     logger.info("Export layout vias.");
+    auto tech_ptr = cv.get_tech();
     for (auto iter = cv.begin_via(); iter != cv.end_via(); ++iter) {
-        write_lay_via(logger, stream, *iter);
+        write_lay_via(logger, stream, *tech_ptr, *iter);
     }
 
     logger.info("Export layout pins.");
-    auto tech_ptr = cv.get_tech();
     auto purp = tech_ptr->pin_purpose;
     auto make_pin_obj = tech_ptr->make_pin_obj;
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {

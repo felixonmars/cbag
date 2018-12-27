@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
+#include "yaml-cpp/tuple.h"
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/tech.h>
@@ -115,11 +116,9 @@ std::string tech::get_layer_type(lay_t lay_id) const {
     return (iter == lay_type_map.end()) ? "" : iter->second;
 }
 
-void tech::get_via_layers(const std::string &key, lay_t &bot, lay_t &top) const {
+via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
     try {
-        auto temp = via_map.at(key);
-        bot = temp.first;
-        top = temp.second;
+        return via_map.at(key);
     } catch (const std::out_of_range &) {
         throw std::out_of_range(fmt::format("Cannot find via ID: {}", key));
     }
