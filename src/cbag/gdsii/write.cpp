@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 
+#include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
 #include <cbag/gdsii/math.h>
 #include <cbag/gdsii/write.h>
@@ -38,6 +39,8 @@ enum class record_type : uint16_t {
     STRING = 0x1906,
     STRANS = 0x1A01,
     ANGLE = 0x1C05,
+    BOX = 0x2D00,
+    BOXTYPE = 0x2E02,
 };
 
 using size_type = uint16_t;
@@ -48,6 +51,8 @@ constexpr auto size_size = sizeof(size_type);
 constexpr auto version = static_cast<uint16_t>(5);
 constexpr auto text_presentation = static_cast<uint16_t>(0xA000);
 
+template <typename T, typename U> T interpret_as(U val) { return *reinterpret_cast<T *>(&val); }
+
 class uchar_iter {
   private:
     std::string::const_iterator iter;
@@ -56,7 +61,7 @@ class uchar_iter {
     uchar_iter() = default;
     explicit uchar_iter(std::string::const_iterator iter) : iter(std::move(iter)) {}
 
-    unsigned char operator*() { return static_cast<unsigned char>(*iter); }
+    unsigned char operator*() { return interpret_as<unsigned char>(*iter); }
     uchar_iter &operator++() {
         ++iter;
         return *this;
@@ -193,13 +198,13 @@ void write_transform(spdlog::logger &logger, std::ofstream &stream, const transf
         decltype(spx) y3 = gds_spy * ny;
         xform.transform(x2, y2);
         xform.transform(x3, y3);
-        std::array<uint32_t, 6> xy{static_cast<uint32_t>(x1), static_cast<uint32_t>(y1),
-                                   static_cast<uint32_t>(x2), static_cast<uint32_t>(y2),
-                                   static_cast<uint32_t>(x3), static_cast<uint32_t>(y3)};
+        std::array<uint32_t, 6> xy{interpret_as<uint32_t>(x1), interpret_as<uint32_t>(y1),
+                                   interpret_as<uint32_t>(x2), interpret_as<uint32_t>(y2),
+                                   interpret_as<uint32_t>(x3), interpret_as<uint32_t>(y3)};
         write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
     } else {
-        std::array<uint32_t, 2> xy{static_cast<uint32_t>(x(xform)),
-                                   static_cast<uint32_t>(y(xform))};
+        std::array<uint32_t, 2> xy{interpret_as<uint32_t>(x(xform)),
+                                   interpret_as<uint32_t>(y(xform))};
         write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
     }
 }
@@ -243,9 +248,23 @@ void write_struct_end(spdlog::logger &logger, std::ofstream &stream) {
 void write_polygon(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
                    const layout::polygon &poly) {
     write_empty<record_type::BOUNDARY>(logger, stream);
-    write_int<record_type::LAYER>(logger, stream, static_cast<uint16_t>(layer));
-    write_int<record_type::DATATYPE>(logger, stream, static_cast<uint16_t>(purpose));
+    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
+    write_int<record_type::DATATYPE>(logger, stream, interpret_as<uint16_t>(purpose));
     write_points(logger, stream, poly.size(), poly.begin(), poly.end());
+}
+
+void write_box(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+               const box_t &b) {
+    write_empty<record_type::BOX>(logger, stream);
+    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
+    write_int<record_type::BOXTYPE>(logger, stream, interpret_as<uint16_t>(purpose));
+
+    auto x0 = interpret_as<uint32_t>(xl(b));
+    auto x1 = interpret_as<uint32_t>(xh(b));
+    auto y0 = interpret_as<uint32_t>(yl(b));
+    auto y1 = interpret_as<uint32_t>(yh(b));
+    std::array<uint32_t, 10> xy{x0, y0, x1, y0, x1, y1, x0, y1, x0, y0};
+    write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
 }
 
 void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
@@ -270,8 +289,8 @@ void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::st
 void write_text(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
                 const std::string &text, const transformation &xform) {
     write_empty<record_type::TEXT>(logger, stream);
-    write_int<record_type::LAYER>(logger, stream, static_cast<uint16_t>(layer));
-    write_int<record_type::TEXTTYPE>(logger, stream, static_cast<uint16_t>(purpose));
+    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
+    write_int<record_type::TEXTTYPE>(logger, stream, interpret_as<uint16_t>(purpose));
     write_int<record_type::PRESENTATION>(logger, stream, text_presentation);
     write_transform(logger, stream, xform);
     write_name<record_type::STRING>(logger, stream, text);

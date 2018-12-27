@@ -656,16 +656,15 @@ void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock 
     }
     oa::oaPoint center(xm(pin), ym(pin));
     auto w = width(pin);
-    auto h = height(pin);
+    auto text_h = height(pin);
     oa::oaOrient orient(oa::oacR0);
-    auto height = h;
-    if (h > w) {
+    if (text_h > w) {
         orient = oa::oacR90;
-        height = w;
+        text_h = w;
     }
 
     oa::oaText::create(blk, lay, purp, pin.label.c_str(), center, oa::oacCenterCenterTextAlign,
-                       orient, oa::oacRomanFont, height);
+                       orient, oa::oacRomanFont, text_h);
     if (make_pin_obj) {
         auto r = oa::oaRect::create(blk, lay, purp, oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
 

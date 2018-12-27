@@ -1,6 +1,8 @@
 #include <cbag/gdsii/main.h>
 #include <cbag/gdsii/write.h>
 
+#include <cbag/common/box_t_util.h>
+#include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/via.h>
 
@@ -36,7 +38,29 @@ void write_lay_geometry(spdlog::logger &logger, std::ofstream &stream, lay_t lay
 void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::via &v) {}
 
 void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, lay_t lay, purp_t purp,
-                   const layout::pin &p, bool make_pin_obj) {}
+                   const layout::pin &pin, bool make_pin_obj) {
+    if (!is_physical(pin)) {
+        logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin), lay,
+                    purp);
+        return;
+    }
+    auto xc = xm(pin);
+    auto yc = ym(pin);
+    auto w = width(pin);
+    auto text_h = height(pin);
+    transformation xform;
+    if (text_h > w) {
+        xform = make_xform(xc, yc, oR90);
+        text_h = w;
+    } else {
+        xform = make_xform(xc, yc, oR0);
+    }
+
+    write_text(logger, stream, lay, purp, pin.label, xform);
+    if (make_pin_obj) {
+        write_box(logger, stream, lay, purp, pin);
+    }
+}
 
 void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
                         const cbag::layout::cellview &cv,
