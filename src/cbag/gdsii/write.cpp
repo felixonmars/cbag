@@ -15,6 +15,41 @@
 namespace cbag {
 namespace gdsii {
 
+enum class record_type : uint16_t {
+    HEADER = 0x0002,
+    BGNLIB = 0x0102,
+    LIBNAME = 0x0206,
+    UNITS = 0x0305,
+    ENDLIB = 0x0400,
+    BGNSTR = 0x0502,
+    STRNAME = 0x0606,
+    ENDSTR = 0x0700,
+    BOUNDARY = 0x0800,
+    SREF = 0x0A00,
+    AREF = 0x0B00,
+    TEXT = 0x0C00,
+    LAYER = 0x0D02,
+    DATATYPE = 0x0E02,
+    WIDTH = 0x0F03,
+    XY = 0x1003,
+    ENDEL = 0x1100,
+    SNAME = 0x1206,
+    COLROW = 0x1302,
+    TEXTTYPE = 0x1602,
+    PRESENTATION = 0x1701,
+    STRING = 0x1906,
+    STRANS = 0x1A01,
+    ANGLE = 0x1C05,
+};
+
+using size_type = uint16_t;
+
+constexpr auto max_size = UINT16_MAX;
+constexpr auto type_size = sizeof(record_type);
+constexpr auto size_size = sizeof(size_type);
+constexpr auto version = static_cast<uint16_t>(5);
+constexpr auto text_presentation = static_cast<uint16_t>(0xA000);
+
 class uchar_iter {
   private:
     std::string::const_iterator iter;
@@ -56,40 +91,6 @@ template <typename iT> class point_xy_iter {
         return pt_iter != other.pt_iter || is_y != other.is_y;
     }
 };
-
-enum class record_type : uint16_t {
-    HEADER = 0x0002,
-    BGNLIB = 0x0102,
-    LIBNAME = 0x0206,
-    UNITS = 0x0305,
-    ENDLIB = 0x0400,
-    BGNSTR = 0x0502,
-    STRNAME = 0x0606,
-    ENDSTR = 0x0700,
-    BOUNDARY = 0x0800,
-    SREF = 0x0A00,
-    AREF = 0x0B00,
-    TEXT = 0x0C00,
-    LAYER = 0x0D02,
-    DATATYPE = 0x0E02,
-    WIDTH = 0x0F03,
-    XY = 0x1003,
-    ENDEL = 0x1100,
-    SNAME = 0x1206,
-    COLROW = 0x1302,
-    TEXTTYPE = 0x1602,
-    PRESENTATION = 0x1701,
-    STRING = 0x1906,
-    STRANS = 0x1A01,
-    ANGLE = 0x1C05,
-};
-
-using size_type = uint16_t;
-
-constexpr auto max_size = UINT16_MAX;
-constexpr auto type_size = sizeof(record_type);
-constexpr auto size_size = sizeof(size_type);
-constexpr auto version = static_cast<int16_t>(5);
 
 template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ofstream &stream, T val) {
     constexpr auto unit_size = sizeof(T);
@@ -237,6 +238,16 @@ void write_instance(spdlog::logger &logger, std::ofstream &stream, const layout:
         write_name<record_type::SNAME>(logger, stream, inst.get_cell_name(&rename_map));
         write_transform(logger, stream, inst.xform);
     }
+}
+
+void write_text(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+                const std::string &text, const transformation &xform) {
+    write_empty<record_type::TEXT>(logger, stream);
+    write_int<record_type::LAYER>(logger, stream, static_cast<uint16_t>(layer));
+    write_int<record_type::TEXTTYPE>(logger, stream, static_cast<uint16_t>(purpose));
+    write_int<record_type::PRESENTATION>(logger, stream, text_presentation);
+    write_transform(logger, stream, xform);
+    write_name<record_type::STRING>(logger, stream, text);
 }
 
 } // namespace gdsii
