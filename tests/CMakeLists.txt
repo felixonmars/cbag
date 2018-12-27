@@ -11,6 +11,7 @@ add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_map.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/util/sorted_vector.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/oa/oa_io.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp/tuple.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/util/io.cpp
 
   )
@@ -21,6 +22,7 @@ target_link_libraries(test_main
   PRIVATE
   cbag
   fmt
+  yaml-cpp
   )
 
 install(TARGETS
