@@ -10,6 +10,22 @@
 namespace cbag {
 namespace gdsii {
 
+class uchar_iter {
+  private:
+    std::string::const_iterator iter;
+
+  public:
+    uchar_iter() = default;
+    uchar_iter(std::string::const_iterator iter) : iter(std::move(iter)) {}
+
+    unsigned char operator*() { return static_cast<unsigned char>(*iter); }
+    uchar_iter &operator++() {
+        ++iter;
+        return *this;
+    }
+    bool operator!=(const uchar_iter &other) { return iter != other.iter; }
+};
+
 enum class record_type : uint16_t {
     HEADER = 0x0002,
     BGNLIB = 0x0102,
@@ -54,10 +70,10 @@ template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ofstream &strea
     }
 }
 
-template <typename T, record_type R> void write(std::ofstream &stream, const std::vector<T> &vec) {
-    constexpr auto unit_size = sizeof(T);
+template <record_type R, typename iT>
+void write(std::ofstream &stream, std::size_t num_data, iT start, iT stop) {
+    constexpr auto unit_size = sizeof(*start);
 
-    auto num_data = vec.size();
     auto size_test = unit_size * num_data + size_size + type_size;
     assert(size_test <= max_size);
 
@@ -69,8 +85,8 @@ template <typename T, record_type R> void write(std::ofstream &stream, const std
     }
     write_bytes(stream, size);
     write_bytes(stream, static_cast<uint16_t>(R));
-    for (auto val : vec) {
-        write_bytes(stream, val);
+    for (; start != stop; ++start) {
+        write_bytes(stream, *start);
     }
     if (add_zero) {
         stream.put('\0');
@@ -82,35 +98,36 @@ void write_grp_begin(spdlog::logger &logger, std::ofstream &stream,
                      const std::vector<uint16_t> &time_vec) {
     std::vector<uint16_t> data(time_vec.begin(), time_vec.end());
     data.insert(data.end(), time_vec.begin(), time_vec.end());
-    write<uint16_t, R>(stream, data);
+    write<R>(stream, data.size(), data.begin(), data.end());
 }
 
 template <record_type R> void write_empty(spdlog::logger &logger, std::ofstream &stream) {
-    std::vector<uint16_t> data;
-    write<uint16_t, R>(stream, data);
+    uint16_t tmp[1] = {0};
+    write<R>(stream, 0, tmp, tmp);
 }
 
 template <record_type R>
 void write_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name) {
-    std::vector<unsigned char> data(name.begin(), name.end());
-    write<unsigned char, R>(stream, data);
+    write<R>(stream, name.size(), uchar_iter(name.begin()), uchar_iter(name.end()));
 }
 
 template <record_type R>
 void write_int(spdlog::logger &logger, std::ofstream &stream, uint16_t val) {
-    std::vector<uint16_t> data({val});
-    write<uint16_t, R>(stream, data);
+    uint16_t tmp[1] = {val};
+    write<R>(stream, 1, tmp, tmp + 1);
 }
 
+template <typename iT>
+void write_points(spdlog::logger &logger, std::ofstream &stream, iT begin, iT end) {}
+
 void write_header(spdlog::logger &logger, std::ofstream &stream) {
-    std::vector<uint16_t> data({version});
-    write<uint16_t, record_type::HEADER>(stream, data);
+    write_int<record_type::HEADER>(logger, stream, version);
 }
 
 void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
                  double user_unit) {
-    std::vector<uint64_t> data({double_to_gds(resolution), double_to_gds(resolution * user_unit)});
-    write<uint64_t, record_type::UNITS>(stream, data);
+    uint64_t data[2] = {double_to_gds(resolution), double_to_gds(resolution * user_unit)};
+    write<record_type::UNITS>(stream, 2, data, data + 2);
 }
 
 void write_lib_begin(spdlog::logger &logger, std::ofstream &stream,
