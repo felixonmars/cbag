@@ -30,6 +30,7 @@ template <typename It> void get_via_cuts(const via &v, It out_iter) {
         offset_t dy = yoff;
         for (std::remove_const_t<decltype(nx)> yidx = 0; yidx != ny; ++yidx, dy += spy) {
             *out_iter = get_move_by(get_transform(cut_box, v.xform), dx, dy);
+            ++out_iter;
         }
     }
 }

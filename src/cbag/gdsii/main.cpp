@@ -4,10 +4,68 @@
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/via.h>
+#include <cbag/layout/polygon.h>
+#include <cbag/layout/via_util.h>
 
 namespace cbag {
 namespace gdsii {
+
+class polygon_writer {
+  public:
+    using value_type = layout::polygon;
+
+  private:
+    spdlog::logger &logger;
+    std::ofstream &stream;
+    lay_t layer;
+    purp_t purpose;
+    value_type last;
+
+  public:
+    polygon_writer(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose)
+        : logger(logger), stream(stream), layer(layer), purpose(purpose) {}
+
+    void push_back(value_type &&v) {
+        record_last();
+        last = std::move(v);
+    }
+
+    void insert(value_type *ptr, const value_type &v) {
+        record_last();
+        last = v;
+    }
+
+    void record_last() const {
+        if (last.size() > 0) {
+            write_polygon(logger, stream, layer, purpose, last);
+        }
+    }
+
+    value_type &back() { return last; }
+
+    value_type *end() const { return nullptr; }
+};
+
+class rect_writer {
+  private:
+    spdlog::logger &logger;
+    std::ofstream &stream;
+    lay_t layer;
+    purp_t purpose;
+
+  public:
+    rect_writer(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose)
+        : logger(logger), stream(stream), layer(layer), purpose(purpose) {}
+
+    rect_writer &operator=(const box_t &box) {
+        write_box(logger, stream, layer, purpose, box);
+        return *this;
+    }
+
+    rect_writer &operator*() { return *this; }
+
+    rect_writer &operator++() { return *this; }
+};
 
 std::vector<uint16_t> get_gds_time() {
     auto ep_time = std::time(nullptr);
@@ -33,10 +91,19 @@ void write_gds_stop(spdlog::logger &logger, std::ofstream &stream) {
 }
 
 void write_lay_geometry(spdlog::logger &logger, std::ofstream &stream, lay_t lay, purp_t purp,
-                        const layout::geometry &geo) {}
+                        const layout::geometry &geo) {
+    polygon_writer w(logger, stream, lay, purp);
+    geo.write_geometry(w);
+    w.record_last();
+}
 
 void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::tech &tech,
-                   const layout::via &v) {}
+                   const layout::via &v) {
+    auto [lay1_key, cut_key, lay2_key] = tech.get_via_layer_purpose(v.get_via_id());
+    write_box(logger, stream, lay1_key.first, lay1_key.second, layout::get_bot_box(v));
+    write_box(logger, stream, lay2_key.first, lay2_key.second, layout::get_top_box(v));
+    get_via_cuts(v, rect_writer(logger, stream, cut_key.first, cut_key.second));
+}
 
 void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, lay_t lay, purp_t purp,
                    const layout::pin &pin, bool make_pin_obj) {
