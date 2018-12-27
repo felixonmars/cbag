@@ -1,9 +1,14 @@
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <vector>
 
+#include <cbag/common/transformation_util.h>
+#include <cbag/common/typedefs.h>
 #include <cbag/gdsii/math.h>
 #include <cbag/gdsii/write.h>
+#include <cbag/layout/instance.h>
+#include <cbag/layout/polygon.h>
 #include <cbag/util/io.h>
 #include <cbag/util/sfinae.h>
 
@@ -16,7 +21,7 @@ class uchar_iter {
 
   public:
     uchar_iter() = default;
-    uchar_iter(std::string::const_iterator iter) : iter(std::move(iter)) {}
+    explicit uchar_iter(std::string::const_iterator iter) : iter(std::move(iter)) {}
 
     unsigned char operator*() { return static_cast<unsigned char>(*iter); }
     uchar_iter &operator++() {
@@ -24,6 +29,32 @@ class uchar_iter {
         return *this;
     }
     bool operator!=(const uchar_iter &other) { return iter != other.iter; }
+};
+
+template <typename iT> class point_xy_iter {
+  private:
+    iT pt_iter;
+    bool is_y = false;
+
+  public:
+    point_xy_iter() = default;
+    explicit point_xy_iter(iT pt_iter, bool is_y = false)
+        : pt_iter(std::move(pt_iter)), is_y(is_y) {}
+
+    uint32_t operator*() {
+        auto val = (is_y) ? pt_iter->y() : pt_iter->x();
+        return *reinterpret_cast<uint32_t *>(&val);
+    }
+    point_xy_iter &operator++() {
+        if (is_y) {
+            ++pt_iter;
+        }
+        is_y = !is_y;
+        return *this;
+    }
+    bool operator!=(const point_xy_iter &other) {
+        return pt_iter != other.pt_iter || is_y != other.is_y;
+    }
 };
 
 enum class record_type : uint16_t {
@@ -51,8 +82,6 @@ enum class record_type : uint16_t {
     STRING = 0x1906,
     STRANS = 0x1A01,
     ANGLE = 0x1C05,
-    BOX = 0x2D00,
-    BOXTYPE = 0x2E02,
 };
 
 using size_type = uint16_t;
@@ -102,8 +131,8 @@ void write_grp_begin(spdlog::logger &logger, std::ofstream &stream,
 }
 
 template <record_type R> void write_empty(spdlog::logger &logger, std::ofstream &stream) {
-    uint16_t tmp[1] = {0};
-    write<R>(stream, 0, tmp, tmp);
+    std::array<uint16_t, 0> tmp;
+    write<R>(stream, tmp.size(), tmp.begin(), tmp.end());
 }
 
 template <record_type R>
@@ -113,12 +142,40 @@ void write_name(spdlog::logger &logger, std::ofstream &stream, const std::string
 
 template <record_type R>
 void write_int(spdlog::logger &logger, std::ofstream &stream, uint16_t val) {
-    uint16_t tmp[1] = {val};
-    write<R>(stream, 1, tmp, tmp + 1);
+    std::array<uint16_t, 1> tmp{val};
+    write<R>(stream, tmp.size(), tmp.begin(), tmp.end());
 }
 
 template <typename iT>
-void write_points(spdlog::logger &logger, std::ofstream &stream, iT begin, iT end) {}
+void write_points(spdlog::logger &logger, std::ofstream &stream, std::size_t num_pts, iT begin,
+                  iT end) {
+    write<record_type::XY>(stream, 2 * num_pts, point_xy_iter(begin), point_xy_iter(end));
+}
+
+void write_transform(spdlog::logger &logger, std::ofstream &stream, const transformation &xform,
+                     cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0) {
+    // TODO: figure out angle and bit flag
+    int angle = 0;
+    uint16_t bit_flag = 0;
+
+    write_int<record_type::STRANS>(logger, stream, bit_flag);
+    if (angle != 0) {
+        std::array<uint64_t, 1> data{double_to_gds((double)angle)};
+        write<record_type::ANGLE>(stream, data.size(), data.begin(), data.end());
+    }
+    if (nx > 1 || ny > 1) {
+        std::array<uint16_t, 2> nxy{static_cast<uint16_t>(nx), static_cast<uint16_t>(ny)};
+        write<record_type::COLROW>(stream, nxy.size(), nxy.begin(), nxy.end());
+        // TODO: figure out xy array
+        std::array<uint32_t, 6> xy{
+            static_cast<uint32_t>(x(xform)), static_cast<uint32_t>(y(xform)), 0, 0, 0, 0};
+        write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
+    } else {
+        std::array<uint32_t, 2> xy{static_cast<uint32_t>(x(xform)),
+                                   static_cast<uint32_t>(y(xform))};
+        write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
+    }
+}
 
 void write_header(spdlog::logger &logger, std::ofstream &stream) {
     write_int<record_type::HEADER>(logger, stream, version);
@@ -126,8 +183,8 @@ void write_header(spdlog::logger &logger, std::ofstream &stream) {
 
 void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
                  double user_unit) {
-    uint64_t data[2] = {double_to_gds(resolution), double_to_gds(resolution * user_unit)};
-    write<record_type::UNITS>(stream, 2, data, data + 2);
+    std::array<uint64_t, 2> data{double_to_gds(resolution), double_to_gds(resolution * user_unit)};
+    write<record_type::UNITS>(stream, data.size(), data.begin(), data.end());
 }
 
 void write_lib_begin(spdlog::logger &logger, std::ofstream &stream,
@@ -154,6 +211,32 @@ void write_struct_name(spdlog::logger &logger, std::ofstream &stream, const std:
 
 void write_struct_end(spdlog::logger &logger, std::ofstream &stream) {
     write_empty<record_type::ENDSTR>(logger, stream);
+}
+
+void write_polygon(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+                   const layout::polygon &poly) {
+    write_empty<record_type::BOUNDARY>(logger, stream);
+    write_int<record_type::LAYER>(logger, stream, static_cast<uint16_t>(layer));
+    write_int<record_type::DATATYPE>(logger, stream, static_cast<uint16_t>(purpose));
+    write_points(logger, stream, poly.size(), poly.begin(), poly.end());
+}
+
+void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const layout::instance &inst,
+                        const std::unordered_map<std::string, std::string> &rename_map) {
+    write_empty<record_type::AREF>(logger, stream);
+    write_name<record_type::SNAME>(logger, stream, inst.get_cell_name(&rename_map));
+    write_transform(logger, stream, inst.xform, inst.nx, inst.ny, inst.spx, inst.spy);
+}
+
+void write_instance(spdlog::logger &logger, std::ofstream &stream, const layout::instance &inst,
+                    const std::unordered_map<std::string, std::string> &rename_map) {
+    if (inst.nx > 1 || inst.ny > 1) {
+        write_arr_instance(logger, stream, inst, rename_map);
+    } else {
+        write_empty<record_type::SREF>(logger, stream);
+        write_name<record_type::SNAME>(logger, stream, inst.get_cell_name(&rename_map));
+        write_transform(logger, stream, inst.xform);
+    }
 }
 
 } // namespace gdsii
