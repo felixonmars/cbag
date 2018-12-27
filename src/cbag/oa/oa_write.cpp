@@ -711,8 +711,8 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         auto lay = iter->first;
         for (auto const &pin : iter->second) {
             if (!is_physical(pin)) {
-                logger.warn("non-physical BBox({}, {}, {}, {}) on pin layer ({}, {}), skipping.",
-                            xl(pin), yl(pin), xh(pin), yh(pin), lay, purp);
+                logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin),
+                            lay, purp);
             }
             oa::oaPoint center(xm(pin), ym(pin));
             auto w = width(pin);

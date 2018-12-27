@@ -19,13 +19,13 @@ std::vector<uint16_t> get_gds_time() {
 void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::string &lib_name,
                      double resolution, double user_unit, const std::vector<uint16_t> &time_vec) {
     write_header(logger, stream);
-    write_struct_begin<record_type::BGNLIB>(logger, stream, time_vec);
-    write_name<record_type::LIBNAME>(logger, stream, lib_name);
+    write_lib_begin(logger, stream, time_vec);
+    write_lib_name(logger, stream, lib_name);
     write_units(logger, stream, resolution, user_unit);
 }
 
 void write_gds_stop(spdlog::logger &logger, std::ofstream &stream) {
-    write_empty<record_type::ENDLIB>(logger, stream);
+    write_lib_end(logger, stream);
     stream.close();
 }
 
@@ -33,9 +33,9 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
                         const cbag::layout::cellview &cv,
                         const std::unordered_map<std::string, std::string> &rename_map,
                         const std::vector<uint16_t> &time_vec) {
-    write_struct_begin<record_type::BGNSTR>(logger, stream, time_vec);
-    write_name<record_type::STRNAME>(logger, stream, cell_name);
-    write_empty<record_type::ENDSTR>(logger, stream);
+    write_struct_begin(logger, stream, time_vec);
+    write_struct_name(logger, stream, cell_name);
+    write_struct_end(logger, stream);
 }
 
 } // namespace gdsii
