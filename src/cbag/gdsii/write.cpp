@@ -128,8 +128,8 @@ void write(std::ofstream &stream, std::size_t num_data, iT start, iT stop) {
 
 template <record_type R>
 void write_grp_begin(spdlog::logger &logger, std::ofstream &stream,
-                     const std::vector<uint16_t> &time_vec) {
-    std::vector<uint16_t> data(time_vec.begin(), time_vec.end());
+                     const std::vector<tval_t> &time_vec) {
+    std::vector<tval_t> data(time_vec.begin(), time_vec.end());
     data.insert(data.end(), time_vec.begin(), time_vec.end());
     write<R>(stream, data.size(), data.begin(), data.end());
 }
@@ -220,7 +220,7 @@ void write_units(spdlog::logger &logger, std::ofstream &stream, double resolutio
 }
 
 void write_lib_begin(spdlog::logger &logger, std::ofstream &stream,
-                     const std::vector<uint16_t> &time_vec) {
+                     const std::vector<tval_t> &time_vec) {
     write_grp_begin<record_type::BGNLIB>(logger, stream, time_vec);
 }
 
@@ -233,7 +233,7 @@ void write_lib_end(spdlog::logger &logger, std::ofstream &stream) {
 }
 
 void write_struct_begin(spdlog::logger &logger, std::ofstream &stream,
-                        const std::vector<uint16_t> &time_vec) {
+                        const std::vector<tval_t> &time_vec) {
     write_grp_begin<record_type::BGNSTR>(logger, stream, time_vec);
 }
 
@@ -245,19 +245,19 @@ void write_struct_end(spdlog::logger &logger, std::ofstream &stream) {
     write_empty<record_type::ENDSTR>(logger, stream);
 }
 
-void write_polygon(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+void write_polygon(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
                    const layout::polygon &poly) {
     write_empty<record_type::BOUNDARY>(logger, stream);
-    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
-    write_int<record_type::DATATYPE>(logger, stream, interpret_as<uint16_t>(purpose));
+    write_int<record_type::LAYER>(logger, stream, layer);
+    write_int<record_type::DATATYPE>(logger, stream, purpose);
     write_points(logger, stream, poly.size(), poly.begin(), poly.end());
 }
 
-void write_box(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+void write_box(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
                const box_t &b) {
     write_empty<record_type::BOX>(logger, stream);
-    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
-    write_int<record_type::BOXTYPE>(logger, stream, interpret_as<uint16_t>(purpose));
+    write_int<record_type::LAYER>(logger, stream, layer);
+    write_int<record_type::BOXTYPE>(logger, stream, purpose);
 
     auto x0 = interpret_as<uint32_t>(xl(b));
     auto x1 = interpret_as<uint32_t>(xh(b));
@@ -286,11 +286,11 @@ void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::st
     }
 }
 
-void write_text(spdlog::logger &logger, std::ofstream &stream, lay_t layer, purp_t purpose,
+void write_text(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
                 const std::string &text, const transformation &xform) {
     write_empty<record_type::TEXT>(logger, stream);
-    write_int<record_type::LAYER>(logger, stream, interpret_as<uint16_t>(layer));
-    write_int<record_type::TEXTTYPE>(logger, stream, interpret_as<uint16_t>(purpose));
+    write_int<record_type::LAYER>(logger, stream, layer);
+    write_int<record_type::TEXTTYPE>(logger, stream, purpose);
     write_int<record_type::PRESENTATION>(logger, stream, text_presentation);
     write_transform(logger, stream, xform);
     write_name<record_type::STRING>(logger, stream, text);
