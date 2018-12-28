@@ -7,6 +7,8 @@
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/via_util.h>
+#include <cbag/util/io.h>
+#include <cbag/util/string.h>
 
 namespace cbag {
 namespace gdsii {
@@ -68,10 +70,46 @@ class rect_writer {
     rect_writer &operator++() { return *this; }
 };
 
-layer_map parse_layer_map(const std::string &fname) {
+void check_has_next(const util::token_iterator &iter, const std::string &fname) {
+    if (!iter.has_next())
+        throw std::runtime_error("Cannot parse file: " + fname);
+}
+
+uint16_t to_int(std::string &&s, const std::string &fname) {
+    try {
+        return static_cast<uint16_t>(std::stoi(std::move(s)));
+    } catch (const std::invalid_argument &) {
+        throw std::runtime_error("Cannot parse file: " + fname);
+    } catch (const std::out_of_range &) {
+        throw std::runtime_error("Cannot parse file: " + fname);
+    }
+}
+
+template <typename F> void process_file(const std::string &fname, F fun) {
+    auto file = util::open_file_read(fname);
+    std::string line;
+    while (std::getline(file, line)) {
+        // ignore comments
+        if (line[0] != '#') {
+            util::token_iterator iter(line, " \t");
+            check_has_next(iter, fname);
+            auto val1 = iter.get_next();
+            check_has_next(iter, fname);
+            auto val2 = iter.get_next();
+            check_has_next(iter, fname);
+            auto lay_id = to_int(iter.get_next(), fname);
+            check_has_next(iter, fname);
+            auto purp_id = to_int(iter.get_next(), fname);
+            fun(val1, val2, lay_id, purp_id);
+        }
+    }
+}
+
+layer_map parse_layer_map(const std::string &fname, const layout::tech &tech) {
     layer_map ans;
 
-    // TODO: implement this
+    process_file(fname, [&ans, &tech](const std::string &s1, const std::string &s2, uint16_t lay,
+                                      uint16_t purp) {});
 
     return ans;
 }
@@ -79,29 +117,41 @@ layer_map parse_layer_map(const std::string &fname) {
 boundary_map parse_obj_map(const std::string &fname) {
     boundary_map ans;
 
-    // TODO: implement this
+    process_file(fname,
+                 [&ans](const std::string &s1, const std::string &s2, uint16_t lay, uint16_t purp) {
+                     if (s1 == "Boundary") {
+                         if (s2 == "PR") {
+                             ans.emplace(boundary_type::PR, std::make_pair(lay, purp));
+                         } else if (s2 == "snap") {
+                             ans.emplace(boundary_type::snap, std::make_pair(lay, purp));
+                         }
+                     }
+                 });
 
     return ans;
 }
 
-gds_lookup::gds_lookup(const std::string &lay_map_file, const std::string &obj_map_file)
-    : lay_map(parse_layer_map(lay_map_file)), bnd_map(parse_obj_map(obj_map_file)) {}
+gds_lookup::gds_lookup(const layout::tech &tech, const std::string &lay_map_file,
+                       const std::string &obj_map_file)
+    : lay_map(parse_layer_map(lay_map_file, tech)), bnd_map(parse_obj_map(obj_map_file)) {}
 
-layer_map::const_iterator gds_lookup::find_gds_layer(const layer_t &key) const {
-    return lay_map.find(key);
+std::optional<gds_layer_t> gds_lookup::get_gds_layer(const layer_t &key) const {
+    auto iter = lay_map.find(key);
+    if (iter == lay_map.end())
+        return {};
+    return iter->second;
 }
 
-layer_map::const_iterator find_gds_layer(const gds_lookup &lookup, lay_t lay, purp_t purp) {
-    return lookup.find_gds_layer(std::make_pair(lay, purp));
+std::optional<gds_layer_t> get_gds_layer(const gds_lookup &lookup, lay_t lay, purp_t purp) {
+    return lookup.get_gds_layer(std::make_pair(lay, purp));
 }
 
-boundary_map::const_iterator gds_lookup::find_gds_layer(boundary_type bnd_type) const {
-    return bnd_map.find(bnd_type);
+std::optional<gds_layer_t> gds_lookup::get_gds_layer(boundary_type bnd_type) const {
+    auto iter = bnd_map.find(bnd_type);
+    if (iter == bnd_map.end())
+        return {};
+    return iter->second;
 }
-
-layer_map::const_iterator gds_lookup::end_layer() const { return lay_map.end(); }
-
-boundary_map::const_iterator gds_lookup::end_boundary() const { return bnd_map.end(); }
 
 std::vector<tval_t> get_gds_time() {
     auto ep_time = std::time(nullptr);
@@ -136,28 +186,27 @@ void write_lay_geometry(spdlog::logger &logger, std::ofstream &stream, glay_t la
 void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::tech &tech,
                    const gds_lookup &lookup, const layout::via &v) {
     auto [lay1_key, cut_key, lay2_key] = tech.get_via_layer_purpose(v.get_via_id());
-    auto iter1 = lookup.find_gds_layer(lay1_key);
-    auto iter2 = lookup.find_gds_layer(lay2_key);
-    auto iterc = lookup.find_gds_layer(cut_key);
-    auto itere = lookup.end_layer();
-    if (iter1 == itere) {
+    auto gkey1 = lookup.get_gds_layer(lay1_key);
+    if (!gkey1) {
         logger.warn("Cannot find layer/purpose ({}, {}) in layer map.  Skipping via.",
                     lay1_key.first, lay1_key.second);
         return;
     }
-    if (iter2 == itere) {
+    auto gkey2 = lookup.get_gds_layer(lay2_key);
+    if (!gkey2) {
         logger.warn("Cannot find layer/purpose ({}, {}) in layer map.  Skipping via.",
                     lay2_key.first, lay2_key.second);
         return;
     }
-    if (iterc == itere) {
+    auto gkeyc = lookup.get_gds_layer(cut_key);
+    if (!gkeyc) {
         logger.warn("Cannot find layer/purpose ({}, {}) in layer map.  Skipping via.",
                     cut_key.first, cut_key.second);
         return;
     }
-    auto [glay1, gpurp1] = iter1->second;
-    auto [gcl, gcp] = iterc->second;
-    auto [glay2, gpurp2] = iter2->second;
+    auto [glay1, gpurp1] = *gkey1;
+    auto [gcl, gcp] = *gkeyc;
+    auto [glay2, gpurp2] = *gkey2;
     write_box(logger, stream, glay1, gpurp1, layout::get_bot_box(v));
     write_box(logger, stream, glay2, gpurp2, layout::get_top_box(v));
     get_via_cuts(v, rect_writer(logger, stream, gcl, gcp));
@@ -203,15 +252,14 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     }
 
     logger.info("Export layout geometries.");
-    auto iterel = lookup.end_layer();
     for (auto iter = cv.begin_geometry(); iter != cv.end_geometry(); ++iter) {
         auto &[layer_key, geo] = *iter;
-        auto iterl = lookup.find_gds_layer(layer_key);
-        if (iterl == iterel) {
+        auto gkey = lookup.get_gds_layer(layer_key);
+        if (!gkey) {
             logger.warn("Cannot find layer/purpose ({}, {}) in layer map.  Skipping geometry.",
                         layer_key.first, layer_key.second);
         } else {
-            auto [glay, gpurp] = iterl->second;
+            auto [glay, gpurp] = *gkey;
             write_lay_geometry(logger, stream, glay, gpurp, geo);
         }
     }
@@ -227,12 +275,12 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     auto make_pin_obj = tech_ptr->get_make_pin();
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
         auto &[lay, pin_list] = *iter;
-        auto iterl = find_gds_layer(lookup, lay, purp);
-        if (iterl == iterel) {
+        auto gkey = get_gds_layer(lookup, lay, purp);
+        if (!gkey) {
             logger.warn("Cannot find layer/purpose ({}, {}) in layer map.  Skipping pins.", lay,
                         purp);
         } else {
-            auto [glay, gpurp] = iterl->second;
+            auto [glay, gpurp] = *gkey;
             for (const auto &pin : pin_list) {
                 write_lay_pin(logger, stream, glay, gpurp, pin, make_pin_obj);
             }
@@ -240,14 +288,13 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     }
 
     logger.info("Export layout boundaries.");
-    auto itereb = lookup.end_boundary();
     for (auto iter = cv.begin_boundary(); iter != cv.end_boundary(); ++iter) {
         auto btype = iter->get_type();
-        auto iterb = lookup.find_gds_layer(btype);
-        if (iterb == itereb) {
+        auto gkey = lookup.get_gds_layer(btype);
+        if (!gkey) {
             logger.warn("Cannot find boundary type {} in object map.  Skipping boundary.", btype);
         } else {
-            auto [glay, gpurp] = iterb->second;
+            auto [glay, gpurp] = *gkey;
             write_polygon(logger, stream, glay, gpurp, *iter);
         }
     }

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <optional>
 
 #include <boost/functional/hash.hpp>
 
@@ -27,15 +28,11 @@ private:
     layer_map lay_map;
     boundary_map bnd_map;
 public:
-    gds_lookup(const std::string &lay_map_file, const std::string &obj_map_file);
+    gds_lookup(const layout::tech &tech, const std::string &lay_map_file, const std::string &obj_map_file);
 
-    layer_map::const_iterator find_gds_layer(const layer_t &key) const;
+    std::optional<gds_layer_t> get_gds_layer(const layer_t &key) const;
 
-    boundary_map::const_iterator find_gds_layer(boundary_type bnd_type) const;
-
-    layer_map::const_iterator end_layer() const;
-
-    boundary_map::const_iterator end_boundary() const;
+    std::optional<gds_layer_t> get_gds_layer(boundary_type bnd_type) const;
 };
 
 std::vector<tval_t> get_gds_time();
@@ -57,20 +54,25 @@ void implement_gds(const std::string &fname, const std::string &lib_name,
     auto logger = get_cbag_logger();
     auto time_vec = get_gds_time();
 
-    gds_lookup lookup(layer_map, obj_map);
-
     // get gds file stream
     auto stream = util::open_file_write(fname, true);
     write_gds_start(*logger, stream, lib_name, resolution, user_unit, time_vec);
 
     std::unordered_map<std::string, std::string> rename_map{};
-    for (const auto &cv_info : cv_list) {
-        auto &[cv_cell_name, cv_ptr] = cv_info;
-        auto cell_name = cv_ptr->get_name();
-        logger->info("Creating layout cell {}", cv_cell_name);
-        write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec, lookup);
-        logger->info("cell name {} maps to {}", cell_name, cv_cell_name);
-        rename_map[cell_name] = cv_cell_name;
+
+    // get first element and setup gds_lookup
+    auto cursor = cv_list.begin();
+    auto stop = cv_list.end();
+    if (cursor != stop) {
+        gds_lookup lookup(*(cursor->second->get_tech()), layer_map, obj_map);
+        for (; cursor != stop; ++cursor) {
+            auto &[cv_cell_name, cv_ptr] = *cursor;
+            auto cell_name = cv_ptr->get_name();
+            logger->info("Creating layout cell {}", cv_cell_name);
+            write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec, lookup);
+            logger->info("cell name {} maps to {}", cell_name, cv_cell_name);
+            rename_map[cell_name] = cv_cell_name;            
+        }
     }
 
     write_gds_stop(*logger, stream);

@@ -14,6 +14,8 @@ void make_parent_dirs(const std::filesystem::path &path);
 
 std::ofstream open_file_write(const std::string &fname, bool binary = false);
 
+std::ifstream open_file_read(const std::string &fname);
+
 bool is_file(const std::string &fname);
 
 bool is_file(const std::filesystem::path &path);

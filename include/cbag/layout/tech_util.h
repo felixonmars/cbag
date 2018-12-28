@@ -9,7 +9,11 @@
 namespace cbag {
 namespace layout {
 
-layer_t get_layer_t(const tech &t, const std::string &layer, const std::string &purpose);
+lay_t layer_id_at(const tech &t, const std::string &layer);
+
+purp_t purpose_id_at(const tech &t, const std::string &purpose);
+
+layer_t layer_t_at(const tech &t, const std::string &layer, const std::string &purpose);
 
 std::string get_pin_purpose_name(const tech &t);
 

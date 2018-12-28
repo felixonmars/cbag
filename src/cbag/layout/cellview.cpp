@@ -4,7 +4,7 @@
 
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/tech.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_util.h>
 #include <cbag/layout/via_wrapper.h>
 
@@ -94,7 +94,7 @@ auto cellview::begin_pin() const -> decltype(pin_map.cbegin()) { return pin_map.
 auto cellview::end_pin() const -> decltype(pin_map.cend()) { return pin_map.cend(); }
 
 void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
-    auto lay_id = tech_ptr->get_layer_id(layer);
+    auto lay_id = layer_id_at(*tech_ptr, layer);
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;

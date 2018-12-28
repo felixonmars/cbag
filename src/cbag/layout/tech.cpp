@@ -94,23 +94,21 @@ std::string tech::get_purpose_name(purp_t purp_id) const {
     return iter->first;
 }
 
-lay_t tech::get_layer_id(const std::string &layer) const {
-    try {
-        return lay_map.at(layer);
-    } catch (const std::out_of_range &) {
-        throw std::out_of_range(fmt::format("Cannot find layer: {}", layer));
-    }
+std::optional<lay_t> tech::get_layer_id(const std::string &layer) const {
+    auto iter = lay_map.find(layer);
+    if (iter == lay_map.end())
+        return {};
+    return iter->second;
 }
 
-purp_t tech::get_purpose_id(const std::string &purpose) const {
+std::optional<purp_t> tech::get_purpose_id(const std::string &purpose) const {
     if (purpose.empty()) {
         return default_purpose;
     }
-    try {
-        return purp_map.at(purpose);
-    } catch (const std::out_of_range &) {
-        throw std::out_of_range(fmt::format("Cannot find purpose: {}", purpose));
-    }
+    auto iter = purp_map.find(purpose);
+    if (iter == purp_map.end())
+        return {};
+    return iter->second;
 }
 
 std::string tech::get_layer_type(lay_t lay_id) const {

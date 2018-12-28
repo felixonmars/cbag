@@ -11,7 +11,7 @@ namespace layout {
 box_t get_bbox(const cellview &cv, const std::string &layer, const std::string &purpose) {
     auto ans = box_t::get_invalid_box();
     // merge geometry bounding box
-    auto iter = cv.find_geometry(get_layer_t(*cv.get_tech(), layer, purpose));
+    auto iter = cv.find_geometry(layer_t_at(*cv.get_tech(), layer, purpose));
     if (iter != cv.end_geometry()) {
         merge(ans, iter->second.get_bbox());
     }

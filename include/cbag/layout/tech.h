@@ -46,9 +46,9 @@ class tech {
 
     std::string get_purpose_name(purp_t purp_id) const;
 
-    lay_t get_layer_id(const std::string &layer) const;
+    std::optional<lay_t> get_layer_id(const std::string &layer) const;
 
-    purp_t get_purpose_id(const std::string &purpose) const;
+    std::optional<purp_t> get_purpose_id(const std::string &purpose) const;
 
     std::string get_layer_type(lay_t lay_id) const;
 

@@ -23,13 +23,13 @@ SCENARIO("technology layer/purpose lookup", "[cbag]") {
                 {"label", 237},
             }));
 
-        REQUIRE(lay_pair.second == obj.get_layer_id(lay_pair.first));
+        REQUIRE(lay_pair.second == cbag::layout::layer_id_at(obj, lay_pair.first));
 
-        REQUIRE(purp_pair.second == obj.get_purpose_id(purp_pair.first));
+        REQUIRE(purp_pair.second == cbag::layout::purpose_id_at(obj, purp_pair.first));
 
-        REQUIRE(obj.get_purpose_id("drawing") == obj.get_purpose_id(""));
+        REQUIRE(obj.get_purpose_id("drawing") == cbag::layout::purpose_id_at(obj, ""));
 
         REQUIRE(cbag::layer_t(lay_pair.second, purp_pair.second) ==
-                get_layer_t(obj, lay_pair.first, purp_pair.first));
+                cbag::layout::layer_t_at(obj, lay_pair.first, purp_pair.first));
     }
 }

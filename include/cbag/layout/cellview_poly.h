@@ -22,7 +22,7 @@ void add_rect_arr(cellview &cv, const std::string &layer, const std::string &pur
 template <typename T>
 shape_ref<T> add_polygon(cellview &cv, const std::string &layer, const std::string &purpose,
                          bool is_horiz, T &&poly, bool commit) {
-    auto key = get_layer_t(*cv.get_tech(), layer, purpose);
+    auto key = layer_t_at(*cv.get_tech(), layer, purpose);
     return {&cv, std::move(key), is_horiz, std::forward<T>(poly), commit};
 }
 
@@ -53,7 +53,7 @@ shape_ref<polygon> add_poly(cellview &cv, const std::string &layer, const std::s
 template <typename T, typename = IsPtList<T>>
 cv_obj_ref<blockage> add_blockage(cellview &cv, const std::string &layer, enum_t blk_code,
                                   const T &data, bool commit) {
-    auto lay_id = cv.get_tech()->get_layer_id(layer);
+    auto lay_id = layer_id_at(*cv.get_tech(), layer);
     blockage obj(static_cast<blockage_type>(blk_code), lay_id);
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
     return {&cv, std::move(obj), commit};

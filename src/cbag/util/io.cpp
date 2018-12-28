@@ -22,6 +22,13 @@ std::ofstream open_file_write(const std::string &fname, bool binary) {
     return ans;
 }
 
+std::ifstream open_file_read(const std::string &fname) {
+    if (!is_file(fname))
+        throw std::invalid_argument(fname + " is not a file.");
+    auto mode = std::ios_base::out;
+    return std::ifstream{fname, mode};
+}
+
 bool is_file(const std::string &fname) { return is_file(std::filesystem::path(fname)); }
 
 bool is_file(const std::filesystem::path &path) { return std::filesystem::is_regular_file(path); }

@@ -127,6 +127,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/spirit/range.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/io.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/name_convert.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/util/string.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/box_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
