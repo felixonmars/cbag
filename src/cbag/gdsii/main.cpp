@@ -253,6 +253,8 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
     }
 
     write_struct_end(logger, stream);
+
+    logger.info("Finish GDS export.");
 }
 
 } // namespace gdsii
