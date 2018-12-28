@@ -2,9 +2,9 @@
 #ifndef CBAG_GDSII_MAIN_H
 #define CBAG_GDSII_MAIN_H
 
+#include <optional>
 #include <string>
 #include <unordered_map>
-#include <optional>
 
 #include <boost/functional/hash.hpp>
 
@@ -12,10 +12,10 @@
 
 #include <cbag/util/io.h>
 
-#include <cbag/gdsii/typedefs.h>
 #include <cbag/common/layer_t.h>
-#include <cbag/layout/cellview_fwd.h>
 #include <cbag/enum/boundary_type.h>
+#include <cbag/gdsii/typedefs.h>
+#include <cbag/layout/cellview_fwd.h>
 
 namespace cbag {
 namespace gdsii {
@@ -24,11 +24,13 @@ using layer_map = std::unordered_map<layer_t, gds_layer_t, boost::hash<layer_t>>
 using boundary_map = std::unordered_map<boundary_type, gds_layer_t>;
 
 class gds_lookup {
-private:
+  private:
     layer_map lay_map;
     boundary_map bnd_map;
-public:
-    gds_lookup(const layout::tech &tech, const std::string &lay_map_file, const std::string &obj_map_file);
+
+  public:
+    gds_lookup(const layout::tech &tech, const std::string &lay_map_file,
+               const std::string &obj_map_file);
 
     std::optional<gds_layer_t> get_gds_layer(const layer_t &key) const;
 
@@ -64,14 +66,15 @@ void implement_gds(const std::string &fname, const std::string &lib_name,
     auto cursor = cv_list.begin();
     auto stop = cv_list.end();
     if (cursor != stop) {
-        gds_lookup lookup(*(cursor->second->get_tech()), layer_map, obj_map);
+        gds_lookup lookup{*cursor->second->get_tech(), layer_map, obj_map};
         for (; cursor != stop; ++cursor) {
             auto &[cv_cell_name, cv_ptr] = *cursor;
             auto cell_name = cv_ptr->get_name();
             logger->info("Creating layout cell {}", cv_cell_name);
-            write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec, lookup);
+            write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec,
+                               lookup);
             logger->info("cell name {} maps to {}", cell_name, cv_cell_name);
-            rename_map[cell_name] = cv_cell_name;            
+            rename_map[cell_name] = cv_cell_name;
         }
     }
 
