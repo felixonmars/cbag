@@ -15,17 +15,15 @@
 namespace cbag {
 namespace layout {
 
-using lay_map_t = std::unordered_map<std::string, lay_t>;
-using purp_map_t = std::unordered_map<std::string, purp_t>;
 using sp_map_t = std::unordered_map<std::string, std::vector<std::pair<offset_t, offset_t>>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
 using lay_type_map_t = std::unordered_map<lay_t, std::string>;
 
 class tech {
   private:
-    via_lookup vlookup;
     lay_map_t lay_map;
     purp_map_t purp_map;
+    via_lookup vlookup;
     sp_map_grp_t sp_map_grp;
     lay_type_map_t lay_type_map;
     purp_t default_purpose;

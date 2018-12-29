@@ -112,13 +112,13 @@ via_name:
 
 # mapping from tuple of via layers to via ID.
 via_id:
-  !!python/tuple [!!python/tuple ['LiPo', 'drawing'], 'M1']: M1_LiPo
-  !!python/tuple [!!python/tuple ['LiAct', 'drawing'], 'M1']: M1_LiAct
-  !!python/tuple ['M1', 'M2']: M2_M1
-  !!python/tuple ['M2', 'M3']: M3_M2
-  !!python/tuple ['M3', 'M4']: M4_M3
-  !!python/tuple ['M4', 'M5']: M5_M4
-  !!python/tuple ['M5', 'M6']: M6_M5
+  [['LiPo', 'drawing'], ['M1', 'drawing']]: M1_LiPo
+  [['LiAct', 'drawing'], ['M1', 'drawing']]: M1_LiAct
+  [['M1', 'drawing'], ['M2', 'drawing']]: M2_M1
+  [['M2', 'drawing'], ['M3', 'drawing']]: M3_M2
+  [['M3', 'drawing'], ['M4', 'drawing']]: M4_M3
+  [['M4', 'drawing'], ['M5', 'drawing']]: M5_M4
+  [['M5', 'drawing'], ['M6', 'drawing']]: M6_M5
 
 # table of eletromigration temperature scale factor
 idc_em_scale:

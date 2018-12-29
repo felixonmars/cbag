@@ -3,7 +3,6 @@
 #include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
-#include "yaml-cpp/tuple.h"
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/tech.h>
@@ -39,9 +38,9 @@ sp_map_t make_space_map(const YAML::Node &node) {
 tech::tech(const std::string &tech_fname) {
     YAML::Node node = YAML::LoadFile(tech_fname);
 
-    vlookup = {node["via_layers"].as<vlp_map_t>()};
     lay_map = node["layer"].as<lay_map_t>();
     purp_map = node["purpose"].as<purp_map_t>();
+    vlookup = via_lookup(node, lay_map, purp_map);
     make_pin_obj = node["make_pin_obj"].as<bool>();
 
     std::string pin_purp = node["pin_purpose"].as<std::string>();
