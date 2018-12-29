@@ -2,15 +2,17 @@
 #ifndef CBAG_COMMON_VIA_PARAM_H
 #define CBAG_COMMON_VIA_PARAM_H
 
+#include <array>
+
 #include <cbag/common/typedefs.h>
 #include <cbag/common/vector.h>
 
 namespace cbag {
 
-class via_param {
+struct via_param {
   public:
-    cnt_t num[2] = {1, 1};
-    dist_t cut_dim[2] = {0, 0};
+    std::array<cnt_t, 2> num = {1, 1};
+    std::array<dist_t, 2> cut_dim = {0, 0};
     vector cut_spacing;
     vector lay1_enc;
     vector lay1_off;

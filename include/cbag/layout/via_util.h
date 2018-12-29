@@ -3,9 +3,8 @@
 
 #include <type_traits>
 
-#include <cbag/layout/via.h>
 #include <cbag/common/box_t_util.h>
-
+#include <cbag/layout/via.h>
 
 namespace cbag {
 
@@ -26,9 +25,9 @@ template <typename It> void get_via_cuts(const via &v, It out_iter) {
 
     offset_t dx = xoff;
     box_t cut_box{0, 0, static_cast<coord_t>(vw), static_cast<coord_t>(vh)};
-    for (std::remove_const_t<decltype(nx)> xidx = 0; xidx != nx; ++xidx, dx += spx) {
+    for (std::decay_t<decltype(nx)> xidx = 0; xidx != nx; ++xidx, dx += spx) {
         offset_t dy = yoff;
-        for (std::remove_const_t<decltype(nx)> yidx = 0; yidx != ny; ++yidx, dy += spy) {
+        for (std::decay_t<decltype(ny)> yidx = 0; yidx != ny; ++yidx, dy += spy) {
             *out_iter = get_move_by(get_transform(cut_box, v.xform), dx, dy);
             ++out_iter;
         }
