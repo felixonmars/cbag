@@ -39,9 +39,9 @@ sp_map_t make_space_map(const YAML::Node &node) {
 tech::tech(const std::string &tech_fname) {
     YAML::Node node = YAML::LoadFile(tech_fname);
 
+    vlookup = {node["via_layers"].as<vlp_map_t>()};
     lay_map = node["layer"].as<lay_map_t>();
     purp_map = node["purpose"].as<purp_map_t>();
-    via_map = node["via_layers"].as<via_map_t>();
     make_pin_obj = node["make_pin_obj"].as<bool>();
 
     std::string pin_purp = node["pin_purpose"].as<std::string>();
@@ -122,14 +122,6 @@ std::string tech::get_layer_type(lay_t lay_id) const {
     return (iter == lay_type_map.end()) ? "" : iter->second;
 }
 
-via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
-    auto iter = via_map.find(key);
-    if (iter == via_map.end()) {
-        throw std::out_of_range(fmt::format("Cannot find via ID: {}", key));
-    }
-    return iter->second;
-}
-
 offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
                              space_type sp_type) const {
     auto map_iter = sp_map_grp.find((sp_type == space_type::SAME_COLOR) ? sp_sc_type : sp_type);
@@ -149,6 +141,10 @@ offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
             return sp;
     }
     return w_sp_list[w_sp_list.size() - 1].second;
+}
+
+via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
+    return vlookup.get_via_layer_purpose(key);
 }
 
 } // namespace layout

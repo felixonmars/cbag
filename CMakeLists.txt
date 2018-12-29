@@ -96,6 +96,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_lookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_param.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_wrapper.cpp
