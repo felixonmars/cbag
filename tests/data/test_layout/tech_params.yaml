@@ -221,38 +221,42 @@ via:
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:
   1x:
-    w_list: [.inf]
-    sp_list: [32]
+    - [.inf, 32]
   '4':
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
+    - [99, 48]
+    - [749, 72]
+    - [1499, 112]
+    - [.inf, 220]
   2x:
-    w_list: [59, 89, .inf]
-    sp_list: [68, 80, 100]
+    - [59, 68]
+    - [89, 80]
+    - [.inf, 100]
 
 # minimum wire spacing rule for same color wires.
 sp_sc_min:
   1x:
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
+    - [99, 48]
+    - [749, 72]
+    - [1499, 112]
+    - [.inf, 220]
   '4':
-    w_list: [99, 749, 1499, .inf]
-    sp_list: [48, 72, 112, 220]
+    - [99, 48]
+    - [749, 72]
+    - [1499, 112]
+    - [.inf, 220]
   2x:
-    w_list: [59, 89, .inf]
-    sp_list: [68, 80, 100]
+    - [59, 68]
+    - [89, 80]
+    - [.inf, 100]
 
 # minimum line-end spacing rule.  Space is measured parallel to wire direction.
 sp_le_min:
   1x:
-    w_list: [.inf]
-    sp_list: [64]
+    - [.inf, 64]
   '4':
-    w_list: [.inf]
-    sp_list: [64]
+    - [.inf, 64]
   2x:
-    w_list: [.inf]
-    sp_list: [74]
+    - [.inf, 74]
 
 # minimum length/minimum area rules.
 len_min:

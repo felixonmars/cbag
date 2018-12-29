@@ -10,6 +10,7 @@
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/space_type.h>
+#include <cbag/layout/via_info.h>
 
 namespace cbag {
 namespace layout {
@@ -18,8 +19,8 @@ using via_lay_purp_t = std::tuple<layer_t, layer_t, layer_t>;
 using lay_map_t = std::unordered_map<std::string, lay_t>;
 using purp_map_t = std::unordered_map<std::string, purp_t>;
 using via_map_t = std::unordered_map<std::string, via_lay_purp_t>;
-using sp_map_t =
-    std::unordered_map<std::string, std::pair<std::vector<offset_t>, std::vector<offset_t>>>;
+using via_info_map_t = std::unordered_map<std::string, std::vector<via_info>>;
+using sp_map_t = std::unordered_map<std::string, std::vector<std::pair<offset_t, offset_t>>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
 using lay_type_map_t = std::unordered_map<lay_t, std::string>;
 
@@ -28,6 +29,7 @@ class tech {
     lay_map_t lay_map;
     purp_map_t purp_map;
     via_map_t via_map;
+    via_info_map_t via_info_map;
     sp_map_grp_t sp_map_grp;
     lay_type_map_t lay_type_map;
     purp_t default_purpose;
@@ -53,6 +55,8 @@ class tech {
     std::string get_layer_type(lay_t lay_id) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
+
+    const std::vector<via_info> &get_via_info_list(const std::string &via_name) const;
 
     offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
 };
