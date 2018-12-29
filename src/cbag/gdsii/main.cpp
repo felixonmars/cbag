@@ -108,8 +108,14 @@ template <typename F> void process_file(const std::string &fname, F fun) {
 layer_map parse_layer_map(const std::string &fname, const layout::tech &tech) {
     layer_map ans;
 
-    process_file(fname, [&ans, &tech](const std::string &s1, const std::string &s2, uint16_t lay,
-                                      uint16_t purp) {});
+    process_file(fname, [&ans, &tech](const std::string &s1, const std::string &s2, uint16_t glay,
+                                      uint16_t gpurp) {
+        auto lay = tech.get_layer_id(s1);
+        auto purp = tech.get_purpose_id(s2);
+        if (lay && purp) {
+            ans.emplace(std::make_pair(*lay, *purp), std::make_pair(glay, gpurp));
+        }
+    });
 
     return ans;
 }
