@@ -7,7 +7,6 @@
 #include <cbag/layout/via.h>
 
 namespace cbag {
-
 namespace layout {
 
 box_t get_bot_box(const via &v);

@@ -8,6 +8,7 @@
 #include <cbag/common/vector.h>
 
 namespace cbag {
+namespace layout {
 
 struct via_param {
   public:
@@ -27,6 +28,7 @@ struct via_param {
               offset_t enc2r, offset_t enc2t, offset_t enc2b);
 };
 
+} // namespace layout
 } // namespace cbag
 
 #endif

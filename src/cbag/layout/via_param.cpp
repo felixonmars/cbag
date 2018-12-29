@@ -1,6 +1,7 @@
 #include <cbag/layout/via_param.h>
 
 namespace cbag {
+namespace layout {
 
 void set_via_enc_offset(vector &enc, vector &off, offset_t encl, offset_t encr, offset_t enct,
                         offset_t encb) {
@@ -20,4 +21,5 @@ via_param::via_param(cnt_t vnx, cnt_t vny, dist_t w, dist_t h, offset_t vspx, of
     set_via_enc_offset(lay2_enc, lay2_off, enc2l, enc2r, enc2t, enc2b);
 }
 
+} // namespace layout
 } // namespace cbag

@@ -154,7 +154,7 @@ oa::oaPathStyle get_path_style(cbag::path_style cbag_enum) {
     return static_cast<oa::oaPathStyleEnum>(cbag_enum);
 }
 
-oa::oaViaParam get_via_params(const cbag::via_param &params) {
+oa::oaViaParam get_via_params(const cbag::layout::via_param &params) {
     oa::oaViaParam ans;
     ans.setCutColumns(params.num[0]);
     ans.setCutRows(params.num[1]);
