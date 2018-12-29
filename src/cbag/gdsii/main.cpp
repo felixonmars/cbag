@@ -90,7 +90,7 @@ template <typename F> void process_file(const std::string &fname, F fun) {
     std::string line;
     while (std::getline(file, line)) {
         // ignore comments
-        if (line[0] != '#') {
+        if (!line.empty() && line[0] != '#') {
             util::token_iterator iter(line, " \t");
             check_has_next(iter, fname);
             auto val1 = iter.get_next();
