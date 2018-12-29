@@ -2,7 +2,7 @@
 
 #include <cbag/gdsii/math.h>
 
-TEST_CASE("No precision lost in gds <-> double converesion", "[gds]") {
+TEST_CASE("No precision lost in gds <-> double conversion", "[gds]") {
     double value = GENERATE(values<double>({
         2.65732619e5,
         -2.65732619e5,
