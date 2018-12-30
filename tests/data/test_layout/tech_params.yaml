@@ -100,16 +100,6 @@ layer_type:
   M5: 2x
   M6: 2x
 
-# mapping from via bottom layer ID to via name.  Via name is used
-# to figure out enclosure rules.
-via_name:
-  0: 1x
-  1: 1x
-  2: 1x
-  3: '4'
-  4: 2x
-  5: 2x
-
 # mapping from tuple of via layers to via ID.
 via_id:
   [['LiPo', 'drawing'], ['M1', 'drawing']]: M1_LiPo
@@ -138,9 +128,8 @@ idc_em_scale:
 
 # via enclosure/spacing rules
 via:
-  1x:
-    - &square_1x
-      name: square
+  M2_M1: &via_1x
+    - name: square
       dim: [32, 32]
       sp: [42, 42]
       sp2: [[42, 42]]
@@ -175,11 +164,9 @@ via:
         - [105, [[10, 10]]]
         - [.inf, [[0, 10]]]
       top_enc: *vrect_1x_enc
-  '4':
-    - *square_1x
-    - *hrect_1x
-    - *vrect_1x
-  2x:
+  M3_M2: *via_1x
+  M4_M3: *via_1x
+  M5_M4: &via_2x
     - name: square
       dim: [42, 42]
       sp: [62, 62]
@@ -190,6 +177,7 @@ via:
       top_enc: *square_2x_enc
     - *hrect_1x
     - *vrect_1x
+  M6_M5: *via_2x
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:
