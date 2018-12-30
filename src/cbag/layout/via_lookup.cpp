@@ -53,5 +53,10 @@ via_lay_purp_t via_lookup::get_via_layer_purpose(const std::string &key) const {
     return iter->second;
 }
 
+via_param via_lookup::get_via_params(const box_t &box, layer_t bot_layer, layer_t top_layer,
+                                     orient_2d bot_dir, orient_2d top_dir, bool extend) const {
+    return {};
+}
+
 } // namespace layout
 } // namespace cbag

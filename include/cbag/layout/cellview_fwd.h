@@ -53,8 +53,8 @@ class cellview {
 
     void set_geometry_mode(geometry_mode new_mode);
 
-    auto find_geometry(const layer_t &key) const -> decltype(geo_map.find(key));
-    geometry &make_geometry(const layer_t &key);
+    auto find_geometry(layer_t key) const -> decltype(geo_map.find(key));
+    geometry &make_geometry(layer_t key);
 
     const std::string &get_name() const noexcept;
     tech *get_tech() const noexcept;

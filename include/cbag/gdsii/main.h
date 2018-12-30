@@ -32,7 +32,7 @@ class gds_lookup {
     gds_lookup(const layout::tech &tech, const std::string &lay_map_file,
                const std::string &obj_map_file);
 
-    std::optional<gds_layer_t> get_gds_layer(const layer_t &key) const;
+    std::optional<gds_layer_t> get_gds_layer(layer_t key) const;
 
     std::optional<gds_layer_t> get_gds_layer(boundary_type bnd_type) const;
 };

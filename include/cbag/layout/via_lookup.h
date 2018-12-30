@@ -6,9 +6,12 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <cbag/common/box_t.h>
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/orient_2d.h>
 #include <cbag/layout/via_info.h>
+#include <cbag/layout/via_param.h>
 
 namespace YAML {
 class Node;
@@ -39,6 +42,9 @@ class via_lookup {
     via_lookup(const YAML::Node &parent, const lay_map_t &lay_map, const purp_map_t &purp_map);
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
+
+    via_param get_via_params(const box_t &box, layer_t bot_layer, layer_t top_layer,
+                             orient_2d bot_dir, orient_2d top_dir, bool extend) const;
 };
 
 } // namespace layout

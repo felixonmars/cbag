@@ -141,7 +141,7 @@ gds_lookup::gds_lookup(const layout::tech &tech, const std::string &lay_map_file
                        const std::string &obj_map_file)
     : lay_map(parse_layer_map(lay_map_file, tech)), bnd_map(parse_obj_map(obj_map_file)) {}
 
-std::optional<gds_layer_t> gds_lookup::get_gds_layer(const layer_t &key) const {
+std::optional<gds_layer_t> gds_lookup::get_gds_layer(layer_t key) const {
     auto iter = lay_map.find(key);
     if (iter == lay_map.end())
         return {};

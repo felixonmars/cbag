@@ -44,11 +44,11 @@ void cellview::set_geometry_mode(geometry_mode new_mode) {
     geo_mode = new_mode;
 }
 
-auto cellview::find_geometry(const layer_t &key) const -> decltype(geo_map.find(key)) {
+auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
     return geo_map.find(key);
 }
 
-geometry &cellview::make_geometry(const layer_t &key) {
+geometry &cellview::make_geometry(layer_t key) {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end()) {
         iter =
