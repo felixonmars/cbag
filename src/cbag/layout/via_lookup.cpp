@@ -6,6 +6,7 @@
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/via_lookup.h>
+#include <cbag/yaml/via_info.h>
 
 namespace cbag {
 namespace layout {
@@ -36,7 +37,8 @@ via_lookup::via_lookup() = default;
 
 via_lookup::via_lookup(const YAML::Node &parent, const lay_map_t &lay_map,
                        const purp_map_t &purp_map)
-    : name_map(parent["via_name"].as<vname_map_t>()), lp_map(parent["via_layers"].as<vlp_map_t>()) {
+    : name_map(parent["via_name"].as<vname_map_t>()), lp_map(parent["via_layers"].as<vlp_map_t>()),
+      info_map(parent["via"].as<vinfo_map_t>()) {
     for (const auto &node : parent["via_id"]) {
         id_map.emplace(parse_via_layers(node.first, lay_map, purp_map),
                        node.second.as<std::string>());

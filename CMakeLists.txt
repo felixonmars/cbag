@@ -135,6 +135,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/figures.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/via_info.cpp
   )
 
 set(SRC_FILES_LIB_CBAG_OA

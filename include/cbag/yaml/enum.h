@@ -22,9 +22,9 @@
 
 namespace YAML {
 
-template <typename T> using IsEnum = std::enable_if_t<std::is_enum_v<T>>;
+template <typename T> using IsEnum = std::enable_if_t<std::is_enum_v<T>, int>;
 
-template <typename T, typename = IsEnum<T>> struct convert_enum {
+template <typename T, IsEnum<T> = 0> struct convert_enum {
     static Node encode(const T &rhs) {
         Node n;
         n = static_cast<int>(rhs);
