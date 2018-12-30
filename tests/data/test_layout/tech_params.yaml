@@ -139,84 +139,61 @@ idc_em_scale:
 # via enclosure/spacing rules
 via:
   1x:
-    square:
+    - &square_1x
+      name: square
+      scale: 1.0
       dim: [32, 32]
       sp: [42, 42]
       sp2: [!!python/tuple [42, 42]]
       sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [35, 51, 67, .inf]
-        enc_list:
-          - [[40, 0], [0, 40]]
-          - [[2, 34], [34, 2]]
-          - [[28, 10], [10, 28]]
-          - [[18, 18]]
-    hrect:
+      bot_enc: &square_1x_enc
+        - [35, [[40, 0], [0, 40]]]
+        - [51, [[2, 34], [34, 2]]]
+        - [67, [[28, 10], [10, 28]]]
+        - [.inf, [[18, 18]]]
+      top_enc: *square_1x_enc
+    - &hrect_1x
+      name: hrect
+      scale: 2.0
       dim: [64, 32]
       sp: [42, 42]
       sp2: [!!python/tuple [42, 42]]
       sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
+      bot_enc: &hrect_1x_enc
+        - [49, [[20, 0]]]
+        - [51, [[12, 9]]]
+        - [105, [[10, 10]]]
+        - [.inf, [[10, 0]]]
+      top_enc: *hrect_1x_enc
+    - &vrect_1x
+      name: vrect
+      scale: 2.0
+      dim: [32, 64]
+      sp: [42, 42]
+      sp2: [!!python/tuple [42, 42]]
+      sp3: [!!python/tuple [42, 42]]
+      bot_enc: &vrect_1x_enc
+        - [49, [[0, 20]]]
+        - [51, [[9, 12]]]
+        - [105, [[10, 10]]]
+        - [.inf, [[0, 10]]]
+      top_enc: *vrect_1x_enc
   '4':
-    square:
-      dim: [32, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [35, 51, 67, .inf]
-        enc_list:
-          - [[40, 0], [0, 40]]
-          - [[2, 34], [34, 2]]
-          - [[28, 10], [10, 28]]
-          - [[18, 18]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          # list of valid horizontal/vertical enclosures.
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
+    - *square_1x
+    - *hrect_1x
+    - *vrect_1x
   2x:
-    square:
+    - name: square
+      scale: 1.0
       dim: [42, 42]
       sp: [62, 62]
       sp2: [!!python/tuple [62, 62]]
       sp3: [!!python/tuple [78, 78]]
-      bot_enc:
-      top_enc:
-        w_list: [.inf]
-        enc_list:
-          - [[8, 8]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
-      bot_enc:
-      top_enc:
-        w_list: [49, 51, 105, .inf]
-        enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
+      bot_enc: &square_2x_enc
+        - [.inf, [[8, 8]]]
+      top_enc: *square_2x_enc
+    - *hrect_1x
+    - *vrect_1x
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:

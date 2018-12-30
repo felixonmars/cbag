@@ -16,12 +16,12 @@ using venc_list_t = std::vector<std::pair<dist_t, std::vector<std::array<dist_t,
 class via_info {
   private:
     std::string cut_type;
+    double_t via_scale;
     std::array<dist_t, 2> cut_dim = {0, 0};
     std::array<dist_t, 2> sp = {0, 0};
     std::vector<std::array<dist_t, 2>> sp2_list;
     std::vector<std::array<dist_t, 2>> sp3_list;
     std::array<venc_list_t, 2> enc_list;
-    double_t via_scale;
 
   public:
     via_info();
