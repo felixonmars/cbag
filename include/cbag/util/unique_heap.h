@@ -29,7 +29,14 @@ template <class T, class Hash = std::hash<T>> class unique_heap {
         }
     }
 
-    T &top() const { return heap.top(); }
+    template <class... Args> void emplace(Args &&... args) {
+        auto result = items.emplace(std::forward<Args>(args)...);
+        if (result.second) {
+            heap.push(*(result.first));
+        }
+    }
+
+    const T &top() const { return heap.top(); }
 
     void pop() {
         items.erase(top());

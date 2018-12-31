@@ -75,7 +75,7 @@ via_param via_lookup::get_via_params(dim_t dim, layer_t bot_layer, layer_t top_l
     auto vinfo_list = via_info_at(info_map, via_id);
 
     for (const auto &vinfo : vinfo_list) {
-        auto num_via = vinfo.get_num_via(dim);
+        auto num_via = vinfo.get_num_via(dim, bot_dir, top_dir, extend);
     }
 
     return {};
