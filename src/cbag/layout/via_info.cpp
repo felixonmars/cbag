@@ -43,8 +43,23 @@ dist_t get_arr_dim(cnt_t n, dist_t w, dist_t sp) {
         return n * (w + sp) - sp;
 }
 
-via_cnt_t via_info::get_num_via(dim_t dim, orient_2d bot_dir, orient_2d top_dir,
+const std::vector<dim_t> &get_enc_list(const venc_info &enc_info, dist_t width) {
+    for (const auto &data : enc_info) {
+        if (width <= data.width)
+            return data.enc_list;
+    }
+    return enc_info.back().enc_list;
+}
+
+dist_t get_enclosure_dim(dim_t box_dim, dim_t arr_dim, const venc_info &enc_info, orient_2d dir,
+                         bool extend) {
+    // TODO: implement this
+    return 0;
+}
+
+via_cnt_t via_info::get_num_via(dim_t box_dim, orient_2d bot_dir, orient_2d top_dir,
                                 bool extend) const {
+    // get maximum possible number of vias
     dim_t min_sp = sp;
     for (const auto &arr : sp2_list) {
         min_sp[0] = std::min(min_sp[0], arr[0]);
@@ -54,12 +69,14 @@ via_cnt_t via_info::get_num_via(dim_t dim, orient_2d bot_dir, orient_2d top_dir,
         min_sp[0] = std::min(min_sp[0], arr[0]);
         min_sp[1] = std::min(min_sp[1], arr[1]);
     }
+    auto nx_max = get_n_max(box_dim[0], cut_dim[0], min_sp[0]);
+    auto ny_max = get_n_max(box_dim[1], cut_dim[1], min_sp[1]);
 
-    auto nx_max = get_n_max(dim[0], cut_dim[0], min_sp[0]);
-    auto ny_max = get_n_max(dim[1], cut_dim[1], min_sp[1]);
+    // check if it's possible to palce a via
     if (nx_max == 0 || ny_max == 0)
         return {0, std::array<cnt_t, 2>{0, 0}};
 
+    // use priority queue to find maximum number of vias
     util::unique_heap<via_cnt_t, boost::hash<via_cnt_t>> heap;
     heap.emplace(nx_max * ny_max, std::array<cnt_t, 2>{nx_max, ny_max});
 
@@ -68,6 +85,7 @@ via_cnt_t via_info::get_num_via(dim_t dim, orient_2d bot_dir, orient_2d top_dir,
     while (!heap.empty()) {
         auto &[via_cnt, num_via] = heap.top();
 
+        // get list of valid via spacing
         const std::vector<dim_t> *sp_vec_ptr;
         if (num_via[0] == 2 && num_via[1] == 2) {
             sp_vec_ptr = &sp2_list;
@@ -77,11 +95,40 @@ via_cnt_t via_info::get_num_via(dim_t dim, orient_2d bot_dir, orient_2d top_dir,
             sp_vec_ptr = &sp1_list;
         }
 
+        // find optimal legal enclosure via
+        dim_t opt_enc_dim = {MAX_SP, MAX_SP};
+        const dim_t *opt_sp = nullptr;
         for (const auto &sp_via : *sp_vec_ptr) {
-            std::array<dist_t, 2> arr_dim = {get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
-                                             get_arr_dim(num_via[1], cut_dim[1], sp_via[1])};
+            dim_t arr_dim = {get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
+                             get_arr_dim(num_via[1], cut_dim[1], sp_via[1])};
             if (arr_dim[0] == 0 || arr_dim[1] == 0)
                 continue;
+
+            auto bot_dim = get_enclosure_dim(box_dim, arr_dim, enc_list[0], bot_dir, extend);
+            if (bot_dim == 0)
+                continue;
+            auto top_dim = get_enclosure_dim(box_dim, arr_dim, enc_list[1], top_dir, extend);
+            if (top_dim == 0)
+                continue;
+
+            if (bot_dim <= opt_enc_dim[0] && top_dim <= opt_enc_dim[1]) {
+                opt_enc_dim[0] = bot_dim;
+                opt_enc_dim[1] = top_dim;
+                opt_sp = &sp_via;
+            }
+        }
+
+        if (opt_sp == nullptr) {
+            // fail to find legal via enclosure
+            // continue searching
+            if (nx_max > 1)
+                heap.emplace((nx_max - 1) * ny_max, std::array<cnt_t, 2>{nx_max - 1, ny_max});
+            if (ny_max > 1)
+                heap.emplace(nx_max * (ny_max - 1), std::array<cnt_t, 2>{nx_max, ny_max - 1});
+        } else {
+            // solution found
+            // TODO: return best space and enclosure
+            return heap.top();
         }
 
         heap.pop();
