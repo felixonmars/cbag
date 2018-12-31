@@ -4,6 +4,7 @@
 
 #include <cbag/common/typedefs.h>
 #include <cbag/yaml/common.h>
+#include <cbag/yaml/dim_t.h>
 #include <cbag/yaml/via_info.h>
 
 namespace YAML {
@@ -18,10 +19,7 @@ bool convert<cbag::layout::venc_data>::decode(const Node &node, cbag::layout::ve
     }
 
     try {
-        if (node[0].as<double>() == std::numeric_limits<double>::infinity())
-            rhs.width = std::numeric_limits<cbag::dist_t>::max();
-        else
-            rhs.width = node[0].as<cbag::dist_t>();
+        rhs.width = cbagyaml::get_int<cbag::dist_t>(node[0]);
 
         rhs.enc_list = node[1].as<std::decay_t<decltype(rhs.enc_list)>>();
     } catch (...) {
@@ -30,16 +28,16 @@ bool convert<cbag::layout::venc_data>::decode(const Node &node, cbag::layout::ve
         return false;
     }
     return true;
-} // namespace YAML
+}
 
 bool convert<cbag::layout::via_info>::decode(const Node &node, cbag::layout::via_info &rhs) {
     auto logger = cbag::get_cbag_logger();
     try {
         auto cut_type = node["name"].as<std::string>();
-        auto cut_dim = node["dim"].as<std::array<cbag::dist_t, 2>>();
-        auto sp = node["sp"].as<std::array<cbag::dist_t, 2>>();
-        auto sp2_list = node["sp2"].as<std::vector<std::array<cbag::dist_t, 2>>>();
-        auto sp3_list = node["sp3"].as<std::vector<std::array<cbag::dist_t, 2>>>();
+        auto cut_dim = node["dim"].as<cbag::dim_t>();
+        auto sp = node["sp"].as<cbag::dim_t>();
+        auto sp2_list = node["sp2"].as<std::vector<cbag::dim_t>>();
+        auto sp3_list = node["sp3"].as<std::vector<cbag::dim_t>>();
         std::array<cbag::layout::venc_info, 2> enc_list = {
             node["bot_enc"].as<cbag::layout::venc_info>(),
             node["top_enc"].as<cbag::layout::venc_info>()};
@@ -52,6 +50,6 @@ bool convert<cbag::layout::via_info>::decode(const Node &node, cbag::layout::via
         return false;
     }
     return true;
-} // namespace YAML
+}
 
 } // namespace YAML

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 
+#include <cbag/common/dim_t.h>
 #include <cbag/common/typedefs.h>
 
 namespace cbag {
@@ -13,7 +14,7 @@ namespace layout {
 
 struct venc_data {
     dist_t width;
-    std::vector<std::array<dist_t, 2>> enc_list;
+    std::vector<dim_t> enc_list;
 
     venc_data();
 };
@@ -23,18 +24,19 @@ using venc_info = std::vector<venc_data>;
 class via_info {
   private:
     std::string cut_type;
-    std::array<dist_t, 2> cut_dim = {0, 0};
-    std::array<dist_t, 2> sp = {0, 0};
-    std::vector<std::array<dist_t, 2>> sp2_list;
-    std::vector<std::array<dist_t, 2>> sp3_list;
+    dim_t cut_dim = {0, 0};
+    dim_t sp = {0, 0};
+    std::vector<dim_t> sp2_list;
+    std::vector<dim_t> sp3_list;
     std::array<venc_info, 2> enc_list;
 
   public:
     via_info();
 
-    via_info(std::string &&cut_type, std::array<dist_t, 2> &&cut_dim, std::array<dist_t, 2> &&sp,
-             std::vector<std::array<dist_t, 2>> &&sp2_list,
-             std::vector<std::array<dist_t, 2>> &&sp3_list, std::array<venc_info, 2> &&enc_list);
+    via_info(std::string &&ctype, dim_t &&cdim, dim_t &&s, std::vector<dim_t> &&s2_list,
+             std::vector<dim_t> &&s3_list, std::array<venc_info, 2> &&e_list);
+
+    std::array<cnt_t, 2> get_num_via(dim_t dim) const;
 };
 
 } // namespace layout

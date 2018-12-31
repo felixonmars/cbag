@@ -6,23 +6,16 @@
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/tech.h>
+#include <cbag/yaml/common.h>
 
 namespace cbag {
 namespace layout {
-
-offset_t get_offset_t(const YAML::Node &val) {
-    if (val.as<double>() == std::numeric_limits<double>::infinity()) {
-        return std::numeric_limits<offset_t>::max();
-    } else {
-        return val.as<offset_t>();
-    }
-}
 
 std::vector<std::pair<offset_t, offset_t>> make_w_sp_vec(const YAML::Node &node) {
     std::vector<std::pair<offset_t, offset_t>> ans;
     ans.reserve(node.size());
     for (const auto &val : node) {
-        ans.emplace_back(get_offset_t(val[0]), get_offset_t(val[1]));
+        ans.emplace_back(cbagyaml::get_int<offset_t>(val[0]), cbagyaml::get_int<offset_t>(val[1]));
     }
     return ans;
 }

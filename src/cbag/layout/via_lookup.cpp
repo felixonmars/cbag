@@ -69,10 +69,14 @@ via_lay_purp_t via_lookup::get_via_layer_purpose(const std::string &key) const {
     return iter->second;
 }
 
-via_param via_lookup::get_via_params(const box_t &box, layer_t bot_layer, layer_t top_layer,
+via_param via_lookup::get_via_params(dim_t dim, layer_t bot_layer, layer_t top_layer,
                                      orient_2d bot_dir, orient_2d top_dir, bool extend) const {
     auto via_id = via_id_at(id_map, std::move(bot_layer), std::move(top_layer));
     auto vinfo_list = via_info_at(info_map, via_id);
+
+    for (const auto &vinfo : vinfo_list) {
+        auto num_via = vinfo.get_num_via(dim);
+    }
 
     return {};
 }

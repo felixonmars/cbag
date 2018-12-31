@@ -10,7 +10,7 @@
 namespace YAML {
 
 Node convert<cbag::box_t>::encode(const cbag::box_t &rhs) {
-    Node root;
+    Node root(NodeType::Sequence);
     root.push_back(xl(rhs));
     root.push_back(yl(rhs));
     root.push_back(xh(rhs));

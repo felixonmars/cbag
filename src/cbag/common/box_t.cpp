@@ -3,9 +3,10 @@
 
 namespace cbag {
 
-box_t::box_t() noexcept : intvs{{0, 0}, {0, 0}} {}
+box_t::box_t() noexcept : intvs{interval_t{0, 0}, interval_t{0, 0}} {}
 
-box_t::box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) noexcept : intvs{{xl, xh}, {yl, yh}} {}
+box_t::box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) noexcept
+    : intvs{interval_t{xl, xh}, interval_t{yl, yh}} {}
 
 box_t::box_t(orient_2d orient, coord_t tl, coord_t th, coord_t pl, coord_t ph) noexcept {
     auto orient_code = static_cast<orient_2d_t>(orient);

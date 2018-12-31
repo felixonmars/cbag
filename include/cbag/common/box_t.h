@@ -9,9 +9,11 @@
 
 namespace cbag {
 
+using interval_t = std::array<coord_t, 2>;
+
 struct box_t {
   public:
-    std::array<coord_t, 2> intvs[2];
+    std::array<interval_t, 2> intvs;
 
     box_t() noexcept;
     box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) noexcept;

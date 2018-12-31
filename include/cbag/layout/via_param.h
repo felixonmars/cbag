@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include <cbag/common/dim_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/common/vector.h>
 
@@ -13,7 +14,7 @@ namespace layout {
 struct via_param {
   public:
     std::array<cnt_t, 2> num = {1, 1};
-    std::array<dist_t, 2> cut_dim = {0, 0};
+    dim_t cut_dim = {0, 0};
     vector cut_spacing;
     vector lay1_enc;
     vector lay1_off;

@@ -13,27 +13,23 @@ namespace bp = boost::polygon;
 namespace boost {
 namespace polygon {
 
-template <> struct geometry_concept<std::array<cbag::coord_t, 2>> {
-    using type = interval_concept;
-};
+template <> struct geometry_concept<cbag::interval_t> { using type = interval_concept; };
 
-template <> struct interval_traits<std::array<cbag::coord_t, 2>> {
+template <> struct interval_traits<cbag::interval_t> {
     using coordinate_type = cbag::coord_t;
 
-    static coordinate_type get(const std::array<cbag::coord_t, 2> &interval, direction_1d dir) {
+    static coordinate_type get(const cbag::interval_t &interval, direction_1d dir) {
         return interval[dir.to_int()];
     }
 };
 
-template <> struct interval_mutable_traits<std::array<cbag::coord_t, 2>> {
+template <> struct interval_mutable_traits<cbag::interval_t> {
     using coordinate_type = cbag::coord_t;
 
-    static void set(std::array<cbag::coord_t, 2> &interval, direction_1d dir,
-                    coordinate_type value) {
+    static void set(cbag::interval_t &interval, direction_1d dir, coordinate_type value) {
         interval[dir.to_int()] = value;
     }
-    static std::array<cbag::coord_t, 2> construct(coordinate_type low_value,
-                                                  coordinate_type high_value) {
+    static cbag::interval_t construct(coordinate_type low_value, coordinate_type high_value) {
         return {low_value, high_value};
     }
 };
@@ -42,7 +38,7 @@ template <> struct geometry_concept<cbag::box_t> { using type = rectangle_concep
 
 template <> struct rectangle_traits<cbag::box_t> {
     using coordinate_type = cbag::coord_t;
-    using interval_type = std::array<cbag::coord_t, 2>;
+    using interval_type = cbag::interval_t;
     static interval_type get(const cbag::box_t &rectangle, orientation_2d orient) {
         return rectangle.intvs[orient.to_int()];
     }
@@ -50,7 +46,7 @@ template <> struct rectangle_traits<cbag::box_t> {
 
 template <> struct rectangle_mutable_traits<cbag::box_t> {
     using coordinate_type = cbag::coord_t;
-    using interval_type = std::array<cbag::coord_t, 2>;
+    using interval_type = cbag::interval_t;
     static inline void set(cbag::box_t &rectangle, orientation_2d orient,
                            const interval_type &interval) {
         rectangle.intvs[orient.to_int()] = interval;

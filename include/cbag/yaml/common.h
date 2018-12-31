@@ -48,6 +48,14 @@ template <typename Base> bool from_yaml(std::string const &yaml_string, Base &ob
     return YAML::convert<Base>::decode(n, obj);
 }
 
+template <typename T> T get_int(const YAML::Node &val) {
+    if (val.as<double>() == std::numeric_limits<double>::infinity()) {
+        return std::numeric_limits<T>::max();
+    } else {
+        return val.as<T>();
+    }
+}
+
 } // namespace cbagyaml
 
 #endif
