@@ -161,10 +161,10 @@ oa::oaViaParam get_via_params(const cbag::layout::via_param &params) {
     ans.setCutWidth(params.cut_dim[0]);
     ans.setCutHeight(params.cut_dim[1]);
     ans.setCutSpacing(oa::oaVector(params.cut_spacing[0], params.cut_spacing[1]));
-    ans.setLayer1Enc(oa::oaVector(params.lay1_enc[0], params.lay1_enc[1]));
-    ans.setLayer2Enc(oa::oaVector(params.lay2_enc[0], params.lay2_enc[1]));
-    ans.setLayer1Offset(oa::oaVector(params.lay1_off[0], params.lay1_off[1]));
-    ans.setLayer2Offset(oa::oaVector(params.lay2_off[0], params.lay2_off[1]));
+    ans.setLayer1Enc(oa::oaVector(params.enc[0][0], params.enc[0][1]));
+    ans.setLayer2Enc(oa::oaVector(params.enc[1][0], params.enc[1][1]));
+    ans.setLayer1Offset(oa::oaVector(params.off[0][0], params.off[0][1]));
+    ans.setLayer2Offset(oa::oaVector(params.off[1][0], params.off[1][1]));
     return ans;
 }
 

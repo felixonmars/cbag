@@ -15,10 +15,8 @@ struct via_param {
     std::array<cnt_t, 2> num = {0, 0};
     vector cut_dim = {0, 0};
     vector cut_spacing = {0, 0};
-    vector lay1_enc = {0, 0};
-    vector lay1_off = {0, 0};
-    vector lay2_enc = {0, 0};
-    vector lay2_off = {0, 0};
+    std::array<vector, 2> enc = {vector{0, 0}, vector{0, 0}};
+    std::array<vector, 2> off = {vector{0, 0}, vector{0, 0}};
 
   public:
     via_param();

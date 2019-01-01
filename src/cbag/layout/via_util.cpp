@@ -8,10 +8,10 @@ namespace layout {
 
 box_t get_via_box(const transformation &xform, const via_param &params, const vector &offset,
                   const vector &enc) {
-    auto nx = params.num[0];
-    auto ny = params.num[1];
-    auto via_w = nx * params.cut_dim[0] + (nx - 1) * params.cut_spacing[0];
-    auto via_h = ny * params.cut_dim[1] + (ny - 1) * params.cut_spacing[1];
+    auto via_w =
+        params.num[0] * (params.cut_dim[0] + params.cut_spacing[0]) - params.cut_spacing[0];
+    auto via_h =
+        params.num[1] * (params.cut_dim[1] + params.cut_spacing[1]) - params.cut_spacing[1];
 
     auto xl = static_cast<coord_t>(offset[0] - (via_w / 2) - enc[0]);
     auto yl = static_cast<coord_t>(offset[1] - (via_h / 2) - enc[1]);
@@ -25,12 +25,12 @@ box_t get_via_box(const transformation &xform, const via_param &params, const ve
 
 box_t get_bot_box(const via &v) {
     auto &param = v.get_params();
-    return get_via_box(v.xform, param, param.lay1_off, param.lay1_enc);
+    return get_via_box(v.xform, param, param.off[0], param.enc[0]);
 }
 
 box_t get_top_box(const via &v) {
     auto &param = v.get_params();
-    return get_via_box(v.xform, param, param.lay2_off, param.lay2_enc);
+    return get_via_box(v.xform, param, param.off[1], param.enc[1]);
 }
 
 } // namespace layout

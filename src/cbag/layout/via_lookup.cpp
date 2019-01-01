@@ -69,13 +69,20 @@ via_lay_purp_t via_lookup::get_via_layer_purpose(const std::string &key) const {
     return iter->second;
 }
 
-via_param via_lookup::get_via_params(vector dim, layer_t bot_layer, layer_t top_layer,
-                                     orient_2d bot_dir, orient_2d top_dir, bool extend) const {
+uint64_t get_via_score(const via_param &p) {
+    return static_cast<uint64_t>(p.num[0]) * p.num[1] * p.cut_dim[0] * p.cut_dim[1];
+}
+
+via_param via_lookup::get_via_param(vector dim, layer_t bot_layer, layer_t top_layer,
+                                    orient_2d bot_dir, orient_2d top_dir, bool extend) const {
     auto via_id = via_id_at(id_map, std::move(bot_layer), std::move(top_layer));
     auto vinfo_list = via_info_at(info_map, via_id);
 
+    via_param ans;
+    auto opt_score = get_via_score(ans);
     for (const auto &vinfo : vinfo_list) {
-        auto num_via = vinfo.get_num_via(dim, bot_dir, top_dir, extend);
+        auto via_param = vinfo.get_via_param(dim, bot_dir, top_dir, extend);
+        auto cur_score = get_via_score(via_param);
     }
 
     return {};
