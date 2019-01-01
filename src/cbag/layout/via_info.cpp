@@ -9,7 +9,7 @@
 namespace cbag {
 namespace layout {
 
-constexpr offset_t MAX_SP = std::numeric_limits<offset_t>::max();
+constexpr offset_t MAX_INT = std::numeric_limits<offset_t>::max();
 
 venc_data::venc_data() = default;
 
@@ -28,14 +28,14 @@ via_info::via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<v
 }
 
 cnt_t get_n_max(offset_t dim, offset_t w, offset_t sp) {
-    if (sp == MAX_SP) {
+    if (sp == MAX_INT) {
         return (dim > w) ? 1 : 0;
     }
     return (dim + sp) / (w + sp);
 }
 
 offset_t get_arr_dim(cnt_t n, offset_t w, offset_t sp) {
-    if (sp == MAX_SP)
+    if (sp == MAX_INT)
         if (n != 1)
             return 0;
         else
@@ -52,14 +52,43 @@ const std::vector<vector> &get_enc_list(const venc_info &enc_info, offset_t widt
     return enc_info.back().enc_list;
 }
 
-vector get_metal_dim(vector box_dim, vector arr_dim, const venc_info &enc_info, orient_2d dir,
+vector get_metal_dim(vector box_dim, vector arr_dim, const venc_info &enc_info, orient_2d_t dir_idx,
                      bool extend) {
-    // TODO: implement this
-    return {0, 0};
+    auto pdir_idx = 1 - dir_idx;
+    auto wire_w = box_dim[pdir_idx];
+    vector ans = {MAX_INT, MAX_INT};
+    for (const auto &enc_data : enc_info) {
+        if (wire_w <= enc_data.width) {
+            for (const auto &enc_vec : enc_data.enc_list) {
+                vector enc_dim = {2 * enc_vec[0] + arr_dim[0], 2 * enc_vec[1] + arr_dim[1]};
+                if (enc_dim[pdir_idx] <= box_dim[pdir_idx]) {
+                    if (extend || enc_dim[dir_idx] <= box_dim[dir_idx]) {
+                        // enclosure rule passed, get optimal metal dimension
+                        ans[0] = std::min(ans[0], enc_dim[0]);
+                        ans[1] = std::min(ans[1], enc_dim[1]);
+                    }
+                }
+            }
+        }
+    }
+
+    // no solution
+    if (ans[0] == MAX_INT) {
+        ans[0] = 0;
+        ans[1] = 0;
+    } else {
+        ans[0] = std::max(ans[0], box_dim[0]);
+        ans[1] = std::max(ans[1], box_dim[1]);
+    }
+
+    return ans;
 }
 
 via_param via_info::get_num_via(vector box_dim, orient_2d bot_dir, orient_2d top_dir,
                                 bool extend) const {
+    auto bd_idx = static_cast<orient_2d_t>(bot_dir);
+    auto td_idx = static_cast<orient_2d_t>(top_dir);
+
     // get maximum possible number of vias
     vector min_sp = sp;
     for (const auto &arr : sp2_list) {
@@ -106,14 +135,14 @@ via_param via_info::get_num_via(vector box_dim, orient_2d bot_dir, orient_2d top
             if (arr_dim[0] == 0 || arr_dim[1] == 0)
                 continue;
 
-            auto bot_dim = get_metal_dim(box_dim, arr_dim, enc_list[0], bot_dir, extend);
+            auto bot_dim = get_metal_dim(box_dim, arr_dim, enc_list[0], bd_idx, extend);
             if (bot_dim[0] == 0)
                 continue;
-            auto top_dim = get_metal_dim(box_dim, arr_dim, enc_list[1], top_dir, extend);
+            auto top_dim = get_metal_dim(box_dim, arr_dim, enc_list[1], td_idx, extend);
             if (top_dim[0] == 0)
                 continue;
 
-            if (bot_dim <= opt_mdim[0] && top_dim <= opt_mdim[1]) {
+            if (bot_dim[bd_idx] <= opt_mdim[0][bd_idx] && top_dim[td_idx] <= opt_mdim[1][td_idx]) {
                 opt_arr_dim = arr_dim;
                 opt_mdim[0] = bot_dim;
                 opt_mdim[1] = top_dim;
