@@ -6,6 +6,7 @@
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/via_lookup.h>
+#include <cbag/layout/via_param_util.h>
 #include <cbag/yaml/via_info.h>
 
 namespace cbag {
@@ -75,17 +76,28 @@ uint64_t get_via_score(const via_param &p) {
 
 via_param via_lookup::get_via_param(vector dim, layer_t bot_layer, layer_t top_layer,
                                     orient_2d bot_dir, orient_2d top_dir, bool extend) const {
+
     auto via_id = via_id_at(id_map, std::move(bot_layer), std::move(top_layer));
     auto vinfo_list = via_info_at(info_map, via_id);
 
     via_param ans;
-    auto opt_score = get_via_score(ans);
+    auto opt_score = static_cast<uint64_t>(0);
+    vector opt_ext_dim = {0, 0};
     for (const auto &vinfo : vinfo_list) {
         auto via_param = vinfo.get_via_param(dim, bot_dir, top_dir, extend);
         auto cur_score = get_via_score(via_param);
+        vector cur_ext_dim = {get_metal_dim(via_param, bot_dir, 0),
+                              get_metal_dim(via_param, top_dir, 1)};
+        if (cur_score > opt_score ||
+            (cur_score > 0 && cur_score == opt_score && cur_ext_dim[0] <= opt_ext_dim[0] &&
+             cur_ext_dim[1] <= opt_ext_dim[1])) {
+            ans = std::move(via_param);
+            opt_score = cur_score;
+            opt_ext_dim = cur_ext_dim;
+        }
     }
 
-    return {};
+    return ans;
 }
 
 } // namespace layout

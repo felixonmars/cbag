@@ -9,7 +9,7 @@
 namespace cbag {
 namespace layout {
 
-vector get_arr_dim(const via_param &p);
+offset_t get_arr_dim(const via_param &p, orient_2d orient);
 
 offset_t get_metal_dim(const via_param &p, orient_2d orient, cnt_t level);
 
