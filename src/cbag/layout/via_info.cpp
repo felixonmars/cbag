@@ -46,29 +46,24 @@ vector get_metal_dim(vector box_dim, vector arr_dim, const venc_info &enc_info, 
                      bool extend) {
     auto pdir_idx = 1 - dir_idx;
     auto wire_w = box_dim[pdir_idx];
-    vector ans = {MAX_INT, MAX_INT};
-    for (const auto &enc_data : enc_info) {
-        if (wire_w <= enc_data.width) {
-            for (const auto &enc_vec : enc_data.enc_list) {
-                vector enc_dim = {2 * enc_vec[0] + arr_dim[0], 2 * enc_vec[1] + arr_dim[1]};
-                if (enc_dim[pdir_idx] <= box_dim[pdir_idx]) {
-                    if (extend || enc_dim[dir_idx] <= box_dim[dir_idx]) {
-                        // enclosure rule passed, get optimal metal dimension
-                        ans[0] = std::min(ans[0], enc_dim[0]);
-                        ans[1] = std::min(ans[1], enc_dim[1]);
-                    }
-                }
+    vector ans;
+    ans[dir_idx] = MAX_INT;
+    ans[pdir_idx] = wire_w;
+    for (const auto &enc_vec : get_enc_list(enc_info, wire_w)) {
+        vector enc_dim = {2 * enc_vec[0] + arr_dim[0], 2 * enc_vec[1] + arr_dim[1]};
+        if (enc_dim[pdir_idx] <= box_dim[pdir_idx]) {
+            if (extend || enc_dim[dir_idx] <= box_dim[dir_idx]) {
+                // enclosure rule passed, get optimal metal dimension
+                ans[dir_idx] = std::min(ans[dir_idx], enc_dim[dir_idx]);
             }
         }
     }
-
-    // no solution
-    if (ans[0] == MAX_INT) {
+    if (ans[dir_idx] == MAX_INT) {
+        // no solution
         ans[0] = 0;
         ans[1] = 0;
     } else {
-        ans[0] = std::max(ans[0], box_dim[0]);
-        ans[1] = std::max(ans[1], box_dim[1]);
+        ans[dir_idx] = std::max(ans[dir_idx], box_dim[dir_idx]);
     }
 
     return ans;
