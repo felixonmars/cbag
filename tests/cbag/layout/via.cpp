@@ -55,4 +55,49 @@ TEST_CASE("get_via_param() for 1 via", "[via]") {
     REQUIRE(param.cut_spacing == c_vector{0, 0});
     REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{10, 10}, c_vector{0, 20}});
     REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+
+    // test 1 via due to infinite space
+    bot_layer = layer_t_at(obj, "TEST1", "drawing");
+    top_layer = layer_t_at(obj, "TEST2", "drawing");
+    param = obj.get_via_param(c_vector{100, 100}, bot_layer, top_layer, bot_dir, top_dir, extend);
+    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
+    REQUIRE(param.cut_dim == c_vector{10, 10});
+    REQUIRE(param.cut_spacing == c_vector{0, 0});
+    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{45, 45}, c_vector{45, 45}});
+    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+}
+
+TEST_CASE("get_via_param() for 0 via", "[via]") {
+    c_tech obj("tests/data/test_layout/tech_params.yaml");
+    auto bot_layer = layer_t_at(obj, "M1", "drawing");
+    auto top_layer = layer_t_at(obj, "M2", "drawing");
+    auto bot_dir = cbag::orient_2d::HORIZONTAL;
+    auto top_dir = cbag::orient_2d::VERTICAL;
+    auto extend = true;
+
+    cbag::layout::via_param param;
+
+    auto value = GENERATE(values<c_vector>({
+        {32, 31},
+        {31, 32},
+        {31, 31},
+    }));
+
+    // test both dimensions too small
+    param = obj.get_via_param(value, bot_layer, top_layer, bot_dir, top_dir, extend);
+    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{0, 0});
+    REQUIRE(param.cut_dim == c_vector{0, 0});
+    REQUIRE(param.cut_spacing == c_vector{0, 0});
+    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+
+    // test no solution due to empty enclosure spec
+    bot_layer = layer_t_at(obj, "TEST1", "drawing");
+    top_layer = layer_t_at(obj, "TEST2", "drawing");
+    param = obj.get_via_param(c_vector{20, 20}, bot_layer, top_layer, bot_dir, top_dir, extend);
+    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{0, 0});
+    REQUIRE(param.cut_dim == c_vector{0, 0});
+    REQUIRE(param.cut_spacing == c_vector{0, 0});
+    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
 }

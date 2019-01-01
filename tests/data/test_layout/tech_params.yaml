@@ -109,6 +109,7 @@ via_id:
   [['M3', 'drawing'], ['M4', 'drawing']]: M4_M3
   [['M4', 'drawing'], ['M5', 'drawing']]: M5_M4
   [['M5', 'drawing'], ['M6', 'drawing']]: M6_M5
+  [[TEST1, drawing], [TEST2, drawing]]: TEST
 
 # table of eletromigration temperature scale factor
 idc_em_scale:
@@ -137,7 +138,7 @@ via:
       bot_enc:
         - [.inf, [[0, 0]]]
       top_enc:
-        - [30, [[.inf, .inf]]]
+        - [30, []]
         - [.inf, [[0, 0]]]
   M2_M1: &via_1x
     - name: square
@@ -737,6 +738,8 @@ layer:
   NPNdummy: 99933
   mimW: 99934
   mimL: 99935
+  TEST1: 99936
+  TEST2: 99937
 purpose:
   dummy: 1000
   fin: 12000
