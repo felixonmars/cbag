@@ -96,11 +96,11 @@ via_cnt_t via_info::get_num_via(vector box_dim, orient_2d bot_dir, orient_2d top
         }
 
         // find optimal legal enclosure via
-        vector opt_enc_dim = {{MAX_SP, MAX_SP}};
+        vector opt_enc_dim = {MAX_SP, MAX_SP};
         const vector *opt_sp = nullptr;
         for (const auto &sp_via : *sp_vec_ptr) {
-            vector arr_dim = {{get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
-                               get_arr_dim(num_via[1], cut_dim[1], sp_via[1])}};
+            vector arr_dim = {get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
+                              get_arr_dim(num_via[1], cut_dim[1], sp_via[1])};
             if (arr_dim[0] == 0 || arr_dim[1] == 0)
                 continue;
 
