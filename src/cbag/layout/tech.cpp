@@ -31,13 +31,18 @@ sp_map_t make_space_map(const YAML::Node &node) {
 tech::tech(const std::string &tech_fname) {
     YAML::Node node = YAML::LoadFile(tech_fname);
 
+    tech_lib = node["tech_lib"].as<std::string>();
+    layout_unit = node["layout_unit"].as<double_t>();
+    resolution = node["resolution"].as<double_t>();
+    use_flip_parity = node["use_flip_parity"].as<bool>();
+    auto def_purp = node["default_purpose"].as<std::string>();
+    auto pin_purp = node["pin_purpose"].as<std::string>();
+    make_pin_obj = node["make_pin_obj"].as<bool>();
+
     lay_map = node["layer"].as<lay_map_t>();
     purp_map = node["purpose"].as<purp_map_t>();
     vlookup = via_lookup(node, lay_map, purp_map);
-    make_pin_obj = node["make_pin_obj"].as<bool>();
 
-    std::string pin_purp = node["pin_purpose"].as<std::string>();
-    std::string def_purp = node["default_purpose"].as<std::string>();
     auto purp_iter = purp_map.find(def_purp);
     if (purp_iter == purp_map.end()) {
         throw std::out_of_range(fmt::format("Cannot find default purpose: {}", def_purp));
@@ -77,11 +82,19 @@ tech::tech(const std::string &tech_fname) {
     } else {
         sp_sc_type = space_type::DIFF_COLOR;
     }
-} // namespace layout
+}
 
-purp_t tech::get_pin_purpose() const { return pin_purpose; }
+const std::string &tech::get_tech_lib() const { return tech_lib; }
+
+double_t tech::get_layout_unit() const { return layout_unit; }
+
+double_t tech::get_resolution() const { return resolution; }
+
+bool tech::get_use_flip_parity() const { return use_flip_parity; }
 
 purp_t tech::get_default_purpose() const { return default_purpose; }
+
+purp_t tech::get_pin_purpose() const { return pin_purpose; }
 
 bool tech::get_make_pin() const { return make_pin_obj; }
 

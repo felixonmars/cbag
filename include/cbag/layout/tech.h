@@ -21,22 +21,34 @@ using lay_type_map_t = std::unordered_map<lay_t, std::string>;
 
 class tech {
   private:
+    std::string tech_lib;
+    double_t layout_unit = 1e-6;
+    double_t resolution = 0.001;
+    bool use_flip_parity = false;
+    purp_t default_purpose;
+    purp_t pin_purpose;
+    bool make_pin_obj = true;
     lay_map_t lay_map;
     purp_map_t purp_map;
     via_lookup vlookup;
     sp_map_grp_t sp_map_grp;
     lay_type_map_t lay_type_map;
-    purp_t default_purpose;
     space_type sp_sc_type;
-    purp_t pin_purpose;
-    bool make_pin_obj = true;
 
   public:
     tech(const std::string &tech_fname);
 
-    purp_t get_pin_purpose() const;
+    const std::string &get_tech_lib() const;
+
+    double_t get_layout_unit() const;
+
+    double_t get_resolution() const;
+
+    bool get_use_flip_parity() const;
 
     purp_t get_default_purpose() const;
+
+    purp_t get_pin_purpose() const;
 
     bool get_make_pin() const;
 
