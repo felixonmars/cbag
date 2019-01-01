@@ -5,26 +5,13 @@
 #include "yaml-cpp/tuple.h"
 #include "yaml-cpp/unordered_map.h"
 
+#include <cbag/layout/tech_helper.h>
 #include <cbag/layout/via_lookup.h>
 #include <cbag/layout/via_param_util.h>
 #include <cbag/yaml/via_info.h>
 
 namespace cbag {
 namespace layout {
-
-lay_t layer_id_at(const lay_map_t &lay_map, const std::string &layer) {
-    auto iter = lay_map.find(layer);
-    if (iter == lay_map.end())
-        throw std::out_of_range("Cannot find layer ID for layer: " + layer);
-    return iter->second;
-}
-
-purp_t purpose_id_at(const purp_map_t &purp_map, const std::string &purpose) {
-    auto iter = purp_map.find(purpose);
-    if (iter == purp_map.end())
-        throw std::out_of_range("Cannot find purpose ID for purpose: " + purpose);
-    return iter->second;
-}
 
 const std::string &via_id_at(const vid_map_t &id_map, layer_t bot_lay, layer_t top_lay) {
     auto iter = id_map.find(std::make_pair(std::move(bot_lay), std::move(top_lay)));

@@ -11,8 +11,8 @@ struct geometry::helper {};
 
 geometry::geometry() = default;
 
-geometry::geometry(std::string &&lay_type, tech *tech_ptr, geometry_mode mode)
-    : mode(mode), index(std::move(lay_type), tech_ptr) {
+geometry::geometry(layer_t &&lay_purp, tech *tech_ptr, geometry_mode mode)
+    : mode(mode), index(std::move(lay_purp), tech_ptr) {
     if (mode != geometry_mode::POLY90)
         reset_to_mode(mode);
 }

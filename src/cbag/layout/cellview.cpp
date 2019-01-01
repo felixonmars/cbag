@@ -51,9 +51,7 @@ auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
 geometry &cellview::make_geometry(layer_t key) {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end()) {
-        iter =
-            geo_map.emplace(key, geometry(tech_ptr->get_layer_type(key.first), tech_ptr, geo_mode))
-                .first;
+        iter = geo_map.emplace(key, geometry(std::move(key), tech_ptr, geo_mode)).first;
     }
     return iter->second;
 }

@@ -6,6 +6,8 @@
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/tech.h>
+#include <cbag/layout/tech_helper.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/yaml/common.h>
 
 namespace cbag {
@@ -20,10 +22,13 @@ std::vector<std::pair<offset_t, offset_t>> make_w_sp_vec(const YAML::Node &node)
     return ans;
 }
 
-sp_map_t make_space_map(const YAML::Node &node) {
+sp_map_t make_space_map(const YAML::Node &node, const lay_map_t &lay_map,
+                        const purp_map_t &purp_map) {
     sp_map_t ans;
     for (const auto &pair : node) {
-        ans.emplace(pair.first.as<std::string>(), make_w_sp_vec(pair.second));
+        auto [lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
+        layer_t key(layer_id_at(lay_map, lay_name), purpose_id_at(purp_map, purp_name));
+        ans.emplace(std::move(key), make_w_sp_vec(pair.second));
     }
     return ans;
 }
@@ -56,28 +61,13 @@ tech::tech(const std::string &tech_fname) {
         pin_purpose = purp_iter->second;
     }
 
-    // populate layer type map
-    for (const auto &pair : node["layer_type"]) {
-        std::string lay_name = pair.first.as<std::string>();
-        auto lay_iter = lay_map.find(lay_name);
-        if (lay_iter == lay_map.end()) {
-            throw std::out_of_range(
-                fmt::format("Cannot find layer ID for layer {} in type map", lay_name));
-
-        } else {
-            lay_t lay_id = lay_iter->second;
-            lay_type_map[lay_id] = pair.second.as<std::string>();
-        }
-    }
-
     // populate space map
-    sp_map_t sp_map;
-    sp_map_grp.emplace(space_type::DIFF_COLOR, make_space_map(node["sp_min"]));
-    sp_map_grp.emplace(space_type::LINE_END, make_space_map(node["sp_le_min"]));
+    sp_map_grp.emplace(space_type::DIFF_COLOR, make_space_map(node["sp_min"], lay_map, purp_map));
+    sp_map_grp.emplace(space_type::LINE_END, make_space_map(node["sp_le_min"], lay_map, purp_map));
 
     auto sp_sc_node = node["sp_sc_min"];
     if (sp_sc_node.IsDefined()) {
-        sp_map_grp.emplace(space_type::SAME_COLOR, make_space_map(sp_sc_node));
+        sp_map_grp.emplace(space_type::SAME_COLOR, make_space_map(sp_sc_node, lay_map, purp_map));
         sp_sc_type = space_type::SAME_COLOR;
     } else {
         sp_sc_type = space_type::DIFF_COLOR;
@@ -122,22 +112,16 @@ std::optional<purp_t> tech::get_purpose_id(const std::string &purpose) const {
     return iter->second;
 }
 
-std::string tech::get_layer_type(lay_t lay_id) const {
-    auto iter = lay_type_map.find(lay_id);
-    return (iter == lay_type_map.end()) ? "" : iter->second;
-}
-
-offset_t tech::get_min_space(const std::string &layer_type, offset_t width,
-                             space_type sp_type) const {
+offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) const {
     auto map_iter = sp_map_grp.find((sp_type == space_type::SAME_COLOR) ? sp_sc_type : sp_type);
     if (map_iter == sp_map_grp.end())
         throw std::out_of_range(
             fmt::format("Cannot find space type {}", static_cast<enum_t>(sp_type)));
 
     const auto &cur_map = map_iter->second;
-    auto vec_iter = cur_map.find(layer_type);
+    auto vec_iter = cur_map.find(key);
     if (vec_iter == cur_map.end())
-        throw std::out_of_range(fmt::format("Cannot find layer type {}", layer_type));
+        return 0;
 
     const auto &w_sp_list = vec_iter->second;
 

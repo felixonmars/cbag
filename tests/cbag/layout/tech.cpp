@@ -38,16 +38,17 @@ TEST_CASE("technology get_min_space", "[tech]") {
 
     auto args =
         GENERATE(values<std::tuple<cbag::space_type, std::string, cbag::offset_t, cbag::offset_t>>({
-            {cbag::space_type::DIFF_COLOR, "1x", 10, 32},
-            {cbag::space_type::DIFF_COLOR, "1x", 100, 32},
-            {cbag::space_type::DIFF_COLOR, "4", 10, 48},
-            {cbag::space_type::DIFF_COLOR, "4", 99, 48},
-            {cbag::space_type::DIFF_COLOR, "4", 100, 72},
-            {cbag::space_type::DIFF_COLOR, "4", 9999, 220},
-            {cbag::space_type::SAME_COLOR, "2x", 89, 80},
-            {cbag::space_type::SAME_COLOR, "2x", 90, 100},
+            {cbag::space_type::DIFF_COLOR, "M1", 10, 32},
+            {cbag::space_type::DIFF_COLOR, "M2", 100, 32},
+            {cbag::space_type::DIFF_COLOR, "M4", 10, 48},
+            {cbag::space_type::DIFF_COLOR, "M4", 99, 48},
+            {cbag::space_type::DIFF_COLOR, "M4", 100, 72},
+            {cbag::space_type::DIFF_COLOR, "M4", 9999, 220},
+            {cbag::space_type::SAME_COLOR, "M5", 89, 80},
+            {cbag::space_type::SAME_COLOR, "M6", 90, 100},
         }));
 
-    auto ans = obj.get_min_space(std::get<1>(args), std::get<2>(args), std::get<0>(args));
+    auto key = layer_t_at(obj, std::get<1>(args), "drawing");
+    auto ans = obj.get_min_space(key, std::get<2>(args), std::get<0>(args));
     REQUIRE(ans == std::get<3>(args));
 }

@@ -37,8 +37,8 @@ class poly45_writer {
 
 geo_index::geo_index() = default;
 
-geo_index::geo_index(std::string &&lay_type, tech *tech_ptr)
-    : lay_type(std::move(lay_type)), tech_ptr(tech_ptr) {}
+geo_index::geo_index(layer_t &&lay_purp, tech *tech_ptr)
+    : lay_purp(std::move(lay_purp)), tech_ptr(tech_ptr) {}
 
 bool geo_index::empty() const { return index.empty(); }
 
@@ -64,18 +64,14 @@ geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t s
 
 void geo_index::insert(const box_t &obj, bool is_horiz) {
     coord_t spx, spy;
-    if (lay_type.empty()) {
-        spx = spy = 0;
+    if (is_horiz) {
+        auto wid = get_dim(obj, orient_2d::VERTICAL);
+        spx = tech_ptr->get_min_space(lay_purp, wid, space_type::LINE_END);
+        spy = tech_ptr->get_min_space(lay_purp, wid, space_type::DIFF_COLOR);
     } else {
-        if (is_horiz) {
-            auto wid = get_dim(obj, orient_2d::VERTICAL);
-            spx = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
-            spy = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
-        } else {
-            auto wid = get_dim(obj, orient_2d::HORIZONTAL);
-            spx = tech_ptr->get_min_space(lay_type, wid, space_type::DIFF_COLOR);
-            spy = tech_ptr->get_min_space(lay_type, wid, space_type::LINE_END);
-        }
+        auto wid = get_dim(obj, orient_2d::HORIZONTAL);
+        spx = tech_ptr->get_min_space(lay_purp, wid, space_type::DIFF_COLOR);
+        spy = tech_ptr->get_min_space(lay_purp, wid, space_type::LINE_END);
     }
 
     index.insert(geo_object(obj, spx, spy));

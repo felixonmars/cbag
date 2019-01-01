@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/functional/hash.hpp>
+
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/space_type.h>
@@ -15,9 +17,9 @@
 namespace cbag {
 namespace layout {
 
-using sp_map_t = std::unordered_map<std::string, std::vector<std::pair<offset_t, offset_t>>>;
+using sp_map_t =
+    std::unordered_map<layer_t, std::vector<std::pair<offset_t, offset_t>>, boost::hash<layer_t>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
-using lay_type_map_t = std::unordered_map<lay_t, std::string>;
 
 class tech {
   private:
@@ -32,7 +34,6 @@ class tech {
     purp_map_t purp_map;
     via_lookup vlookup;
     sp_map_grp_t sp_map_grp;
-    lay_type_map_t lay_type_map;
     space_type sp_sc_type;
 
   public:
@@ -58,9 +59,7 @@ class tech {
 
     std::optional<purp_t> get_purpose_id(const std::string &purpose) const;
 
-    std::string get_layer_type(lay_t lay_id) const;
-
-    offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
+    offset_t get_min_space(layer_t key, offset_t width, space_type sp_type) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 

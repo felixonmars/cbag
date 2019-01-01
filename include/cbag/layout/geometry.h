@@ -5,6 +5,7 @@
 #include <variant>
 #include <vector>
 
+#include <cbag/common/layer_t.h>
 #include <cbag/common/transformation.h>
 #include <cbag/enum/geometry_mode.h>
 #include <cbag/layout/geo_index.h>
@@ -40,7 +41,7 @@ class geometry {
   public:
     geometry();
 
-    geometry(std::string &&lay_type, tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
+    geometry(layer_t &&lay_purp, tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
 
     bool index_empty() const;
     box_t get_bbox() const;

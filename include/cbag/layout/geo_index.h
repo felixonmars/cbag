@@ -1,6 +1,7 @@
 #ifndef CBAG_LAYOUT_GEO_INDEX_H
 #define CBAG_LAYOUT_GEO_INDEX_H
 
+#include <cbag/common/layer_t.h>
 #include <cbag/common/transformation_fwd.h>
 #include <cbag/layout/geo_index_impl.h>
 #include <cbag/layout/polygon45_set_fwd.h>
@@ -20,13 +21,13 @@ class geo_index {
 
   private:
     geo_index_impl index;
-    std::string lay_type = "";
+    layer_t lay_purp;
     tech *tech_ptr = nullptr;
 
   public:
     geo_index();
 
-    explicit geo_index(std::string &&lay_type, tech *tech_ptr);
+    explicit geo_index(layer_t &&lay_purp, tech *tech_ptr);
 
     bool empty() const;
 

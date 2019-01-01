@@ -88,18 +88,6 @@ lay_purp_list:
   5: [!!python/tuple ['M5', '']]
   6: [!!python/tuple ['M6', '']]
 
-# mapping from metal layer name to metal layer type.  The layer type
-# is used to figure out which EM rules to use.
-layer_type:
-  LiPo: LiPo
-  LiAct: LiAct
-  M1: 1x
-  M2: 1x
-  M3: 1x
-  M4: '4'
-  M5: 2x
-  M6: 2x
-
 # mapping from tuple of via layers to via ID.
 via_id:
   [['LiPo', 'drawing'], ['M1', 'drawing']]: M1_LiPo
@@ -119,7 +107,7 @@ idc_em_scale:
     temp: [100, .inf]
     scale: [1.0, 0.5]
   # scale factor for this metal layer type
-  x:
+  ['M1', 'drawing']:
     temp: [100, .inf]
     scale: [1.0, 0.5]
   # default scale vector
@@ -192,62 +180,49 @@ via:
   M6_M5: *via_2x
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
-sp_min:
-  1x:
+sp_min: &sp_min_data
+  [M1, drawing]: &sp_min_1x
     - [.inf, 32]
-  '4':
+  [M2, drawing]: *sp_min_1x
+  [M3, drawing]: *sp_min_1x
+  [M4, drawing]:
     - [99, 48]
     - [749, 72]
     - [1499, 112]
     - [.inf, 220]
-  2x:
+  [M5, drawing]: &sp_min_2x
     - [59, 68]
     - [89, 80]
     - [.inf, 100]
+  [M6, drawing]: *sp_min_2x
 
 # minimum wire spacing rule for same color wires.
-sp_sc_min:
-  1x:
-    - [99, 48]
-    - [749, 72]
-    - [1499, 112]
-    - [.inf, 220]
-  '4':
-    - [99, 48]
-    - [749, 72]
-    - [1499, 112]
-    - [.inf, 220]
-  2x:
-    - [59, 68]
-    - [89, 80]
-    - [.inf, 100]
+sp_sc_min: *sp_min_data
 
 # minimum line-end spacing rule.  Space is measured parallel to wire direction.
 sp_le_min:
-  1x:
+  [M1, drawing]: &sp_le_min_1x
     - [.inf, 64]
-  '4':
+  [M2, drawing]: *sp_le_min_1x
+  [M3, drawing]: *sp_le_min_1x
+  [M4, drawing]:
     - [.inf, 64]
-  2x:
+  [M5, drawing]: &sp_le_min_2x
     - [.inf, 74]
+  [M6, drawing]: *sp_le_min_2x
 
 # minimum length/minimum area rules.
 len_min:
-  1x:
-    w_list: [.inf]
-    w_al_list: [[6176, 10]]
-    md_list: [.inf]
-    md_al_list: [[6176, 10]]
-  '4':
-    w_list: [.inf]
-    w_al_list: [[6176, 10]]
-    md_list: [.inf]
-    md_al_list: [[6176, 10]]
-  2x:
-    w_list: [.inf]
-    w_al_list: [[8200, 10]]
-    md_list: [.inf]
-    md_al_list: [[8200, 10]]
+  [M1, drawing]: &len_min_1x
+    w_al_list:
+      - [.inf, 6176, 10]
+    md_al_list:
+      - [.inf, 6176, 10]
+  [M2, drawing]: *len_min_1x
+  [M3, drawing]: *len_min_1x
+  [M4, drawing]: *len_min_1x
+  [M5, drawing]: *len_min_1x
+  [M6, drawing]: *len_min_1x
 
 # DNW margin rules.
 dnw_margins:
