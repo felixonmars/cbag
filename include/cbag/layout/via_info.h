@@ -13,6 +13,8 @@
 namespace cbag {
 namespace layout {
 
+class via_param;
+
 struct venc_data {
     offset_t width;
     std::vector<vector> enc_list;
@@ -39,7 +41,7 @@ class via_info {
     via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
              std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list);
 
-    via_cnt_t get_num_via(vector dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;
+    via_param get_num_via(vector dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;
 };
 
 } // namespace layout
