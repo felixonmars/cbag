@@ -135,10 +135,10 @@ via:
       sp2: [[.inf, .inf]]
       sp3: [[.inf, .inf]]
       bot_enc:
-        - [.inf, [0, 0]]
+        - [.inf, [[0, 0]]]
       top_enc:
-        - [30, [.inf, .inf]]
-        - [.inf, [0, 0]]
+        - [30, [[.inf, .inf]]]
+        - [.inf, [[0, 0]]]
   M2_M1: &via_1x
     - name: square
       dim: [32, 32]

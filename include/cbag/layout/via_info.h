@@ -6,16 +6,16 @@
 #include <cmath>
 #include <vector>
 
-#include <cbag/common/dim_t.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/common/vector.h>
 #include <cbag/enum/orient_2d.h>
 
 namespace cbag {
 namespace layout {
 
 struct venc_data {
-    dist_t width;
-    std::vector<dim_t> enc_list;
+    offset_t width;
+    std::vector<vector> enc_list;
 
     venc_data();
 };
@@ -27,19 +27,19 @@ using via_cnt_t = std::tuple<cnt_t, std::array<cnt_t, 2>>;
 class via_info {
   private:
     std::string cut_type;
-    dim_t cut_dim = {0, 0};
-    dim_t sp = {0, 0};
-    std::vector<dim_t> sp2_list;
-    std::vector<dim_t> sp3_list;
+    vector cut_dim = {0, 0};
+    vector sp = {0, 0};
+    std::vector<vector> sp2_list;
+    std::vector<vector> sp3_list;
     std::array<venc_info, 2> enc_list;
 
   public:
     via_info();
 
-    via_info(std::string &&ctype, dim_t &&cdim, dim_t &&s, std::vector<dim_t> &&s2_list,
-             std::vector<dim_t> &&s3_list, std::array<venc_info, 2> &&e_list);
+    via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
+             std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list);
 
-    via_cnt_t get_num_via(dim_t dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;
+    via_cnt_t get_num_via(vector dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;
 };
 
 } // namespace layout

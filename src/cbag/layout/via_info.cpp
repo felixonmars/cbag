@@ -8,14 +8,14 @@
 namespace cbag {
 namespace layout {
 
-constexpr dist_t MAX_SP = std::numeric_limits<dist_t>::max();
+constexpr offset_t MAX_SP = std::numeric_limits<offset_t>::max();
 
 venc_data::venc_data() = default;
 
 via_info::via_info() = default;
 
-via_info::via_info(std::string &&ctype, dim_t &&cdim, dim_t &&s, std::vector<dim_t> &&s2_list,
-                   std::vector<dim_t> &&s3_list, std::array<venc_info, 2> &&e_list)
+via_info::via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
+                   std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list)
     : cut_type(std::move(ctype)), cut_dim(std::move(cdim)), sp(std::move(s)),
       sp2_list(std::move(s2_list)), sp3_list(std::move(s3_list)), enc_list(std::move(e_list)) {
     if (sp2_list.empty()) {
@@ -26,14 +26,14 @@ via_info::via_info(std::string &&ctype, dim_t &&cdim, dim_t &&s, std::vector<dim
     }
 }
 
-cnt_t get_n_max(dist_t dim, dist_t w, dist_t sp) {
+cnt_t get_n_max(offset_t dim, offset_t w, offset_t sp) {
     if (sp == MAX_SP) {
         return (dim > w) ? 1 : 0;
     }
     return (dim + sp) / (w + sp);
 }
 
-dist_t get_arr_dim(cnt_t n, dist_t w, dist_t sp) {
+offset_t get_arr_dim(cnt_t n, offset_t w, offset_t sp) {
     if (sp == MAX_SP)
         if (n != 1)
             return 0;
@@ -43,7 +43,7 @@ dist_t get_arr_dim(cnt_t n, dist_t w, dist_t sp) {
         return n * (w + sp) - sp;
 }
 
-const std::vector<dim_t> &get_enc_list(const venc_info &enc_info, dist_t width) {
+const std::vector<vector> &get_enc_list(const venc_info &enc_info, offset_t width) {
     for (const auto &data : enc_info) {
         if (width <= data.width)
             return data.enc_list;
@@ -51,16 +51,16 @@ const std::vector<dim_t> &get_enc_list(const venc_info &enc_info, dist_t width) 
     return enc_info.back().enc_list;
 }
 
-dist_t get_enclosure_dim(dim_t box_dim, dim_t arr_dim, const venc_info &enc_info, orient_2d dir,
-                         bool extend) {
+offset_t get_enclosure_dim(vector box_dim, vector arr_dim, const venc_info &enc_info, orient_2d dir,
+                           bool extend) {
     // TODO: implement this
     return 0;
 }
 
-via_cnt_t via_info::get_num_via(dim_t box_dim, orient_2d bot_dir, orient_2d top_dir,
+via_cnt_t via_info::get_num_via(vector box_dim, orient_2d bot_dir, orient_2d top_dir,
                                 bool extend) const {
     // get maximum possible number of vias
-    dim_t min_sp = sp;
+    vector min_sp = sp;
     for (const auto &arr : sp2_list) {
         min_sp[0] = std::min(min_sp[0], arr[0]);
         min_sp[1] = std::min(min_sp[1], arr[1]);
@@ -80,13 +80,13 @@ via_cnt_t via_info::get_num_via(dim_t box_dim, orient_2d bot_dir, orient_2d top_
     util::unique_heap<via_cnt_t, boost::hash<via_cnt_t>> heap;
     heap.emplace(nx_max * ny_max, std::array<cnt_t, 2>{nx_max, ny_max});
 
-    std::vector<dim_t> sp1_list({sp});
+    std::vector<vector> sp1_list({sp});
 
     while (!heap.empty()) {
         auto &[via_cnt, num_via] = heap.top();
 
         // get list of valid via spacing
-        const std::vector<dim_t> *sp_vec_ptr;
+        const std::vector<vector> *sp_vec_ptr;
         if (num_via[0] == 2 && num_via[1] == 2) {
             sp_vec_ptr = &sp2_list;
         } else if (num_via[0] > 1 && num_via[1] > 1) {
@@ -96,11 +96,11 @@ via_cnt_t via_info::get_num_via(dim_t box_dim, orient_2d bot_dir, orient_2d top_
         }
 
         // find optimal legal enclosure via
-        dim_t opt_enc_dim = {MAX_SP, MAX_SP};
-        const dim_t *opt_sp = nullptr;
+        vector opt_enc_dim = {{MAX_SP, MAX_SP}};
+        const vector *opt_sp = nullptr;
         for (const auto &sp_via : *sp_vec_ptr) {
-            dim_t arr_dim = {get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
-                             get_arr_dim(num_via[1], cut_dim[1], sp_via[1])};
+            vector arr_dim = {{get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
+                               get_arr_dim(num_via[1], cut_dim[1], sp_via[1])}};
             if (arr_dim[0] == 0 || arr_dim[1] == 0)
                 continue;
 
