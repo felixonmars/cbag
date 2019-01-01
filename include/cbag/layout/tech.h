@@ -51,6 +51,9 @@ class tech {
     offset_t get_min_space(const std::string &layer_type, offset_t width, space_type sp_type) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
+
+    via_param get_via_param(vector dim, layer_t bot_layer, layer_t top_layer, orient_2d bot_dir,
+                            orient_2d top_dir, bool extend) const;
 };
 
 } // namespace layout

@@ -139,5 +139,10 @@ via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
     return vlookup.get_via_layer_purpose(key);
 }
 
+via_param tech::get_via_param(vector dim, layer_t bot_layer, layer_t top_layer, orient_2d bot_dir,
+                              orient_2d top_dir, bool extend) const {
+    return vlookup.get_via_param(dim, bot_layer, top_layer, bot_dir, top_dir, extend);
+}
+
 } // namespace layout
 } // namespace cbag

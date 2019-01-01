@@ -5,6 +5,7 @@ add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/gdsii/gds_lookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/gdsii/math.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/layout/tech.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/netlist/output.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/schematic/cellview.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/spirit/name.cpp

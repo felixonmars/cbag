@@ -129,7 +129,7 @@ via_param via_info::get_via_param(vector box_dim, orient_2d bot_dir, orient_2d t
 
         // find optimal legal enclosure via
         vector opt_arr_dim;
-        std::array<vector, 2> opt_mdim = {vector{0, 0}, vector{0, 0}};
+        std::array<vector, 2> opt_mdim = {vector{MAX_INT, MAX_INT}, vector{MAX_INT, MAX_INT}};
         vector opt_sp = {-1, -1};
         for (const auto &sp_via : *sp_vec_ptr) {
             vector arr_dim = {get_arr_dim(num_via[0], cut_dim[0], sp_via[0]),
