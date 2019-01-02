@@ -1,8 +1,9 @@
+#include <algorithm>
+
 #include <fmt/core.h>
 
 #include <yaml-cpp/yaml.h>
 
-#include "yaml-cpp/tuple.h"
 #include "yaml-cpp/unordered_map.h"
 
 #include <cbag/layout/lp_lookup.h>

@@ -4,14 +4,7 @@
 
 #include <unordered_map>
 
-#include <boost/functional/hash.hpp>
-
-#include <cbag/common/box_t.h>
-#include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
-#include <cbag/enum/orient_2d.h>
-#include <cbag/layout/via_info.h>
-#include <cbag/layout/via_param.h>
 
 namespace YAML {
 class Node;
