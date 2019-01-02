@@ -19,8 +19,26 @@ purp_t purpose_id_at(const tech &t, const std::string &purpose) {
     return *ans;
 }
 
+lay_t layer_id_at(const lp_lookup &lp, const std::string &layer) {
+    auto ans = lp.get_layer_id(layer);
+    if (!ans)
+        throw std::out_of_range(fmt::format("Cannot find layer: {}", layer));
+    return *ans;
+}
+
+purp_t purpose_id_at(const lp_lookup &lp, const std::string &purpose) {
+    auto ans = lp.get_purpose_id(purpose);
+    if (!ans)
+        throw std::out_of_range(fmt::format("Cannot find purpose: {}", purpose));
+    return *ans;
+}
+
 layer_t layer_t_at(const tech &t, const std::string &layer, const std::string &purpose) {
     return {layer_id_at(t, layer), purpose_id_at(t, purpose)};
+}
+
+layer_t layer_t_at(const lp_lookup &lp, const std::string &layer, const std::string &purpose) {
+    return {layer_id_at(lp, layer), purpose_id_at(lp, purpose)};
 }
 
 std::string get_pin_purpose_name(const tech &t) { return t.get_purpose_name(t.get_pin_purpose()); }

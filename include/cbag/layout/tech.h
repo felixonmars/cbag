@@ -12,6 +12,7 @@
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/space_type.h>
+#include <cbag/layout/lp_lookup.h>
 #include <cbag/layout/via_lookup.h>
 
 namespace cbag {
@@ -27,11 +28,8 @@ class tech {
     double_t layout_unit = 1e-6;
     double_t resolution = 0.001;
     bool use_flip_parity = false;
-    purp_t default_purpose;
-    purp_t pin_purpose;
     bool make_pin_obj = true;
-    lay_map_t lay_map;
-    purp_map_t purp_map;
+    lp_lookup lp_map;
     via_lookup vlookup;
     sp_map_grp_t sp_map_grp;
     space_type sp_sc_type;

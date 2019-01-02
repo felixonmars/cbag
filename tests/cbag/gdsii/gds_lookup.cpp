@@ -12,9 +12,7 @@ TEST_CASE("gds_lookup can read layer and object maps", "[gds]") {
     REQUIRE(bool(bnd_key) == true);
     REQUIRE(*bnd_key == cbag::gdsii::gds_layer_t(1000, 0));
 
-    auto lay_id = cbag::layout::layer_id_at(obj, "Poly");
-    auto purp_id = cbag::layout::purpose_id_at(obj, "label");
-    auto lay_key = lookup.get_gds_layer(cbag::layer_t(lay_id, purp_id));
+    auto lay_key = lookup.get_gds_layer(cbag::layout::layer_t_at(obj, "Poly", "label"));
     REQUIRE(bool(lay_key) == true);
     REQUIRE(*lay_key == cbag::gdsii::gds_layer_t(20, 46));
 }

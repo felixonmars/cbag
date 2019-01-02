@@ -5,7 +5,7 @@
 #include "yaml-cpp/tuple.h"
 #include "yaml-cpp/unordered_map.h"
 
-#include <cbag/layout/tech_helper.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_lookup.h>
 #include <cbag/layout/via_param_util.h>
 #include <cbag/yaml/via_info.h>
@@ -30,22 +30,17 @@ const std::vector<via_info> &via_info_at(const vinfo_map_t &info_map, const std:
     return iter->second;
 }
 
-vlayers_t parse_via_layers(const YAML::Node &node, const lay_map_t &lay_map,
-                           const purp_map_t &purp_map) {
-    return {layer_t{layer_id_at(lay_map, node[0][0].as<std::string>()),
-                    purpose_id_at(purp_map, node[0][1].as<std::string>())},
-            layer_t{layer_id_at(lay_map, node[1][0].as<std::string>()),
-                    purpose_id_at(purp_map, node[1][1].as<std::string>())}};
+vlayers_t parse_via_layers(const YAML::Node &node, const lp_lookup &lp) {
+    return {layer_t_at(lp, node[0][0].as<std::string>(), node[0][1].as<std::string>()),
+            layer_t_at(lp, node[1][0].as<std::string>(), node[1][1].as<std::string>())};
 }
 
 via_lookup::via_lookup() = default;
 
-via_lookup::via_lookup(const YAML::Node &parent, const lay_map_t &lay_map,
-                       const purp_map_t &purp_map)
+via_lookup::via_lookup(const YAML::Node &parent, const lp_lookup &lp)
     : lp_map(parent["via_layers"].as<vlp_map_t>()), info_map(parent["via"].as<vinfo_map_t>()) {
     for (const auto &node : parent["via_id"]) {
-        id_map.emplace(parse_via_layers(node.first, lay_map, purp_map),
-                       node.second.as<std::string>());
+        id_map.emplace(parse_via_layers(node.first, lp), node.second.as<std::string>());
     }
 }
 
