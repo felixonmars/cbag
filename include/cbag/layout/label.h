@@ -21,6 +21,10 @@ class label {
 
     label(layer_t key, transformation xform, std::string text);
 
+    layer_t get_key() const;
+    transformation get_xform() const;
+    const std::string &get_text() const;
+
     bool operator==(const label &rhs) const noexcept;
 };
 

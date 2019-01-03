@@ -243,6 +243,11 @@ void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, glay_t lay, gp
     }
 }
 
+void write_lay_label(spdlog::logger &logger, std::ofstream &stream, const layout::label &lab) {
+    auto [lay, purp] = lab.get_key();
+    write_text(logger, stream, lay, purp, lab.get_text(), lab.get_xform());
+}
+
 void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
                         const cbag::layout::cellview &cv,
                         const std::unordered_map<std::string, std::string> &rename_map,
@@ -291,6 +296,11 @@ void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std
                 write_lay_pin(logger, stream, glay, gpurp, pin, make_pin_obj);
             }
         }
+    }
+
+    logger.info("Export layout labels.");
+    for (auto iter = cv.begin_label(); iter != cv.end_label(); ++iter) {
+        write_lay_label(logger, stream, *iter);
     }
 
     logger.info("Export layout boundaries.");
