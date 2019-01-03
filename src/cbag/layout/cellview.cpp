@@ -35,7 +35,7 @@ struct cellview::helper {
     }
 };
 
-cellview::cellview(tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
+cellview::cellview(const tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
     : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(std::move(cell_name)) {}
 
 void cellview::set_geometry_mode(geometry_mode new_mode) {
@@ -57,7 +57,7 @@ geometry &cellview::make_geometry(layer_t key) {
 }
 
 const std::string &cellview::get_name() const noexcept { return cell_name; }
-tech *cellview::get_tech() const noexcept { return tech_ptr; }
+const tech *cellview::get_tech() const noexcept { return tech_ptr; }
 
 bool cellview::empty() const noexcept {
     return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&

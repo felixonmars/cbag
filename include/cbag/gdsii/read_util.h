@@ -22,6 +22,10 @@ std::string read_lib_name(spdlog::logger &logger, std::ifstream &stream);
 
 void read_units(spdlog::logger &logger, std::ifstream &stream);
 
+std::string read_struct_name(spdlog::logger &logger, std::ifstream &stream);
+
+void read_struct_end(spdlog::logger &logger, std::ifstream &stream);
+
 } // namespace gdsii
 } // namespace cbag
 

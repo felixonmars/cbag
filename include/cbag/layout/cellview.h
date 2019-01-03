@@ -6,5 +6,6 @@
 #include <cbag/layout/cellview_fwd.h>
 #include <cbag/layout/pin.h>
 #include <cbag/layout/tech.h>
+#include <cbag/layout/via.h>
 
 #endif

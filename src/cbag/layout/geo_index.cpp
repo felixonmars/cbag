@@ -37,7 +37,7 @@ class poly45_writer {
 
 geo_index::geo_index() = default;
 
-geo_index::geo_index(layer_t &&lay_purp, tech *tech_ptr)
+geo_index::geo_index(layer_t &&lay_purp, const tech *tech_ptr)
     : lay_purp(std::move(lay_purp)), tech_ptr(tech_ptr) {}
 
 bool geo_index::empty() const { return index.empty(); }

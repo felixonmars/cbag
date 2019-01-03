@@ -217,12 +217,17 @@ void write_struct_end(spdlog::logger &logger, std::ofstream &stream) {
     write_empty<record_type::ENDSTR>(logger, stream);
 }
 
+void write_element_end(spdlog::logger &logger, std::ofstream &stream) {
+    write_empty<record_type::ENDEL>(logger, stream);
+}
+
 void write_polygon(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
                    const layout::polygon &poly) {
     write_empty<record_type::BOUNDARY>(logger, stream);
     write_int<record_type::LAYER>(logger, stream, layer);
     write_int<record_type::DATATYPE>(logger, stream, purpose);
     write_points(logger, stream, poly.size(), poly.begin(), poly.end());
+    write_element_end(logger, stream);
 }
 
 void write_box(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
@@ -237,6 +242,7 @@ void write_box(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpur
     auto y1 = interpret_as<uint32_t>(yh(b));
     std::array<uint32_t, 10> xy{x0, y0, x1, y0, x1, y1, x0, y1, x0, y0};
     write<record_type::XY>(stream, xy.size(), xy.begin(), xy.end());
+    write_element_end(logger, stream);
 }
 
 void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
@@ -245,6 +251,7 @@ void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std
     write_empty<record_type::AREF>(logger, stream);
     write_name<record_type::SNAME>(logger, stream, cell_name);
     write_transform(logger, stream, xform, nx, ny, spx, spy);
+    write_element_end(logger, stream);
 }
 
 void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
@@ -255,6 +262,7 @@ void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::st
         write_empty<record_type::SREF>(logger, stream);
         write_name<record_type::SNAME>(logger, stream, cell_name);
         write_transform(logger, stream, xform);
+        write_element_end(logger, stream);
     }
 }
 
@@ -266,6 +274,7 @@ void write_text(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpu
     write_int<record_type::PRESENTATION>(logger, stream, text_presentation);
     write_transform(logger, stream, xform);
     write_name<record_type::STRING>(logger, stream, text);
+    write_element_end(logger, stream);
 }
 
 } // namespace gdsii

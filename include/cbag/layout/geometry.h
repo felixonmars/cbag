@@ -41,7 +41,7 @@ class geometry {
   public:
     geometry();
 
-    geometry(layer_t &&lay_purp, tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
+    geometry(layer_t &&lay_purp, const tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
 
     bool index_empty() const;
     box_t get_bbox() const;

@@ -35,7 +35,7 @@ class cellview {
   private:
     cnt_t inst_name_cnt = 0;
     geometry_mode geo_mode = geometry_mode::POLY90;
-    tech *tech_ptr = nullptr;
+    const tech *tech_ptr = nullptr;
     std::string cell_name;
     geo_map_t geo_map;
     inst_map_t inst_map;
@@ -48,7 +48,7 @@ class cellview {
     struct helper;
 
   public:
-    explicit cellview(tech *tech_ptr, std::string cell_name,
+    explicit cellview(const tech *tech_ptr, std::string cell_name,
                       geometry_mode geo_mode = geometry_mode::POLY90);
 
     void set_geometry_mode(geometry_mode new_mode);
@@ -57,7 +57,7 @@ class cellview {
     geometry &make_geometry(layer_t key);
 
     const std::string &get_name() const noexcept;
-    tech *get_tech() const noexcept;
+    const tech *get_tech() const noexcept;
 
     bool empty() const noexcept;
 

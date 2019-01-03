@@ -22,12 +22,12 @@ class geo_index {
   private:
     geo_index_impl index;
     layer_t lay_purp;
-    tech *tech_ptr = nullptr;
+    const tech *tech_ptr = nullptr;
 
   public:
     geo_index();
 
-    explicit geo_index(layer_t &&lay_purp, tech *tech_ptr);
+    explicit geo_index(layer_t &&lay_purp, const tech *tech_ptr);
 
     bool empty() const;
 
