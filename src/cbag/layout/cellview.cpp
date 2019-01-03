@@ -38,6 +38,14 @@ struct cellview::helper {
 cellview::cellview(const tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
     : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(std::move(cell_name)) {}
 
+bool cellview::operator==(const cellview &rhs) const noexcept {
+    return geo_mode == rhs.geo_mode && tech_ptr == rhs.tech_ptr && cell_name == rhs.cell_name &&
+           geo_map == rhs.geo_map && inst_map == rhs.inst_map && pin_map == rhs.pin_map &&
+           via_list == rhs.via_list && lay_block_map == rhs.lay_block_map &&
+           area_block_list == rhs.area_block_list && boundary_list == rhs.boundary_list &&
+           label_list == rhs.label_list;
+}
+
 void cellview::set_geometry_mode(geometry_mode new_mode) {
     if (!empty())
         throw std::runtime_error("Cannot change geometry mode of non-empty layout.");
@@ -90,6 +98,8 @@ auto cellview::end_boundary() const -> decltype(boundary_list.cend()) {
 }
 auto cellview::begin_pin() const -> decltype(pin_map.cbegin()) { return pin_map.cbegin(); }
 auto cellview::end_pin() const -> decltype(pin_map.cend()) { return pin_map.cend(); }
+auto cellview::begin_label() const -> decltype(label_list.cbegin()) { return label_list.cbegin(); }
+auto cellview::end_label() const -> decltype(label_list.cend()) { return label_list.cend(); }
 
 void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
     auto lay_id = layer_id_at(*tech_ptr, layer);
@@ -98,6 +108,12 @@ void cellview::add_pin(const std::string &layer, std::string net, std::string la
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
     }
     iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
+}
+
+void cellview::add_label(const std::string &layer, const std::string &purpose, transformation xform,
+                         std::string label) {
+    label_list.emplace_back(layer_t_at(*tech_ptr, layer, purpose), std::move(xform),
+                            std::move(label));
 }
 
 void cellview::add_object(const blockage &obj) {

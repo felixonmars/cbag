@@ -19,6 +19,10 @@ geometry::geometry(layer_t &&lay_purp, const tech *tech_ptr, geometry_mode mode)
 
 bool geometry::index_empty() const { return index.empty(); }
 
+bool geometry::operator==(const geometry &rhs) const noexcept {
+    return mode == rhs.mode && data == rhs.data;
+}
+
 box_t geometry::get_bbox() const {
     box_t ans;
     bool success = std::visit(

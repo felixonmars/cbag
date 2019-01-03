@@ -27,7 +27,7 @@ class geo_index {
   public:
     geo_index();
 
-    explicit geo_index(layer_t &&lay_purp, const tech *tech_ptr);
+    geo_index(layer_t &&lay_purp, const tech *tech_ptr);
 
     bool empty() const;
 

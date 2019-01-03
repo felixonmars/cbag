@@ -43,6 +43,8 @@ class geometry {
 
     geometry(layer_t &&lay_purp, const tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
 
+    bool operator==(const geometry &rhs) const noexcept;
+
     bool index_empty() const;
     box_t get_bbox() const;
     box_t get_index_bbox() const;

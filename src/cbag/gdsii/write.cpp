@@ -237,7 +237,7 @@ void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, glay_t lay, gp
         xform = make_xform(xc, yc, oR0);
     }
 
-    write_text(logger, stream, lay, purp, pin.label, xform);
+    write_text(logger, stream, lay, purp, pin.get_label(), xform);
     if (make_pin_obj) {
         write_box(logger, stream, lay, purp, pin);
     }

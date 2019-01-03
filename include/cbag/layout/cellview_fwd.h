@@ -25,6 +25,7 @@ class pin;
 class via;
 class via_wrapper;
 class tech;
+class label;
 
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
@@ -44,12 +45,15 @@ class cellview {
     block_map_t lay_block_map;
     std::vector<blockage> area_block_list;
     std::vector<boundary> boundary_list;
+    std::vector<label> label_list;
 
     struct helper;
 
   public:
-    explicit cellview(const tech *tech_ptr, std::string cell_name,
-                      geometry_mode geo_mode = geometry_mode::POLY90);
+    cellview(const tech *tech_ptr, std::string cell_name,
+             geometry_mode geo_mode = geometry_mode::POLY90);
+
+    bool operator==(const cellview &rhs) const noexcept;
 
     void set_geometry_mode(geometry_mode new_mode);
 
@@ -75,8 +79,13 @@ class cellview {
     auto end_boundary() const -> decltype(boundary_list.cend());
     auto begin_pin() const -> decltype(pin_map.cbegin());
     auto end_pin() const -> decltype(pin_map.cend());
+    auto begin_label() const -> decltype(label_list.cbegin());
+    auto end_label() const -> decltype(label_list.cend());
 
     void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
+
+    void add_label(const std::string &layer, const std::string &purpose, transformation xform,
+                   std::string label);
 
     void add_object(const blockage &obj);
     void add_object(const boundary &obj);

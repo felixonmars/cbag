@@ -665,12 +665,12 @@ void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock 
         text_h = w;
     }
 
-    oa::oaText::create(blk, lay, purp, pin.label.c_str(), center, oa::oacCenterCenterTextAlign,
-                       orient, oa::oacRomanFont, text_h);
+    oa::oaText::create(blk, lay, purp, pin.get_label().c_str(), center,
+                       oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, text_h);
     if (make_pin_obj) {
         auto r = oa::oaRect::create(blk, lay, purp, oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
 
-        oa::oaName term_name(ns, pin.net.c_str());
+        oa::oaName term_name(ns, pin.get_net().c_str());
         auto term = oa::oaTerm::find(blk, term_name);
         if (term == nullptr) {
             auto net = oa::oaNet::find(blk, term_name);
