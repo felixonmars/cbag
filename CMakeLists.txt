@@ -76,6 +76,8 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/box_t_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/common/transformation_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/math.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/read.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/read_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/write.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/write_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
