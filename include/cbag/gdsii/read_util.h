@@ -4,11 +4,15 @@
 
 #include <fstream>
 #include <string>
+#include <tuple>
 
+#include <cbag/gdsii/record_type.h>
 #include <cbag/logging/logging.h>
 
 namespace cbag {
 namespace gdsii {
+
+std::tuple<record_type, std::size_t> read_record_header(std::ifstream &stream);
 
 void read_header(spdlog::logger &logger, std::ifstream &stream);
 
