@@ -6,7 +6,7 @@
 #include <cbag/common/box_t_adapt.h>
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation.h>
-#include <cbag/util/floor_half.h>
+#include <cbag/util/math.h>
 
 namespace bp = boost::polygon;
 
@@ -20,7 +20,7 @@ offset_t get_dim(const box_t &box, orient_2d orient) {
 }
 coord_t get_center(const box_t &box, orient_2d orient) {
     auto orient_code = static_cast<orient_2d_t>(orient);
-    return cbag::util::floor_half(box.intvs[orient_code][0] + box.intvs[orient_code][1]);
+    return cbag::util::floor2(box.intvs[orient_code][0] + box.intvs[orient_code][1]);
 }
 
 bool operator==(const box_t &box, const box_t &other) {

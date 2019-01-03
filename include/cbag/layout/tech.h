@@ -63,7 +63,7 @@ class tech {
 
     offset_t get_min_space(layer_t key, offset_t width, space_type sp_type) const;
 
-    offset_t get_min_length(layer_t key, offset_t width) const;
+    offset_t get_min_length(layer_t key, offset_t width, bool even) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 

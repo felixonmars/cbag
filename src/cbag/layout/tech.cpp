@@ -114,12 +114,12 @@ offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) co
     return w_sp_list[w_sp_list.size() - 1].second;
 }
 
-offset_t tech::get_min_length(layer_t key, offset_t width) const {
+offset_t tech::get_min_length(layer_t key, offset_t width, bool even) const {
     auto iter = len_map.find(key);
     if (iter == len_map.end())
         return 0;
 
-    return iter->second.get_min_length(width);
+    return iter->second.get_min_length(width, even);
 }
 
 via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {

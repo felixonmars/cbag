@@ -22,7 +22,7 @@ class len_info {
 
     len_info(std::vector<max_len_data> &&w_al, std::vector<max_len_data> &&md_al);
 
-    offset_t get_min_length(offset_t w) const;
+    offset_t get_min_length(offset_t w, bool even) const;
 };
 
 } // namespace layout
