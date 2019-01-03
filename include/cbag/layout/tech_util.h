@@ -24,6 +24,9 @@ std::string get_default_purpose_name(const tech &t);
 offset_t get_min_space(const tech &t, const std::string &layer, const std::string &purpose,
                        offset_t width, enum_t sp_type);
 
+offset_t get_min_length(const tech &t, const std::string &layer, const std::string &purpose,
+                        offset_t width, bool even);
+
 } // namespace layout
 } // namespace cbag
 
