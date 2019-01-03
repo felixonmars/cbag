@@ -15,6 +15,8 @@ namespace cbag {
  */
 struct time_struct {
     time_t time_val;
+
+    bool operator==(const time_struct &rhs) const noexcept { return time_val == rhs.time_val; }
 };
 
 /** A custom struct representing binary data.
@@ -25,6 +27,10 @@ struct time_struct {
 struct binary_t {
     std::string name;
     std::string bin_val;
+
+    bool operator==(const binary_t &rhs) const noexcept {
+        return name == rhs.name && bin_val == rhs.bin_val;
+    }
 };
 
 /** Type definition for a parameter value type.

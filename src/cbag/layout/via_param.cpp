@@ -21,5 +21,10 @@ via_param::via_param(cnt_t vnx, cnt_t vny, offset_t w, offset_t h, offset_t vspx
     set_via_enc_offset(enc[1], off[1], enc2l, enc2r, enc2t, enc2b);
 }
 
+bool via_param::operator==(const via_param &rhs) const noexcept {
+    return num == rhs.num && cut_dim == rhs.cut_dim && cut_spacing == rhs.cut_spacing &&
+           enc == rhs.enc && off == rhs.off;
+}
+
 } // namespace layout
 } // namespace cbag

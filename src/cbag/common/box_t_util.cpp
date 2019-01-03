@@ -23,10 +23,6 @@ coord_t get_center(const box_t &box, orient_2d orient) {
     return cbag::util::floor2(box.intvs[orient_code][0] + box.intvs[orient_code][1]);
 }
 
-bool operator==(const box_t &box, const box_t &other) {
-    return box.intvs[0] == other.intvs[0] && box.intvs[1] == other.intvs[1];
-}
-
 void set(box_t &box, coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
     box.intvs[0][0] = xl;
     box.intvs[0][1] = xh;

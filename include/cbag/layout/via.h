@@ -29,6 +29,8 @@ class via {
     const std::string &get_via_id() const;
 
     const via_param &get_params() const;
+
+    bool operator==(const via &rhs) const noexcept;
 };
 
 } // namespace layout

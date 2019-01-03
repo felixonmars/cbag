@@ -11,5 +11,8 @@ blockage_type blockage::get_type() const noexcept { return type; }
 
 lay_t blockage::get_layer() const noexcept { return layer; }
 
+bool blockage::operator==(const blockage &rhs) const noexcept {
+    return polygon::operator==(rhs) && layer == rhs.layer && type == rhs.type;
+}
 } // namespace layout
 } // namespace cbag

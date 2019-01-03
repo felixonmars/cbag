@@ -25,6 +25,8 @@ struct cellview_ref {
     param_map params;
 
     cellview_ref(std::string lib, std::string cell, std::string view);
+
+    bool operator==(const cellview_ref &rhs) const noexcept;
 };
 
 using str_map_t = std::unordered_map<std::string, std::string>;
@@ -49,6 +51,8 @@ class instance {
 
     instance(std::string name, const cellview *master, cbag::transformation xform, cnt_t nx = 1,
              cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
+
+    bool operator==(const instance &rhs) const noexcept;
 
     bool is_reference() const;
 

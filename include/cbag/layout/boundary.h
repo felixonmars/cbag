@@ -15,6 +15,8 @@ class boundary : public polygon {
     explicit boundary(boundary_type type = boundary_type::PR) noexcept;
 
     boundary_type get_type() const noexcept;
+
+    bool operator==(const boundary &rhs) const noexcept;
 };
 
 } // namespace layout

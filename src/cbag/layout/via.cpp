@@ -32,5 +32,9 @@ const std::string &via::get_via_id() const { return via_id; }
 
 const via_param &via::get_params() const { return params; }
 
+bool via::operator==(const via &rhs) const noexcept {
+    return via_id == rhs.via_id && params == rhs.params && xform == rhs.xform;
+}
+
 } // namespace layout
 } // namespace cbag

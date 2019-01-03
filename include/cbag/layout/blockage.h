@@ -18,6 +18,8 @@ class blockage : public polygon {
 
     blockage_type get_type() const noexcept;
     lay_t get_layer() const noexcept;
+
+    bool operator==(const blockage &rhs) const noexcept;
 };
 
 } // namespace layout

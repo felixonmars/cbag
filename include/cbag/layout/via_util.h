@@ -13,6 +13,8 @@ box_t get_bot_box(const via &v);
 
 box_t get_top_box(const via &v);
 
+bool operator==(const via &lhs, const via &rhs) noexcept;
+
 template <typename It> void get_via_cuts(const via &v, It out_iter) {
     auto &params = v.get_params();
     auto &[nx, ny] = params.num;

@@ -22,6 +22,8 @@ class pin : public box_t {
     pin();
     pin(coord_t xl, coord_t yl, coord_t xh, coord_t yh, std::string net, std::string label);
     pin(box_t box, std::string net, std::string label);
+
+    bool operator==(const pin &rhs) const noexcept;
 };
 
 } // namespace layout

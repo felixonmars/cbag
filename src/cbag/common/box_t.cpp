@@ -18,4 +18,8 @@ box_t::box_t(orient_2d orient, coord_t tl, coord_t th, coord_t pl, coord_t ph) n
 
 box_t box_t::get_invalid_box() noexcept { return {0, 0, -1, -1}; }
 
+bool box_t::operator==(const box_t &rhs) const noexcept {
+    return intvs[0] == rhs.intvs[0] && intvs[1] == rhs.intvs[1];
+}
+
 } // namespace cbag

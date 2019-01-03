@@ -20,6 +20,8 @@ struct box_t {
     box_t(orient_2d orient, coord_t tl, coord_t th, coord_t pl, coord_t ph) noexcept;
 
     static box_t get_invalid_box() noexcept;
+
+    bool operator==(const box_t &rhs) const noexcept;
 };
 
 } // namespace cbag

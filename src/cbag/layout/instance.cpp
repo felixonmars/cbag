@@ -12,6 +12,10 @@ namespace layout {
 cellview_ref::cellview_ref(std::string lib, std::string cell, std::string view)
     : lib(std::move(lib)), cell(std::move(cell)), view(std::move(view)) {}
 
+bool cellview_ref::operator==(const cellview_ref &rhs) const noexcept {
+    return lib == rhs.lib && cell == rhs.cell && view == rhs.view && params == rhs.params;
+}
+
 instance::instance() = default;
 
 instance::instance(std::string name, std::string lib, std::string cell, std::string view,
@@ -24,6 +28,11 @@ instance::instance(std::string name, const cellview *master, cbag::transformatio
                    cnt_t ny, coord_t spx, coord_t spy)
     : master(std::in_place_type_t<const cellview *>{}, master), name(std::move(name)),
       xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
+
+bool instance::operator==(const instance &rhs) const noexcept {
+    return master == rhs.master && name == rhs.name && xform == rhs.xform && nx == rhs.nx &&
+           ny == rhs.ny && spx == rhs.spx && spy == rhs.spy;
+}
 
 bool instance::is_reference() const { return std::holds_alternative<cellview_ref>(master); }
 
