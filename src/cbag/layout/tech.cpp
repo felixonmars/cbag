@@ -8,6 +8,7 @@
 #include <cbag/layout/tech.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/yaml/common.h>
+#include <cbag/yaml/len_info.h>
 
 namespace cbag {
 namespace layout {
@@ -26,6 +27,15 @@ sp_map_t make_space_map(const YAML::Node &node, const lp_lookup &lp_map) {
     for (const auto &pair : node) {
         auto [lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
         ans.emplace(layer_t_at(lp_map, lay_name, purp_name), make_w_sp_vec(pair.second));
+    }
+    return ans;
+}
+
+len_map_t make_len_map(const YAML::Node &node, const lp_lookup &lp_map) {
+    len_map_t ans;
+    for (const auto &pair : node) {
+        auto [lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
+        ans.emplace(layer_t_at(lp_map, lay_name, purp_name), pair.second.as<len_info>());
     }
     return ans;
 }
@@ -53,6 +63,9 @@ tech::tech(const std::string &tech_fname) {
     } else {
         sp_sc_type = space_type::DIFF_COLOR;
     }
+
+    // populate len_map
+    len_map = make_len_map(node["len_min"], lp_map);
 }
 
 const std::string &tech::get_tech_lib() const { return tech_lib; }
@@ -99,6 +112,14 @@ offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) co
             return sp;
     }
     return w_sp_list[w_sp_list.size() - 1].second;
+}
+
+offset_t tech::get_min_length(layer_t key, offset_t width) const {
+    auto iter = len_map.find(key);
+    if (iter == len_map.end())
+        return 0;
+
+    return iter->second.get_min_length(width);
 }
 
 via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {

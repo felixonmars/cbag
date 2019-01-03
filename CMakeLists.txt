@@ -89,6 +89,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geometry.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/instance.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/len_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/lp_lookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/path_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
@@ -135,6 +136,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/box_t.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/datatypes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/figures.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/len_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/shapes.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/yaml/via_info.cpp

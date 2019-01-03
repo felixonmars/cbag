@@ -12,6 +12,7 @@
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/space_type.h>
+#include <cbag/layout/len_info.h>
 #include <cbag/layout/lp_lookup.h>
 #include <cbag/layout/via_lookup.h>
 
@@ -21,6 +22,8 @@ namespace layout {
 using sp_map_t =
     std::unordered_map<layer_t, std::vector<std::pair<offset_t, offset_t>>, boost::hash<layer_t>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
+
+using len_map_t = std::unordered_map<layer_t, len_info, boost::hash<layer_t>>;
 
 class tech {
   private:
@@ -33,6 +36,7 @@ class tech {
     via_lookup vlookup;
     sp_map_grp_t sp_map_grp;
     space_type sp_sc_type;
+    len_map_t len_map;
 
   public:
     tech(const std::string &tech_fname);
@@ -58,6 +62,8 @@ class tech {
     std::optional<purp_t> get_purpose_id(const std::string &purpose) const;
 
     offset_t get_min_space(layer_t key, offset_t width, space_type sp_type) const;
+
+    offset_t get_min_length(layer_t key, offset_t width) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 
