@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 
-#include <cbag/gdsii/main.h>
+#include <cbag/gdsii/write.h>
 #include <cbag/layout/tech_util.h>
 
 TEST_CASE("gds_lookup can read layer and object maps", "[gds]") {

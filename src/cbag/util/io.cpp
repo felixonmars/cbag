@@ -22,11 +22,16 @@ std::ofstream open_file_write(const std::string &fname, bool binary) {
     return ans;
 }
 
-std::ifstream open_file_read(const std::string &fname) {
+std::ifstream open_file_read(const std::string &fname, bool binary) {
     if (!is_file(fname))
         throw std::invalid_argument(fname + " is not a file.");
     auto mode = std::ios_base::out;
-    return std::ifstream{fname, mode};
+    if (binary)
+        mode |= std::ios_base::binary;
+    std::ifstream ans{fname, mode};
+    if (binary)
+        ans.imbue(std::locale::classic());
+    return ans;
 }
 
 bool is_file(const std::string &fname) { return is_file(std::filesystem::path(fname)); }
