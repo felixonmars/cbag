@@ -87,7 +87,7 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
     class const_intv_iterator {
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = const disjoint_intvs::value_type;
+        using value_type = const typename traits::interval<disjoint_intvs::value_type>::intv_type;
         using difference_type = typename const_iterator::difference_type;
         using pointer = value_type *;
         using reference = value_type &;
@@ -299,7 +299,8 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
                 fmt::format("Cannot add nonempty interval [{:d}, {:d})", i_start, i_stop));
         abut = abut && merge;
         auto [start_iter, stop_iter] =
-            (abut) ? overlap_range(value_type{i_start - 1, i_stop + 1}) : overlap_range(item);
+            (abut) ? overlap_range(std::array<coord_type, 2>{i_start - 1, i_stop + 1})
+                   : overlap_range(item);
         if (start_iter == stop_iter) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));
