@@ -66,7 +66,7 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
     while (!is_done) {
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
-        case record_type::BGNSTR:
+        case record_type::BGNSTR: {
             stream.ignore(rsize);
             auto [cell_name, cv_ptr] =
                 read_lay_cellview(*logger, stream, lib_name, t, rmap, cv_map);
@@ -75,6 +75,7 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
             *out_iter = std::move(cv_ptr);
             ++out_iter;
             break;
+        }
         case record_type::ENDLIB:
             stream.close();
             return;
