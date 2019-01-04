@@ -97,6 +97,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/lp_lookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/path_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/pin.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/routing_grid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
