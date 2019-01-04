@@ -129,13 +129,13 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
                                  disjoint_intvs::const_iterator &first,
                                  const disjoint_intvs::const_iterator &last,
                                  const intv_comp &comp) {
-        auto iter_pair = std::equal_range(first, last, intv, comp);
-        first = (iter_pair.first == iter_pair.second) ? iter_pair.first : iter_pair.second - 1;
-        for (; iter_pair.first != iter_pair.second; ++(iter_pair.first)) {
+        auto [start_iter, stop_iter] = std::equal_range(first, last, intv, comp);
+        first = (start_iter == stop_iter) ? start_iter : stop_iter - 1;
+        for (; start_iter != stop_iter; ++(start_iter)) {
             coord_type start = std::max(traits::interval<Interval>::start(intv),
-                                        traits::interval<Interval>::start(*(iter_pair.first)));
+                                        traits::interval<Interval>::start(*start_iter));
             coord_type stop = std::min(traits::interval<Interval>::stop(intv),
-                                       traits::interval<Interval>::stop(*(iter_pair.first)));
+                                       traits::interval<Interval>::stop(*start_iter));
             if (start < stop)
                 ans.push_back(traits::interval<Interval>::construct(start, stop));
         }
@@ -250,43 +250,43 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
     }
 
     template <class K> bool remove_overlaps(const K &key) {
-        auto iter_pair = overlap_range(key);
-        if (iter_pair.first == iter_pair.second)
+        auto [start_iter, stop_iter] = overlap_range(key);
+        if (start_iter == stop_iter)
             return false;
-        data_.erase(iter_pair.first, iter_pair.second);
+        data_.erase(start_iter, stop_iter);
         return true;
     }
 
     template <class K> bool subtract(const K &key) {
-        auto iter_pair = overlap_range(key);
-        auto overlap_size = iter_pair.second - iter_pair.first;
+        auto [start_iter, stop_iter] = overlap_range(key);
+        auto overlap_size = stop_iter - start_iter;
         if (overlap_size == 0)
             return false;
 
         auto k_start = traits::interval<K>::start(key);
         auto k_stop = traits::interval<K>::stop(key);
-        coord_type test = traits::interval<Interval>::start(*(iter_pair.first));
+        coord_type test = traits::interval<Interval>::start(*start_iter);
         if (test < k_start) {
             // perform subtraction on first interval
-            traits::interval<Interval>::set_stop(*(iter_pair.first), k_start);
-            ++iter_pair.first;
+            traits::interval<Interval>::set_stop(*start_iter, k_start);
+            ++start_iter;
             // we're done if there's no more interval
             if ((--overlap_size) == 0)
                 return true;
         }
 
-        auto last_iter = iter_pair.second - 1;
+        auto last_iter = stop_iter - 1;
         test = traits::interval<Interval>::stop(*last_iter);
         if (k_stop < test) {
             // perform subtraction on last interval
             traits::interval<Interval>::set_start(*last_iter, k_stop);
-            iter_pair.second = last_iter;
+            stop_iter = last_iter;
             if ((--overlap_size) == 0)
                 return true;
         }
 
         // erase all completely overlapped intervals
-        data_.erase(iter_pair.first, iter_pair.second);
+        data_.erase(start_iter, stop_iter);
         return true;
     }
 
@@ -298,24 +298,24 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
             throw std::invalid_argument(
                 fmt::format("Cannot add nonempty interval [{:d}, {:d})", i_start, i_stop));
         abut = abut && merge;
-        auto iter_pair =
+        auto [start_iter, stop_iter] =
             (abut) ? overlap_range(value_type{i_start - 1, i_stop + 1}) : overlap_range(item);
-        if (iter_pair.first == iter_pair.second) {
+        if (start_iter == stop_iter) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));
             return true;
         } else if (merge) {
             // have overlapping/abutting intervals, and we want to merge
-            auto ovl_start = traits::interval<Interval>::start(*(iter_pair.first));
-            auto ovl_stop = traits::interval<Interval>::stop(*(iter_pair.second - 1));
+            auto ovl_start = traits::interval<Interval>::start(*start_iter);
+            auto ovl_stop = traits::interval<Interval>::stop(*(stop_iter - 1));
             traits::interval<Interval>::set_start(item, std::min(i_start, ovl_start));
             traits::interval<Interval>::set_stop(item, std::max(i_stop, ovl_stop));
             // modify the first overlapping interval
-            *(iter_pair.first) = item;
+            *start_iter = item;
             // erase the rest
-            ++(iter_pair.first);
-            if (iter_pair.second > iter_pair.first)
-                data_.erase(iter_pair.first, iter_pair.second);
+            ++(start_iter);
+            if (stop_iter > start_iter)
+                data_.erase(start_iter, stop_iter);
             return true;
         }
         // has overlap, and not merging; adding failed.
