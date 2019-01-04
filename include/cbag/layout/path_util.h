@@ -87,13 +87,13 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     s0.rotate90_norm();
     if (s0.is_45_or_invalid()) {
         for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
-            auto scale = round(deltas[idx] / root2);
-            prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
+            auto scale = static_cast<offset_t>(round(deltas[idx] / root2));
+            prev_pts.emplace_back(cbag::point{x0 + s0.dx * scale, y0 + s0.dy * scale});
         }
     } else {
         for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
             auto scale = deltas[idx];
-            prev_pts.emplace_back(x0 + s0.dx * scale, y0 + s0.dy * scale);
+            prev_pts.emplace_back(cbag::point{x0 + s0.dx * scale, y0 + s0.dy * scale});
         }
     }
 
@@ -118,7 +118,7 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
         vector45 dir1 = s1.get_rotate90();
         if (dir1.is_45_or_invalid()) {
             for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
-                auto scale = round(deltas[idx] / root2);
+                auto scale = static_cast<offset_t>(round(deltas[idx] / root2));
                 auto prevx = traits::pt_list<pt_vector>::x(prev_pts, idx);
                 auto prevy = traits::pt_list<pt_vector>::y(prev_pts, idx);
                 auto pdx = xc + dir1.dx * scale - prevx;
@@ -161,7 +161,7 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     s0.rotate90_norm();
     if (s0.is_45_or_invalid()) {
         for (decltype(n_paths) idx = 0; idx < n_paths; ++idx) {
-            auto scale = round(deltas[idx] / root2);
+            auto scale = static_cast<offset_t>(round(deltas[idx] / root2));
             auto xt = traits::pt_list<pt_vector>::x(prev_pts, idx);
             auto yt = traits::pt_list<pt_vector>::y(prev_pts, idx);
             auto vec = path_to_poly45(xt, yt, x0 + s0.dx * scale, y0 + s0.dy * scale,

@@ -81,7 +81,7 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
     ans.reserve(8);
 
     vector45 n_norm = p_norm.get_rotate90();
-    auto half_diag = round(half_width / root2);
+    auto half_diag = static_cast<offset_t>(round(half_width / root2));
     offset_t w_main, w_norm;
     if (is_45) {
         w_main = half_diag;
