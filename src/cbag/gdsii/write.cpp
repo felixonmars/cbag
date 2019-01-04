@@ -2,13 +2,12 @@
 
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
+#include <cbag/gdsii/parse_map.h>
 #include <cbag/gdsii/write.h>
 #include <cbag/gdsii/write_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/via_util.h>
-#include <cbag/util/io.h>
-#include <cbag/util/string.h>
 
 namespace cbag {
 namespace gdsii {
@@ -69,41 +68,6 @@ class rect_writer {
 
     rect_writer &operator++() { return *this; }
 };
-
-void check_has_next(const util::token_iterator &iter, const std::string &fname) {
-    if (!iter.has_next())
-        throw std::runtime_error("Cannot parse file: " + fname);
-}
-
-uint16_t to_int(std::string &&s, const std::string &fname) {
-    try {
-        return static_cast<uint16_t>(std::stoi(std::move(s)));
-    } catch (const std::invalid_argument &) {
-        throw std::runtime_error("Cannot parse file: " + fname);
-    } catch (const std::out_of_range &) {
-        throw std::runtime_error("Cannot parse file: " + fname);
-    }
-}
-
-template <typename F> void process_file(const std::string &fname, F fun) {
-    auto file = util::open_file_read(fname);
-    std::string line;
-    while (std::getline(file, line)) {
-        // ignore comments
-        if (!line.empty() && line[0] != '#') {
-            util::token_iterator iter(line, " \t");
-            check_has_next(iter, fname);
-            auto val1 = iter.get_next();
-            check_has_next(iter, fname);
-            auto val2 = iter.get_next();
-            check_has_next(iter, fname);
-            auto lay_id = to_int(iter.get_next(), fname);
-            check_has_next(iter, fname);
-            auto purp_id = to_int(iter.get_next(), fname);
-            fun(val1, val2, lay_id, purp_id);
-        }
-    }
-}
 
 layer_map parse_layer_map(const std::string &fname, const layout::tech &tech) {
     layer_map ans;

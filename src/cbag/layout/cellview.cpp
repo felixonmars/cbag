@@ -130,6 +130,8 @@ void cellview::add_object(const blockage &obj) {
 
 void cellview::add_object(const boundary &obj) { boundary_list.push_back(obj); }
 
+void cellview::add_object(boundary &&obj) { boundary_list.push_back(std::move(obj)); }
+
 void cellview::add_object(const via_wrapper &obj) {
     via_list.push_back(obj.v);
     if (obj.add_layers) {

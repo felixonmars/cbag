@@ -23,10 +23,13 @@
 namespace cbag {
 namespace gdsii {
 
+using gds_to_lay_map = std::unordered_map<gds_layer_t, layer_t, boost::hash<gds_layer_t>>;
+using gds_to_bnd_map = std::unordered_map<gds_layer_t, boundary_type, boost::hash<gds_layer_t>>;
+
 class gds_rlookup {
   private:
-    std::unordered_map<gds_layer_t, layer_t, boost::hash<gds_layer_t>> lay_map;
-    std::unordered_map<gds_layer_t, boundary_type, boost::hash<gds_layer_t>> bnd_map;
+    gds_to_lay_map lay_map;
+    gds_to_bnd_map bnd_map;
 
   public:
     gds_rlookup();

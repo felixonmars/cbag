@@ -88,6 +88,7 @@ class cellview {
 
     void add_object(const blockage &obj);
     void add_object(const boundary &obj);
+    void add_object(boundary &&obj);
     void add_object(const via_wrapper &obj);
     void add_object(const instance &obj);
 };

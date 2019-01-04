@@ -149,7 +149,6 @@ void traits::nstream<verilog_stream>::write_instance(type &stream, const std::st
         append_inst_nets(stream, name, inst, info.in_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.out_terms, has_prev_term);
         append_inst_nets(stream, name, inst, info.io_terms, has_prev_term);
-        // TODO: bug is here
         if (has_prev_term)
             stream.out_file << std::endl;
         stream.out_file << ");" << std::endl;
