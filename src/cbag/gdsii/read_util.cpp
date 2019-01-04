@@ -55,9 +55,14 @@ void read_skip(std::ifstream &stream) {
     stream.ignore(num * unit_size);
 }
 
+template <record_type R> uint16_t read_int(spdlog::logger &logger, std::ifstream &stream) {
+    check_record_header<R, sizeof(uint16_t), 1>(stream);
+    return read_bytes<uint16_t>(stream);
+}
+
 template <record_type R> std::string read_name(spdlog::logger &logger, std::ifstream &stream) {
     std::string ans;
-    auto num = check_record_header<R, 1>(stream);
+    auto num = check_record_header<R, sizeof(char)>(stream);
     ans.reserve(num);
     for (decltype(num) idx = 0; idx < num; ++idx) {
         ans.push_back(read_bytes<char>(stream));
@@ -86,14 +91,44 @@ void read_units(spdlog::logger &logger, std::ifstream &stream) {
 }
 
 std::string read_struct_name(spdlog::logger &logger, std::ifstream &stream) {
-    // TODO: implement this
-    return "";
+    return read_name<record_type::STRNAME>(logger, stream);
 }
 
-std::tuple<gds_layer_t, transformation, std::string>
-read_text(spdlog::logger &logger, std::ifstream &stream, std::size_t size) {
+void read_ele_end(spdlog::logger &logger, std::ifstream &stream) {
+    check_record_header<record_type::ENDEL, sizeof(uint16_t), 0>(stream);
+}
+
+transformation read_transform(spdlog::logger &logger, std::ifstream &stream) {
     // TODO: implement this
-    return {gds_layer_t{0, 0}, make_xform(), ""};
+    return {};
+}
+
+std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
+                                                               std::ifstream &stream) {
+    auto glay = read_int<record_type::LAYER>(logger, stream);
+    auto gpurp = read_int<record_type::TEXTTYPE>(logger, stream);
+    read_skip<record_type::PRESENTATION, sizeof(uint16_t), 1>(stream);
+    auto xform = read_transform(logger, stream);
+    auto text = read_name<record_type::STRING>(logger, stream);
+    read_ele_end(logger, stream);
+
+    return {gds_layer_t{glay, gpurp}, std::move(xform), std::move(text)};
+}
+
+std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::ifstream &stream,
+                                                  std::size_t size) {
+    auto glay = read_int<record_type::LAYER>(logger, stream);
+    auto gpurp = read_int<record_type::BOXTYPE>(logger, stream);
+    auto npts = check_record_header<record_type::XY, sizeof(uint32_t), 10>(stream);
+
+    // TODO: finish this
+    return {gds_layer_t{0, 0}, layout::polygon{}};
+}
+
+std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
+                                                       std::ifstream &stream, std::size_t size) {
+    // TODO: implement this
+    return {gds_layer_t{0, 0}, layout::polygon{}};
 }
 
 layout::instance read_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t size) {
@@ -105,18 +140,6 @@ layout::instance read_arr_instance(spdlog::logger &logger, std::ifstream &stream
                                    std::size_t size) {
     // TODO: implement this
     return {};
-}
-
-std::tuple<gds_layer_t, box_t> read_box(spdlog::logger &logger, std::ifstream &stream,
-                                        std::size_t size) {
-    // TODO: implement this
-    return {gds_layer_t{0, 0}, box_t{}};
-}
-
-std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
-                                                       std::ifstream &stream, std::size_t size) {
-    // TODO: implement this
-    return {gds_layer_t{0, 0}, layout::polygon{}};
 }
 
 } // namespace gdsii

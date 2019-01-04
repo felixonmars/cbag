@@ -5,7 +5,6 @@
 #include <cbag/gdsii/parse_map.h>
 #include <cbag/gdsii/read.h>
 #include <cbag/gdsii/read_util.h>
-#include <cbag/layout/boundary_util.h>
 
 namespace cbag {
 namespace gdsii {
@@ -76,6 +75,26 @@ std::string read_gds_start(spdlog::logger &logger, std::ifstream &stream) {
     return ans;
 }
 
+void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds_key,
+                layout::polygon &&poly, const gds_rlookup &rmap) {
+    auto map_val = rmap.get_mapping(gds_key);
+    std::visit(
+        overload{
+            [&ans, &poly](layer_t k) { ans.make_geometry(std::move(k)).add_shape(poly, false); },
+            [&ans, &poly](boundary_type k) {
+                layout::boundary bnd{k};
+                bnd.set(poly.begin(), poly.end());
+                ans.add_object(std::move(bnd));
+            },
+            [&logger, &gds_key](bool k) {
+                logger.warn("Cannot find mapping for GDS layer/purpose: ({}, {}), skipping.",
+                            gds_key.first, gds_key.second);
+            },
+
+        },
+        map_val);
+}
+
 layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream,
                                    const std::string &lib_name, const layout::tech &t,
                                    const gds_rlookup &rmap) {
@@ -86,7 +105,7 @@ layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::TEXT: {
-            auto [gds_key, xform, text] = read_text(logger, stream, rsize);
+            auto [gds_key, xform, text] = read_text(logger, stream);
             ans.add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text));
             break;
         }
@@ -97,45 +116,13 @@ layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream
             ans.add_object(read_arr_instance(logger, stream, rsize));
             break;
         case record_type::BOX: {
-            auto [gds_key, box] = read_box(logger, stream, rsize);
-            auto map_val = rmap.get_mapping(gds_key);
-            std::visit(
-                overload{
-                    [&ans, &box](layer_t k) {
-                        ans.make_geometry(std::move(k)).add_shape(box, false);
-                    },
-                    [&ans, &box](boundary_type k) { ans.add_object(layout::from_box(k, box)); },
-                    [&logger, &gds_key](bool k) {
-                        logger.warn(
-                            "Cannot find mapping for GDS layer/purpose: ({}, {}), skipping.",
-                            gds_key.first, gds_key.second);
-                    },
-
-                },
-                map_val);
+            auto [gds_key, poly] = read_box(logger, stream, rsize);
+            add_object(logger, ans, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::BOUNDARY: {
             auto [gds_key, poly] = read_boundary(logger, stream, rsize);
-            auto map_val = rmap.get_mapping(gds_key);
-            std::visit(
-                overload{
-                    [&ans, &poly](layer_t k) {
-                        ans.make_geometry(std::move(k)).add_shape(poly, false);
-                    },
-                    [&ans, &poly](boundary_type k) {
-                        layout::boundary bnd{k};
-                        bnd.set(poly.begin(), poly.end());
-                        ans.add_object(std::move(bnd));
-                    },
-                    [&logger, &gds_key](bool k) {
-                        logger.warn(
-                            "Cannot find mapping for GDS layer/purpose: ({}, {}), skipping.",
-                            gds_key.first, gds_key.second);
-                    },
-
-                },
-                map_val);
+            add_object(logger, ans, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::ENDSTR:

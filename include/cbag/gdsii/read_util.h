@@ -35,18 +35,18 @@ void read_units(spdlog::logger &logger, std::ifstream &stream);
 
 std::string read_struct_name(spdlog::logger &logger, std::ifstream &stream);
 
-std::tuple<gds_layer_t, transformation, std::string>
-read_text(spdlog::logger &logger, std::ifstream &stream, std::size_t size);
+std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
+                                                               std::ifstream &stream);
+
+std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::ifstream &stream,
+                                                  std::size_t size);
+
+std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
+                                                       std::ifstream &stream, std::size_t size);
 
 layout::instance read_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t size);
 
 layout::instance read_arr_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t size);
-
-std::tuple<gds_layer_t, box_t> read_box(spdlog::logger &logger, std::ifstream &stream,
-                                        std::size_t size);
-
-std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
-                                                       std::ifstream &stream, std::size_t size);
 
 } // namespace gdsii
 } // namespace cbag
