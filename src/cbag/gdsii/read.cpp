@@ -100,6 +100,9 @@ read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::stri
                   const layout::tech &t, const gds_rlookup &rmap,
                   const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
+
+    logger.info("GDS cellview name: " + cell_name);
+
     auto cv_ptr = std::make_unique<layout::cellview>(&t, std::move(cell_name), geometry_mode::POLY);
 
     auto inst_cnt = static_cast<std::size_t>(0);
@@ -107,29 +110,35 @@ read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::stri
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::TEXT: {
+            logger.info("Reading layout text.");
             auto [gds_key, xform, text] = read_text(logger, stream);
             cv_ptr->add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text));
             break;
         }
         case record_type::SREF:
+            logger.info("Reading layout instance.");
             cv_ptr->add_object(read_instance(logger, stream, inst_cnt, master_map));
             ++inst_cnt;
             break;
         case record_type::AREF:
+            logger.info("Reading layout array instance.");
             cv_ptr->add_object(read_arr_instance(logger, stream, inst_cnt, master_map));
             ++inst_cnt;
             break;
         case record_type::BOX: {
+            logger.info("Reading layout box.");
             auto [gds_key, poly] = read_box(logger, stream);
             add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::BOUNDARY: {
+            logger.info("Reading layout boundary.");
             auto [gds_key, poly] = read_boundary(logger, stream);
             add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::ENDSTR:
+            logger.info("Finish reading GDS cellview.");
             return {std::move(cell_name), std::move(cv_ptr)};
         default:
             throw std::runtime_error("Unsupported record type in GDS struct: " +

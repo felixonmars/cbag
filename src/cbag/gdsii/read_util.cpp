@@ -37,7 +37,7 @@ template <record_type R, std::size_t unit_size = 1, std::size_t num_data = 0>
 std::size_t check_record_header(std::ifstream &stream) {
     auto [actual, size] = read_record_header(stream);
     if (actual != R)
-        throw std::runtime_error(fmt::format("got gds record {}, expected {}",
+        throw std::runtime_error(fmt::format("got gds record {:#x}, expected {:#x}",
                                              static_cast<int>(actual), static_cast<int>(R)));
 
     auto ans = size / unit_size;
@@ -195,7 +195,8 @@ std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
                                                        std::ifstream &stream) {
     auto glay = read_int<record_type::LAYER>(logger, stream);
     auto gpurp = read_int<record_type::DATATYPE>(logger, stream);
-    auto num = check_record_header<record_type::XY, sizeof(int32_t)>(stream);
+    // divide by 2 to get number of points instead of number of coordinates.
+    auto num = check_record_header<record_type::XY, sizeof(int32_t)>(stream) / 2;
 
     std::vector<point> pt_vec;
     pt_vec.reserve(num);

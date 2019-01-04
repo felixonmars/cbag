@@ -51,10 +51,15 @@ template <typename iT> class point_xy_iter {
     explicit point_xy_iter(iT pt_iter, bool is_y = false)
         : pt_iter(std::move(pt_iter)), is_y(is_y) {}
 
-    uint32_t operator*() {
+    uint32_t operator*() const {
         auto val = (is_y) ? pt_iter->y() : pt_iter->x();
         return *reinterpret_cast<uint32_t *>(&val);
     }
+
+    uint32_t x() const { return pt_iter->x(); }
+
+    uint32_t y() const { return pt_iter->y(); }
+
     point_xy_iter &operator++() {
         if (is_y) {
             ++pt_iter;
@@ -62,7 +67,7 @@ template <typename iT> class point_xy_iter {
         is_y = !is_y;
         return *this;
     }
-    bool operator!=(const point_xy_iter &other) {
+    bool operator!=(const point_xy_iter &other) const noexcept {
         return pt_iter != other.pt_iter || is_y != other.is_y;
     }
 };
@@ -125,7 +130,13 @@ void write_int(spdlog::logger &logger, std::ofstream &stream, uint16_t val) {
 template <typename iT>
 void write_points(spdlog::logger &logger, std::ofstream &stream, std::size_t num_pts, iT begin,
                   iT end) {
-    write<record_type::XY>(stream, 2 * num_pts, point_xy_iter(begin), point_xy_iter(end));
+    auto start_iter = point_xy_iter(begin);
+    auto xval = start_iter.x();
+    auto yval = start_iter.y();
+    write<record_type::XY>(stream, 2 * (num_pts + 1), std::move(start_iter), point_xy_iter(end));
+    // write first point
+    write_bytes(stream, xval);
+    write_bytes(stream, yval);
 }
 
 std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
