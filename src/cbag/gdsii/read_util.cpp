@@ -2,11 +2,14 @@
 
 #include <fmt/core.h>
 
+#include <cbag/common/point.h>
 #include <cbag/common/transformation_util.h>
+#include <cbag/gdsii/math.h>
 #include <cbag/gdsii/read_util.h>
 #include <cbag/gdsii/typedefs.h>
 #include <cbag/layout/instance.h>
 #include <cbag/layout/label.h>
+#include <cbag/layout/pt_traits.h>
 #include <cbag/util/sfinae.h>
 
 namespace cbag {
@@ -60,6 +63,11 @@ template <record_type R> uint16_t read_int(spdlog::logger &logger, std::ifstream
     return read_bytes<uint16_t>(stream);
 }
 
+template <record_type R> double read_double(spdlog::logger &logger, std::ifstream &stream) {
+    check_record_header<R, sizeof(uint64_t), 1>(stream);
+    return gds_to_double(read_bytes<uint64_t>(stream));
+}
+
 template <record_type R> std::string read_name(spdlog::logger &logger, std::ifstream &stream) {
     std::string ans;
     auto num = check_record_header<R, sizeof(char)>(stream);
@@ -99,8 +107,44 @@ void read_ele_end(spdlog::logger &logger, std::ifstream &stream) {
 }
 
 transformation read_transform(spdlog::logger &logger, std::ifstream &stream) {
-    // TODO: implement this
-    return {};
+    auto bit_flag = read_int<record_type::STRANS>(logger, stream);
+
+    if ((bit_flag & (1 << 13)) != 0) {
+        throw std::runtime_error("GDS Magnification in transform is not supported.");
+    }
+
+    transformation ans;
+    if ((bit_flag & 1) != 0) {
+        set_orient(ans, oMX);
+    }
+
+    if ((bit_flag & (1 << 14)) != 0) {
+        auto ang_dbl = read_double<record_type::ANGLE>(logger, stream);
+        auto angle = static_cast<int>(ang_dbl);
+        switch (angle) {
+        case 0:
+            break;
+        case 90:
+            ans += make_xform(0, 0, oR90);
+            break;
+        case 180:
+            ans += make_xform(0, 0, oR180);
+            break;
+        case 270:
+            ans += make_xform(0, 0, oR270);
+            break;
+        default:
+            throw std::runtime_error("GDS rotation angle not supported: " + std::to_string(angle));
+        }
+    }
+
+    return ans;
+}
+
+point read_point(std::ifstream &stream) {
+    auto x = read_bytes<int32_t>(stream);
+    auto y = read_bytes<int32_t>(stream);
+    return {x, y};
 }
 
 std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
@@ -109,6 +153,11 @@ std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &l
     auto gpurp = read_int<record_type::TEXTTYPE>(logger, stream);
     read_skip<record_type::PRESENTATION, sizeof(uint16_t), 1>(stream);
     auto xform = read_transform(logger, stream);
+
+    check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
+    auto [x, y] = read_point(stream);
+    move_by(xform, x, y);
+
     auto text = read_name<record_type::STRING>(logger, stream);
     read_ele_end(logger, stream);
 
@@ -119,16 +168,39 @@ std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::i
                                                   std::size_t size) {
     auto glay = read_int<record_type::LAYER>(logger, stream);
     auto gpurp = read_int<record_type::BOXTYPE>(logger, stream);
-    auto npts = check_record_header<record_type::XY, sizeof(uint32_t), 10>(stream);
+    check_record_header<record_type::XY, sizeof(int32_t), 10>(stream);
 
-    // TODO: finish this
-    return {gds_layer_t{0, 0}, layout::polygon{}};
+    std::array<point, 5> pt_vec;
+    pt_vec[0] = read_point(stream);
+    pt_vec[1] = read_point(stream);
+    pt_vec[2] = read_point(stream);
+    pt_vec[3] = read_point(stream);
+    pt_vec[4] = read_point(stream);
+    read_ele_end(logger, stream);
+
+    layout::polygon poly;
+    poly.set(pt_vec.begin(), pt_vec.end());
+
+    return {gds_layer_t{glay, gpurp}, std::move(poly)};
 }
 
 std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
                                                        std::ifstream &stream, std::size_t size) {
-    // TODO: implement this
-    return {gds_layer_t{0, 0}, layout::polygon{}};
+    auto glay = read_int<record_type::LAYER>(logger, stream);
+    auto gpurp = read_int<record_type::DATATYPE>(logger, stream);
+    auto num = check_record_header<record_type::XY, sizeof(int32_t)>(stream);
+
+    std::vector<point> pt_vec;
+    pt_vec.reserve(num);
+    for (decltype(num) idx = 0; idx < num; ++idx) {
+        pt_vec.push_back(read_point(stream));
+    }
+    read_ele_end(logger, stream);
+
+    layout::polygon poly;
+    poly.set(pt_vec.begin(), pt_vec.end());
+
+    return {gds_layer_t{glay, gpurp}, std::move(poly)};
 }
 
 layout::instance read_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t size) {
