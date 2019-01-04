@@ -3,24 +3,48 @@
 #define CBAG_GDSII_READ_H
 
 #include <string>
+#include <tuple>
+#include <unordered_map>
+#include <variant>
+
+#include <boost/functional/hash.hpp>
 
 #include <cbag/logging/logging.h>
 
 #include <cbag/util/io.h>
 
+#include <cbag/common/layer_t.h>
+#include <cbag/enum/boundary_type.h>
 #include <cbag/gdsii/record_type.h>
+#include <cbag/gdsii/typedefs.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/tech.h>
 
 namespace cbag {
 namespace gdsii {
 
+class gds_rlookup {
+  private:
+    std::unordered_map<gds_layer_t, layer_t, boost::hash<gds_layer_t>> lay_map;
+    std::unordered_map<gds_layer_t, boundary_type, boost::hash<gds_layer_t>> bnd_map;
+
+  public:
+    gds_rlookup();
+
+    gds_rlookup(const std::string &lay_fname, const std::string &obj_fname, const layout::tech &t);
+
+    std::variant<layer_t, boundary_type, bool> get_mapping(gds_layer_t key) const;
+
+    layer_t get_layer_t(gds_layer_t key) const;
+};
+
 std::tuple<record_type, std::size_t> read_record_header(std::ifstream &stream);
 
 std::string read_gds_start(spdlog::logger &logger, std::ifstream &stream);
 
 layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream,
-                                   const std::string &lib_name, const layout::tech &t);
+                                   const std::string &lib_name, const layout::tech &t,
+                                   const gds_rlookup &rmap);
 
 template <class OutIter>
 void read_gds(const std::string &fname, const std::string &layer_map, const std::string &obj_map,
@@ -32,25 +56,23 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
     auto lib_name = read_gds_start(*logger, stream);
 
     bool is_done = false;
+    gds_rlookup rmap(layer_map, obj_map, t);
     while (!is_done) {
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::BGNSTR:
             stream.ignore(rsize);
-            *out_iter = read_lay_cellview(*logger, stream, lib_name, t);
+            *out_iter = read_lay_cellview(*logger, stream, lib_name, t, rmap);
             ++out_iter;
             break;
         case record_type::ENDLIB:
-            is_done = true;
-            break;
-        default:
             stream.close();
+            return;
+        default:
             throw std::runtime_error("Unrecognized GDS record type: " +
                                      std::to_string(static_cast<int>(rtype)));
         }
     }
-
-    stream.close();
 }
 
 } // namespace gdsii

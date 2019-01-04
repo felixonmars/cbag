@@ -2,8 +2,11 @@
 
 #include <fmt/core.h>
 
+#include <cbag/common/transformation_util.h>
 #include <cbag/gdsii/read_util.h>
 #include <cbag/gdsii/typedefs.h>
+#include <cbag/layout/instance.h>
+#include <cbag/layout/label.h>
 #include <cbag/util/sfinae.h>
 
 namespace cbag {
@@ -80,6 +83,40 @@ std::string read_lib_name(spdlog::logger &logger, std::ifstream &stream) {
 
 void read_units(spdlog::logger &logger, std::ifstream &stream) {
     read_skip<record_type::UNITS, sizeof(uint64_t), 2>(stream);
+}
+
+std::string read_struct_name(spdlog::logger &logger, std::ifstream &stream) {
+    // TODO: implement this
+    return "";
+}
+
+std::tuple<gds_layer_t, transformation, std::string>
+read_text(spdlog::logger &logger, std::ifstream &stream, std::size_t size) {
+    // TODO: implement this
+    return {gds_layer_t{0, 0}, make_xform(), ""};
+}
+
+layout::instance read_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t size) {
+    // TODO: implement this
+    return {};
+}
+
+layout::instance read_arr_instance(spdlog::logger &logger, std::ifstream &stream,
+                                   std::size_t size) {
+    // TODO: implement this
+    return {};
+}
+
+std::tuple<gds_layer_t, box_t> read_box(spdlog::logger &logger, std::ifstream &stream,
+                                        std::size_t size) {
+    // TODO: implement this
+    return {gds_layer_t{0, 0}, box_t{}};
+}
+
+std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
+                                                       std::ifstream &stream, std::size_t size) {
+    // TODO: implement this
+    return {gds_layer_t{0, 0}, layout::polygon{}};
 }
 
 } // namespace gdsii
