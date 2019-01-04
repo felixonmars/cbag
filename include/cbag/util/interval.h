@@ -18,33 +18,19 @@ namespace traits {
 template <typename T> struct coordinate_type {};
 template <typename T> struct interval {};
 
-template <> struct coordinate_type<std::pair<offset_t, offset_t>> { using type = offset_t; };
-template <> struct interval<std::pair<offset_t, offset_t>> {
-    using coordinate_type = coordinate_type<std::pair<offset_t, offset_t>>::type;
+template <> struct coordinate_type<std::array<offset_t, 2>> { using type = offset_t; };
+template <> struct interval<std::array<offset_t, 2>> {
+    using intv_type = std::array<offset_t, 2>;
+    using coordinate_type = coordinate_type<intv_type>::type;
 
-    static std::pair<coordinate_type, coordinate_type> &
-    intv(std::pair<coordinate_type, coordinate_type> &i) {
-        return i;
-    }
-    static const std::pair<coordinate_type, coordinate_type> &
-    intv(const std::pair<coordinate_type, coordinate_type> &i) {
-        return i;
-    }
-    static coordinate_type start(const std::pair<coordinate_type, coordinate_type> &i) {
-        return i.first;
-    }
-    static coordinate_type stop(const std::pair<coordinate_type, coordinate_type> &i) {
-        return i.second;
-    }
-    static void set_start(std::pair<coordinate_type, coordinate_type> &i, coordinate_type val) {
-        i.first = val;
-    }
-    static void set_stop(std::pair<coordinate_type, coordinate_type> &i, coordinate_type val) {
-        i.second = val;
-    }
-    static std::pair<coordinate_type, coordinate_type> construct(coordinate_type start,
-                                                                 coordinate_type stop) {
-        return std::make_pair(start, stop);
+    static intv_type &intv(intv_type &i) { return i; }
+    static const intv_type &intv(const intv_type &i) { return i; }
+    static coordinate_type start(const intv_type &i) { return i[0]; }
+    static coordinate_type stop(const intv_type &i) { return i[1]; }
+    static void set_start(intv_type &i, coordinate_type val) { i[0] = val; }
+    static void set_stop(intv_type &i, coordinate_type val) { i[1] = val; }
+    static intv_type construct(coordinate_type start, coordinate_type stop) {
+        return {start, stop};
     }
 };
 
@@ -89,7 +75,7 @@ struct intv_comp {
     }
 };
 
-template <class Interval = std::pair<offset_t, offset_t>> class disjoint_intvs {
+template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
   public:
     using value_type = Interval;
     using coord_type = typename traits::coordinate_type<Interval>::type;
@@ -101,7 +87,7 @@ template <class Interval = std::pair<offset_t, offset_t>> class disjoint_intvs {
     class const_intv_iterator {
       public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = const std::pair<coord_type, coord_type>;
+        using value_type = const disjoint_intvs::value_type;
         using difference_type = typename const_iterator::difference_type;
         using pointer = value_type *;
         using reference = value_type &;
@@ -313,7 +299,7 @@ template <class Interval = std::pair<offset_t, offset_t>> class disjoint_intvs {
                 fmt::format("Cannot add nonempty interval [{:d}, {:d})", i_start, i_stop));
         abut = abut && merge;
         auto iter_pair =
-            (abut) ? overlap_range(std::make_pair(i_start - 1, i_stop + 1)) : overlap_range(item);
+            (abut) ? overlap_range(value_type{i_start - 1, i_stop + 1}) : overlap_range(item);
         if (iter_pair.first == iter_pair.second) {
             // no overlapping or abutting intervals
             data_.emplace_unique(std::move(item));

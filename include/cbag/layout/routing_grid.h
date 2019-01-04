@@ -1,9 +1,8 @@
 #ifndef CBAG_LAYOUT_ROUTING_GRID_H
 #define CBAG_LAYOUT_ROUTING_GRID_H
 
-#include <boost/polygon/polygon.hpp>
-
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/orient_2d.h>
 
 namespace bp = boost::polygon;
 
@@ -12,11 +11,12 @@ namespace layout {
 
 class tech;
 
-class track_config {
+class grid_info {
   private:
-    bp::orientation_2d_enum orient;
-    dist_t width;
-    dist_t space;
+    orient_2d dir = orient_2d::HORIZONTAL;
+    offset_t w = 0;
+    offset_t sp = 0;
+
   public:
 };
 

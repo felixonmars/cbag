@@ -83,7 +83,6 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/gdsii/write_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/blockage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/boundary_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_poly.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_util.cpp
