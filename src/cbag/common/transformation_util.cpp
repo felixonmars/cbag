@@ -80,4 +80,12 @@ std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_array(const transformation 
                              : std::make_tuple(nx, ny, spx, spy);
 }
 
+std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_gds_array(const transformation &xform,
+                                                               cnt_t gds_nx, cnt_t gds_ny,
+                                                               offset_t gds_spx, offset_t gds_spy) {
+    xform.transform(gds_spx, gds_spy);
+    return (flips_xy(xform)) ? std::make_tuple(gds_ny, gds_nx, gds_spx, gds_spy)
+                             : std::make_tuple(gds_nx, gds_ny, gds_spx, gds_spy);
+}
+
 } // namespace cbag

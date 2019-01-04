@@ -164,10 +164,10 @@ void write_transform(spdlog::logger &logger, std::ofstream &stream, const transf
         std::array<uint16_t, 2> nxy{static_cast<uint16_t>(gds_nx), static_cast<uint16_t>(gds_ny)};
         write<record_type::COLROW>(stream, nxy.size(), nxy.begin(), nxy.end());
         auto [x1, y1] = location(xform);
-        decltype(spx) x2 = gds_spx * nx;
+        decltype(spx) x2 = gds_spx * gds_nx;
         decltype(spx) y2 = 0;
         decltype(spx) x3 = 0;
-        decltype(spx) y3 = gds_spy * ny;
+        decltype(spx) y3 = gds_spy * gds_ny;
         xform.transform(x2, y2);
         xform.transform(x3, y3);
         std::array<uint32_t, 6> xy{interpret_as<uint32_t>(x1), interpret_as<uint32_t>(y1),

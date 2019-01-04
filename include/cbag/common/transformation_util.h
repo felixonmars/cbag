@@ -37,6 +37,10 @@ transformation get_transform_by(transformation xform, const transformation &rhs)
 std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_array(const transformation &xform, cnt_t nx,
                                                            cnt_t ny, offset_t spx, offset_t spy);
 
+std::tuple<cnt_t, cnt_t, offset_t, offset_t> convert_gds_array(const transformation &xform,
+                                                               cnt_t gds_nx, cnt_t gds_ny,
+                                                               offset_t gds_spx, offset_t gds_spy);
+
 } // namespace cbag
 
 #endif

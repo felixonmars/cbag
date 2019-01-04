@@ -95,38 +95,42 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
         map_val);
 }
 
-layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream,
-                                   const std::string &lib_name, const layout::tech &t,
-                                   const gds_rlookup &rmap) {
+std::tuple<std::string, std::unique_ptr<layout::cellview>>
+read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::string &lib_name,
+                  const layout::tech &t, const gds_rlookup &rmap,
+                  const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
-    layout::cellview ans{&t, std::move(cell_name), geometry_mode::POLY};
+    auto cv_ptr = std::make_unique<layout::cellview>(&t, std::move(cell_name), geometry_mode::POLY);
 
+    auto inst_cnt = static_cast<std::size_t>(0);
     while (true) {
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::TEXT: {
             auto [gds_key, xform, text] = read_text(logger, stream);
-            ans.add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text));
+            cv_ptr->add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text));
             break;
         }
         case record_type::SREF:
-            ans.add_object(read_instance(logger, stream, rsize));
+            cv_ptr->add_object(read_instance(logger, stream, inst_cnt, master_map));
+            ++inst_cnt;
             break;
         case record_type::AREF:
-            ans.add_object(read_arr_instance(logger, stream, rsize));
+            cv_ptr->add_object(read_arr_instance(logger, stream, inst_cnt, master_map));
+            ++inst_cnt;
             break;
         case record_type::BOX: {
-            auto [gds_key, poly] = read_box(logger, stream, rsize);
-            add_object(logger, ans, std::move(gds_key), std::move(poly), rmap);
+            auto [gds_key, poly] = read_box(logger, stream);
+            add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::BOUNDARY: {
-            auto [gds_key, poly] = read_boundary(logger, stream, rsize);
-            add_object(logger, ans, std::move(gds_key), std::move(poly), rmap);
+            auto [gds_key, poly] = read_boundary(logger, stream);
+            add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::ENDSTR:
-            return ans;
+            return {std::move(cell_name), std::move(cv_ptr)};
         default:
             throw std::runtime_error("Unsupported record type in GDS struct: " +
                                      std::to_string(static_cast<int>(rtype)));

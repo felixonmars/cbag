@@ -2,6 +2,7 @@
 #ifndef CBAG_GDSII_READ_H
 #define CBAG_GDSII_READ_H
 
+#include <memory>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -45,9 +46,10 @@ std::tuple<record_type, std::size_t> read_record_header(std::ifstream &stream);
 
 std::string read_gds_start(spdlog::logger &logger, std::ifstream &stream);
 
-layout::cellview read_lay_cellview(spdlog::logger &logger, std::ifstream &stream,
-                                   const std::string &lib_name, const layout::tech &t,
-                                   const gds_rlookup &rmap);
+std::tuple<std::string, std::unique_ptr<layout::cellview>>
+read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::string &lib_name,
+                  const layout::tech &t, const gds_rlookup &rmap,
+                  const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 template <class OutIter>
 void read_gds(const std::string &fname, const std::string &layer_map, const std::string &obj_map,
@@ -60,12 +62,17 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
 
     bool is_done = false;
     gds_rlookup rmap(layer_map, obj_map, t);
+    std::unordered_map<std::string, layout::cellview *> cv_map;
     while (!is_done) {
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::BGNSTR:
             stream.ignore(rsize);
-            *out_iter = read_lay_cellview(*logger, stream, lib_name, t, rmap);
+            auto [cell_name, cv_ptr] =
+                read_lay_cellview(*logger, stream, lib_name, t, rmap, cv_map);
+
+            cv_map.emplace(cell_name, cv_ptr.get());
+            *out_iter = std::move(cv_ptr);
             ++out_iter;
             break;
         case record_type::ENDLIB:
