@@ -12,20 +12,20 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
     case end_style::truncate: {
         auto xw = n.dx * w_main;
         auto yw = n.dy * w_main;
-        vec.emplace_back(x + xw, y + yw);
-        vec.emplace_back(x - xw, y - yw);
+        vec.emplace_back(cbag::point{x + xw, y + yw});
+        vec.emplace_back(cbag::point{x - xw, y - yw});
         break;
     }
     case end_style::extend:
-        vec.emplace_back(x - (p.dx - n.dx) * w_main, y - (p.dy - n.dy) * w_main);
-        vec.emplace_back(x - (p.dx + n.dx) * w_main, y - (p.dy + n.dy) * w_main);
+        vec.emplace_back(cbag::point{x - (p.dx - n.dx) * w_main, y - (p.dy - n.dy) * w_main});
+        vec.emplace_back(cbag::point{x - (p.dx + n.dx) * w_main, y - (p.dy + n.dy) * w_main});
         break;
     case end_style::triangle: {
         auto xw = n.dx * w_main;
         auto yw = n.dy * w_main;
-        vec.emplace_back(x + xw, y + yw);
-        vec.emplace_back(x - w_main * p.dx, y - w_main * p.dy);
-        vec.emplace_back(x - xw, y - yw);
+        vec.emplace_back(cbag::point{x + xw, y + yw});
+        vec.emplace_back(cbag::point{x - w_main * p.dx, y - w_main * p.dy});
+        vec.emplace_back(cbag::point{x - xw, y - yw});
         break;
     }
     default: {
@@ -37,13 +37,13 @@ void add_path_points(pt_vector &vec, coord_t x, coord_t y, const vector45 &p, co
         auto ynn = n.dy * w_norm;
         auto xpn = p.dx * w_norm;
         auto ypn = p.dy * w_norm;
-        vec.emplace_back(x - xpn + xnm, y - ypn + ynm);
-        vec.emplace_back(x - xpm + xnn, y - ypm + ynn);
-        vec.emplace_back(x - xpm - xnn, y - ypm - ynn);
-        vec.emplace_back(x - xpn - xnm, y - ypn - ynm);
+        vec.emplace_back(cbag::point{x - xpn + xnm, y - ypn + ynm});
+        vec.emplace_back(cbag::point{x - xpm + xnn, y - ypm + ynn});
+        vec.emplace_back(cbag::point{x - xpm - xnn, y - ypm - ynn});
+        vec.emplace_back(cbag::point{x - xpn - xnm, y - ypn - ynm});
     }
     }
-}
+} // namespace layout
 
 end_style get_style(end_style ans, offset_t half_width, bool is_45) {
     if (ans == end_style::round) {

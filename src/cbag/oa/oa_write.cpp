@@ -87,7 +87,7 @@ oa::oaBox get_box(const cbag::box_t &cbag_obj) {
     return {xl(cbag_obj), yl(cbag_obj), xh(cbag_obj), yh(cbag_obj)};
 }
 
-oa::oaPoint get_point(const cbag::point &cbag_obj) { return {cbag_obj.first, cbag_obj.second}; }
+oa::oaPoint get_point(const cbag::point &cbag_obj) { return {cbag_obj[0], cbag_obj[1]}; }
 
 oa::oaOrient get_orient(cbag::orientation cbag_enum) {
     switch (cbag_enum) {
@@ -115,7 +115,7 @@ oa::oaOrient get_orient(cbag::orientation cbag_enum) {
 oa::oaPointArray get_point_arr(const cbag::point_array &pt_arr) {
     oa::oaPointArray ans(pt_arr.size());
     for (const auto &p : pt_arr) {
-        ans.append(oa::oaPoint(p.first, p.second));
+        ans.append(oa::oaPoint(p[0], p[1]));
     }
     return ans;
 }

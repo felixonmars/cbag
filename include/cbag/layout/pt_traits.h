@@ -14,9 +14,7 @@ template <> struct point_traits<cbag::point> {
     using coordinate_type = cbag::coord_t;
 
     static coordinate_type get(const point_type &point, orientation_2d orient) {
-        return (orient.to_int() == static_cast<unsigned int>(orientation_2d_enum::HORIZONTAL))
-                   ? point.first
-                   : point.second;
+        return point[orient.to_int()];
     }
 };
 } // namespace polygon

@@ -153,7 +153,7 @@ cbag::sch::polygon read_poly(oa::oaPolygon *p, std::string &&net) {
     oa::oaUInt4 size = p->getNumPoints();
     cbag::sch::polygon ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), size);
     for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
-        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+        ans.points.emplace_back(cbag::point{arr[idx].x(), arr[idx].y()});
     }
     return ans;
 }
@@ -188,7 +188,7 @@ cbag::sch::line read_line(oa::oaLine *p, std::string &&net) {
     oa::oaUInt4 size = p->getNumPoints();
     cbag::sch::line ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), size);
     for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
-        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+        ans.points.emplace_back(cbag::point{arr[idx].x(), arr[idx].y()});
     }
     return ans;
 }
@@ -200,9 +200,8 @@ cbag::sch::path read_path(oa::oaPath *p, std::string &&net) {
     cbag::sch::path ans(p->getLayerNum(), p->getPurposeNum(), std::move(net), p->getWidth(), size,
                         get_path_style(p->getStyle()), p->getBeginExt(), p->getEndExt());
     for (oa::oaUInt4 idx = 0; idx < size; ++idx) {
-        ans.points.emplace_back(arr[idx].x(), arr[idx].y());
+        ans.points.emplace_back(cbag::point{arr[idx].x(), arr[idx].y()});
     }
-    return ans;
     return ans;
 }
 

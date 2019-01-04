@@ -15,6 +15,7 @@
 #include <cbag/schematic/shape_t_def.h>
 
 #include <cbag/yaml/fusion.h>
+#include <cbag/yaml/vector.h>
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::rectangle, layer, purpose, net, bbox)
 
