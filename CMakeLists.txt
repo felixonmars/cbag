@@ -62,9 +62,6 @@ find_package(spdlog CONFIG REQUIRED)
 # Include yaml-cpp
 add_subdirectory(yaml-cpp EXCLUDE_FROM_ALL)
 
-# Include Catch2
-find_package(Catch2 REQUIRED)
-
 # set variable storing binary/library location
 message("install prefix: " ${CMAKE_INSTALL_PREFIX})
 set(CBAG_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/cbag/bin)

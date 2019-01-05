@@ -1,4 +1,4 @@
-
+add_subdirectory(../Catch2 catch2)
 
 add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -25,6 +25,7 @@ target_link_libraries(test_main
   cbag
   fmt
   yaml-cpp
+  Catch2::Catch2
   )
 
 install(TARGETS
