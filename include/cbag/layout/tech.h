@@ -22,8 +22,9 @@ namespace layout {
 using sp_map_t =
     std::unordered_map<layer_t, std::vector<std::pair<offset_t, offset_t>>, boost::hash<layer_t>>;
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
-
 using len_map_t = std::unordered_map<layer_t, len_info, boost::hash<layer_t>>;
+using lp_list_t = std::vector<std::vector<layer_t>>;
+using level_map_t = std::unordered_map<layer_t, int, boost::hash<layer_t>>;
 
 class tech {
   private:
@@ -37,6 +38,9 @@ class tech {
     sp_map_grp_t sp_map_grp;
     space_type sp_sc_type;
     len_map_t len_map;
+    int grid_bot_layer = 0;
+    lp_list_t lp_list;
+    level_map_t lev_map;
 
   public:
     tech(const std::string &tech_fname);
@@ -60,6 +64,10 @@ class tech {
     std::optional<lay_t> get_layer_id(const std::string &layer) const;
 
     std::optional<purp_t> get_purpose_id(const std::string &purpose) const;
+
+    std::optional<int> get_level(layer_t key) const;
+
+    const std::vector<layer_t> &get_lay_purp_list(int level) const;
 
     offset_t get_min_space(layer_t key, offset_t width, space_type sp_type) const;
 

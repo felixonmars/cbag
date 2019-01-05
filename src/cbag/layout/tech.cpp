@@ -66,6 +66,37 @@ tech::tech(const std::string &tech_fname) {
 
     // populate len_map
     len_map = make_len_map(node["len_min"], lp_map);
+
+    // get level-to-layer/purpose mapping
+    auto tmp = cbagyaml::int_map_to_vec<std::vector<std::pair<std::string, std::string>>>(
+        node["lay_purp_list"]);
+
+    grid_bot_layer = std::get<0>(tmp);
+    lp_list.reserve(std::get<1>(tmp).size());
+    for (const auto &cur_lp_vec : std::get<1>(tmp)) {
+        std::vector<layer_t> new_lp_vec;
+        new_lp_vec.reserve(cur_lp_vec.size());
+        for (const auto &[lay_str, purp_str] : cur_lp_vec) {
+            auto lid = lp_map.get_layer_id(lay_str);
+            if (!lid)
+                throw std::out_of_range("Cannot find layer ID for layer: " + lay_str);
+
+            auto pid = lp_map.get_purpose_id(purp_str);
+            if (!pid)
+                throw std::out_of_range("Cannot find purpose ID for purpose: " + purp_str);
+            new_lp_vec.push_back(std::make_pair(*lid, *pid));
+        }
+        lp_list.push_back(new_lp_vec);
+    }
+
+    // get layer/purpose-to-level mapping
+    auto lay = grid_bot_layer;
+    for (const auto &lay_purp_vec : lp_list) {
+        for (const auto &lp : lay_purp_vec) {
+            lev_map.emplace(lp, lay);
+        }
+        ++lay;
+    }
 }
 
 const std::string &tech::get_tech_lib() const { return tech_lib; }
@@ -92,6 +123,22 @@ std::optional<lay_t> tech::get_layer_id(const std::string &layer) const {
 
 std::optional<purp_t> tech::get_purpose_id(const std::string &purpose) const {
     return lp_map.get_purpose_id(purpose);
+}
+
+std::optional<int> tech::get_level(layer_t key) const {
+    std::optional<int> ans;
+    auto iter = lev_map.find(key);
+    if (iter == lev_map.end())
+        return ans;
+    ans = iter->second;
+    return ans;
+}
+
+const std::vector<layer_t> &tech::get_lay_purp_list(int level) const {
+    auto idx = static_cast<std::size_t>(level - grid_bot_layer);
+    if (idx > lp_list.size())
+        throw std::out_of_range("No layer/purpose corresponding to level " + std::to_string(idx));
+    return lp_list[idx];
 }
 
 offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) const {

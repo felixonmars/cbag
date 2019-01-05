@@ -15,7 +15,7 @@ class track_info;
 class routing_grid {
   private:
     const tech *tech_ptr = nullptr;
-    cnt_t bot_layer = 0;
+    int bot_layer = 0;
     std::vector<track_info> info_list;
 
   public:

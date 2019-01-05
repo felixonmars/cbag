@@ -9,6 +9,7 @@
 #define CBAG_YAML_COMMON_H
 
 #include <string>
+#include <unordered_map>
 
 #include <yaml-cpp/yaml.h>
 
@@ -54,6 +55,26 @@ template <typename T> T get_int(const YAML::Node &val) {
     } else {
         return val.as<T>();
     }
+}
+
+template <typename T> std::tuple<int, std::vector<T>> int_map_to_vec(const YAML::Node &node) {
+    std::unordered_map<int, T> tmp;
+    auto min_key = std::numeric_limits<int>::max();
+    for (const auto &child : node) {
+        auto cur_key = child.first.as<int>();
+        min_key = std::min(min_key, cur_key);
+        tmp.emplace(cur_key, child.second.as<T>());
+    }
+    auto num = static_cast<decltype(min_key)>(tmp.size());
+    std::vector<T> vec;
+    vec.reserve(num);
+    for (auto key = min_key; key < min_key + num; ++key) {
+        auto iter = tmp.find(key);
+        if (iter == tmp.end())
+            throw std::runtime_error("Cannot find integer key " + std::to_string(key));
+        vec.push_back(std::move(iter->second));
+    }
+    return {min_key, vec};
 }
 
 } // namespace cbagyaml
