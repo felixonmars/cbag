@@ -41,7 +41,7 @@ len_map_t make_len_map(const YAML::Node &node, const lp_lookup &lp_map) {
 }
 
 tech::tech(const std::string &tech_fname) {
-    YAML::Node node = YAML::LoadFile(tech_fname);
+    auto node = YAML::LoadFile(tech_fname);
 
     tech_lib = node["tech_lib"].as<std::string>();
     layout_unit = node["layout_unit"].as<double_t>();
