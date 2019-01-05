@@ -22,6 +22,10 @@ class routing_grid {
     routing_grid();
 
     routing_grid(const tech *t, const std::string &fname);
+
+    const tech *get_tech() const noexcept;
+
+    bool operator==(const routing_grid &rhs) const noexcept;
 };
 
 } // namespace layout

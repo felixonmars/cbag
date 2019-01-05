@@ -97,13 +97,13 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
 
 std::tuple<std::string, std::unique_ptr<layout::cellview>>
 read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::string &lib_name,
-                  const layout::tech &t, const gds_rlookup &rmap,
+                  const layout::routing_grid &g, const gds_rlookup &rmap,
                   const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
 
     logger.info("GDS cellview name: " + cell_name);
 
-    auto cv_ptr = std::make_unique<layout::cellview>(&t, std::move(cell_name), geometry_mode::POLY);
+    auto cv_ptr = std::make_unique<layout::cellview>(&g, std::move(cell_name), geometry_mode::POLY);
 
     auto inst_cnt = static_cast<std::size_t>(0);
     while (true) {

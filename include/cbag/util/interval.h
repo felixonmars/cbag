@@ -322,6 +322,8 @@ template <class Interval = std::array<offset_t, 2>> class disjoint_intvs {
         // has overlap, and not merging; adding failed.
         return false;
     }
+
+    bool operator==(const disjoint_intvs &rhs) const noexcept { return data_ == rhs.data_; }
 };
 
 } // namespace util

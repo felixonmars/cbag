@@ -26,6 +26,8 @@ class track_info {
 
     track_info(orient_2d tr_dir, offset_t tr_w, offset_t tr_sp,
                const std::vector<std::array<offset_t, 2>> &intv_list);
+
+    bool operator==(const track_info &rhs) const noexcept;
 };
 
 } // namespace layout

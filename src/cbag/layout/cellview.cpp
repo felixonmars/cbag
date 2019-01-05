@@ -4,6 +4,7 @@
 
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
+#include <cbag/layout/routing_grid.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_util.h>
 #include <cbag/layout/via_wrapper.h>
@@ -35,11 +36,11 @@ struct cellview::helper {
     }
 };
 
-cellview::cellview(const tech *tech_ptr, std::string cell_name, geometry_mode geo_mode)
-    : geo_mode(geo_mode), tech_ptr(tech_ptr), cell_name(std::move(cell_name)) {}
+cellview::cellview(const routing_grid *grid_ptr, std::string cell_name, geometry_mode geo_mode)
+    : geo_mode(geo_mode), grid_ptr(grid_ptr), cell_name(std::move(cell_name)) {}
 
 bool cellview::operator==(const cellview &rhs) const noexcept {
-    return geo_mode == rhs.geo_mode && tech_ptr == rhs.tech_ptr && cell_name == rhs.cell_name &&
+    return geo_mode == rhs.geo_mode && *grid_ptr == *(rhs.grid_ptr) && cell_name == rhs.cell_name &&
            geo_map == rhs.geo_map && inst_map == rhs.inst_map && pin_map == rhs.pin_map &&
            via_list == rhs.via_list && lay_block_map == rhs.lay_block_map &&
            area_block_list == rhs.area_block_list && boundary_list == rhs.boundary_list &&
@@ -59,13 +60,14 @@ auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
 geometry &cellview::make_geometry(layer_t key) {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end()) {
-        iter = geo_map.emplace(key, geometry(std::move(key), tech_ptr, geo_mode)).first;
+        iter = geo_map.emplace(key, geometry(std::move(key), get_tech(), geo_mode)).first;
     }
     return iter->second;
 }
 
 const std::string &cellview::get_name() const noexcept { return cell_name; }
-const tech *cellview::get_tech() const noexcept { return tech_ptr; }
+const tech *cellview::get_tech() const noexcept { return grid_ptr->get_tech(); }
+const routing_grid *cellview::get_grid() const noexcept { return grid_ptr; }
 
 bool cellview::empty() const noexcept {
     return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
@@ -102,7 +104,7 @@ auto cellview::begin_label() const -> decltype(label_list.cbegin()) { return lab
 auto cellview::end_label() const -> decltype(label_list.cend()) { return label_list.cend(); }
 
 void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
-    auto lay_id = layer_id_at(*tech_ptr, layer);
+    auto lay_id = layer_id_at(*get_tech(), layer);
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;
@@ -135,7 +137,7 @@ void cellview::add_object(boundary &&obj) { boundary_list.push_back(std::move(ob
 void cellview::add_object(const via_wrapper &obj) {
     via_list.push_back(obj.v);
     if (obj.add_layers) {
-        auto [bot_key, unused, top_key] = tech_ptr->get_via_layer_purpose(obj.v.get_via_id());
+        auto [bot_key, unused, top_key] = get_tech()->get_via_layer_purpose(obj.v.get_via_id());
         (void)unused;
         make_geometry(bot_key).add_shape(get_bot_box(obj.v), obj.bot_horiz);
         make_geometry(top_key).add_shape(get_top_box(obj.v), obj.top_horiz);

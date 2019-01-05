@@ -24,6 +24,7 @@ class blockage;
 class pin;
 class via;
 class via_wrapper;
+class routing_grid;
 class tech;
 class label;
 
@@ -36,7 +37,7 @@ class cellview {
   private:
     cnt_t inst_name_cnt = 0;
     geometry_mode geo_mode = geometry_mode::POLY90;
-    const tech *tech_ptr = nullptr;
+    const routing_grid *grid_ptr = nullptr;
     std::string cell_name;
     geo_map_t geo_map;
     inst_map_t inst_map;
@@ -50,7 +51,7 @@ class cellview {
     struct helper;
 
   public:
-    cellview(const tech *tech_ptr, std::string cell_name,
+    cellview(const routing_grid *grid_ptr, std::string cell_name,
              geometry_mode geo_mode = geometry_mode::POLY90);
 
     bool operator==(const cellview &rhs) const noexcept;
@@ -62,6 +63,7 @@ class cellview {
 
     const std::string &get_name() const noexcept;
     const tech *get_tech() const noexcept;
+    const routing_grid *get_grid() const noexcept;
 
     bool empty() const noexcept;
 

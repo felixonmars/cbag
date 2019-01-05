@@ -25,6 +25,10 @@ track_info::track_info(orient_2d tr_dir, offset_t tr_w, offset_t tr_sp,
     }
 }
 
+bool track_info::operator==(const track_info &rhs) const noexcept {
+    return dir == rhs.dir && w == rhs.w && sp == rhs.sp && w_intvs == rhs.w_intvs;
+}
+
 } // namespace layout
 } // namespace cbag
 

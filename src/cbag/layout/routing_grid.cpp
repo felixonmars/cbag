@@ -17,5 +17,11 @@ routing_grid::routing_grid(const tech *t, const std::string &fname) : tech_ptr(t
     info_list = node["layer_info"].as<decltype(info_list)>();
 }
 
+const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
+
+bool routing_grid::operator==(const routing_grid &rhs) const noexcept {
+    return tech_ptr == rhs.tech_ptr && bot_layer == rhs.bot_layer && info_list == rhs.info_list;
+}
+
 } // namespace layout
 } // namespace cbag
