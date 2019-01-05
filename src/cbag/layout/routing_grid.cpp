@@ -5,7 +5,6 @@
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/layout/routing_grid.h>
-#include <cbag/layout/track_info.h>
 #include <cbag/yaml/common.h>
 
 namespace cbag {

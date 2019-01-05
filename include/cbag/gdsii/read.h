@@ -19,7 +19,7 @@
 #include <cbag/gdsii/record_type.h>
 #include <cbag/gdsii/typedefs.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/routing_grid.h>
+#include <cbag/layout/routing_grid_fwd.h>
 #include <cbag/layout/tech.h>
 
 namespace cbag {
@@ -64,7 +64,7 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
     log_ptr->info("GDS library: {}", lib_name);
 
     bool is_done = false;
-    gds_rlookup rmap(layer_map, obj_map, g.get_tech());
+    gds_rlookup rmap(layer_map, obj_map, *(g.get_tech()));
     std::unordered_map<std::string, layout::cellview *> cv_map;
     while (!is_done) {
         auto [rtype, rsize] = read_record_header(stream);

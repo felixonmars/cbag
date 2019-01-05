@@ -24,7 +24,8 @@ template <typename T> class shape_ref {
             commit();
     }
 
-    T *operator->() const noexcept { return &obj; }
+    const T *operator->() const noexcept { return &obj; }
+    T *operator->() noexcept { return &obj; }
 
     bool editable() const noexcept { return parent != nullptr; }
 
@@ -55,7 +56,8 @@ template <typename T> class cv_obj_ref {
             commit();
     }
 
-    T *operator->() const noexcept { return &obj; }
+    const T *operator->() const noexcept { return &obj; }
+    T *operator->() noexcept { return &obj; }
 
     bool editable() const noexcept { return parent != nullptr; }
 

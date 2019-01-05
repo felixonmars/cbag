@@ -4,7 +4,6 @@
 
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
-#include <cbag/layout/routing_grid.h>
 #include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_util.h>
