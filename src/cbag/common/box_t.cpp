@@ -9,7 +9,7 @@ box_t::box_t(coord_t xl, coord_t yl, coord_t xh, coord_t yh) noexcept
     : intvs{interval_t{xl, xh}, interval_t{yl, yh}} {}
 
 box_t::box_t(orient_2d orient, coord_t tl, coord_t th, coord_t pl, coord_t ph) noexcept {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     intvs[orient_code][0] = tl;
     intvs[orient_code][1] = th;
     intvs[1 - orient_code][0] = pl;

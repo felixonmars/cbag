@@ -83,8 +83,8 @@ via_param via_info::get_via_param(vector box_dim, orient_2d bot_dir, orient_2d t
                                   bool extend) const {
     via_param ans;
 
-    auto bd_idx = static_cast<orient_2d_t>(bot_dir);
-    auto td_idx = static_cast<orient_2d_t>(top_dir);
+    auto bd_idx = to_int(bot_dir);
+    auto td_idx = to_int(top_dir);
 
     // get maximum possible number of vias
     vector min_sp = sp;

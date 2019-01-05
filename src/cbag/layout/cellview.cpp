@@ -5,6 +5,7 @@
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview.h>
 #include <cbag/layout/routing_grid.h>
+#include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_util.h>
 #include <cbag/layout/via_wrapper.h>
@@ -60,7 +61,7 @@ auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
 geometry &cellview::make_geometry(layer_t key) {
     auto iter = geo_map.find(key);
     if (iter == geo_map.end()) {
-        iter = geo_map.emplace(key, geometry(std::move(key), get_tech(), geo_mode)).first;
+        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
     }
     return iter->second;
 }
@@ -139,8 +140,12 @@ void cellview::add_object(const via_wrapper &obj) {
     if (obj.add_layers) {
         auto [bot_key, unused, top_key] = get_tech()->get_via_layer_purpose(obj.v.get_via_id());
         (void)unused;
-        make_geometry(bot_key).add_shape(get_bot_box(obj.v), obj.bot_horiz);
-        make_geometry(top_key).add_shape(get_top_box(obj.v), obj.top_horiz);
+        auto bot_box = get_bot_box(obj.v);
+        auto top_box = get_top_box(obj.v);
+        auto [bspx, bspy] = get_margins(*get_grid(), bot_key, bot_box);
+        auto [tspx, tspy] = get_margins(*get_grid(), top_key, top_box);
+        make_geometry(bot_key).add_shape(bot_box, bspx, bspy);
+        make_geometry(top_key).add_shape(top_box, tspx, tspy);
     }
 }
 

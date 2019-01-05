@@ -32,7 +32,7 @@ class geo_object {
     offset_t spy = 0;
     box_type bnd_box;
 
-    template <typename T> geo_object(T v, offset_t spx, offset_t spy);
+    template <typename T> geo_object(T &&v, offset_t spx, offset_t spy);
 
     bool operator==(const geo_object &v) const;
 
@@ -42,8 +42,8 @@ class geo_object {
 bg_box get_bnd_box(const geo_object::value_type &val, offset_t spx, offset_t spy);
 
 template <typename T>
-geo_object::geo_object(T v, offset_t spx, offset_t spy)
-    : val(std::move(v)), spx(spx), spy(spy), bnd_box(get_bnd_box(val, spx, spy)) {}
+geo_object::geo_object(T &&v, offset_t spx, offset_t spy)
+    : val(std::forward<T>(v)), spx(spx), spy(spy), bnd_box(get_bnd_box(val, spx, spy)) {}
 
 } // namespace layout
 } // namespace cbag

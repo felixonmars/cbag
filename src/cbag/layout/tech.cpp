@@ -1,6 +1,5 @@
 #include <algorithm>
 
-#include <fmt/core.h>
 #include <yaml-cpp/yaml.h>
 
 #include "yaml-cpp/unordered_map.h"
@@ -136,16 +135,16 @@ std::optional<int> tech::get_level(layer_t key) const {
 
 const std::vector<layer_t> &tech::get_lay_purp_list(int level) const {
     auto idx = static_cast<std::size_t>(level - grid_bot_layer);
-    if (idx > lp_list.size())
-        throw std::out_of_range("No layer/purpose corresponding to level " + std::to_string(idx));
+    if (idx >= lp_list.size())
+        throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
     return lp_list[idx];
 }
 
 offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) const {
     auto map_iter = sp_map_grp.find((sp_type == space_type::SAME_COLOR) ? sp_sc_type : sp_type);
     if (map_iter == sp_map_grp.end())
-        throw std::out_of_range(
-            fmt::format("Cannot find space type {}", static_cast<enum_t>(sp_type)));
+        throw std::out_of_range("Min space not defined forspace type: " +
+                                std::to_string(static_cast<enum_t>(sp_type)));
 
     const auto &cur_map = map_iter->second;
     auto vec_iter = cur_map.find(key);

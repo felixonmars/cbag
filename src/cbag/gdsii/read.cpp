@@ -80,7 +80,7 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
     auto map_val = rmap.get_mapping(gds_key);
     std::visit(
         overload{
-            [&ans, &poly](layer_t k) { ans.make_geometry(std::move(k)).add_shape(poly, false); },
+            [&ans, &poly](layer_t k) { ans.make_geometry(std::move(k)).add_shape(poly, 0, 0); },
             [&ans, &poly](boundary_type k) {
                 layout::boundary bnd{k};
                 bnd.set(poly.begin(), poly.end());

@@ -4,7 +4,7 @@ namespace cbag {
 namespace layout {
 
 offset_t get_arr_dim(const via_param &p, orient_2d orient) {
-    auto dir_idx = static_cast<orient_2d_t>(orient);
+    auto dir_idx = to_int(orient);
     return p.num[dir_idx] * (p.cut_dim[dir_idx] + p.cut_spacing[dir_idx]) - p.cut_spacing[dir_idx];
 }
 

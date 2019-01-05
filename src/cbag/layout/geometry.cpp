@@ -3,16 +3,48 @@
 #include <cbag/common/transformation.h>
 #include <cbag/layout/geo_iterator.h>
 #include <cbag/layout/geometry.h>
+#include <cbag/layout/routing_grid_util.h>
 
 namespace cbag {
 namespace layout {
 
+class poly45_writer {
+  public:
+    using value_type = polygon45;
+
+  private:
+    geo_index &index;
+    const routing_grid &grid;
+    layer_t key;
+    value_type last;
+
+  public:
+    poly45_writer(geo_index &index, const routing_grid &grid, layer_t key)
+        : index(index), grid(grid), key(std::move(key)) {}
+
+    void push_back(value_type &&v) {
+        record_last();
+        last = std::move(v);
+    }
+
+    void insert(value_type *ptr, const value_type &v) {
+        record_last();
+        last = v;
+    }
+
+    void record_last() const {
+        auto [spx, spy] = get_margins(grid, key, last);
+        index.insert(last, spx, spy);
+    }
+
+    value_type &back() { return last; }
+
+    value_type *end() const { return nullptr; }
+};
+
 struct geometry::helper {};
 
-geometry::geometry() = default;
-
-geometry::geometry(layer_t &&lay_purp, const tech *tech_ptr, geometry_mode mode)
-    : mode(mode), index(std::move(lay_purp), tech_ptr) {
+geometry::geometry(geometry_mode mode) : mode(mode) {
     if (mode != geometry_mode::POLY90)
         reset_to_mode(mode);
 }
@@ -61,7 +93,7 @@ void geometry::reset_to_mode(geometry_mode m) {
     mode = m;
 }
 
-void geometry::add_shape(const box_t &obj, bool is_horiz) {
+void geometry::add_shape(const box_t &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [&obj](polygon90_set &d) { d.insert(obj); },
@@ -70,10 +102,10 @@ void geometry::add_shape(const box_t &obj, bool is_horiz) {
         },
         data);
 
-    index.insert(obj, is_horiz);
+    index.insert(obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
+void geometry::add_shape(const polygon90 &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [&obj](polygon90_set &d) { d.insert(obj); },
@@ -82,10 +114,10 @@ void geometry::add_shape(const polygon90 &obj, bool is_horiz) {
         },
         data);
 
-    index.insert(obj, is_horiz);
+    index.insert(obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
+void geometry::add_shape(const polygon45 &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [](polygon90_set &d) {
@@ -96,24 +128,10 @@ void geometry::add_shape(const polygon45 &obj, bool is_horiz) {
         },
         data);
 
-    index.insert(obj, is_horiz);
+    index.insert(obj, spx, spy);
 }
 
-void geometry::add_shape(const polygon45_set &obj, bool is_horiz) {
-    std::visit(
-        overload{
-            [](polygon90_set &d) {
-                throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
-            },
-            [&obj](polygon45_set &d) { d.insert(obj); },
-            [&obj](polygon_set &d) { d.insert(obj); },
-        },
-        data);
-
-    index.insert(obj, is_horiz);
-}
-
-void geometry::add_shape(const polygon &obj, bool is_horiz) {
+void geometry::add_shape(const polygon &obj, offset_t spx, offset_t spy) {
     std::visit(
         overload{
             [](polygon90_set &d) {
@@ -126,7 +144,23 @@ void geometry::add_shape(const polygon &obj, bool is_horiz) {
         },
         data);
 
-    index.insert(obj, is_horiz);
+    index.insert(obj, spx, spy);
+}
+
+void geometry::add_shape_set(const routing_grid &grid, layer_t key, const polygon45_set &obj) {
+    std::visit(
+        overload{
+            [](polygon90_set &d) {
+                throw std::invalid_argument("Cannot add poly45; incorrect cellview layout mode.");
+            },
+            [&obj](polygon45_set &d) { d.insert(obj); },
+            [&obj](polygon_set &d) { d.insert(obj); },
+        },
+        data);
+
+    poly45_writer writer(index, grid, key);
+    obj.get(writer);
+    writer.record_last();
 }
 
 void geometry::record_instance(const geometry *master, transformation xform) {

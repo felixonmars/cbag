@@ -15,11 +15,11 @@ namespace cbag {
 box_t invalid_box() noexcept { return {0, 0, -1, -1}; }
 
 offset_t get_dim(const box_t &box, orient_2d orient) {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     return box.intvs[orient_code][1] - box.intvs[orient_code][0];
 }
 coord_t get_center(const box_t &box, orient_2d orient) {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     return cbag::util::floor2(box.intvs[orient_code][0] + box.intvs[orient_code][1]);
 }
 
@@ -30,7 +30,7 @@ void set(box_t &box, coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
     box.intvs[1][1] = yh;
 }
 void set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th) {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     box.intvs[orient_code][0] = tl;
     box.intvs[orient_code][1] = th;
 }
@@ -72,7 +72,7 @@ box_t get_intersect(box_t box, const box_t &other) { return intersect(box, other
 
 box_t &extend_orient(box_t &box, orient_2d orient, const std::optional<coord_t> &ct,
                      const std::optional<coord_t> &cp) {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     if (is_valid(box)) {
         if (ct) {
             box.intvs[orient_code][0] = std::min(box.intvs[orient_code][0], *ct);
@@ -109,7 +109,7 @@ box_t &transform(box_t &box, const transformation &xform) { return bp::transform
 box_t get_transform(box_t box, const transformation &xform) { return bp::transform(box, xform); }
 
 box_t &move_by_orient(box_t &box, orient_2d orient, offset_t dt, offset_t dp) {
-    auto orient_code = static_cast<orient_2d_t>(orient);
+    auto orient_code = to_int(orient);
     box.intvs[orient_code][0] += dt;
     box.intvs[orient_code][1] += dt;
     box.intvs[1 - orient_code][0] += dp;

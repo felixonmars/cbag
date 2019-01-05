@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <cbag/layout/cellview_fwd.h>
-#include <cbag/layout/via.h>
+#include <cbag/layout/routing_grid_util.h>
 
 namespace cbag {
 namespace layout {
@@ -12,37 +12,42 @@ namespace layout {
 template <typename T> class shape_ref {
   private:
     layer_t key{0, 0};
-    bool is_horiz = true;
     cellview *parent = nullptr;
-
-  public:
     T obj;
 
+  public:
     shape_ref() = default;
 
-    shape_ref(cellview *parent, layer_t &&key, bool is_horiz, T &&obj, bool add)
-        : key(std::move(key)), is_horiz(is_horiz), parent(parent), obj(std::move(obj)) {
+    shape_ref(cellview *parent, layer_t &&key, T &&obj, bool add)
+        : key(std::move(key)), parent(parent), obj(std::move(obj)) {
         if (add)
             commit();
     }
 
-    void commit() {
-        if (editable()) {
-            parent->make_geometry(key).add_shape(obj, is_horiz);
-            parent = nullptr;
-        }
-    }
+    T *operator->() const noexcept { return &obj; }
 
     bool editable() const noexcept { return parent != nullptr; }
+
+    void commit() {
+        if (editable()) {
+            if constexpr (std::is_base_of_v<polygon45_set, std::decay_t<T>>) {
+                parent->make_geometry(key).add_shape_set(*(parent->get_grid()), key, obj);
+                parent = nullptr;
+            } else {
+                auto [spx, spy] = get_margins(*(parent->get_grid()), key, obj);
+                parent->make_geometry(key).add_shape(obj, spx, spy);
+                parent = nullptr;
+            }
+        }
+    }
 };
 
 template <typename T> class cv_obj_ref {
   private:
     cellview *parent = nullptr;
-
-  public:
     T obj;
 
+  public:
     cv_obj_ref() = default;
 
     cv_obj_ref(cellview *parent, T &&obj, bool add) : parent(parent), obj(std::move(obj)) {
@@ -50,14 +55,16 @@ template <typename T> class cv_obj_ref {
             commit();
     }
 
+    T *operator->() const noexcept { return &obj; }
+
+    bool editable() const noexcept { return parent != nullptr; }
+
     void commit() {
         if (editable()) {
             parent->add_object(obj);
             parent = nullptr;
         }
     }
-
-    bool editable() const noexcept { return parent != nullptr; }
 };
 
 } // namespace layout

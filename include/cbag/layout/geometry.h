@@ -26,6 +26,7 @@ class box_t;
 namespace layout {
 
 class tech;
+class routing_grid;
 
 /** A class representing layout geometries on the same layer.
  */
@@ -33,15 +34,13 @@ class geometry {
   private:
     using geometry_data = std::variant<polygon90_set, polygon45_set, polygon_set>;
 
-    geometry_mode mode = geometry_mode::POLY90;
+    geometry_mode mode;
     geometry_data data;
     geo_index index;
     struct helper;
 
   public:
-    geometry();
-
-    geometry(layer_t &&lay_purp, const tech *tech_ptr, geometry_mode mode = geometry_mode::POLY90);
+    explicit geometry(geometry_mode mode = geometry_mode::POLY90);
 
     bool operator==(const geometry &rhs) const noexcept;
 
@@ -54,11 +53,12 @@ class geometry {
 
     void reset_to_mode(geometry_mode m);
 
-    void add_shape(const box_t &obj, bool is_horiz);
-    void add_shape(const polygon90 &obj, bool is_horiz);
-    void add_shape(const polygon45 &obj, bool is_horiz);
-    void add_shape(const polygon45_set &obj, bool is_horiz);
-    void add_shape(const polygon &obj, bool is_horiz);
+    void add_shape(const box_t &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon90 &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon45 &obj, offset_t spx, offset_t spy);
+    void add_shape(const polygon &obj, offset_t spx, offset_t spy);
+
+    void add_shape_set(const routing_grid &grid, layer_t key, const polygon45_set &obj);
 
     void record_instance(const geometry *master, transformation xform);
 

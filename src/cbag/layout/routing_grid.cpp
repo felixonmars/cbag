@@ -21,10 +21,17 @@ routing_grid::routing_grid(const tech *t, const std::string &fname) : tech_ptr(t
     info_list = std::move(std::get<1>(tmp));
 }
 
-const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
-
 bool routing_grid::operator==(const routing_grid &rhs) const noexcept {
     return tech_ptr == rhs.tech_ptr && bot_layer == rhs.bot_layer && info_list == rhs.info_list;
+}
+
+const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
+
+orient_2d routing_grid::get_direction(int level) const {
+    auto idx = static_cast<std::size_t>(level - bot_layer);
+    if (idx >= info_list.size())
+        throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
+    return info_list[idx].get_direction();
 }
 
 } // namespace layout
