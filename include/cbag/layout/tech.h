@@ -59,6 +59,8 @@ class tech {
 
     bool get_make_pin() const;
 
+    std::string get_layer_name(lay_t lay_id) const;
+
     std::string get_purpose_name(purp_t purp_id) const;
 
     std::optional<lay_t> get_layer_id(const std::string &layer) const;

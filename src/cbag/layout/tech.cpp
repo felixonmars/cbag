@@ -112,6 +112,8 @@ purp_t tech::get_pin_purpose() const { return lp_map.get_pin_purpose(); }
 
 bool tech::get_make_pin() const { return make_pin_obj; }
 
+std::string tech::get_layer_name(lay_t lay_id) const { return lp_map.get_layer_name(lay_id); }
+
 std::string tech::get_purpose_name(purp_t purp_id) const {
     return lp_map.get_purpose_name(purp_id);
 }

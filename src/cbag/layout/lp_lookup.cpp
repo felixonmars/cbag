@@ -37,6 +37,13 @@ purp_t lp_lookup::get_default_purpose() const { return default_purpose; }
 
 purp_t lp_lookup::get_pin_purpose() const { return pin_purpose; }
 
+std::string lp_lookup::get_layer_name(lay_t lay_id) const {
+    auto iter = std::find_if(
+        lay_map.begin(), lay_map.end(),
+        [&lay_id](const std::pair<std::string, purp_t> &v) { return lay_id == v.second; });
+    return iter->first;
+}
+
 std::string lp_lookup::get_purpose_name(purp_t purp_id) const {
     auto iter = std::find_if(
         purp_map.begin(), purp_map.end(),
