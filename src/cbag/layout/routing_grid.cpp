@@ -11,6 +11,15 @@
 namespace cbag {
 namespace layout {
 
+struct routing_grid::helper {
+    static std::size_t get_index(const routing_grid &grid, int level) {
+        auto idx = static_cast<std::size_t>(level - grid.bot_layer);
+        if (idx >= grid.info_list.size())
+            throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
+        return idx;
+    }
+};
+
 void update_blk_pitch_helper(std::vector<track_info> &info_list, int start, int stop) {
     using p_type = std::array<offset_t, 2>;
     using p_vec = std::vector<p_type>;
@@ -59,23 +68,40 @@ routing_grid::routing_grid(const tech *t, const std::string &fname) : tech_ptr(t
 
     auto tmp = cbagyaml::int_map_to_vec<track_info>(node["routing_grid"]);
     bot_layer = std::get<0>(tmp);
-    top_ignore_layer = bot_layer - 1;
-    top_private_layer = bot_layer - 1;
+    top_ignore_level = bot_layer - 1;
+    top_private_level = bot_layer - 1;
     info_list = std::move(std::get<1>(tmp));
-    update_block_pitch(info_list, bot_layer, top_private_layer, top_ignore_layer);
+    update_block_pitch(info_list, bot_layer, top_private_level, top_ignore_level);
 }
 
 bool routing_grid::operator==(const routing_grid &rhs) const noexcept {
-    return tech_ptr == rhs.tech_ptr && bot_layer == rhs.bot_layer && info_list == rhs.info_list;
+    return tech_ptr == rhs.tech_ptr && bot_layer == rhs.bot_layer && info_list == rhs.info_list &&
+           top_ignore_level == rhs.top_ignore_level && top_private_level == rhs.top_private_level;
 }
 
 const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
 
+int routing_grid::get_top_ignore_level() const noexcept { return top_ignore_level; }
+
+int routing_grid::get_top_private_level() const noexcept { return top_private_level; }
+
 orient_2d routing_grid::get_direction(int level) const {
-    auto idx = static_cast<std::size_t>(level - bot_layer);
+    auto idx = helper::get_index(*this, level);
+    return info_list[idx].dir;
+}
+
+offset_t routing_grid::get_level_offset(int level) const {
+    auto idx = helper::get_index(*this, level);
+    return info_list[idx].offset;
+}
+
+void routing_grid::set_flip_parity(int level, offset_t scale, offset_t offset) {
+    auto idx = helper::get_index(*this, level);
     if (idx >= info_list.size())
         throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
-    return info_list[idx].dir;
+
+    info_list[idx].par_scale = scale;
+    info_list[idx].par_offset = offset;
 }
 
 } // namespace layout
