@@ -32,6 +32,15 @@ bool track_info::operator==(const track_info &rhs) const noexcept {
            blk_pitch == rhs.blk_pitch && w_intvs == rhs.w_intvs;
 }
 
+bool track_info::compatible(const track_info &rhs) const noexcept {
+    return dir == rhs.dir && w == rhs.w && sp == rhs.sp && offset == rhs.offset;
+}
+
+orient_2d track_info::get_direction() const noexcept { return dir; }
+
+offset_t track_info::get_pitch() const noexcept { return w + sp; }
+
+offset_t track_info::get_offset() const noexcept { return offset; }
 } // namespace layout
 } // namespace cbag
 

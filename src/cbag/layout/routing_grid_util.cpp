@@ -3,6 +3,7 @@
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech.h>
+#include <cbag/layout/track_info.h>
 
 namespace cbag {
 namespace layout {
@@ -12,7 +13,7 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
     auto level = tech_ptr->get_level(key);
     std::array<offset_t, 2> ans{0, 0};
     if (level) {
-        auto dir = grid.get_direction(*level);
+        auto dir = grid.get_track_info(*level).get_direction();
         auto pdir = perpendicular(dir);
         auto width = get_dim(obj, pdir);
         ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END);

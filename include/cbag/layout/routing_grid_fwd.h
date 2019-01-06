@@ -13,7 +13,7 @@ class track_info;
 class routing_grid {
   private:
     const tech *tech_ptr = nullptr;
-    int bot_layer = 0;
+    int bot_level = 0;
     std::vector<track_info> info_list;
     int top_ignore_level = std::numeric_limits<int>::min();
     int top_private_level = std::numeric_limits<int>::min();
@@ -28,13 +28,13 @@ class routing_grid {
 
     const tech *get_tech() const noexcept;
 
+    int get_bot_level() const noexcept;
+
     int get_top_ignore_level() const noexcept;
 
     int get_top_private_level() const noexcept;
 
-    orient_2d get_direction(int level) const;
-
-    offset_t get_level_offset(int level) const;
+    const track_info &get_track_info(int level) const;
 
     void set_flip_parity(int level, offset_t scale, offset_t offset);
 };
