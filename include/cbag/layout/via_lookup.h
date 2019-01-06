@@ -41,7 +41,9 @@ class via_lookup {
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 
-    via_param get_via_param(vector dim, layer_t bot_layer, layer_t top_layer, orient_2d bot_dir,
+    const std::string &get_via_id(layer_t bot_layer, layer_t top_layer) const;
+
+    via_param get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
                             orient_2d top_dir, bool extend) const;
 };
 

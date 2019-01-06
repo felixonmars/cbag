@@ -3,101 +3,39 @@
 #include <cbag/common/vector.h>
 #include <cbag/enum/orient_2d.h>
 #include <cbag/layout/tech_util.h>
+#include <cbag/layout/via_param.h>
 
 using c_tech = cbag::layout::tech;
 using c_vector = cbag::vector;
+using c_via_param = cbag::layout::via_param;
 
-TEST_CASE("get_via_param() for 1 via", "[via]") {
+TEST_CASE("get_via_param()", "[via]") {
     c_tech obj("tests/data/test_layout/tech_params.yaml");
-    auto bot_layer = layer_t_at(obj, "M1", "drawing");
-    auto top_layer = layer_t_at(obj, "M2", "drawing");
     auto bot_dir = cbag::orient_2d::HORIZONTAL;
     auto top_dir = cbag::orient_2d::VERTICAL;
     auto extend = true;
 
-    cbag::layout::via_param param;
-
-    // test square via
-    param = obj.get_via_param(c_vector{32, 32}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{32, 32});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{40, 0}, c_vector{0, 40}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    // test square via constraint switch works properly
-    param = obj.get_via_param(c_vector{34, 34}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{32, 32});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{40, 1}, c_vector{1, 40}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    param = obj.get_via_param(c_vector{36, 36}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{32, 32});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{34, 2}, c_vector{2, 34}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    // test hrect via
-    param = obj.get_via_param(c_vector{84, 32}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{64, 32});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{20, 0}, c_vector{10, 10}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    // test vrect via
-    param = obj.get_via_param(c_vector{32, 84}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{32, 64});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{10, 10}, c_vector{0, 20}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    // test 1 via due to infinite space
-    bot_layer = layer_t_at(obj, "TEST1", "drawing");
-    top_layer = layer_t_at(obj, "TEST2", "drawing");
-    param = obj.get_via_param(c_vector{100, 100}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{1, 1});
-    REQUIRE(param.cut_dim == c_vector{10, 10});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{45, 45}, c_vector{45, 45}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-}
-
-TEST_CASE("get_via_param() for 0 via", "[via]") {
-    c_tech obj("tests/data/test_layout/tech_params.yaml");
-    auto bot_layer = layer_t_at(obj, "M1", "drawing");
-    auto top_layer = layer_t_at(obj, "M2", "drawing");
-    auto bot_dir = cbag::orient_2d::HORIZONTAL;
-    auto top_dir = cbag::orient_2d::VERTICAL;
-    auto extend = true;
-
-    cbag::layout::via_param param;
-
-    auto value = GENERATE(values<c_vector>({
-        {32, 31},
-        {31, 32},
-        {31, 31},
+    auto [bl, tl, dim,
+          ans] = GENERATE(values<std::tuple<std::string, std::string, c_vector, c_via_param>>({
+        // 1 via solutions
+        {"M1", "M2", c_vector{32, 32}, c_via_param(1, 1, 32, 32, 0, 0, 40, 40, 0, 0, 0, 0, 40, 40)},
+        {"M1", "M2", c_vector{34, 34}, c_via_param(1, 1, 32, 32, 0, 0, 40, 40, 1, 1, 1, 1, 40, 40)},
+        {"M1", "M2", c_vector{36, 36}, c_via_param(1, 1, 32, 32, 0, 0, 34, 34, 2, 2, 2, 2, 34, 34)},
+        {"M1", "M2", c_vector{84, 32},
+         c_via_param(1, 1, 64, 32, 0, 0, 20, 20, 0, 0, 10, 10, 10, 10)},
+        {"M1", "M2", c_vector{32, 84},
+         c_via_param(1, 1, 32, 64, 0, 0, 10, 10, 10, 10, 0, 0, 20, 20)},
+        {"TEST1", "TEST2", c_vector{100, 100},
+         c_via_param(1, 1, 10, 10, 0, 0, 45, 45, 45, 45, 45, 45, 45, 45)},
+        // 0 via solutions
+        {"M1", "M2", c_vector{32, 31}, c_via_param(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
+        {"M1", "M2", c_vector{31, 32}, c_via_param(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
+        {"M1", "M2", c_vector{31, 31}, c_via_param(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
+        {"TEST1", "TEST2", c_vector{20, 20}, c_via_param(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
     }));
 
-    // test both dimensions too small
-    param = obj.get_via_param(value, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{0, 0});
-    REQUIRE(param.cut_dim == c_vector{0, 0});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-
-    // test no solution due to empty enclosure spec
-    bot_layer = layer_t_at(obj, "TEST1", "drawing");
-    top_layer = layer_t_at(obj, "TEST2", "drawing");
-    param = obj.get_via_param(c_vector{20, 20}, bot_layer, top_layer, bot_dir, top_dir, extend);
-    REQUIRE(param.num == std::array<cbag::cnt_t, 2>{0, 0});
-    REQUIRE(param.cut_dim == c_vector{0, 0});
-    REQUIRE(param.cut_spacing == c_vector{0, 0});
-    REQUIRE(param.enc == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
-    REQUIRE(param.off == std::array<c_vector, 2>{c_vector{0, 0}, c_vector{0, 0}});
+    auto param = obj.get_via_param(
+        dim, obj.get_via_id(layer_t_at(obj, bl, "drawing"), layer_t_at(obj, tl, "drawing")),
+        bot_dir, top_dir, extend);
+    REQUIRE(param == ans);
 }

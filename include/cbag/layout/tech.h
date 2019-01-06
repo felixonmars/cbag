@@ -59,9 +59,9 @@ class tech {
 
     bool get_make_pin() const;
 
-    std::string get_layer_name(lay_t lay_id) const;
+    const std::string &get_layer_name(lay_t lay_id) const;
 
-    std::string get_purpose_name(purp_t purp_id) const;
+    const std::string &get_purpose_name(purp_t purp_id) const;
 
     std::optional<lay_t> get_layer_id(const std::string &layer) const;
 
@@ -75,9 +75,11 @@ class tech {
 
     offset_t get_min_length(layer_t key, offset_t width, bool even) const;
 
+    const std::string &get_via_id(layer_t bot_layer, layer_t top_layer) const;
+
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 
-    via_param get_via_param(vector dim, layer_t bot_layer, layer_t top_layer, orient_2d bot_dir,
+    via_param get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
                             orient_2d top_dir, bool extend) const;
 };
 

@@ -13,15 +13,6 @@
 namespace cbag {
 namespace layout {
 
-const std::string &via_id_at(const vid_map_t &id_map, layer_t bot_lay, layer_t top_lay) {
-    auto iter = id_map.find(std::make_pair(std::move(bot_lay), std::move(top_lay)));
-    if (iter == id_map.end())
-        throw std::out_of_range(fmt::format("Cannot find via ID between ({}, {}) and ({}, {})",
-                                            bot_lay.first, bot_lay.second, top_lay.first,
-                                            top_lay.second));
-    return iter->second;
-}
-
 const std::vector<via_info> &via_info_at(const vinfo_map_t &info_map, const std::string &via_id) {
     auto iter = info_map.find(via_id);
     if (iter == info_map.end())
@@ -56,10 +47,17 @@ uint64_t get_via_score(const via_param &p) {
     return static_cast<uint64_t>(p.num[0]) * p.num[1] * p.cut_dim[0] * p.cut_dim[1];
 }
 
-via_param via_lookup::get_via_param(vector dim, layer_t bot_layer, layer_t top_layer,
-                                    orient_2d bot_dir, orient_2d top_dir, bool extend) const {
+const std::string &via_lookup::get_via_id(layer_t bot_layer, layer_t top_layer) const {
+    auto iter = id_map.find(std::make_pair(std::move(bot_layer), std::move(top_layer)));
+    if (iter == id_map.end())
+        throw std::out_of_range(fmt::format("Cannot find via ID between ({}, {}) and ({}, {})",
+                                            bot_layer.first, bot_layer.second, top_layer.first,
+                                            top_layer.second));
+    return iter->second;
+}
 
-    auto via_id = via_id_at(id_map, std::move(bot_layer), std::move(top_layer));
+via_param via_lookup::get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
+                                    orient_2d top_dir, bool extend) const {
     auto vinfo_list = via_info_at(info_map, via_id);
 
     via_param ans;

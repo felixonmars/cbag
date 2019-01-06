@@ -112,9 +112,11 @@ purp_t tech::get_pin_purpose() const { return lp_map.get_pin_purpose(); }
 
 bool tech::get_make_pin() const { return make_pin_obj; }
 
-std::string tech::get_layer_name(lay_t lay_id) const { return lp_map.get_layer_name(lay_id); }
+const std::string &tech::get_layer_name(lay_t lay_id) const {
+    return lp_map.get_layer_name(lay_id);
+}
 
-std::string tech::get_purpose_name(purp_t purp_id) const {
+const std::string &tech::get_purpose_name(purp_t purp_id) const {
     return lp_map.get_purpose_name(purp_id);
 }
 
@@ -170,13 +172,17 @@ offset_t tech::get_min_length(layer_t key, offset_t width, bool even) const {
     return iter->second.get_min_length(width, even);
 }
 
+const std::string &tech::get_via_id(layer_t bot_layer, layer_t top_layer) const {
+    return vlookup.get_via_id(bot_layer, top_layer);
+}
+
 via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
     return vlookup.get_via_layer_purpose(key);
 }
 
-via_param tech::get_via_param(vector dim, layer_t bot_layer, layer_t top_layer, orient_2d bot_dir,
+via_param tech::get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
                               orient_2d top_dir, bool extend) const {
-    return vlookup.get_via_param(dim, bot_layer, top_layer, bot_dir, top_dir, extend);
+    return vlookup.get_via_param(dim, via_id, bot_dir, top_dir, extend);
 }
 
 } // namespace layout
