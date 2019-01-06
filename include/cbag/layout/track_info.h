@@ -16,24 +16,23 @@ namespace layout {
 
 class track_info {
   private:
-    orient_2d dir = orient_2d::HORIZONTAL;
-    offset_t w = 0;
-    offset_t sp = 0;
     cbag::util::disjoint_intvs<> w_intvs;
 
   public:
+    orient_2d dir = orient_2d::HORIZONTAL;
+    offset_t w = 0;
+    offset_t sp = 0;
+    offset_t offset = 0;
+    offset_t par_scale = 1;
+    offset_t par_offset = 0;
+    std::array<offset_t, 2> blk_pitch = {1, 1};
+
     track_info();
 
     track_info(orient_2d tr_dir, offset_t tr_w, offset_t tr_sp,
                const std::vector<std::array<offset_t, 2>> &intv_list);
 
     bool operator==(const track_info &rhs) const noexcept;
-
-    orient_2d get_direction() const noexcept;
-
-    offset_t get_tr_width() const noexcept;
-
-    offset_t get_tr_space() const noexcept;
 };
 
 } // namespace layout

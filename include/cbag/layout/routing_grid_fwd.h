@@ -15,6 +15,8 @@ class routing_grid {
     const tech *tech_ptr = nullptr;
     int bot_layer = 0;
     std::vector<track_info> info_list;
+    int top_ignore_layer = std::numeric_limits<int>::min();
+    int top_private_layer = std::numeric_limits<int>::min();
 
   public:
     routing_grid();

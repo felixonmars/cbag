@@ -15,7 +15,8 @@ track_info::track_info() = default;
 
 track_info::track_info(orient_2d tr_dir, offset_t tr_w, offset_t tr_sp,
                        const std::vector<std::array<offset_t, 2>> &intv_list)
-    : dir(tr_dir), w(tr_w), sp(tr_sp) {
+    : dir(tr_dir), w(tr_w), sp(tr_sp),
+      offset((tr_w + tr_sp) / 2), blk_pitch{tr_w + tr_sp, (tr_w + tr_sp) / 2} {
     for (const auto &intv : intv_list) {
         bool success = w_intvs.emplace(false, false, intv);
         if (!success) {
@@ -26,14 +27,10 @@ track_info::track_info(orient_2d tr_dir, offset_t tr_w, offset_t tr_sp,
 }
 
 bool track_info::operator==(const track_info &rhs) const noexcept {
-    return dir == rhs.dir && w == rhs.w && sp == rhs.sp && w_intvs == rhs.w_intvs;
+    return dir == rhs.dir && w == rhs.w && sp == rhs.sp && offset == rhs.offset &&
+           par_scale == rhs.par_scale && par_offset == rhs.par_offset &&
+           blk_pitch == rhs.blk_pitch && w_intvs == rhs.w_intvs;
 }
-
-orient_2d track_info::get_direction() const noexcept { return dir; }
-
-offset_t track_info::get_tr_width() const noexcept { return w; }
-
-offset_t track_info::get_tr_space() const noexcept { return sp; }
 
 } // namespace layout
 } // namespace cbag
