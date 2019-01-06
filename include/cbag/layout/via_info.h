@@ -28,7 +28,6 @@ using via_cnt_t = std::tuple<cnt_t, std::array<cnt_t, 2>>;
 
 class via_info {
   private:
-    std::string cut_type;
     vector cut_dim = {0, 0};
     vector sp = {0, 0};
     std::vector<vector> sp2_list;
@@ -38,7 +37,7 @@ class via_info {
   public:
     via_info();
 
-    via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
+    via_info(vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
              std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list);
 
     via_param get_via_param(vector dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;

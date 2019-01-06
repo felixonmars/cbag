@@ -15,10 +15,10 @@ venc_data::venc_data() = default;
 
 via_info::via_info() = default;
 
-via_info::via_info(std::string &&ctype, vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
+via_info::via_info(vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
                    std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list)
-    : cut_type(std::move(ctype)), cut_dim(std::move(cdim)), sp(std::move(s)),
-      sp2_list(std::move(s2_list)), sp3_list(std::move(s3_list)), enc_list(std::move(e_list)) {
+    : cut_dim(std::move(cdim)), sp(std::move(s)), sp2_list(std::move(s2_list)),
+      sp3_list(std::move(s3_list)), enc_list(std::move(e_list)) {
     if (sp2_list.empty()) {
         sp2_list.emplace_back(sp);
     }

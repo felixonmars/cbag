@@ -33,7 +33,6 @@ bool convert<cbag::layout::venc_data>::decode(const Node &node, cbag::layout::ve
 bool convert<cbag::layout::via_info>::decode(const Node &node, cbag::layout::via_info &rhs) {
     auto logger = cbag::get_cbag_logger();
     try {
-        auto cut_type = node["name"].as<std::string>();
         auto cut_dim = node["dim"].as<cbag::vector>();
         auto sp = node["sp"].as<cbag::vector>();
         auto sp2_list = node["sp2"].as<std::vector<cbag::vector>>();
@@ -42,8 +41,8 @@ bool convert<cbag::layout::via_info>::decode(const Node &node, cbag::layout::via
             node["bot_enc"].as<cbag::layout::venc_info>(),
             node["top_enc"].as<cbag::layout::venc_info>()};
 
-        rhs = cbag::layout::via_info(std::move(cut_type), std::move(cut_dim), std::move(sp),
-                                     std::move(sp2_list), std::move(sp3_list), std::move(enc_list));
+        rhs = cbag::layout::via_info(std::move(cut_dim), std::move(sp), std::move(sp2_list),
+                                     std::move(sp3_list), std::move(enc_list));
     } catch (...) {
         logger->warn("cbag::layout::via_info YAML decode exception.  Node:\n{}",
                      cbagyaml::node_to_str(node));

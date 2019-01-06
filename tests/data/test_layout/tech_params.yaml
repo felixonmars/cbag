@@ -118,8 +118,7 @@ idc_em_scale:
 # via enclosure/spacing rules
 via:
   TEST:
-    - name: square
-      dim: [10, 10]
+    - dim: [10, 10]
       sp: [.inf, .inf]
       sp2: [[.inf, .inf]]
       sp3: [[.inf, .inf]]
@@ -129,8 +128,7 @@ via:
         - [30, []]
         - [.inf, [[0, 0]]]
   M2_M1: &via_1x
-    - name: square
-      dim: [32, 32]
+    - dim: [32, 32]
       sp: [42, 42]
       sp2: [[42, 42]]
       sp3: [[42, 42]]
@@ -141,7 +139,6 @@ via:
         - [.inf, [[18, 18]]]
       top_enc: *square_1x_enc
     - &hrect_1x
-      name: hrect
       dim: [64, 32]
       sp: [42, 42]
       sp2: [[42, 42]]
@@ -153,7 +150,6 @@ via:
         - [.inf, [[10, 0]]]
       top_enc: *hrect_1x_enc
     - &vrect_1x
-      name: vrect
       dim: [32, 64]
       sp: [42, 42]
       sp2: [[42, 42]]
@@ -167,8 +163,7 @@ via:
   M3_M2: *via_1x
   M4_M3: *via_1x
   M5_M4: &via_2x
-    - name: square
-      dim: [42, 42]
+    - dim: [42, 42]
       sp: [62, 62]
       sp2: [[62, 62]]
       sp3: [[78, 78]]
