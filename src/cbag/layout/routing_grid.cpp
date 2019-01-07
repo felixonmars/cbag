@@ -5,8 +5,10 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/common/transformation_util.h>
 #include <cbag/layout/flip_parity.h>
 #include <cbag/layout/routing_grid.h>
+#include <cbag/layout/track_info_util.h>
 #include <cbag/yaml/common.h>
 
 namespace cbag {
@@ -93,9 +95,31 @@ const track_info &routing_grid::get_track_info(int level) const {
     return info_list[idx];
 }
 
-flip_parity routing_grid::get_flip_parity_at(int bot_layer, int top_layer,
+flip_parity routing_grid::get_flip_parity_at(int bot_level, int top_level,
                                              const transformation &xform) const {
+    if (flips_xy(xform))
+        throw std::invalid_argument("Unsupported orientation: " +
+                                    std::to_string(orient_code(xform)));
+
+    auto ascale = axis_scale(xform);
+    auto loc = location(xform);
     std::vector<std::tuple<int, offset_t, offset_t>> data;
+    data.reserve(top_level - bot_level + 1);
+    for (auto lev = bot_level; lev <= top_level; ++lev) {
+        auto tr_info = get_track_info(lev);
+        auto dir = tr_info.get_direction();
+        auto didx = static_cast<orient_2d_t>(dir);
+        auto coord = loc[didx];
+        auto scale = ascale[didx];
+        auto htr = coord_to_track(tr_info, coord);
+
+        auto cur_scale = tr_info.par_scale;
+        auto cur_offset = tr_info.par_offset;
+        auto new_scale = cur_scale * scale;
+        auto new_offset = (cur_scale * htr + cur_offset);
+        data.emplace_back(lev, new_scale, new_offset);
+    }
+
     return flip_parity(std::move(data));
 }
 

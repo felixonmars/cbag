@@ -11,13 +11,18 @@ transformation make_xform(coord_t dx, coord_t dy, orientation orient) {
     return ans;
 }
 
-std::pair<coord_t, coord_t> location(const transformation &xform) {
-    auto ans = std::make_pair<coord_t, coord_t>(0, 0);
-    xform.transform(ans.first, ans.second);
+std::array<coord_t, 2> location(const transformation &xform) {
+    auto ans = std::array<coord_t, 2>{0, 0};
+    xform.transform(ans[0], ans[1]);
     return ans;
 }
-coord_t x(const transformation &xform) { return location(xform).first; }
-coord_t y(const transformation &xform) { return location(xform).second; }
+
+coord_t get_coord(const transformation &xform, orient_2d orient) {
+    return location(xform)[static_cast<orient_2d_t>(orient)];
+}
+
+coord_t x(const transformation &xform) { return get_coord(xform, orient_2d::HORIZONTAL); }
+coord_t y(const transformation &xform) { return get_coord(xform, orient_2d::VERTICAL); }
 orient_t orient_code(const transformation &xform) {
     bp::direction_2d hdir, vdir;
     xform.get_directions(hdir, vdir);
@@ -38,21 +43,22 @@ void set_orient(transformation &xform, orientation orient) {
     // set new orientation
     xform.set_axis_transformation(bp::axis_transformation(orient));
     // set origin
-    set_location(xform, loc.first, loc.second);
+    set_location(xform, loc[0], loc[1]);
 }
 void set_orient_code(transformation &xform, orient_t code) {
     set_orient(xform, static_cast<orientation>(code));
 }
 
 bool flips_xy(const transformation &xform) { return (orient_code(xform) & 0b100) == 0b100; }
-std::pair<bool, bool> axis_scale(const transformation &xform) {
+std::array<int, 2> axis_scale(const transformation &xform) {
     auto ocode = orient_code(xform);
-    return {(ocode & 0b001) == 0b001, (ocode & 0b010) == 0b010};
+    return {1 - 2 * static_cast<int>(ocode & 0b001),
+            1 - 2 * static_cast<int>((ocode & 0b010) >> 1)};
 }
 
 transformation &move_by(transformation &xform, offset_t dx, offset_t dy) {
     auto loc = location(xform);
-    set_location(xform, loc.first + dx, loc.second + dy);
+    set_location(xform, loc[0] + dx, loc[1] + dy);
     return xform;
 }
 transformation get_move_by(transformation xform, offset_t dx, offset_t dy) {

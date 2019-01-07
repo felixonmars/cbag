@@ -2,10 +2,12 @@
 #ifndef CBAG_COMMON_TRANSFORMATION_UTIL_H
 #define CBAG_COMMON_TRANSFORMATION_UTIL_H
 
+#include <array>
 #include <tuple>
 #include <utility>
 
 #include <cbag/common/transformation_fwd.h>
+#include <cbag/enum/orient_2d.h>
 #include <cbag/enum/orientation.h>
 
 namespace bp = boost::polygon;
@@ -16,7 +18,8 @@ transformation make_xform(coord_t dx = 0, coord_t dy = 0, orientation orient = o
 
 coord_t x(const transformation &xform);
 coord_t y(const transformation &xform);
-std::pair<coord_t, coord_t> location(const transformation &xform);
+std::array<coord_t, 2> location(const transformation &xform);
+coord_t get_coord(const transformation &xform, orient_2d orient);
 orientation orient(const transformation &xform);
 orient_t orient_code(const transformation &xform);
 
@@ -25,7 +28,7 @@ void set_orient(transformation &xform, orientation orient);
 void set_orient_code(transformation &xform, orient_t orient);
 
 bool flips_xy(const transformation &xform);
-std::pair<bool, bool> axis_scale(const transformation &xform);
+std::array<int, 2> axis_scale(const transformation &xform);
 
 transformation &move_by(transformation &xform, offset_t dx, offset_t dy);
 transformation get_move_by(transformation xform, offset_t dx, offset_t dy);

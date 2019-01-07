@@ -100,6 +100,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/tech_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/track_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/track_info_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/vector45.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_info.cpp

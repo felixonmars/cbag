@@ -39,7 +39,7 @@ class routing_grid {
 
     const track_info &get_track_info(int level) const;
 
-    flip_parity get_flip_parity_at(int bot_layer, int top_layer, const transformation &xform) const;
+    flip_parity get_flip_parity_at(int bot_level, int top_level, const transformation &xform) const;
 
     void set_flip_parity(const flip_parity &fp);
 };
