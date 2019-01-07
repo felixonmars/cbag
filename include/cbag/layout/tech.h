@@ -71,7 +71,7 @@ class tech {
 
     const std::vector<layer_t> &get_lay_purp_list(int level) const;
 
-    offset_t get_min_space(layer_t key, offset_t width, space_type sp_type) const;
+    offset_t get_min_space(layer_t key, offset_t width, space_type sp_type, bool even) const;
 
     offset_t get_min_length(layer_t key, offset_t width, bool even) const;
 

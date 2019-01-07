@@ -43,7 +43,7 @@ TEST_CASE("technology get_min_space", "[tech]") {
         }));
 
     auto key = layer_t_at(obj, lay_name, "drawing");
-    REQUIRE(obj.get_min_space(key, w, sp_type) == min_sp);
+    REQUIRE(obj.get_min_space(key, w, sp_type, false) == min_sp);
 }
 
 TEST_CASE("technology get_min_length", "[tech]") {

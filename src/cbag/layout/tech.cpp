@@ -144,7 +144,7 @@ const std::vector<layer_t> &tech::get_lay_purp_list(int level) const {
     return lp_list[idx];
 }
 
-offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) const {
+offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type, bool even) const {
     auto map_iter = sp_map_grp.find((sp_type == space_type::SAME_COLOR) ? sp_sc_type : sp_type);
     if (map_iter == sp_map_grp.end())
         throw std::out_of_range("Min space not defined forspace type: " +
@@ -159,9 +159,10 @@ offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type) co
 
     for (const auto &[w_spec, sp] : w_sp_list) {
         if (width <= w_spec)
-            return sp;
+            return sp + (sp & static_cast<int>(even));
     }
-    return w_sp_list[w_sp_list.size() - 1].second;
+    auto ans = w_sp_list[w_sp_list.size() - 1].second;
+    return ans + (ans & static_cast<int>(even));
 }
 
 offset_t tech::get_min_length(layer_t key, offset_t width, bool even) const {

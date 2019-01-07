@@ -33,8 +33,7 @@ offset_t get_min_len_max_dim(offset_t w, offset_t len, const std::vector<max_len
 offset_t len_info::get_min_length(offset_t w, bool even) const {
     offset_t ans = get_min_len_width(w, w_al_list);
     ans = get_min_len_max_dim(w, ans, md_al_list);
-
-    return (even) ? ans + (ans & 1) : ans;
+    return ans + (ans & static_cast<int>(even));
 }
 
 } // namespace layout

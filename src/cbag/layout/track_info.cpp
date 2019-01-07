@@ -5,6 +5,7 @@
 #include <cbag/logging/logging.h>
 
 #include <cbag/layout/track_info.h>
+#include <cbag/layout/wire_info.h>
 #include <cbag/yaml/common.h>
 #include <cbag/yaml/int_array.h>
 
@@ -41,6 +42,13 @@ orient_2d track_info::get_direction() const noexcept { return dir; }
 offset_t track_info::get_pitch() const noexcept { return w + sp; }
 
 offset_t track_info::get_offset() const noexcept { return offset; }
+
+wire_info track_info::get_wire_info(cnt_t num_tr) const {
+    auto wire_w = (num_tr - 1) * (w + sp) + w;
+    return wire_info{
+        std::vector<std::tuple<int, offset_t>>({std::tuple<int, offset_t>{0, wire_w}})};
+}
+
 } // namespace layout
 } // namespace cbag
 

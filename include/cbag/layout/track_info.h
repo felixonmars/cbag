@@ -13,6 +13,7 @@ namespace cbag {
 namespace layout {
 
 class routing_grid;
+class wire_info;
 
 class track_info {
   private:
@@ -42,6 +43,8 @@ class track_info {
     offset_t get_pitch() const noexcept;
 
     offset_t get_offset() const noexcept;
+
+    wire_info get_wire_info(cnt_t num_tr) const;
 };
 
 } // namespace layout

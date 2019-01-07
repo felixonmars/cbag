@@ -16,8 +16,8 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
         auto dir = grid.get_track_info(*level).get_direction();
         auto pdir = perpendicular(dir);
         auto width = get_dim(obj, pdir);
-        ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END);
-        ans[to_int(pdir)] = tech_ptr->get_min_space(key, width, space_type::DIFF_COLOR);
+        ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END, false);
+        ans[to_int(pdir)] = tech_ptr->get_min_space(key, width, space_type::DIFF_COLOR, false);
     }
     return ans;
 }
