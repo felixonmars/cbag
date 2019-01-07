@@ -5,6 +5,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <cbag/layout/flip_parity.h>
 #include <cbag/layout/routing_grid.h>
 #include <cbag/yaml/common.h>
 
@@ -92,13 +93,18 @@ const track_info &routing_grid::get_track_info(int level) const {
     return info_list[idx];
 }
 
-void routing_grid::set_flip_parity(int level, offset_t scale, offset_t offset) {
-    auto idx = helper::get_index(*this, level);
-    if (idx >= info_list.size())
-        throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
+flip_parity routing_grid::get_flip_parity_at(int bot_layer, int top_layer,
+                                             const transformation &xform) const {
+    std::vector<std::tuple<int, offset_t, offset_t>> data;
+    return flip_parity(std::move(data));
+}
 
-    info_list[idx].par_scale = scale;
-    info_list[idx].par_offset = offset;
+void routing_grid::set_flip_parity(const flip_parity &fp) {
+    for (const auto &[level, scale, offset] : fp.data_) {
+        auto idx = helper::get_index(*this, level);
+        info_list[idx].par_scale = scale;
+        info_list[idx].par_offset = offset;
+    }
 }
 
 } // namespace layout

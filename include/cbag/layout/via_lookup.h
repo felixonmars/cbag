@@ -4,7 +4,7 @@
 
 #include <unordered_map>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include <cbag/common/box_t.h>
 #include <cbag/common/layer_t.h>

@@ -83,6 +83,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_poly.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/cellview_util.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/flip_parity.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_index.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp

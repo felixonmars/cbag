@@ -9,8 +9,6 @@
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/orient_2d.h>
 
-namespace bp = boost::polygon;
-
 namespace cbag {
 namespace layout {
 

@@ -1,4 +1,3 @@
-
 #include <cbag/schematic/cellview.h>
 
 #include <cbag/oa/oa_read.h>

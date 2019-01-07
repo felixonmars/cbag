@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 namespace cbag {
 namespace layout {

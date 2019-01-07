@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <variant>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include <cbag/logging/logging.h>
 

@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include <cbag/layout/via_info.h>
 #include <cbag/layout/via_param.h>

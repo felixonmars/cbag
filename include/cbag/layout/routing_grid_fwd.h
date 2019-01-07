@@ -1,14 +1,17 @@
 #ifndef CBAG_LAYOUT_ROUTING_GRID_FWD_H
 #define CBAG_LAYOUT_ROUTING_GRID_FWD_H
 
+#include <cbag/common/transformation_fwd.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/orient_2d.h>
 
 namespace cbag {
+
 namespace layout {
 
 class tech;
 class track_info;
+class flip_parity;
 
 class routing_grid {
   private:
@@ -36,7 +39,9 @@ class routing_grid {
 
     const track_info &get_track_info(int level) const;
 
-    void set_flip_parity(int level, offset_t scale, offset_t offset);
+    flip_parity get_flip_parity_at(int bot_layer, int top_layer, const transformation &xform) const;
+
+    void set_flip_parity(const flip_parity &fp);
 };
 
 } // namespace layout
