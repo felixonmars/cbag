@@ -12,6 +12,7 @@
 namespace cbag {
 namespace layout {
 
+class tech;
 class routing_grid;
 class wire_info;
 
@@ -44,7 +45,12 @@ class track_info {
 
     offset_t get_offset() const noexcept;
 
+    offset_t get_wire_span(cnt_t num_tr) const noexcept;
+
     wire_info get_wire_info(cnt_t num_tr) const;
+
+    cnt_t get_min_space_htr(const tech &t, int level, cnt_t num_tr, bool same_color,
+                            bool even) const;
 };
 
 } // namespace layout

@@ -13,6 +13,16 @@ namespace layout {
 
 class tech;
 
+/** A class to model a "conceptual wire".
+ * A "conceptual wire" consists of one or more wires, since some technologies
+ * have discrete width choices, so wide wires have to be realized with multiple
+ * small wires.  This class encapsulates these technology details.
+ *
+ * Assumptions made by this class:
+ * - minimum space DRC rules is the same for different color wires.
+ * - all the individual wires are on track, and they are symmetric with respect
+ *   to the center.
+ */
 class wire_info {
   private:
     std::vector<std::tuple<int, offset_t>> widths_;
@@ -23,6 +33,8 @@ class wire_info {
     offset_t get_min_length(const tech &t, int level, bool even) const;
 
     offset_t get_min_space(const tech &t, int level, space_type sp_type, bool even) const;
+
+    offset_t get_wire_width(offset_t pitch) const;
 };
 
 } // namespace layout

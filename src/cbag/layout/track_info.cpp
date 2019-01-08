@@ -6,6 +6,7 @@
 
 #include <cbag/layout/track_info.h>
 #include <cbag/layout/wire_info.h>
+#include <cbag/util/math.h>
 #include <cbag/yaml/common.h>
 #include <cbag/yaml/int_array.h>
 
@@ -43,10 +44,26 @@ offset_t track_info::get_pitch() const noexcept { return w + sp; }
 
 offset_t track_info::get_offset() const noexcept { return offset; }
 
+offset_t track_info::get_wire_span(cnt_t num_tr) const noexcept {
+    return w + static_cast<offset_t>(num_tr - 1) * get_pitch();
+}
 wire_info track_info::get_wire_info(cnt_t num_tr) const {
-    auto wire_w = (num_tr - 1) * (w + sp) + w;
+    auto wire_w = get_wire_span(num_tr);
     return wire_info{
         std::vector<std::tuple<int, offset_t>>({std::tuple<int, offset_t>{0, wire_w}})};
+}
+
+cnt_t track_info::get_min_space_htr(const tech &t, int level, cnt_t num_tr, bool same_color,
+                                    bool even) const {
+    auto p = get_pitch();
+    auto p2 = p / 2;
+    auto winfo = get_wire_info(num_tr);
+    auto span = get_wire_span(num_tr);
+    auto extra = (span - winfo.get_wire_width(p2)) / 2;
+    auto margin =
+        std::max(0, winfo.get_min_space(t, level, get_space_type(same_color), even) - extra);
+
+    return util::ceil(std::max(margin - sp, 0), p2);
 }
 
 } // namespace layout

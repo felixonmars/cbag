@@ -7,10 +7,12 @@
 namespace cbag {
 
 enum class space_type : enum_t {
-    LINE_END = 0,
-    DIFF_COLOR = 1,
-    SAME_COLOR = 2,
+    DIFF_COLOR = 0,
+    SAME_COLOR = 1,
+    LINE_END = 2,
 };
+
+inline space_type get_space_type(bool same_color) { return static_cast<space_type>(same_color); }
 
 } // namespace cbag
 
