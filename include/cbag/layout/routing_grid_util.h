@@ -22,6 +22,9 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
 std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon45 &obj);
 std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon &obj);
 
+std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, int bot_level, cnt_t bot_ntr,
+                                           cnt_t top_ntr, orient_2d bot_dir, orient_2d top_dir);
+
 } // namespace layout
 } // namespace cbag
 

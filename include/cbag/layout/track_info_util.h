@@ -10,6 +10,9 @@ offset_t get_pitch2(const track_info &tr_info);
 
 int coord_to_track(const track_info &tr_info, offset_t coord);
 
+cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, int level, cnt_t num_tr,
+                        bool same_color, bool even);
+
 } // namespace layout
 } // namespace cbag
 

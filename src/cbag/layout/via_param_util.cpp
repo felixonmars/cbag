@@ -21,5 +21,14 @@ box_t get_box(const via_param &p, const transformation &xform, cnt_t level) {
     return {x - w2, y - h2, x + w2, y + h2};
 }
 
+std::array<offset_t, 2> get_via_extension(const via_param &p, vector dim, orient_2d bot_dir,
+                                          orient_2d top_dir) {
+
+    return std::array<offset_t, 2>{
+        get_metal_dim(p, bot_dir, 0) - dim[to_int(bot_dir)],
+        get_metal_dim(p, top_dir, 1) - dim[to_int(top_dir)],
+    };
+}
+
 } // namespace layout
 } // namespace cbag

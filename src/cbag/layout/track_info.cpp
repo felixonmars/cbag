@@ -53,17 +53,8 @@ wire_info track_info::get_wire_info(cnt_t num_tr) const {
         std::vector<std::tuple<int, offset_t>>({std::tuple<int, offset_t>{0, wire_w}})};
 }
 
-cnt_t track_info::get_min_space_htr(const tech &t, int level, cnt_t num_tr, bool same_color,
-                                    bool even) const {
-    auto p = get_pitch();
-    auto p2 = p / 2;
-    auto winfo = get_wire_info(num_tr);
-    auto span = get_wire_span(num_tr);
-    auto extra = (span - winfo.get_wire_width(p2)) / 2;
-    auto margin =
-        std::max(0, winfo.get_min_space(t, level, get_space_type(same_color), even) - extra);
-
-    return util::ceil(std::max(margin - sp, 0), p2);
+cnt_t track_info::space_to_htr(offset_t space) const noexcept {
+    return util::ceil(std::max(space - sp, 0), get_pitch() / 2);
 }
 
 } // namespace layout
