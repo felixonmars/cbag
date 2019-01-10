@@ -34,7 +34,9 @@ class wire_info {
 
     offset_t get_min_space(const tech &t, int level, space_type sp_type, bool even) const;
 
-    offset_t get_wire_width(offset_t pitch) const;
+    offset_t get_edge_wire_width() const;
+
+    offset_t get_total_width(offset_t pitch) const;
 };
 
 } // namespace layout

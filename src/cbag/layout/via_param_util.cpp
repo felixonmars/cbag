@@ -5,6 +5,8 @@
 namespace cbag {
 namespace layout {
 
+bool empty(const via_param &p) { return p.num[0] == 0; }
+
 offset_t get_arr_dim(const via_param &p, orient_2d orient) {
     auto dir_idx = to_int(orient);
     return p.num[dir_idx] * (p.cut_dim[dir_idx] + p.cut_spacing[dir_idx]) - p.cut_spacing[dir_idx];
@@ -21,8 +23,8 @@ box_t get_box(const via_param &p, const transformation &xform, cnt_t level) {
     return {x - w2, y - h2, x + w2, y + h2};
 }
 
-std::array<offset_t, 2> get_via_extension(const via_param &p, vector dim, orient_2d bot_dir,
-                                          orient_2d top_dir) {
+std::array<offset_t, 2> get_via_extensions(const via_param &p, vector dim, orient_2d bot_dir,
+                                           orient_2d top_dir) {
 
     return std::array<offset_t, 2>{
         get_metal_dim(p, bot_dir, 0) - dim[to_int(bot_dir)],

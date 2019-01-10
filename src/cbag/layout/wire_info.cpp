@@ -24,9 +24,11 @@ offset_t wire_info::get_min_space(const tech &t, int level, space_type sp_type, 
     return t.get_min_space(key, std::get<1>(widths_[0]), sp_type, even);
 }
 
-offset_t wire_info::get_wire_width(offset_t pitch2) const {
+offset_t wire_info::get_edge_wire_width() const { return std::get<1>(widths_[0]); }
+
+offset_t wire_info::get_total_width(offset_t pitch2) const {
     auto &[htr, w] = widths_[0];
-    return w + pitch2 * (std::get<0>(widths_.back()) - htr);
+    return w + pitch2 * (std::get<0>(widths_[widths_.size() - 1]) - htr);
 }
 
 } // namespace layout

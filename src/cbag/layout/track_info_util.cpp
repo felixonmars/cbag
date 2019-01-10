@@ -29,7 +29,7 @@ cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, int level, cnt
     auto p2 = get_pitch2(tr_info);
     auto winfo = tr_info.get_wire_info(num_tr);
     auto span = tr_info.get_wire_span(num_tr);
-    auto extra = (span - winfo.get_wire_width(p2)) / 2;
+    auto extra = (span - winfo.get_total_width(p2)) / 2;
     auto margin =
         std::max(0, winfo.get_min_space(t, level, get_space_type(same_color), even) - extra);
 
