@@ -39,34 +39,43 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
     return {0, 0};
 }
 
-std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, int bot_level, cnt_t bot_ntr,
-                                           cnt_t top_ntr) {
-    auto bot_tr_info = grid.get_track_info(bot_level);
-    auto top_tr_info = grid.get_track_info(bot_level + 1);
-    auto bot_dir = bot_tr_info.get_direction();
-    auto top_dir = top_tr_info.get_direction();
-    if (top_dir == bot_dir) {
+std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, int level,
+                                           cnt_t ntr, cnt_t adj_ntr) {
+    auto adj_level = get_adj_level(vdir, level);
+    auto tr_info = grid.get_track_info(level);
+    auto adj_tr_info = grid.get_track_info(adj_level);
+    auto dir = tr_info.get_direction();
+    auto adj_dir = adj_tr_info.get_direction();
+    if (dir == adj_dir) {
         // TODO: implement for layers with same direction
         throw std::invalid_argument(
             "get_via_extensions() right now requires two layers with different directions.");
     }
     auto tech = *grid.get_tech();
-    auto bot_wire_info = bot_tr_info.get_wire_info(bot_ntr);
-    auto top_wire_info = top_tr_info.get_wire_info(top_ntr);
-    auto bot_key = tech.get_lay_purp_list(bot_level)[0];
-    auto top_key = tech.get_lay_purp_list(bot_level + 1)[0];
-    auto via_id = tech.get_via_id(bot_key, top_key);
+    auto wire_info = tr_info.get_wire_info(ntr);
+    auto adj_wire_info = adj_tr_info.get_wire_info(adj_ntr);
+    auto key = tech.get_lay_purp_list(level)[0];
+    auto adj_key = tech.get_lay_purp_list(adj_level)[0];
+    auto via_id = tech.get_via_id(vdir, key, adj_key);
     vector vbox_dim;
-    vbox_dim[to_int(bot_dir)] = bot_wire_info.get_edge_wire_width();
-    vbox_dim[to_int(top_dir)] = top_wire_info.get_edge_wire_width();
-    auto via_param = tech.get_via_param(vbox_dim, via_id, bot_dir, top_dir, true);
+    vbox_dim[to_int(dir)] = wire_info.get_edge_wire_width();
+    vbox_dim[to_int(adj_dir)] = adj_wire_info.get_edge_wire_width();
+    auto via_param = tech.get_via_param(vbox_dim, via_id, vdir, dir, adj_dir, true);
 
-    if (empty(via_param))
+    if (empty(via_param)) {
+        auto vidx = to_int(vdir);
+        std::array<int, 2> lev_arr;
+        lev_arr[vidx] = level;
+        lev_arr[1 - vidx] = adj_level;
+        std::array<cnt_t, 2> ntr_arr;
+        ntr_arr[vidx] = ntr;
+        ntr_arr[1 - vidx] = adj_ntr;
         throw std::invalid_argument(
-            fmt::format("Cannot draw via with bot_level={}, bot_ntr={}, top_ntr={}", bot_level,
-                        bot_ntr, top_ntr));
+            fmt::format("Cannot draw via with bot_level={}, bot_ntr={}, top_ntr={}", lev_arr[0],
+                        ntr_arr[0], ntr_arr[1]));
+    }
 
-    return get_via_extensions(via_param, vbox_dim, bot_dir, top_dir);
+    return get_via_extensions(via_param, vbox_dim, vdir, dir, adj_dir);
 }
 
 } // namespace layout

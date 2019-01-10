@@ -11,6 +11,7 @@
 
 #include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
+#include <cbag/enum/direction.h>
 #include <cbag/enum/space_type.h>
 #include <cbag/layout/len_info.h>
 #include <cbag/layout/lp_lookup.h>
@@ -75,12 +76,12 @@ class tech {
 
     offset_t get_min_length(layer_t key, offset_t width, bool even) const;
 
-    const std::string &get_via_id(layer_t bot_layer, layer_t top_layer) const;
+    const std::string &get_via_id(direction vdir, layer_t layer, layer_t adj_layer) const;
 
     via_lay_purp_t get_via_layer_purpose(const std::string &key) const;
 
-    via_param get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
-                            orient_2d top_dir, bool extend) const;
+    via_param get_via_param(vector dim, const std::string &via_id, direction vdir, orient_2d ex_dir,
+                            orient_2d adj_ex_dir, bool extend) const;
 };
 
 } // namespace layout

@@ -8,6 +8,7 @@
 
 #include <cbag/common/typedefs.h>
 #include <cbag/common/vector.h>
+#include <cbag/enum/direction.h>
 #include <cbag/enum/orient_2d.h>
 
 namespace cbag {
@@ -40,7 +41,8 @@ class via_info {
     via_info(vector &&cdim, vector &&s, std::vector<vector> &&s2_list,
              std::vector<vector> &&s3_list, std::array<venc_info, 2> &&e_list);
 
-    via_param get_via_param(vector dim, orient_2d bot_dir, orient_2d top_dir, bool extend) const;
+    via_param get_via_param(vector dim, direction vdir, orient_2d ex_dir, orient_2d adj_ex_dir,
+                            bool extend) const;
 };
 
 } // namespace layout

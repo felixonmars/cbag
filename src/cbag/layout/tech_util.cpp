@@ -41,6 +41,10 @@ layer_t layer_t_at(const lp_lookup &lp, const std::string &layer, const std::str
     return {layer_id_at(lp, layer), purpose_id_at(lp, purpose)};
 }
 
+const std::string &get_via_id(const tech &t, layer_t bot_layer, layer_t top_layer) {
+    return t.get_via_id(direction::LOWER, bot_layer, top_layer);
+}
+
 std::string get_pin_purpose_name(const tech &t) { return t.get_purpose_name(t.get_pin_purpose()); }
 
 std::string get_default_purpose_name(const tech &t) {

@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <cbag/common/vector.h>
+#include <cbag/enum/direction.h>
 #include <cbag/enum/orient_2d.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/via_param.h>
@@ -34,8 +35,10 @@ TEST_CASE("get_via_param()", "[via]") {
         {"TEST1", "TEST2", c_vector{20, 20}, c_via_param(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)},
     }));
 
-    auto param = obj.get_via_param(
-        dim, obj.get_via_id(layer_t_at(obj, bl, "drawing"), layer_t_at(obj, tl, "drawing")),
-        bot_dir, top_dir, extend);
+    auto param =
+        obj.get_via_param(dim,
+                          obj.get_via_id(cbag::direction::LOWER, layer_t_at(obj, bl, "drawing"),
+                                         layer_t_at(obj, tl, "drawing")),
+                          cbag::direction::LOWER, bot_dir, top_dir, extend);
     REQUIRE(param == ans);
 }

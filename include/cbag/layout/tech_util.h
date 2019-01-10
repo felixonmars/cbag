@@ -21,6 +21,8 @@ std::string get_pin_purpose_name(const tech &t);
 
 std::string get_default_purpose_name(const tech &t);
 
+const std::string &get_via_id(const tech &t, layer_t bot_layer, layer_t top_layer);
+
 offset_t get_min_length(const tech &t, const std::string &layer, const std::string &purpose,
                         offset_t width, bool even);
 

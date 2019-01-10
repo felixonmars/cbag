@@ -47,27 +47,33 @@ uint64_t get_via_score(const via_param &p) {
     return static_cast<uint64_t>(p.num[0]) * p.num[1] * p.cut_dim[0] * p.cut_dim[1];
 }
 
-const std::string &via_lookup::get_via_id(layer_t bot_layer, layer_t top_layer) const {
-    auto iter = id_map.find(std::make_pair(std::move(bot_layer), std::move(top_layer)));
+const std::string &via_lookup::get_via_id(direction vdir, layer_t layer, layer_t adj_layer) const {
+    vlayers_t key;
+    auto dir_idx = to_int(vdir);
+    key[dir_idx] = layer;
+    key[1 - dir_idx] = adj_layer;
+    auto iter = id_map.find(key);
     if (iter == id_map.end())
         throw std::out_of_range(fmt::format("Cannot find via ID between ({}, {}) and ({}, {})",
-                                            bot_layer.first, bot_layer.second, top_layer.first,
-                                            top_layer.second));
+                                            key[0].first, key[0].second, key[1].first,
+                                            key[1].second));
     return iter->second;
 }
 
-via_param via_lookup::get_via_param(vector dim, const std::string &via_id, orient_2d bot_dir,
-                                    orient_2d top_dir, bool extend) const {
+via_param via_lookup::get_via_param(vector dim, const std::string &via_id, direction vdir,
+                                    orient_2d ex_dir, orient_2d adj_ex_dir, bool extend) const {
+    auto adj_vdir = flip(vdir);
     auto vinfo_list = via_info_at(info_map, via_id);
-
+    auto vidx = to_int(vdir);
     via_param ans;
     auto opt_score = static_cast<uint64_t>(0);
     vector opt_ext_dim = {0, 0};
     for (const auto &vinfo : vinfo_list) {
-        auto via_param = vinfo.get_via_param(dim, bot_dir, top_dir, extend);
+        auto via_param = vinfo.get_via_param(dim, vdir, ex_dir, adj_ex_dir, extend);
         auto cur_score = get_via_score(via_param);
-        vector cur_ext_dim = {get_metal_dim(via_param, bot_dir, 0),
-                              get_metal_dim(via_param, top_dir, 1)};
+        vector cur_ext_dim;
+        cur_ext_dim[vidx] = get_metal_dim(via_param, ex_dir, vdir);
+        cur_ext_dim[1 - vidx] = get_metal_dim(via_param, adj_ex_dir, adj_vdir);
         if (cur_score > opt_score ||
             (cur_score > 0 && cur_score == opt_score && cur_ext_dim[0] <= opt_ext_dim[0] &&
              cur_ext_dim[1] <= opt_ext_dim[1])) {

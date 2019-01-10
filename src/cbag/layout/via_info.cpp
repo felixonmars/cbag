@@ -79,12 +79,13 @@ offset_t get_arr_dim(cnt_t n, offset_t w, offset_t sp) {
         return n * (w + sp) - sp;
 }
 
-via_param via_info::get_via_param(vector box_dim, orient_2d bot_dir, orient_2d top_dir,
-                                  bool extend) const {
+via_param via_info::get_via_param(vector box_dim, direction vdir, orient_2d ex_dir,
+                                  orient_2d ex_adj_dir, bool extend) const {
     via_param ans;
 
-    auto bd_idx = to_int(bot_dir);
-    auto td_idx = to_int(top_dir);
+    auto vidx = to_int(vdir);
+    auto dir_idx = to_int(ex_dir);
+    auto adj_dir_idx = to_int(ex_adj_dir);
 
     // get maximum possible number of vias
     vector min_sp = sp;
@@ -132,17 +133,18 @@ via_param via_info::get_via_param(vector box_dim, orient_2d bot_dir, orient_2d t
             if (arr_dim[0] == 0 || arr_dim[1] == 0)
                 continue;
 
-            auto bot_dim = get_metal_dim(box_dim, arr_dim, enc_list[0], bd_idx, extend);
-            if (bot_dim[0] == 0)
+            auto m_dim = get_metal_dim(box_dim, arr_dim, enc_list[0], dir_idx, extend);
+            if (m_dim[0] == 0)
                 continue;
-            auto top_dim = get_metal_dim(box_dim, arr_dim, enc_list[1], td_idx, extend);
-            if (top_dim[0] == 0)
+            auto adj_m_dim = get_metal_dim(box_dim, arr_dim, enc_list[1], adj_dir_idx, extend);
+            if (adj_m_dim[0] == 0)
                 continue;
 
-            if (bot_dim[bd_idx] <= opt_mdim[0][bd_idx] && top_dim[td_idx] <= opt_mdim[1][td_idx]) {
+            if (m_dim[dir_idx] <= opt_mdim[vidx][dir_idx] &&
+                adj_m_dim[adj_dir_idx] <= opt_mdim[1 - vidx][adj_dir_idx]) {
                 opt_arr_dim = arr_dim;
-                opt_mdim[0] = bot_dim;
-                opt_mdim[1] = top_dim;
+                opt_mdim[vidx] = m_dim;
+                opt_mdim[1 - vidx] = adj_m_dim;
                 opt_sp = sp_via;
             }
         }
