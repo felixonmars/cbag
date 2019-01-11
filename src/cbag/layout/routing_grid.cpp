@@ -82,6 +82,10 @@ bool routing_grid::operator==(const routing_grid &rhs) const noexcept {
            top_ignore_level == rhs.top_ignore_level && top_private_level == rhs.top_private_level;
 }
 
+const track_info &routing_grid::operator[](int level) const {
+    return info_list[static_cast<std::size_t>(level - bot_level)];
+}
+
 const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
 
 int routing_grid::get_bot_level() const noexcept { return bot_level; }
@@ -90,7 +94,7 @@ int routing_grid::get_top_ignore_level() const noexcept { return top_ignore_leve
 
 int routing_grid::get_top_private_level() const noexcept { return top_private_level; }
 
-const track_info &routing_grid::get_track_info(int level) const {
+const track_info &routing_grid::track_info_at(int level) const {
     auto idx = helper::get_index(*this, level);
     return info_list[idx];
 }
@@ -106,7 +110,7 @@ flip_parity routing_grid::get_flip_parity_at(int bot_level, int top_level,
     std::vector<std::tuple<int, offset_t, offset_t>> data;
     data.reserve(top_level - bot_level + 1);
     for (auto lev = bot_level; lev <= top_level; ++lev) {
-        auto tr_info = get_track_info(lev);
+        auto tr_info = operator[](lev);
         auto dir = tr_info.get_direction();
         auto didx = static_cast<orient_2d_t>(dir);
         auto coord = loc[didx];

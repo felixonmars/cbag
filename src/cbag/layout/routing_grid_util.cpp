@@ -15,7 +15,7 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
     auto level = tech_ptr->get_level(key);
     std::array<offset_t, 2> ans{0, 0};
     if (level) {
-        auto dir = grid.get_track_info(*level).get_direction();
+        auto dir = grid.track_info_at(*level).get_direction();
         auto pdir = perpendicular(dir);
         auto width = get_dim(obj, pdir);
         ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END, false);
@@ -39,11 +39,41 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
     return {0, 0};
 }
 
+int get_lower_orthogonal_level(const routing_grid &grid, int level) {
+    auto top_dir = grid.track_info_at(level).get_direction();
+    auto bot_lev = level - 1;
+    for (; bot_lev >= grid.get_bot_level(); --bot_lev) {
+        if (grid[bot_lev].get_direction() != top_dir)
+            return bot_lev;
+    }
+    return bot_lev;
+}
+
+bool block_defined_at(const routing_grid &grid, int level) {
+    auto bot_lev = get_lower_orthogonal_level(grid, level);
+    return bot_lev >= grid.get_bot_level() && bot_lev > grid.get_top_private_level();
+}
+
+std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, int level) {
+    if (!block_defined_at(grid, level))
+        throw std::invalid_argument("Size is undefined at layer " + std::to_string(level));
+
+    auto bot_lev = get_lower_orthogonal_level(grid, level);
+    auto tinfo = grid[level];
+    auto binfo = grid[bot_lev];
+
+    std::array<offset_t, 2> ans;
+    auto tidx = to_int(tinfo.get_direction());
+    ans[tidx] = tinfo.get_pitch();
+    ans[1 - tidx] = binfo.get_pitch();
+    return ans;
+}
+
 std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, int level,
                                            cnt_t ntr, cnt_t adj_ntr) {
     auto adj_level = get_adj_level(vdir, level);
-    auto tr_info = grid.get_track_info(level);
-    auto adj_tr_info = grid.get_track_info(adj_level);
+    auto tr_info = grid.track_info_at(level);
+    auto adj_tr_info = grid.track_info_at(adj_level);
     auto dir = tr_info.get_direction();
     auto adj_dir = adj_tr_info.get_direction();
     if (dir == adj_dir) {
@@ -80,8 +110,8 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
 
 offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int level, cnt_t ntr) {
     auto sp_level = get_adj_level(vdir, level);
-    auto tr_info = grid.get_track_info(level);
-    if (tr_info.get_direction() == grid.get_track_info(sp_level).get_direction())
+    auto tr_info = grid.track_info_at(level);
+    if (tr_info.get_direction() == grid.track_info_at(sp_level).get_direction())
         throw std::invalid_argument("space layer must be orthogonal to wire layer.");
 
     auto via_ext = get_via_extensions(grid, vdir, level, ntr, 1)[to_int(vdir)];
@@ -98,28 +128,20 @@ std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool i
     // default quantization is 2 if no half-block, 1 if half-block.
     std::array<offset_t, 2> ans = {2 - xidx, 2 - yidx};
 
-    auto top_info = grid.get_track_info(level);
+    auto top_info = grid.track_info_at(level);
     auto top_dir = top_info.get_direction();
     auto top_didx = to_int(top_dir);
     ans[1 - top_didx] = top_info.get_blk_pitch(half_blk[1 - top_didx]);
 
     // find bot level track info
-    bool found = false;
-    int bot_lev;
-    const track_info *bot_info_ptr;
-    for (bot_lev = level - 1; bot_lev >= grid.get_bot_level() && !found; --bot_lev) {
-        bot_info_ptr = &grid.get_track_info(bot_lev);
-        if (bot_info_ptr->get_direction() != top_dir)
-            found = true;
-    }
-
-    if (found) {
+    auto bot_lev = get_lower_orthogonal_level(grid, level);
+    if (bot_lev >= grid.get_bot_level()) {
         auto private_lev = grid.get_top_private_level();
         if (include_private || level <= private_lev || private_lev < bot_lev) {
             // bottom level is quantized only if:
             // 1. include_private flag is enabled.
             // 2. top and bottom level are both public or both private.
-            ans[top_didx] = bot_info_ptr->get_blk_pitch(half_blk[top_didx]);
+            ans[top_didx] = grid[bot_lev].get_blk_pitch(half_blk[top_didx]);
         }
     }
     return ans;
