@@ -56,5 +56,13 @@ offset_t get_min_length(const tech &t, const std::string &layer, const std::stri
     return t.get_min_length(layer_t_at(t, layer, purpose), width, even);
 }
 
+std::tuple<double, double, double> get_metal_em_specs(const tech &t, layer_t key, offset_t width,
+                                                      offset_t length, bool vertical, int dc_temp,
+                                                      int rms_dt) {
+    auto &layer = t.get_layer_name(key.first);
+    auto &purpose = t.get_purpose_name(key.second);
+    return t.get_metal_em_specs(layer, width, purpose, length, vertical, dc_temp, rms_dt);
+}
+
 } // namespace layout
 } // namespace cbag

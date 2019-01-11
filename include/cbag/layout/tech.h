@@ -92,7 +92,7 @@ class tech {
 
     virtual std::tuple<double, double, double>
     get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
-                       offset_t length, bool vertical, int dc_temp, int rms_dt);
+                       offset_t length, bool vertical, int dc_temp, int rms_dt) const;
 };
 
 } // namespace layout
