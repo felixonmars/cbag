@@ -8,7 +8,9 @@
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/flip_parity.h>
 #include <cbag/layout/routing_grid.h>
+#include <cbag/layout/tech.h>
 #include <cbag/layout/track_info_util.h>
+#include <cbag/util/math.h>
 #include <cbag/yaml/common.h>
 
 namespace cbag {
@@ -115,7 +117,7 @@ flip_parity routing_grid::get_flip_parity_at(int bot_level, int top_level,
         auto didx = static_cast<orient_2d_t>(dir);
         auto coord = loc[didx];
         auto scale = ascale[didx];
-        auto htr = coord_to_track(tr_info, coord);
+        auto htr = coord_to_htr(tr_info, coord);
 
         auto cur_scale = tr_info.par_scale;
         auto cur_offset = tr_info.par_offset;
@@ -125,6 +127,13 @@ flip_parity routing_grid::get_flip_parity_at(int bot_level, int top_level,
     }
 
     return flip_parity(std::move(data));
+}
+
+cnt_t routing_grid::get_htr_parity(int level, int htr) const {
+    auto &tinfo = track_info_at(level);
+    auto val = tinfo.par_scale * htr + tinfo.par_offset;
+    auto modulus = tech_ptr->get_lay_purp_list(level).size();
+    return util::pos_mod(val, 2 * modulus) / 2;
 }
 
 void routing_grid::set_flip_parity(const flip_parity &fp) {

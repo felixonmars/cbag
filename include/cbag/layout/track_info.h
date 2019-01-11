@@ -52,9 +52,6 @@ class track_info {
     wire_info get_wire_info(cnt_t num_tr) const;
 
     cnt_t space_to_htr(offset_t space) const noexcept;
-
-    cnt_t get_min_space_htr(const tech &t, int level, cnt_t num_tr, bool same_color,
-                            bool even) const;
 };
 
 } // namespace layout

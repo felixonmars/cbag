@@ -3,7 +3,7 @@
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech.h>
-#include <cbag/layout/track_info.h>
+#include <cbag/layout/track_info_util.h>
 #include <cbag/layout/via_param_util.h>
 #include <cbag/layout/wire_info.h>
 
@@ -59,8 +59,8 @@ std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, int leve
         throw std::invalid_argument("Size is undefined at layer " + std::to_string(level));
 
     auto bot_lev = get_lower_orthogonal_level(grid, level);
-    auto tinfo = grid[level];
-    auto binfo = grid[bot_lev];
+    auto &tinfo = grid[level];
+    auto &binfo = grid[bot_lev];
 
     std::array<offset_t, 2> ans;
     auto tidx = to_int(tinfo.get_direction());
@@ -72,8 +72,8 @@ std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, int leve
 std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, int level,
                                            cnt_t ntr, cnt_t adj_ntr) {
     auto adj_level = get_adj_level(vdir, level);
-    auto tr_info = grid.track_info_at(level);
-    auto adj_tr_info = grid.track_info_at(adj_level);
+    auto &tr_info = grid.track_info_at(level);
+    auto &adj_tr_info = grid.track_info_at(adj_level);
     auto dir = tr_info.get_direction();
     auto adj_dir = adj_tr_info.get_direction();
     if (dir == adj_dir) {
@@ -110,7 +110,7 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
 
 offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int level, cnt_t ntr) {
     auto sp_level = get_adj_level(vdir, level);
-    auto tr_info = grid.track_info_at(level);
+    auto &tr_info = grid.track_info_at(level);
     if (tr_info.get_direction() == grid.track_info_at(sp_level).get_direction())
         throw std::invalid_argument("space layer must be orthogonal to wire layer.");
 
@@ -128,7 +128,7 @@ std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool i
     // default quantization is 2 if no half-block, 1 if half-block.
     std::array<offset_t, 2> ans = {2 - xidx, 2 - yidx};
 
-    auto top_info = grid.track_info_at(level);
+    auto &top_info = grid.track_info_at(level);
     auto top_dir = top_info.get_direction();
     auto top_didx = to_int(top_dir);
     ans[1 - top_didx] = top_info.get_blk_pitch(half_blk[1 - top_didx]);
@@ -145,6 +145,19 @@ std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool i
         }
     }
     return ans;
+}
+
+layer_t get_layer_t(const routing_grid &grid, int level, int htr) {
+    auto idx = grid.get_htr_parity(level, htr);
+    return grid.get_tech()->get_lay_purp_list(level)[idx];
+}
+
+std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, int level, int htr, cnt_t ntr) {
+    auto &tinfo = grid.track_info_at(level);
+    auto winfo = tinfo.get_wire_info(ntr);
+    auto half_w = winfo.get_total_width(tinfo.get_pitch()) / 2;
+    auto coord = htr_to_coord(tinfo, htr);
+    return std::array<offset_t, 2>{coord - half_w, coord + half_w};
 }
 
 } // namespace layout

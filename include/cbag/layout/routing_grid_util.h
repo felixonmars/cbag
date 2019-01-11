@@ -37,6 +37,10 @@ offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int le
 std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool include_private,
                                      std::array<bool, 2> half_blk);
 
+layer_t get_layer_t(const routing_grid &grid, int level, int htr);
+
+std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, int level, int htr, cnt_t ntr);
+
 } // namespace layout
 } // namespace cbag
 
