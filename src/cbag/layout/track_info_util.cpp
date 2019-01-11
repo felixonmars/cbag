@@ -8,10 +8,8 @@
 namespace cbag {
 namespace layout {
 
-offset_t get_pitch2(const track_info &tr_info) { return tr_info.get_pitch() >> 1; }
-
 int coord_to_track(const track_info &tr_info, offset_t coord) {
-    auto p2 = get_pitch2(tr_info);
+    auto p2 = tr_info.get_pitch() / 2;
     auto off = tr_info.get_offset();
     auto delta = coord - off;
     auto div_res = std::div(delta, p2);
@@ -26,7 +24,7 @@ int coord_to_track(const track_info &tr_info, offset_t coord) {
 
 cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, int level, cnt_t num_tr,
                         bool same_color, bool even) {
-    auto p2 = get_pitch2(tr_info);
+    auto p2 = tr_info.get_pitch() / 2;
     auto winfo = tr_info.get_wire_info(num_tr);
     auto span = tr_info.get_wire_span(num_tr);
     auto extra = (span - winfo.get_total_width(p2)) / 2;

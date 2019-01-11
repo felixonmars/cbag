@@ -16,7 +16,7 @@ inline enum_t to_int(direction vdir) { return static_cast<enum_t>(vdir); }
 inline direction flip(direction dir) { return static_cast<direction>(1 - to_int(dir)); }
 
 inline int get_adj_level(direction vdir, int level) {
-    return level + 1 - (static_cast<int>(vdir) << 1);
+    return level + 1 - 2 * static_cast<int>(vdir);
 }
 
 } // namespace cbag

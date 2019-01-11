@@ -78,5 +78,17 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
     return get_via_extensions(via_param, vbox_dim, vdir, dir, adj_dir);
 }
 
+offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int level, cnt_t ntr) {
+    auto sp_level = get_adj_level(vdir, level);
+    auto tr_info = grid.get_track_info(level);
+    if (tr_info.get_direction() == grid.get_track_info(sp_level).get_direction())
+        throw std::invalid_argument("space layer must be orthogonal to wire layer.");
+
+    auto via_ext = get_via_extensions(grid, vdir, level, ntr, 1)[to_int(vdir)];
+    auto winfo = tr_info.get_wire_info(ntr);
+    auto sp_le = winfo.get_min_space(*grid.get_tech(), level, space_type::LINE_END, false);
+    return tr_info.space_to_htr(2 * via_ext + sp_le);
+}
+
 } // namespace layout
 } // namespace cbag
