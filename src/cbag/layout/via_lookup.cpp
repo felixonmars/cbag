@@ -63,7 +63,7 @@ const std::string &via_lookup::get_via_id(direction vdir, layer_t layer, layer_t
 via_param via_lookup::get_via_param(vector dim, const std::string &via_id, direction vdir,
                                     orient_2d ex_dir, orient_2d adj_ex_dir, bool extend) const {
     auto adj_vdir = flip(vdir);
-    auto vinfo_list = via_info_at(info_map, via_id);
+    auto &vinfo_list = via_info_at(info_map, via_id);
     auto vidx = to_int(vdir);
     via_param ans;
     auto opt_score = static_cast<uint64_t>(0);

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <limits>
 
 #include <yaml-cpp/yaml.h>
 
@@ -184,6 +185,13 @@ via_lay_purp_t tech::get_via_layer_purpose(const std::string &key) const {
 via_param tech::get_via_param(vector dim, const std::string &via_id, direction vdir,
                               orient_2d ex_dir, orient_2d adj_ex_dir, bool extend) const {
     return vlookup.get_via_param(dim, via_id, vdir, ex_dir, adj_ex_dir, extend);
+}
+
+std::tuple<double, double, double>
+tech::get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
+                         offset_t length, bool vertical, int dc_temp, int rms_dt) {
+    constexpr auto inf = std::numeric_limits<double>::infinity();
+    return {inf, inf, inf};
 }
 
 } // namespace layout

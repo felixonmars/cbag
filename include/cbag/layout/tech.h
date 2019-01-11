@@ -46,6 +46,13 @@ class tech {
   public:
     tech(const std::string &tech_fname);
 
+    virtual ~tech() = default;
+    tech(tech &&) = default;
+    tech &operator=(tech &&) = default;
+    // disable copying; tech object should be singleton
+    tech(const tech &) = delete;
+    tech &operator=(const tech &) = delete;
+
     const std::string &get_tech_lib() const;
 
     double_t get_layout_unit() const;
@@ -82,6 +89,10 @@ class tech {
 
     via_param get_via_param(vector dim, const std::string &via_id, direction vdir, orient_2d ex_dir,
                             orient_2d adj_ex_dir, bool extend) const;
+
+    virtual std::tuple<double, double, double>
+    get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
+                       offset_t length, bool vertical, int dc_temp, int rms_dt);
 };
 
 } // namespace layout

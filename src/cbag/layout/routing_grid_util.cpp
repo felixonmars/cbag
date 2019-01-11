@@ -81,12 +81,12 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
         throw std::invalid_argument(
             "get_via_extensions() right now requires two layers with different directions.");
     }
-    auto tech = *grid.get_tech();
+    auto &tech = *grid.get_tech();
     auto wire_info = tr_info.get_wire_info(ntr);
     auto adj_wire_info = adj_tr_info.get_wire_info(adj_ntr);
-    auto key = tech.get_lay_purp_list(level)[0];
-    auto adj_key = tech.get_lay_purp_list(adj_level)[0];
-    auto via_id = tech.get_via_id(vdir, key, adj_key);
+    auto &key = tech.get_lay_purp_list(level)[0];
+    auto &adj_key = tech.get_lay_purp_list(adj_level)[0];
+    auto &via_id = tech.get_via_id(vdir, key, adj_key);
     vector vbox_dim;
     vbox_dim[to_int(dir)] = wire_info.get_edge_wire_width();
     vbox_dim[to_int(adj_dir)] = adj_wire_info.get_edge_wire_width();

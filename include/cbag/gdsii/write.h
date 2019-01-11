@@ -69,7 +69,7 @@ void implement_gds(const std::string &fname, const std::string &lib_name,
         gds_lookup lookup{*cursor->second->get_tech(), layer_map, obj_map};
         for (; cursor != stop; ++cursor) {
             auto &[cv_cell_name, cv_ptr] = *cursor;
-            auto cell_name = cv_ptr->get_name();
+            const auto &cell_name = cv_ptr->get_name();
             logger->info("Creating layout cell {}", cv_cell_name);
             write_lay_cellview(*logger, stream, cv_cell_name, *cv_ptr, rename_map, time_vec,
                                lookup);
