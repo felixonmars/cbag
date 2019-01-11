@@ -28,6 +28,9 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
 
 offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int level, cnt_t ntr);
 
+std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool include_private,
+                                     std::array<bool, 2> half_blk);
+
 } // namespace layout
 } // namespace cbag
 

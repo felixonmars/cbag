@@ -90,5 +90,40 @@ offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int le
     return tr_info.space_to_htr(2 * via_ext + sp_le);
 }
 
+std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int level, bool include_private,
+                                     std::array<bool, 2> half_blk) {
+    auto xidx = static_cast<int>(half_blk[0]);
+    auto yidx = static_cast<int>(half_blk[1]);
+
+    // default quantization is 2 if no half-block, 1 if half-block.
+    std::array<offset_t, 2> ans = {2 - xidx, 2 - yidx};
+
+    auto top_info = grid.get_track_info(level);
+    auto top_dir = top_info.get_direction();
+    auto top_didx = to_int(top_dir);
+    ans[1 - top_didx] = top_info.get_blk_pitch(half_blk[1 - top_didx]);
+
+    // find bot level track info
+    bool found = false;
+    int bot_lev;
+    const track_info *bot_info_ptr;
+    for (bot_lev = level - 1; bot_lev >= grid.get_bot_level() && !found; --bot_lev) {
+        bot_info_ptr = &grid.get_track_info(bot_lev);
+        if (bot_info_ptr->get_direction() != top_dir)
+            found = true;
+    }
+
+    if (found) {
+        auto private_lev = grid.get_top_private_level();
+        if (include_private || level <= private_lev || private_lev < bot_lev) {
+            // bottom level is quantized only if:
+            // 1. include_private flag is enabled.
+            // 2. top and bottom level are both public or both private.
+            ans[top_didx] = bot_info_ptr->get_blk_pitch(half_blk[top_didx]);
+        }
+    }
+    return ans;
+}
+
 } // namespace layout
 } // namespace cbag

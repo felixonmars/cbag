@@ -42,6 +42,10 @@ orient_2d track_info::get_direction() const noexcept { return dir; }
 
 offset_t track_info::get_pitch() const noexcept { return w + sp; }
 
+offset_t track_info::get_blk_pitch(bool half_blk) const noexcept {
+    return blk_pitch[static_cast<int>(half_blk)];
+}
+
 offset_t track_info::get_offset() const noexcept { return offset; }
 
 offset_t track_info::get_wire_span(cnt_t num_tr) const noexcept {

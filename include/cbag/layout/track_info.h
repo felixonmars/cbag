@@ -43,6 +43,8 @@ class track_info {
 
     offset_t get_pitch() const noexcept;
 
+    offset_t get_blk_pitch(bool half_blk) const noexcept;
+
     offset_t get_offset() const noexcept;
 
     offset_t get_wire_span(cnt_t num_tr) const noexcept;
