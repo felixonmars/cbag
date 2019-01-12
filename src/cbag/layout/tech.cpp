@@ -187,9 +187,18 @@ via_param tech::get_via_param(vector dim, const std::string &via_id, direction v
     return vlookup.get_via_param(dim, via_id, vdir, ex_dir, adj_ex_dir, extend);
 }
 
-std::tuple<double, double, double>
-tech::get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
-                         offset_t length, bool vertical, int_t dc_temp, int_t rms_dt) const {
+em_specs_t tech::get_metal_em_specs(const std::string &layer, const std::string &purpose,
+                                    offset_t width, offset_t length, bool vertical, int_t dc_temp,
+                                    int_t rms_dt) const {
+    constexpr auto inf = std::numeric_limits<double>::infinity();
+    return {inf, inf, inf};
+}
+
+em_specs_t tech::get_via_em_specs(int layer_dir, const std::string &layer,
+                                  const std::string &purpose, const std::string &adj_layer,
+                                  const std::string &adj_purpose, offset_t cut_w, offset_t cut_h,
+                                  offset_t m_w, offset_t m_l, offset_t adj_m_w, offset_t adj_m_l,
+                                  bool array, int_t dc_temp, int_t rms_dt) const {
     constexpr auto inf = std::numeric_limits<double>::infinity();
     return {inf, inf, inf};
 }

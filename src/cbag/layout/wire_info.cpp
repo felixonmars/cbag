@@ -6,7 +6,7 @@
 namespace cbag {
 namespace layout {
 
-wire_info::wire_info(std::vector<std::tuple<int, offset_t>> &&widths)
+wire_info::wire_info(std::vector<std::tuple<int_t, offset_t>> &&widths)
     : widths_(std::move(widths)) {}
 
 offset_t wire_info::get_min_length(const tech &t, int_t level, bool even) const {

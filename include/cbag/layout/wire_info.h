@@ -26,10 +26,10 @@ class tech;
  */
 class wire_info {
   private:
-    std::vector<std::tuple<int, offset_t>> widths_;
+    std::vector<std::tuple<int_t, offset_t>> widths_;
 
   public:
-    explicit wire_info(std::vector<std::tuple<int, offset_t>> &&widths);
+    explicit wire_info(std::vector<std::tuple<int_t, offset_t>> &&widths);
 
     offset_t get_min_length(const tech &t, int_t level, bool even) const;
 

@@ -90,9 +90,16 @@ class tech {
     via_param get_via_param(vector dim, const std::string &via_id, direction vdir, orient_2d ex_dir,
                             orient_2d adj_ex_dir, bool extend) const;
 
-    virtual em_specs_t get_metal_em_specs(const std::string &layer, offset_t width,
-                                          const std::string &purpose, offset_t length,
-                                          bool vertical, int_t dc_temp, int_t rms_dt) const;
+    virtual em_specs_t get_metal_em_specs(const std::string &layer, const std::string &purpose,
+                                          offset_t width, offset_t length, bool vertical,
+                                          int_t dc_temp, int_t rms_dt) const;
+
+    virtual em_specs_t get_via_em_specs(int layer_dir, const std::string &layer,
+                                        const std::string &purpose, const std::string &adj_layer,
+                                        const std::string &adj_purpose, offset_t cut_w,
+                                        offset_t cut_h, offset_t m_w, offset_t m_l,
+                                        offset_t adj_m_w, offset_t adj_m_l, bool array,
+                                        int_t dc_temp, int_t rms_dt) const;
 };
 
 } // namespace layout

@@ -7,9 +7,11 @@
 
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/flip_parity.h>
-#include <cbag/layout/routing_grid.h>
+#include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech.h>
 #include <cbag/layout/track_info_util.h>
+#include <cbag/layout/wire_info.h>
+#include <cbag/util/binary_iterator.h>
 #include <cbag/util/math.h>
 #include <cbag/yaml/common.h>
 
@@ -142,6 +144,49 @@ void routing_grid::set_flip_parity(const flip_parity &fp) {
         info_list[idx].par_scale = scale;
         info_list[idx].par_offset = offset;
     }
+}
+
+cnt_t routing_grid::get_min_num_tr(int_t level, double idc, double iac_rms, double iac_peak,
+                                   offset_t length, cnt_t bot_ntr, cnt_t top_ntr, int_t dc_temp,
+                                   int_t rms_dt) const {
+    util::binary_iterator<cnt_t> bin_iter(1);
+
+    auto &tech = *get_tech();
+    auto &tr_info = track_info_at(level);
+    auto key = tech.get_lay_purp_list(level)[0];
+    auto tr_dir = tr_info.get_direction();
+    auto bot_tr_info_ptr = static_cast<const track_info *>(nullptr);
+    auto top_tr_info_ptr = static_cast<const track_info *>(nullptr);
+    if (bot_ntr > 0) {
+        bot_tr_info_ptr = &track_info_at(level - 1);
+        if (bot_tr_info_ptr->get_direction() == tr_dir)
+            bot_tr_info_ptr = nullptr;
+    }
+    if (top_ntr > 0) {
+        top_tr_info_ptr = &track_info_at(level + 1);
+        if (top_tr_info_ptr->get_direction() == tr_dir)
+            top_tr_info_ptr = nullptr;
+    }
+    while (bin_iter.has_next()) {
+        auto cur_ntr = *bin_iter;
+        auto winfo = tr_info.get_wire_info(cur_ntr);
+
+        auto [idc_max, irms_max, ipeak_max] =
+            winfo.get_metal_em_specs(tech, key, length, false, dc_temp, rms_dt);
+        if (idc > idc_max || iac_rms > irms_max || iac_peak > ipeak_max) {
+            bin_iter.up();
+        } else {
+            // wire passes EM specs, check top/bottom via EM specs
+            if (bot_tr_info_ptr) {
+                auto adj_winfo = bot_tr_info_ptr->get_wire_info(bot_ntr);
+            }
+            if (top_tr_info_ptr) {
+                auto adj_winfo = top_tr_info_ptr->get_wire_info(top_ntr);
+            }
+        }
+    }
+
+    return 1;
 }
 
 } // namespace layout

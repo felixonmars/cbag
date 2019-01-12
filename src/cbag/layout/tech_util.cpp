@@ -60,7 +60,20 @@ em_specs_t get_metal_em_specs(const tech &t, layer_t key, offset_t width, offset
                               bool vertical, int_t dc_temp, int_t rms_dt) {
     auto &layer = t.get_layer_name(key.first);
     auto &purpose = t.get_purpose_name(key.second);
-    return t.get_metal_em_specs(layer, width, purpose, length, vertical, dc_temp, rms_dt);
+    return t.get_metal_em_specs(layer, purpose, width, length, vertical, dc_temp, rms_dt);
+}
+
+em_specs_t get_via_em_specs(const tech &t, direction vdir, layer_t key, layer_t adj_key,
+                            std::array<offset_t, 2> cut_dim, std::array<offset_t, 2> m_dim,
+                            std::array<offset_t, 2> adj_m_dim, bool array, int_t dc_temp,
+                            int_t rms_dt) {
+    auto &layer = t.get_layer_name(key.first);
+    auto &purpose = t.get_purpose_name(key.second);
+    auto &adj_layer = t.get_layer_name(adj_key.first);
+    auto &adj_purpose = t.get_purpose_name(adj_key.second);
+    return t.get_via_em_specs(to_int(vdir), layer, purpose, adj_layer, adj_purpose, cut_dim[0],
+                              cut_dim[1], m_dim[0], m_dim[1], adj_m_dim[0], adj_m_dim[1], array,
+                              dc_temp, rms_dt);
 }
 
 } // namespace layout

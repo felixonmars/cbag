@@ -29,6 +29,11 @@ offset_t get_min_length(const tech &t, const std::string &layer, const std::stri
 em_specs_t get_metal_em_specs(const tech &t, layer_t key, offset_t width, offset_t length,
                               bool vertical, int_t dc_temp, int_t rms_dt);
 
+em_specs_t get_via_em_specs(const tech &t, direction vdir, layer_t key, layer_t adj_key,
+                            std::array<offset_t, 2> cut_dim, std::array<offset_t, 2> m_dim,
+                            std::array<offset_t, 2> adj_m_dim, bool array, int_t dc_temp,
+                            int_t rms_dt);
+
 } // namespace layout
 } // namespace cbag
 
