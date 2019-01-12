@@ -29,9 +29,9 @@ class routing_grid {
 
     bool operator==(const routing_grid &rhs) const noexcept;
 
-    const track_info &track_info_at(int level) const;
+    const track_info &track_info_at(int_t level) const;
 
-    const track_info &operator[](int level) const;
+    const track_info &operator[](int_t level) const;
 
     const tech *get_tech() const noexcept;
 
@@ -43,7 +43,7 @@ class routing_grid {
 
     flip_parity get_flip_parity_at(int bot_level, int top_level, const transformation &xform) const;
 
-    cnt_t get_htr_parity(int level, int htr) const;
+    cnt_t get_htr_parity(int_t level, int_t htr) const;
 
     void set_flip_parity(const flip_parity &fp);
 };

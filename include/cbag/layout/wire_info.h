@@ -5,6 +5,7 @@
 #include <tuple>
 #include <vector>
 
+#include <cbag/common/layer_t.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/space_type.h>
 
@@ -30,13 +31,16 @@ class wire_info {
   public:
     explicit wire_info(std::vector<std::tuple<int, offset_t>> &&widths);
 
-    offset_t get_min_length(const tech &t, int level, bool even) const;
+    offset_t get_min_length(const tech &t, int_t level, bool even) const;
 
-    offset_t get_min_space(const tech &t, int level, space_type sp_type, bool even) const;
+    offset_t get_min_space(const tech &t, int_t level, space_type sp_type, bool even) const;
 
     offset_t get_edge_wire_width() const;
 
     offset_t get_total_width(offset_t pitch) const;
+
+    em_specs_t get_metal_em_specs(const tech &t, layer_t key, offset_t length, bool vertical,
+                                  int_t dc_temp, int_t rms_dt) const;
 };
 
 } // namespace layout

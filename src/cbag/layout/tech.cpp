@@ -138,7 +138,7 @@ std::optional<int> tech::get_level(layer_t key) const {
     return ans;
 }
 
-const std::vector<layer_t> &tech::get_lay_purp_list(int level) const {
+const std::vector<layer_t> &tech::get_lay_purp_list(int_t level) const {
     auto idx = static_cast<std::size_t>(level - grid_bot_layer);
     if (idx >= lp_list.size())
         throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
@@ -189,7 +189,7 @@ via_param tech::get_via_param(vector dim, const std::string &via_id, direction v
 
 std::tuple<double, double, double>
 tech::get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
-                         offset_t length, bool vertical, int dc_temp, int rms_dt) const {
+                         offset_t length, bool vertical, int_t dc_temp, int_t rms_dt) const {
     constexpr auto inf = std::numeric_limits<double>::infinity();
     return {inf, inf, inf};
 }

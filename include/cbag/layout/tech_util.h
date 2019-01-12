@@ -26,9 +26,8 @@ const std::string &get_via_id(const tech &t, layer_t bot_layer, layer_t top_laye
 offset_t get_min_length(const tech &t, const std::string &layer, const std::string &purpose,
                         offset_t width, bool even);
 
-std::tuple<double, double, double> get_metal_em_specs(const tech &t, layer_t key, offset_t width,
-                                                      offset_t length, bool vertical, int dc_temp,
-                                                      int rms_dt);
+em_specs_t get_metal_em_specs(const tech &t, layer_t key, offset_t width, offset_t length,
+                              bool vertical, int_t dc_temp, int_t rms_dt);
 
 } // namespace layout
 } // namespace cbag

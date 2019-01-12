@@ -77,7 +77,7 @@ class tech {
 
     std::optional<int> get_level(layer_t key) const;
 
-    const std::vector<layer_t> &get_lay_purp_list(int level) const;
+    const std::vector<layer_t> &get_lay_purp_list(int_t level) const;
 
     offset_t get_min_space(layer_t key, offset_t width, space_type sp_type, bool even) const;
 
@@ -90,9 +90,9 @@ class tech {
     via_param get_via_param(vector dim, const std::string &via_id, direction vdir, orient_2d ex_dir,
                             orient_2d adj_ex_dir, bool extend) const;
 
-    virtual std::tuple<double, double, double>
-    get_metal_em_specs(const std::string &layer, offset_t width, const std::string &purpose,
-                       offset_t length, bool vertical, int dc_temp, int rms_dt) const;
+    virtual em_specs_t get_metal_em_specs(const std::string &layer, offset_t width,
+                                          const std::string &purpose, offset_t length,
+                                          bool vertical, int_t dc_temp, int_t rms_dt) const;
 };
 
 } // namespace layout

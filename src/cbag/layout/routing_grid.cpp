@@ -17,7 +17,7 @@ namespace cbag {
 namespace layout {
 
 struct routing_grid::helper {
-    static std::size_t get_index(const routing_grid &grid, int level) {
+    static std::size_t get_index(const routing_grid &grid, int_t level) {
         auto idx = static_cast<std::size_t>(level - grid.bot_level);
         if (idx >= grid.info_list.size())
             throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
@@ -84,7 +84,7 @@ bool routing_grid::operator==(const routing_grid &rhs) const noexcept {
            top_ignore_level == rhs.top_ignore_level && top_private_level == rhs.top_private_level;
 }
 
-const track_info &routing_grid::operator[](int level) const {
+const track_info &routing_grid::operator[](int_t level) const {
     return info_list[static_cast<std::size_t>(level - bot_level)];
 }
 
@@ -96,7 +96,7 @@ int routing_grid::get_top_ignore_level() const noexcept { return top_ignore_leve
 
 int routing_grid::get_top_private_level() const noexcept { return top_private_level; }
 
-const track_info &routing_grid::track_info_at(int level) const {
+const track_info &routing_grid::track_info_at(int_t level) const {
     auto idx = helper::get_index(*this, level);
     return info_list[idx];
 }
@@ -129,7 +129,7 @@ flip_parity routing_grid::get_flip_parity_at(int bot_level, int top_level,
     return flip_parity(std::move(data));
 }
 
-cnt_t routing_grid::get_htr_parity(int level, int htr) const {
+cnt_t routing_grid::get_htr_parity(int_t level, int_t htr) const {
     auto &tinfo = track_info_at(level);
     auto val = tinfo.par_scale * htr + tinfo.par_offset;
     auto modulus = tech_ptr->get_lay_purp_list(level).size();
