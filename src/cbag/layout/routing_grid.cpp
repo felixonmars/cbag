@@ -8,9 +8,9 @@
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/flip_parity.h>
 #include <cbag/layout/routing_grid_util.h>
-#include <cbag/layout/tech.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
-#include <cbag/layout/wire_info.h>
+#include <cbag/layout/wire_width.h>
 #include <cbag/util/binary_iterator.h>
 #include <cbag/util/math.h>
 #include <cbag/yaml/common.h>
@@ -153,7 +153,6 @@ cnt_t routing_grid::get_min_num_tr(int_t level, double idc, double iac_rms, doub
 
     auto &tech = *get_tech();
     auto &tr_info = track_info_at(level);
-    auto key = tech.get_lay_purp_list(level)[0];
     auto tr_dir = tr_info.get_direction();
     auto bot_tr_info_ptr = static_cast<const track_info *>(nullptr);
     auto top_tr_info_ptr = static_cast<const track_info *>(nullptr);
@@ -169,19 +168,19 @@ cnt_t routing_grid::get_min_num_tr(int_t level, double idc, double iac_rms, doub
     }
     while (bin_iter.has_next()) {
         auto cur_ntr = *bin_iter;
-        auto winfo = tr_info.get_wire_info(cur_ntr);
+        auto wire_w = tr_info.get_wire_width(cur_ntr);
 
         auto [idc_max, irms_max, ipeak_max] =
-            winfo.get_metal_em_specs(tech, key, length, false, dc_temp, rms_dt);
+            get_metal_em_specs(tech, level, wire_w, length, false, dc_temp, rms_dt);
         if (idc > idc_max || iac_rms > irms_max || iac_peak > ipeak_max) {
             bin_iter.up();
         } else {
             // wire passes EM specs, check top/bottom via EM specs
             if (bot_tr_info_ptr) {
-                auto adj_winfo = bot_tr_info_ptr->get_wire_info(bot_ntr);
+                auto adj_winfo = bot_tr_info_ptr->get_wire_width(bot_ntr);
             }
             if (top_tr_info_ptr) {
-                auto adj_winfo = top_tr_info_ptr->get_wire_info(top_ntr);
+                auto adj_winfo = top_tr_info_ptr->get_wire_width(top_ntr);
             }
         }
     }

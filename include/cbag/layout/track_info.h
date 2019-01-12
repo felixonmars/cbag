@@ -14,7 +14,7 @@ namespace layout {
 
 class tech;
 class routing_grid;
-class wire_info;
+class wire_width;
 
 class track_info {
   private:
@@ -49,7 +49,7 @@ class track_info {
 
     offset_t get_wire_span(cnt_t num_tr) const noexcept;
 
-    wire_info get_wire_info(cnt_t num_tr) const;
+    wire_width get_wire_width(cnt_t num_tr) const;
 
     cnt_t space_to_htr(offset_t space) const noexcept;
 };

@@ -5,7 +5,7 @@
 #include <cbag/logging/logging.h>
 
 #include <cbag/layout/track_info.h>
-#include <cbag/layout/wire_info.h>
+#include <cbag/layout/wire_width.h>
 #include <cbag/util/math.h>
 #include <cbag/yaml/common.h>
 #include <cbag/yaml/int_array.h>
@@ -51,9 +51,9 @@ offset_t track_info::get_offset() const noexcept { return offset; }
 offset_t track_info::get_wire_span(cnt_t num_tr) const noexcept {
     return w + static_cast<offset_t>(num_tr - 1) * get_pitch();
 }
-wire_info track_info::get_wire_info(cnt_t num_tr) const {
+wire_width track_info::get_wire_width(cnt_t num_tr) const {
     auto wire_w = get_wire_span(num_tr);
-    return wire_info{
+    return wire_width{
         std::vector<std::tuple<int_t, offset_t>>({std::tuple<int_t, offset_t>{0, wire_w}})};
 }
 

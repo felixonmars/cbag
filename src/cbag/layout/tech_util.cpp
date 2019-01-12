@@ -1,6 +1,7 @@
 #include <fmt/core.h>
 
 #include <cbag/layout/tech_util.h>
+#include <cbag/layout/wire_width.h>
 
 namespace cbag {
 namespace layout {
@@ -74,6 +75,41 @@ em_specs_t get_via_em_specs(const tech &t, direction vdir, layer_t key, layer_t 
     return t.get_via_em_specs(to_int(vdir), layer, purpose, adj_layer, adj_purpose, cut_dim[0],
                               cut_dim[1], m_dim[0], m_dim[1], adj_m_dim[0], adj_m_dim[1], array,
                               dc_temp, rms_dt);
+}
+
+offset_t get_min_length(const tech &t, int_t level, const wire_width &wire_w, bool even) {
+    offset_t ans = 0;
+    auto key = t.get_lay_purp_list(level)[0];
+    auto wend = wire_w.end_width();
+    for (auto witer = wire_w.begin_width(); witer != wend; ++witer) {
+        ans = std::max(ans, t.get_min_length(key, *witer, even));
+    }
+    return ans;
+}
+
+offset_t get_min_space(const tech &t, int_t level, const wire_width &wire_w, space_type sp_type,
+                       bool even) {
+    const auto &key = t.get_lay_purp_list(level)[0];
+    return t.get_min_space(key, wire_w.get_edge_wire_width(), sp_type, even);
+}
+
+em_specs_t get_metal_em_specs(const tech &t, int_t level, const wire_width &wire_w, offset_t length,
+                              bool vertical, int_t dc_temp, int_t rms_dt) {
+    auto key = t.get_lay_purp_list(level)[0];
+
+    double idc = 0;
+    double iac_rms = 0;
+    double iac_peak = 0;
+    auto wend = wire_w.end_width();
+    for (auto witer = wire_w.begin_width(); witer != wend; ++witer) {
+        auto [idc_cur, iac_rms_cur, iac_peak_cur] =
+            cbag::layout::get_metal_em_specs(t, key, *witer, length, vertical, dc_temp, rms_dt);
+        idc += idc_cur;
+        iac_rms += iac_rms_cur;
+        iac_peak += iac_peak_cur;
+    }
+
+    return {idc, iac_rms, iac_peak};
 }
 
 } // namespace layout

@@ -2,8 +2,9 @@
 
 #include <fmt/core.h>
 
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
-#include <cbag/layout/wire_info.h>
+#include <cbag/layout/wire_width.h>
 
 namespace cbag {
 namespace layout {
@@ -29,11 +30,11 @@ offset_t htr_to_coord(const track_info &tr_info, int_t htr) noexcept {
 cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, int_t level, cnt_t num_tr,
                         bool same_color, bool even) {
     auto p2 = tr_info.get_pitch() / 2;
-    auto winfo = tr_info.get_wire_info(num_tr);
+    auto wire_w = tr_info.get_wire_width(num_tr);
     auto span = tr_info.get_wire_span(num_tr);
-    auto extra = (span - winfo.get_total_width(p2)) / 2;
+    auto extra = (span - wire_w.get_total_width(p2)) / 2;
     auto margin =
-        std::max(0, winfo.get_min_space(t, level, get_space_type(same_color), even) - extra);
+        std::max(0, get_min_space(t, level, wire_w, get_space_type(same_color), even) - extra);
 
     return tr_info.space_to_htr(margin);
 }

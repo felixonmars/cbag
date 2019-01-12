@@ -109,7 +109,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_param_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_util.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/via_wrapper.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/wire_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/wire_width.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/logging/logging.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/cdl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/core.cpp

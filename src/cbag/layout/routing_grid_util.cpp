@@ -2,10 +2,10 @@
 #include <cbag/enum/space_type.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/layout/routing_grid_util.h>
-#include <cbag/layout/tech.h>
+#include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
 #include <cbag/layout/via_param_util.h>
-#include <cbag/layout/wire_info.h>
+#include <cbag/layout/wire_width.h>
 
 namespace cbag {
 namespace layout {
@@ -82,14 +82,14 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
             "get_via_extensions() right now requires two layers with different directions.");
     }
     auto &tech = *grid.get_tech();
-    auto wire_info = tr_info.get_wire_info(ntr);
-    auto adj_wire_info = adj_tr_info.get_wire_info(adj_ntr);
+    auto wire_width = tr_info.get_wire_width(ntr);
+    auto adj_wire_width = adj_tr_info.get_wire_width(adj_ntr);
     auto &key = tech.get_lay_purp_list(level)[0];
     auto &adj_key = tech.get_lay_purp_list(adj_level)[0];
     auto &via_id = tech.get_via_id(vdir, key, adj_key);
     vector vbox_dim;
-    vbox_dim[to_int(dir)] = wire_info.get_edge_wire_width();
-    vbox_dim[to_int(adj_dir)] = adj_wire_info.get_edge_wire_width();
+    vbox_dim[to_int(dir)] = wire_width.get_edge_wire_width();
+    vbox_dim[to_int(adj_dir)] = adj_wire_width.get_edge_wire_width();
     auto via_param = tech.get_via_param(vbox_dim, via_id, vdir, dir, adj_dir, true);
 
     if (empty(via_param)) {
@@ -115,8 +115,8 @@ offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int_t 
         throw std::invalid_argument("space layer must be orthogonal to wire layer.");
 
     auto via_ext = get_via_extensions(grid, vdir, level, ntr, 1)[to_int(vdir)];
-    auto winfo = tr_info.get_wire_info(ntr);
-    auto sp_le = winfo.get_min_space(*grid.get_tech(), level, space_type::LINE_END, false);
+    auto wire_w = tr_info.get_wire_width(ntr);
+    auto sp_le = get_min_space(*grid.get_tech(), level, wire_w, space_type::LINE_END, false);
     return tr_info.space_to_htr(2 * via_ext + sp_le);
 }
 
@@ -155,18 +155,17 @@ layer_t get_layer_t(const routing_grid &grid, int_t level, int_t htr) {
 std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, int_t level, int_t htr,
                                         cnt_t ntr) {
     auto &tinfo = grid.track_info_at(level);
-    auto winfo = tinfo.get_wire_info(ntr);
-    auto half_w = winfo.get_total_width(tinfo.get_pitch()) / 2;
+    auto wire_w = tinfo.get_wire_width(ntr);
+    auto half_w = wire_w.get_total_width(tinfo.get_pitch()) / 2;
     auto coord = htr_to_coord(tinfo, htr);
     return std::array<offset_t, 2>{coord - half_w, coord + half_w};
 }
 
 em_specs_t get_wire_em_specs(const routing_grid &grid, int_t level, cnt_t ntr, offset_t length,
                              bool vertical, int_t dc_temp, int_t rms_dt) {
-    auto winfo = grid.track_info_at(level).get_wire_info(ntr);
+    auto wire_w = grid.track_info_at(level).get_wire_width(ntr);
     auto &tech = *grid.get_tech();
-    auto key = tech.get_lay_purp_list(level)[0];
-    return winfo.get_metal_em_specs(tech, key, length, vertical, dc_temp, rms_dt);
+    return get_metal_em_specs(tech, level, wire_w, length, vertical, dc_temp, rms_dt);
 }
 
 } // namespace layout
