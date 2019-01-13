@@ -17,6 +17,7 @@ using cnt_t = uint_fast32_t;
 using htr_t = int_fast32_t;
 using level_t = int_fast32_t;
 using temp_t = int_fast32_t;
+using scnt_t = int_fast32_t;
 using em_specs_t = std::tuple<double, double, double>;
 
 } // namespace cbag
