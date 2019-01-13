@@ -25,7 +25,7 @@ using sp_map_t =
 using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
 using len_map_t = std::unordered_map<layer_t, len_info, boost::hash<layer_t>>;
 using lp_list_t = std::vector<std::vector<layer_t>>;
-using level_map_t = std::unordered_map<layer_t, int, boost::hash<layer_t>>;
+using level_map_t = std::unordered_map<layer_t, level_t, boost::hash<layer_t>>;
 
 class tech {
   private:
@@ -39,7 +39,7 @@ class tech {
     sp_map_grp_t sp_map_grp;
     space_type sp_sc_type;
     len_map_t len_map;
-    int grid_bot_layer = 0;
+    level_t grid_bot_layer = 0;
     lp_list_t lp_list;
     level_map_t lev_map;
 
@@ -75,9 +75,9 @@ class tech {
 
     std::optional<purp_t> get_purpose_id(const std::string &purpose) const;
 
-    std::optional<int> get_level(layer_t key) const;
+    std::optional<level_t> get_level(layer_t key) const;
 
-    const std::vector<layer_t> &get_lay_purp_list(int_t level) const;
+    const std::vector<layer_t> &get_lay_purp_list(level_t level) const;
 
     offset_t get_min_space(layer_t key, offset_t width, space_type sp_type, bool even) const;
 
@@ -92,14 +92,14 @@ class tech {
 
     virtual em_specs_t get_metal_em_specs(const std::string &layer, const std::string &purpose,
                                           offset_t width, offset_t length, bool vertical,
-                                          int_t dc_temp, int_t rms_dt) const;
+                                          temp_t dc_temp, temp_t rms_dt) const;
 
-    virtual em_specs_t get_via_em_specs(int layer_dir, const std::string &layer,
+    virtual em_specs_t get_via_em_specs(enum_t layer_dir, const std::string &layer,
                                         const std::string &purpose, const std::string &adj_layer,
                                         const std::string &adj_purpose, offset_t cut_w,
                                         offset_t cut_h, offset_t m_w, offset_t m_l,
                                         offset_t adj_m_w, offset_t adj_m_l, bool array,
-                                        int_t dc_temp, int_t rms_dt) const;
+                                        temp_t dc_temp, temp_t rms_dt) const;
 };
 
 } // namespace layout

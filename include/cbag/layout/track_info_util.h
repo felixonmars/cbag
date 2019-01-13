@@ -6,11 +6,11 @@
 namespace cbag {
 namespace layout {
 
-int coord_to_htr(const track_info &tr_info, offset_t coord);
+htr_t coord_to_htr(const track_info &tr_info, offset_t coord);
 
-offset_t htr_to_coord(const track_info &tr_info, int_t htr) noexcept;
+offset_t htr_to_coord(const track_info &tr_info, htr_t htr) noexcept;
 
-cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, int_t level, cnt_t num_tr,
+cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, level_t level, cnt_t num_tr,
                         bool same_color, bool even);
 
 } // namespace layout

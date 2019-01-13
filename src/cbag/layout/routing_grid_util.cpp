@@ -42,7 +42,7 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
     return {0, 0};
 }
 
-int get_lower_orthogonal_level(const routing_grid &grid, int_t level) {
+level_t get_lower_orthogonal_level(const routing_grid &grid, level_t level) {
     auto top_dir = grid.track_info_at(level).get_direction();
     auto bot_lev = level - 1;
     for (; bot_lev >= grid.get_bot_level(); --bot_lev) {
@@ -52,12 +52,12 @@ int get_lower_orthogonal_level(const routing_grid &grid, int_t level) {
     return bot_lev;
 }
 
-bool block_defined_at(const routing_grid &grid, int_t level) {
+bool block_defined_at(const routing_grid &grid, level_t level) {
     auto bot_lev = get_lower_orthogonal_level(grid, level);
     return bot_lev >= grid.get_bot_level() && bot_lev > grid.get_top_private_level();
 }
 
-std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, int_t level) {
+std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, level_t level) {
     if (!block_defined_at(grid, level))
         throw std::invalid_argument("Size is undefined at layer " + std::to_string(level));
 
@@ -72,7 +72,7 @@ std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, int_t le
     return ans;
 }
 
-std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, int_t level,
+std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, level_t level,
                                            cnt_t ntr, cnt_t adj_ntr) {
     auto adj_level = get_adj_level(vdir, level);
     auto &tr_info = grid.track_info_at(level);
@@ -97,7 +97,7 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
 
     if (empty(via_param)) {
         auto vidx = to_int(vdir);
-        std::array<int, 2> lev_arr;
+        std::array<level_t, 2> lev_arr;
         lev_arr[vidx] = level;
         lev_arr[1 - vidx] = adj_level;
         std::array<cnt_t, 2> ntr_arr;
@@ -111,7 +111,8 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
     return get_via_extensions(via_param, vbox_dim, vdir, dir, adj_dir);
 }
 
-offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int_t level, cnt_t ntr) {
+offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, level_t level,
+                                cnt_t ntr) {
     auto sp_level = get_adj_level(vdir, level);
     auto &tr_info = grid.track_info_at(level);
     if (tr_info.get_direction() == grid.track_info_at(sp_level).get_direction())
@@ -123,7 +124,7 @@ offset_t get_line_end_space_htr(const routing_grid &grid, direction vdir, int_t 
     return tr_info.space_to_htr(2 * via_ext + sp_le);
 }
 
-std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int_t level, bool include_private,
+std::array<offset_t, 2> get_blk_size(const routing_grid &grid, level_t level, bool include_private,
                                      std::array<bool, 2> half_blk) {
     auto xidx = static_cast<int>(half_blk[0]);
     auto yidx = static_cast<int>(half_blk[1]);
@@ -150,12 +151,12 @@ std::array<offset_t, 2> get_blk_size(const routing_grid &grid, int_t level, bool
     return ans;
 }
 
-layer_t get_layer_t(const routing_grid &grid, int_t level, int_t htr) {
+layer_t get_layer_t(const routing_grid &grid, level_t level, htr_t htr) {
     auto idx = grid.get_htr_parity(level, htr);
     return grid.get_tech()->get_lay_purp_list(level)[idx];
 }
 
-std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, int_t level, int_t htr,
+std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, level_t level, htr_t htr,
                                         cnt_t ntr) {
     auto &tinfo = grid.track_info_at(level);
     auto wire_w = tinfo.get_wire_width(ntr);
@@ -164,16 +165,16 @@ std::array<offset_t, 2> get_wire_bounds(const routing_grid &grid, int_t level, i
     return std::array<offset_t, 2>{coord - half_w, coord + half_w};
 }
 
-em_specs_t get_wire_em_specs(const routing_grid &grid, int_t level, cnt_t ntr, offset_t length,
-                             bool vertical, int_t dc_temp, int_t rms_dt) {
+em_specs_t get_wire_em_specs(const routing_grid &grid, level_t level, cnt_t ntr, offset_t length,
+                             bool vertical, temp_t dc_temp, temp_t rms_dt) {
     auto wire_w = grid.track_info_at(level).get_wire_width(ntr);
     auto &tech = *grid.get_tech();
     return get_metal_em_specs(tech, level, wire_w, length, vertical, dc_temp, rms_dt);
 }
 
-em_specs_t get_via_em_specs(const routing_grid &grid, direction vdir, int_t level,
+em_specs_t get_via_em_specs(const routing_grid &grid, direction vdir, level_t level,
                             const wire_width &wire_w, offset_t length, const wire_width &adj_wire_w,
-                            offset_t adj_length, int_t dc_temp, int_t rms_dt) {
+                            offset_t adj_length, temp_t dc_temp, temp_t rms_dt) {
     auto &tech = *grid.get_tech();
     auto adj_level = get_adj_level(vdir, level);
     auto &tinfo = grid.track_info_at(level);
@@ -183,7 +184,7 @@ em_specs_t get_via_em_specs(const routing_grid &grid, direction vdir, int_t leve
     auto adj_tr_dir = adj_tinfo.get_direction();
 
     if (tr_dir == adj_tr_dir) {
-        std::array<int_t, 2> lev_vec;
+        std::array<level_t, 2> lev_vec;
         lev_vec[to_int(vdir)] = level;
         lev_vec[1 - to_int(vdir)] = adj_level;
 
@@ -229,9 +230,9 @@ em_specs_t get_via_em_specs(const routing_grid &grid, direction vdir, int_t leve
     return {idc, iac_rms, iac_peak};
 }
 
-cnt_t get_min_num_tr(const routing_grid &grid, int_t level, double idc, double iac_rms,
-                     double iac_peak, offset_t length, cnt_t bot_ntr, cnt_t top_ntr, int_t dc_temp,
-                     int_t rms_dt) {
+cnt_t get_min_num_tr(const routing_grid &grid, level_t level, double idc, double iac_rms,
+                     double iac_peak, offset_t length, cnt_t bot_ntr, cnt_t top_ntr, temp_t dc_temp,
+                     temp_t rms_dt) {
     util::binary_iterator<cnt_t> bin_iter(1);
 
     auto &tech = *grid.get_tech();

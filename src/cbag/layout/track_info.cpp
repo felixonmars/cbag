@@ -54,7 +54,7 @@ offset_t track_info::get_wire_span(cnt_t num_tr) const noexcept {
 wire_width track_info::get_wire_width(cnt_t num_tr) const {
     auto wire_w = get_wire_span(num_tr);
     return wire_width{
-        std::vector<std::tuple<int_t, offset_t>>({std::tuple<int_t, offset_t>{0, wire_w}})};
+        std::vector<std::tuple<level_t, offset_t>>({std::tuple<level_t, offset_t>{0, wire_w}})};
 }
 
 cnt_t track_info::space_to_htr(offset_t space) const noexcept {

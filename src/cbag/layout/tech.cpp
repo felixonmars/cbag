@@ -129,8 +129,8 @@ std::optional<purp_t> tech::get_purpose_id(const std::string &purpose) const {
     return lp_map.get_purpose_id(purpose);
 }
 
-std::optional<int> tech::get_level(layer_t key) const {
-    std::optional<int> ans;
+std::optional<level_t> tech::get_level(layer_t key) const {
+    std::optional<level_t> ans;
     auto iter = lev_map.find(key);
     if (iter == lev_map.end())
         return ans;
@@ -138,7 +138,7 @@ std::optional<int> tech::get_level(layer_t key) const {
     return ans;
 }
 
-const std::vector<layer_t> &tech::get_lay_purp_list(int_t level) const {
+const std::vector<layer_t> &tech::get_lay_purp_list(level_t level) const {
     auto idx = static_cast<std::size_t>(level - grid_bot_layer);
     if (idx >= lp_list.size())
         throw std::out_of_range("Undefined routing grid level: " + std::to_string(level));
@@ -160,10 +160,10 @@ offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type, bo
 
     for (const auto &[w_spec, sp] : w_sp_list) {
         if (width <= w_spec)
-            return sp + (sp & static_cast<int>(even));
+            return sp + (sp & static_cast<offset_t>(even));
     }
     auto ans = w_sp_list[w_sp_list.size() - 1].second;
-    return ans + (ans & static_cast<int>(even));
+    return ans + (ans & static_cast<offset_t>(even));
 }
 
 offset_t tech::get_min_length(layer_t key, offset_t width, bool even) const {
@@ -188,17 +188,17 @@ via_param tech::get_via_param(vector dim, const std::string &via_id, direction v
 }
 
 em_specs_t tech::get_metal_em_specs(const std::string &layer, const std::string &purpose,
-                                    offset_t width, offset_t length, bool vertical, int_t dc_temp,
-                                    int_t rms_dt) const {
+                                    offset_t width, offset_t length, bool vertical, temp_t dc_temp,
+                                    temp_t rms_dt) const {
     constexpr auto inf = std::numeric_limits<double>::infinity();
     return {inf, inf, inf};
 }
 
-em_specs_t tech::get_via_em_specs(int layer_dir, const std::string &layer,
+em_specs_t tech::get_via_em_specs(enum_t layer_dir, const std::string &layer,
                                   const std::string &purpose, const std::string &adj_layer,
                                   const std::string &adj_purpose, offset_t cut_w, offset_t cut_h,
                                   offset_t m_w, offset_t m_l, offset_t adj_m_w, offset_t adj_m_l,
-                                  bool array, int_t dc_temp, int_t rms_dt) const {
+                                  bool array, temp_t dc_temp, temp_t rms_dt) const {
     constexpr auto inf = std::numeric_limits<double>::infinity();
     return {inf, inf, inf};
 }

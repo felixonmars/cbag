@@ -16,10 +16,10 @@ class flip_parity;
 class routing_grid {
   private:
     const tech *tech_ptr = nullptr;
-    int bot_level = 0;
+    level_t bot_level = 0;
     std::vector<track_info> info_list;
-    int top_ignore_level = std::numeric_limits<int>::min();
-    int top_private_level = std::numeric_limits<int>::min();
+    level_t top_ignore_level = std::numeric_limits<level_t>::min();
+    level_t top_private_level = std::numeric_limits<level_t>::min();
     struct helper;
 
   public:
@@ -29,9 +29,9 @@ class routing_grid {
 
     bool operator==(const routing_grid &rhs) const noexcept;
 
-    const track_info &track_info_at(int_t level) const;
+    const track_info &track_info_at(level_t level) const;
 
-    const track_info &operator[](int_t level) const;
+    const track_info &operator[](level_t level) const;
 
     const tech *get_tech() const noexcept;
 
@@ -41,9 +41,10 @@ class routing_grid {
 
     int get_top_private_level() const noexcept;
 
-    flip_parity get_flip_parity_at(int bot_level, int top_level, const transformation &xform) const;
+    flip_parity get_flip_parity_at(level_t bot_level, level_t top_level,
+                                   const transformation &xform) const;
 
-    cnt_t get_htr_parity(int_t level, int_t htr) const;
+    cnt_t get_htr_parity(level_t level, htr_t htr) const;
 
     void set_flip_parity(const flip_parity &fp);
 };

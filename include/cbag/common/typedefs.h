@@ -14,7 +14,9 @@ using dist_t = uint32_t;
 using offset_t = int32_t;
 using enum_t = uint_fast8_t;
 using cnt_t = uint_fast32_t;
-using int_t = int_fast32_t;
+using htr_t = int_fast32_t;
+using level_t = int_fast32_t;
+using temp_t = int_fast32_t;
 using em_specs_t = std::tuple<double, double, double>;
 
 } // namespace cbag

@@ -19,7 +19,7 @@ class tech;
  */
 class wire_width {
   private:
-    using vec_type = std::vector<std::tuple<int_t, offset_t>>;
+    using vec_type = std::vector<std::tuple<htr_t, offset_t>>;
     vec_type widths_;
 
   public:
