@@ -42,13 +42,13 @@ layer_t layer_t_at(const lp_lookup &lp, const std::string &layer, const std::str
     return {layer_id_at(lp, layer), purpose_id_at(lp, purpose)};
 }
 
-const std::string &get_via_id(const tech &t, layer_t bot_layer, layer_t top_layer) {
-    return t.get_via_id(direction::LOWER, bot_layer, top_layer);
+layer_t get_test_lay_purp(const tech &t, int_t level) { return t.get_lay_purp_list(level)[0]; }
+
+const std::string &get_pin_purpose_name(const tech &t) {
+    return t.get_purpose_name(t.get_pin_purpose());
 }
 
-std::string get_pin_purpose_name(const tech &t) { return t.get_purpose_name(t.get_pin_purpose()); }
-
-std::string get_default_purpose_name(const tech &t) {
+const std::string &get_default_purpose_name(const tech &t) {
     return t.get_purpose_name(t.get_default_purpose());
 }
 
@@ -57,11 +57,42 @@ offset_t get_min_length(const tech &t, const std::string &layer, const std::stri
     return t.get_min_length(layer_t_at(t, layer, purpose), width, even);
 }
 
+offset_t get_min_length(const tech &t, int_t level, const wire_width &wire_w, bool even) {
+    offset_t ans = 0;
+    auto key = get_test_lay_purp(t, level);
+    for (auto witer = wire_w.begin_width(), wend = wire_w.end_width(); witer != wend; ++witer) {
+        ans = std::max(ans, t.get_min_length(key, *witer, even));
+    }
+    return ans;
+}
+
+offset_t get_min_space(const tech &t, int_t level, const wire_width &wire_w, space_type sp_type,
+                       bool even) {
+    auto key = get_test_lay_purp(t, level);
+    return t.get_min_space(key, wire_w.get_edge_wire_width(), sp_type, even);
+}
+
 em_specs_t get_metal_em_specs(const tech &t, layer_t key, offset_t width, offset_t length,
                               bool vertical, int_t dc_temp, int_t rms_dt) {
     auto &layer = t.get_layer_name(key.first);
     auto &purpose = t.get_purpose_name(key.second);
     return t.get_metal_em_specs(layer, purpose, width, length, vertical, dc_temp, rms_dt);
+}
+
+em_specs_t get_metal_em_specs(const tech &t, int_t level, const wire_width &wire_w, offset_t length,
+                              bool vertical, int_t dc_temp, int_t rms_dt) {
+    auto key = get_test_lay_purp(t, level);
+
+    double idc = 0, iac_rms = 0, iac_peak = 0;
+    for (auto witer = wire_w.begin_width(), wend = wire_w.end_width(); witer != wend; ++witer) {
+        auto [idc_cur, iac_rms_cur, iac_peak_cur] =
+            cbag::layout::get_metal_em_specs(t, key, *witer, length, vertical, dc_temp, rms_dt);
+        idc += idc_cur;
+        iac_rms += iac_rms_cur;
+        iac_peak += iac_peak_cur;
+    }
+
+    return {idc, iac_rms, iac_peak};
 }
 
 em_specs_t get_via_em_specs(const tech &t, direction vdir, layer_t key, layer_t adj_key,
@@ -75,41 +106,6 @@ em_specs_t get_via_em_specs(const tech &t, direction vdir, layer_t key, layer_t 
     return t.get_via_em_specs(to_int(vdir), layer, purpose, adj_layer, adj_purpose, cut_dim[0],
                               cut_dim[1], m_dim[0], m_dim[1], adj_m_dim[0], adj_m_dim[1], array,
                               dc_temp, rms_dt);
-}
-
-offset_t get_min_length(const tech &t, int_t level, const wire_width &wire_w, bool even) {
-    offset_t ans = 0;
-    auto key = t.get_lay_purp_list(level)[0];
-    auto wend = wire_w.end_width();
-    for (auto witer = wire_w.begin_width(); witer != wend; ++witer) {
-        ans = std::max(ans, t.get_min_length(key, *witer, even));
-    }
-    return ans;
-}
-
-offset_t get_min_space(const tech &t, int_t level, const wire_width &wire_w, space_type sp_type,
-                       bool even) {
-    const auto &key = t.get_lay_purp_list(level)[0];
-    return t.get_min_space(key, wire_w.get_edge_wire_width(), sp_type, even);
-}
-
-em_specs_t get_metal_em_specs(const tech &t, int_t level, const wire_width &wire_w, offset_t length,
-                              bool vertical, int_t dc_temp, int_t rms_dt) {
-    auto key = t.get_lay_purp_list(level)[0];
-
-    double idc = 0;
-    double iac_rms = 0;
-    double iac_peak = 0;
-    auto wend = wire_w.end_width();
-    for (auto witer = wire_w.begin_width(); witer != wend; ++witer) {
-        auto [idc_cur, iac_rms_cur, iac_peak_cur] =
-            cbag::layout::get_metal_em_specs(t, key, *witer, length, vertical, dc_temp, rms_dt);
-        idc += idc_cur;
-        iac_rms += iac_rms_cur;
-        iac_peak += iac_peak_cur;
-    }
-
-    return {idc, iac_rms, iac_peak};
 }
 
 } // namespace layout

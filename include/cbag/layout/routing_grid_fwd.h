@@ -46,9 +46,6 @@ class routing_grid {
     cnt_t get_htr_parity(int_t level, int_t htr) const;
 
     void set_flip_parity(const flip_parity &fp);
-
-    cnt_t get_min_num_tr(int_t level, double idc, double iac_rms, double iac_peak, offset_t length,
-                         cnt_t bot_ntr, cnt_t top_ntr, int_t dc_temp, int_t rms_dt) const;
 };
 
 } // namespace layout

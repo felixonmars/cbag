@@ -1,3 +1,5 @@
+#include <fmt/core.h>
+
 #include <cbag/common/box_t_util.h>
 #include <cbag/enum/space_type.h>
 #include <cbag/layout/polygon.h>
@@ -6,6 +8,7 @@
 #include <cbag/layout/track_info_util.h>
 #include <cbag/layout/via_param_util.h>
 #include <cbag/layout/wire_width.h>
+#include <cbag/util/binary_iterator.h>
 
 namespace cbag {
 namespace layout {
@@ -84,8 +87,8 @@ std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction v
     auto &tech = *grid.get_tech();
     auto wire_width = tr_info.get_wire_width(ntr);
     auto adj_wire_width = adj_tr_info.get_wire_width(adj_ntr);
-    auto &key = tech.get_lay_purp_list(level)[0];
-    auto &adj_key = tech.get_lay_purp_list(adj_level)[0];
+    auto key = get_test_lay_purp(tech, level);
+    auto adj_key = get_test_lay_purp(tech, adj_level);
     auto &via_id = tech.get_via_id(vdir, key, adj_key);
     vector vbox_dim;
     vbox_dim[to_int(dir)] = wire_width.get_edge_wire_width();
@@ -166,6 +169,124 @@ em_specs_t get_wire_em_specs(const routing_grid &grid, int_t level, cnt_t ntr, o
     auto wire_w = grid.track_info_at(level).get_wire_width(ntr);
     auto &tech = *grid.get_tech();
     return get_metal_em_specs(tech, level, wire_w, length, vertical, dc_temp, rms_dt);
+}
+
+em_specs_t get_via_em_specs(const routing_grid &grid, direction vdir, int_t level,
+                            const wire_width &wire_w, offset_t length, const wire_width &adj_wire_w,
+                            offset_t adj_length, int_t dc_temp, int_t rms_dt) {
+    auto &tech = *grid.get_tech();
+    auto adj_level = get_adj_level(vdir, level);
+    auto &tinfo = grid.track_info_at(level);
+    auto &adj_tinfo = grid.track_info_at(adj_level);
+
+    auto tr_dir = tinfo.get_direction();
+    auto adj_tr_dir = adj_tinfo.get_direction();
+
+    if (tr_dir == adj_tr_dir) {
+        std::array<int_t, 2> lev_vec;
+        lev_vec[to_int(vdir)] = level;
+        lev_vec[1 - to_int(vdir)] = adj_level;
+
+        throw std::invalid_argument(fmt::format("levels ({}, {}) have the same direction, but "
+                                                "get_via_em_specs only works on orthogonal levels.",
+                                                lev_vec[0], lev_vec[1]));
+    }
+
+    auto tdir_idx = to_int(tr_dir);
+    auto key = get_test_lay_purp(tech, level);
+    auto adj_key = get_test_lay_purp(tech, adj_level);
+    auto &via_id = tech.get_via_id(vdir, key, adj_key);
+    double idc = 0, iac_rms = 0, iac_peak = 0;
+    vector vbox_dim;
+    std::array<offset_t, 2> m_dim, adj_m_dim;
+    for (auto wi = wire_w.begin_width(), we = wire_w.end_width(); wi != we; ++wi) {
+        auto w = *wi;
+        vbox_dim[1 - tdir_idx] = w;
+        m_dim[0] = w;
+        m_dim[1] = length;
+        for (auto awi = adj_wire_w.begin_width(), awe = adj_wire_w.end_width(); awi != awe; ++awi) {
+            auto aw = *awi;
+            vbox_dim[tdir_idx] = aw;
+            adj_m_dim[0] = aw;
+            adj_m_dim[1] = adj_length;
+
+            auto param = tech.get_via_param(vbox_dim, via_id, vdir, tr_dir, adj_tr_dir, true);
+            if (empty(param)) {
+                // no solution: return all zeros
+                return {0, 0, 0};
+            }
+            auto is_array = param.num[0] > 1 || param.num[1] > 1;
+            auto [cur_idc, cur_irms, cur_ipeak] =
+                get_via_em_specs(tech, vdir, key, adj_key, param.cut_dim, m_dim, adj_m_dim,
+                                 is_array, dc_temp, rms_dt);
+
+            idc += cur_idc;
+            iac_rms += cur_irms;
+            iac_peak += cur_ipeak;
+        }
+    }
+
+    return {idc, iac_rms, iac_peak};
+}
+
+cnt_t get_min_num_tr(const routing_grid &grid, int_t level, double idc, double iac_rms,
+                     double iac_peak, offset_t length, cnt_t bot_ntr, cnt_t top_ntr, int_t dc_temp,
+                     int_t rms_dt) {
+    util::binary_iterator<cnt_t> bin_iter(1);
+
+    auto &tech = *grid.get_tech();
+    auto &tr_info = grid.track_info_at(level);
+    auto tr_dir = tr_info.get_direction();
+    auto bot_tr_info_ptr = static_cast<const track_info *>(nullptr);
+    auto top_tr_info_ptr = static_cast<const track_info *>(nullptr);
+    if (bot_ntr > 0) {
+        bot_tr_info_ptr = &grid.track_info_at(level - 1);
+        if (bot_tr_info_ptr->get_direction() == tr_dir)
+            bot_tr_info_ptr = nullptr;
+    }
+    if (top_ntr > 0) {
+        top_tr_info_ptr = &grid.track_info_at(level + 1);
+        if (top_tr_info_ptr->get_direction() == tr_dir)
+            top_tr_info_ptr = nullptr;
+    }
+    double idc_max = 0, irms_max = 0, ipeak_max = 0;
+    auto result = std::tie(idc_max, irms_max, ipeak_max);
+    while (bin_iter.has_next()) {
+        auto cur_ntr = *bin_iter;
+        auto wire_w = tr_info.get_wire_width(cur_ntr);
+
+        result = get_metal_em_specs(tech, level, wire_w, length, false, dc_temp, rms_dt);
+        if (idc > idc_max || iac_rms > irms_max || iac_peak > ipeak_max) {
+            bin_iter.up();
+            continue;
+        }
+        // wire passes EM specs, check top/bottom via EM specs
+        if (bot_tr_info_ptr) {
+            auto adj_wire_w = bot_tr_info_ptr->get_wire_width(bot_ntr);
+            result = get_via_em_specs(grid, direction::UPPER, level, wire_w, length, adj_wire_w, -1,
+                                      dc_temp, rms_dt);
+            if ((idc_max == 0 && irms_max == 0 && ipeak_max == 0) || idc > idc_max ||
+                iac_rms > irms_max || iac_peak > ipeak_max) {
+                bin_iter.up();
+                continue;
+            }
+        }
+        if (top_tr_info_ptr) {
+            auto adj_wire_w = top_tr_info_ptr->get_wire_width(top_ntr);
+            result = get_via_em_specs(grid, direction::LOWER, level, wire_w, length, adj_wire_w, -1,
+                                      dc_temp, rms_dt);
+            if ((idc_max == 0 && irms_max == 0 && ipeak_max == 0) || idc > idc_max ||
+                iac_rms > irms_max || iac_peak > ipeak_max) {
+                bin_iter.up();
+                continue;
+            }
+        }
+        // we got here, all EM specs passed.
+        bin_iter.save();
+        bin_iter.down();
+    }
+
+    return *bin_iter.get_save();
 }
 
 } // namespace layout
