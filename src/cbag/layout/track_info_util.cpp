@@ -5,13 +5,13 @@
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
 #include <cbag/layout/wire_width.h>
+#include <cbag/util/math.h>
 
 namespace cbag {
 namespace layout {
 
-htr_t coord_to_htr(const track_info &tr_info, offset_t coord, round_mode mode, bool even) {
-    auto modulus = tr_info.get_pitch() >> (1 - even);
-    auto off = tr_info.get_offset();
+htr_t coord_to_htr(offset_t coord, offset_t pitch, offset_t off, round_mode mode, bool even) {
+    auto modulus = pitch >> (1 - even);
     auto delta = coord - off;
     auto div_res = std::div(delta, modulus);
     auto q = div_res.quot;
@@ -41,6 +41,21 @@ htr_t coord_to_htr(const track_info &tr_info, offset_t coord, round_mode mode, b
                 "Coordinate {} is not on track.  (pitch = {}, off = {})", coord, modulus, off));
     }
     return q;
+}
+
+htr_t coord_to_htr(const track_info &tr_info, offset_t coord, round_mode mode, bool even) {
+    return coord_to_htr(coord, tr_info.get_pitch(), tr_info.get_offset(), mode, even);
+}
+
+htr_t find_next_htr(const track_info &tr_info, offset_t coord, cnt_t ntr, round_mode mode,
+                    bool even) {
+    auto int_mode = static_cast<senum_t>(mode);
+    if (mode == round_mode::NEAREST || mode == round_mode::NONE)
+        throw std::invalid_argument("Invalid find_next_htr rounding mode: " +
+                                    std::to_string(int_mode));
+    auto sgn = util::sign(int_mode);
+    auto wire_w = tr_info.get_wire_width(ntr).get_total_width(tr_info.get_pitch() / 2);
+    return coord_to_htr(tr_info, coord + sgn * (wire_w / 2), mode, even);
 }
 
 offset_t htr_to_coord(const track_info &tr_info, htr_t htr) noexcept {

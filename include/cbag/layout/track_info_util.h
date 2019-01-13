@@ -7,8 +7,13 @@
 namespace cbag {
 namespace layout {
 
+htr_t coord_to_htr(offset_t coord, offset_t pitch, offset_t off, round_mode mode, bool even);
+
 htr_t coord_to_htr(const track_info &tr_info, offset_t coord, round_mode mode = round_mode::NONE,
                    bool even = false);
+
+htr_t find_next_htr(const track_info &tr_info, offset_t coord, cnt_t ntr,
+                    round_mode mode = round_mode::NONE, bool even = false);
 
 offset_t htr_to_coord(const track_info &tr_info, htr_t htr) noexcept;
 
