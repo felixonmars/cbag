@@ -1,6 +1,7 @@
 #ifndef CBAG_LAYOUT_TRACK_INFO_UTIL_H
 #define CBAG_LAYOUT_TRACK_INFO_UTIL_H
 
+#include <cbag/common/transformation_fwd.h>
 #include <cbag/enum/round_mode.h>
 #include <cbag/layout/track_info.h>
 
@@ -19,6 +20,9 @@ offset_t htr_to_coord(const track_info &tr_info, htr_t htr) noexcept;
 
 cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, level_t level, cnt_t num_tr,
                         bool same_color, bool even);
+
+// TODO: change definition of spacing to get more optimized layout
+htr_t transform_htr(const track_info &tr_info, htr_t htr, const transformation &xform);
 
 } // namespace layout
 } // namespace cbag

@@ -2,6 +2,7 @@
 
 #include <fmt/core.h>
 
+#include <cbag/common/transformation_util.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
 #include <cbag/layout/wire_width.h>
@@ -72,6 +73,15 @@ cnt_t get_min_space_htr(const track_info &tr_info, const tech &t, level_t level,
         std::max(0, get_min_space(t, level, wire_w, get_space_type(same_color), even) - extra);
 
     return tr_info.space_to_htr(margin);
+}
+
+htr_t transform_htr(const track_info &tr_info, htr_t htr, const transformation &xform) {
+    if (flips_xy(xform))
+        throw std::invalid_argument("Cannot transform track index when axes are swapped.");
+
+    auto pdir = perpendicular(tr_info.get_direction());
+    auto scale = axis_scale(xform)[to_int(pdir)];
+    return scale * htr + coord_to_htr(tr_info, get_coord(xform, pdir));
 }
 
 } // namespace layout
