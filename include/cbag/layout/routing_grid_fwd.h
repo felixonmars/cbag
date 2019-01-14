@@ -18,8 +18,8 @@ class routing_grid {
     const tech *tech_ptr = nullptr;
     level_t bot_level = 0;
     std::vector<track_info> info_list;
-    level_t top_ignore_level = std::numeric_limits<level_t>::min();
-    level_t top_private_level = std::numeric_limits<level_t>::min();
+    level_t top_ignore_level = -1;
+    level_t top_private_level = -1;
     struct helper;
 
   public:
@@ -35,11 +35,13 @@ class routing_grid {
 
     const tech *get_tech() const noexcept;
 
-    int get_bot_level() const noexcept;
+    level_t get_bot_level() const noexcept;
 
-    int get_top_ignore_level() const noexcept;
+    level_t get_top_level() const noexcept;
 
-    int get_top_private_level() const noexcept;
+    level_t get_top_ignore_level() const noexcept;
+
+    level_t get_top_private_level() const noexcept;
 
     flip_parity get_flip_parity_at(level_t bot_level, level_t top_level,
                                    const transformation &xform) const;
@@ -47,6 +49,12 @@ class routing_grid {
     cnt_t get_htr_parity(level_t level, htr_t htr) const;
 
     void set_flip_parity(const flip_parity &fp);
+
+    void set_top_ignore_level(level_t new_level);
+
+    void add_new_level(level_t new_level, bool is_private, orient_2d dir, offset_t w, offset_t sp);
+
+    void set_track_offset(level_t level, offset_t offset);
 };
 
 } // namespace layout

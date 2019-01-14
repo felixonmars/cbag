@@ -1,6 +1,8 @@
 #include <numeric>
 #include <unordered_map>
 
+#include <fmt/core.h>
+
 #include <yaml-cpp/yaml.h>
 
 #include <cbag/common/transformation_util.h>
@@ -89,11 +91,13 @@ const track_info &routing_grid::operator[](level_t level) const {
 
 const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
 
-int routing_grid::get_bot_level() const noexcept { return bot_level; }
+level_t routing_grid::get_bot_level() const noexcept { return bot_level; }
 
-int routing_grid::get_top_ignore_level() const noexcept { return top_ignore_level; }
+level_t routing_grid::get_top_level() const noexcept { return bot_level + info_list.size() - 1; }
 
-int routing_grid::get_top_private_level() const noexcept { return top_private_level; }
+level_t routing_grid::get_top_ignore_level() const noexcept { return top_ignore_level; }
+
+level_t routing_grid::get_top_private_level() const noexcept { return top_private_level; }
 
 const track_info &routing_grid::track_info_at(level_t level) const {
     auto idx = helper::get_index(*this, level);
@@ -141,6 +145,47 @@ void routing_grid::set_flip_parity(const flip_parity &fp) {
         info_list[idx].par_scale = scale;
         info_list[idx].par_offset = offset;
     }
+}
+
+void routing_grid::set_top_ignore_level(level_t new_level) {
+    new_level = std::max(new_level, bot_level - 1);
+    if (new_level - bot_level >= static_cast<level_t>(info_list.size()))
+        throw std::invalid_argument("Cannot set ignore level to " + std::to_string(new_level) +
+                                    "; level is not defined.");
+    top_ignore_level = new_level;
+}
+
+void routing_grid::add_new_level(level_t new_level, bool is_private, orient_2d dir, offset_t w,
+                                 offset_t sp) {
+    auto top_level = get_top_level();
+    auto min_new = bot_level - 1;
+    auto max_new = top_level + 1;
+    if (new_level < min_new || new_level > max_new) {
+        throw std::invalid_argument(
+            fmt::format("Cannot add new level {}; valid new level range: [{}, {}]", new_level,
+                        min_new, max_new));
+    }
+    if (new_level == min_new) {
+        info_list.insert(info_list.begin(), track_info(dir, w, sp, {}));
+        bot_level = new_level;
+    } else if (new_level == max_new) {
+        info_list.emplace_back(dir, w, sp, std::vector<std::array<offset_t, 2>>{});
+    } else {
+        auto &info = info_list[new_level - bot_level];
+        info.dir = dir;
+        info.w = w;
+        info.sp = sp;
+        info.offset = (w + sp) / 2;
+    }
+
+    if (is_private)
+        top_private_level = std::max(top_private_level, new_level);
+    helper::update_block_pitch(info_list, bot_level, top_private_level, top_ignore_level);
+}
+
+void routing_grid::set_track_offset(level_t level, offset_t offset) {
+    auto idx = helper::get_index(*this, level);
+    info_list[idx].offset = offset;
 }
 
 } // namespace layout
