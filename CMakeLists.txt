@@ -90,6 +90,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_iterator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geo_object.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/geometry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/grid_object.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/instance.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/label.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/layout/len_info.cpp
