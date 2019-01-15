@@ -103,8 +103,7 @@ auto cellview::end_pin() const -> decltype(pin_map.cend()) { return pin_map.cend
 auto cellview::begin_label() const -> decltype(label_list.cbegin()) { return label_list.cbegin(); }
 auto cellview::end_label() const -> decltype(label_list.cend()) { return label_list.cend(); }
 
-void cellview::add_pin(const std::string &layer, std::string net, std::string label, box_t bbox) {
-    auto lay_id = layer_id_at(*get_tech(), layer);
+void cellview::add_pin(lay_t lay_id, std::string &&net, std::string &&label, box_t &&bbox) {
     auto iter = pin_map.find(lay_id);
     if (iter == pin_map.end()) {
         iter = pin_map.emplace(lay_id, std::vector<pin>()).first;

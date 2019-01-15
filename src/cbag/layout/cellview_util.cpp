@@ -3,7 +3,9 @@
 #include <cbag/layout/cellview_util.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/tech_util.h>
+#include <cbag/layout/track_info_util.h>
 #include <cbag/layout/via_wrapper.h>
+#include <cbag/layout/wire_width.h>
 
 namespace cbag {
 namespace layout {
@@ -20,6 +22,32 @@ box_t get_bbox(const cellview &cv, const std::string &layer, const std::string &
         merge(ans, it->second.get_bbox(layer, purpose));
     }
     return ans;
+}
+
+void add_pin(cellview &cv, const std::string &layer, const std::string &net,
+             const std::string &label, const box_t &bbox) {
+    auto lay_id = layer_id_at(*cv.get_tech(), layer);
+    cv.add_pin(lay_id, std::string(net), std::string(label), box_t(bbox));
+}
+
+void add_pin_arr(cellview &cv, const std::string &net, const std::string &label, level_t level,
+                 htr_t htr, offset_t lower, offset_t upper, cnt_t ntr, cnt_t n,
+                 offset_t htr_pitch) {
+    auto cur_htr = htr;
+    auto &tinfo = cv.get_grid()->track_info_at(level);
+    auto winfo = tinfo.get_wire_width(ntr);
+    auto winfo_end = winfo.end();
+    auto tr_dir = tinfo.get_direction();
+    for (decltype(n) idx = 0; idx < n; ++idx, htr += htr_pitch) {
+        auto [lay, purp] = get_layer_t(*cv.get_grid(), level, cur_htr);
+        for (auto witer = winfo.begin(); witer != winfo_end; ++witer) {
+            auto &[rel_htr, wire_w] = *witer;
+            auto half_w = wire_w / 2;
+            auto center = htr_to_coord(tinfo, cur_htr + rel_htr);
+            cv.add_pin(lay, std::string(net), std::string(label),
+                       box_t(tr_dir, lower, upper, center - half_w, center + half_w));
+        }
+    }
 }
 
 cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string via_id,

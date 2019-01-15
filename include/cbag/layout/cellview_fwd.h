@@ -84,7 +84,7 @@ class cellview {
     auto begin_label() const -> decltype(label_list.cbegin());
     auto end_label() const -> decltype(label_list.cend());
 
-    void add_pin(const std::string &layer, std::string net, std::string label, box_t bbox);
+    void add_pin(lay_t lay_id, std::string &&net, std::string &&label, box_t &&bbox);
 
     void add_label(layer_t &&key, transformation &&xform, std::string &&label);
 

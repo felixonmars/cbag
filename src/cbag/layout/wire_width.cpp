@@ -27,6 +27,10 @@ bool wire_width::width_iter::operator!=(const width_iter &rhs) const {
 
 wire_width::wire_width(vec_type &&widths) : widths_(std::move(widths)) {}
 
+auto wire_width::begin() const -> vec_type::const_iterator { return widths_.begin(); }
+
+auto wire_width::end() const -> vec_type::const_iterator { return widths_.end(); }
+
 auto wire_width::begin_width() const -> width_iter { return width_iter(widths_.begin()); }
 
 auto wire_width::end_width() const -> width_iter { return width_iter(widths_.end()); }

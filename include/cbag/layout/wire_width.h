@@ -47,6 +47,10 @@ class wire_width {
 
     explicit wire_width(vec_type &&widths);
 
+    vec_type::const_iterator begin() const;
+
+    vec_type::const_iterator end() const;
+
     width_iter begin_width() const;
 
     width_iter end_width() const;
