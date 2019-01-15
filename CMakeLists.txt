@@ -55,7 +55,8 @@ message("Boost libraries: " ${Boost_LIBRARIES})
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 # Include spdlog
-find_package(spdlog CONFIG REQUIRED)
+add_subdirectory(spdlog EXCLUDE_FROM_ALL)
+
 # Include threads for spdlog
 # find_package(Threads REQUIRED)
 
@@ -175,6 +176,7 @@ add_library(cbag ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
 target_link_libraries(cbag
   PUBLIC
   fmt
+  spdlog
   oaBase
   oaCommon
   oaPlugIn
@@ -203,6 +205,7 @@ add_library(cbag ${SRC_FILES_LIB_CBAG})
 target_link_libraries(cbag
   PUBLIC
   fmt
+  spdlog
   PRIVATE
   stdc++fs
   ${Boost_LIBRARIES}

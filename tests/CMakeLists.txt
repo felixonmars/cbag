@@ -26,6 +26,7 @@ target_link_libraries(test_main
   fmt
   yaml-cpp
   Catch2::Catch2
+  spdlog
   )
 
 install(TARGETS
