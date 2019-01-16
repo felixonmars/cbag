@@ -13,12 +13,8 @@ namespace layout {
 
 track_id::track_id() = default;
 
-track_id::track_id(level_t level, htr_t htr, cnt_t ntr, cnt_t num, offset_t pitch)
-    : level(level), htr(htr), ntr(ntr), num(num), pitch(pitch) {
-    if (num == 1) {
-        pitch = 0;
-    }
-}
+track_id::track_id(level_t level, htr_t htr, cnt_t ntr, cnt_t num, htr_t pitch)
+    : level(level), htr(htr), ntr(ntr), num(num), pitch((num == 1) ? 0 : pitch) {}
 
 bool track_id::operator==(const track_id &rhs) const noexcept {
     return level == rhs.level && htr == rhs.htr && ntr == rhs.ntr && num == rhs.num &&
@@ -48,96 +44,51 @@ cnt_t track_id::get_ntr() const noexcept { return ntr; }
 
 cnt_t track_id::get_num() const noexcept { return num; }
 
-offset_t track_id::get_pitch() const noexcept { return pitch; }
+htr_t track_id::get_pitch() const noexcept { return pitch; }
 
-track_id &track_id::transform(const transformation &xform, const routing_grid &grid) {
-    auto &tinfo = grid.track_info_at(level);
-    htr = transform_htr(tinfo, htr, xform);
-    pitch *= axis_scale(xform)[1 - to_int(tinfo.get_direction())];
-    return *this;
-}
+void track_id::set_htr(htr_t val) noexcept { htr = val; }
 
-track_id track_id::get_transform(const transformation &xform, const routing_grid &grid) const {
-    return track_id(*this).transform(xform, grid);
-}
+void track_id::set_pitch(htr_t val) noexcept { pitch = (num == 1) ? 0 : val; }
 
 wire_array::wire_array() = default;
 
-wire_array::wire_array(track_id tid, offset_t lower, offset_t upper)
-    : tid(std::move(tid)), coord({lower, upper}) {}
+wire_array::wire_array(std::shared_ptr<track_id> tid, offset_t lower, offset_t upper)
+    : tid_ptr(std::move(tid)), coord({lower, upper}) {}
 
 bool wire_array::operator==(const wire_array &rhs) const noexcept {
-    return tid == rhs.tid && coord == rhs.coord;
+    auto is_null = tid_ptr == nullptr;
+    auto rhs_is_null = rhs.tid_ptr == nullptr;
+    return (is_null && rhs_is_null) ||
+           (!is_null && !rhs_is_null && *tid_ptr == *(rhs.tid_ptr) && coord == rhs.coord);
 }
 
-std::size_t wire_array::get_hash() const noexcept {
+std::size_t wire_array::get_hash() const {
     auto seed = static_cast<std::size_t>(0);
-    boost::hash_combine(seed, tid.get_hash());
+    boost::hash_combine(seed, tid_ptr->get_hash());
     boost::hash_combine(seed, coord[0]);
     boost::hash_combine(seed, coord[1]);
     return seed;
 }
 
-std::string wire_array::to_string() const noexcept {
-    return fmt::format("WireArray({}, {}, {})", tid.to_string(), coord[0], coord[1]);
+std::string wire_array::to_string() const {
+    return fmt::format("WireArray({}, {}, {})", tid_ptr->to_string(), coord[0], coord[1]);
 }
+
+const std::array<offset_t, 2> &wire_array::get_coord() const noexcept { return coord; }
 
 offset_t wire_array::get_coord(direction dir) const noexcept { return coord[to_int(dir)]; }
 
-const track_id &wire_array::get_track_id() const noexcept { return tid; }
+std::shared_ptr<track_id> wire_array::get_track_id() const noexcept { return tid_ptr; }
+
+const track_id &wire_array::get_track_id_ref() const { return *tid_ptr; }
 
 offset_t wire_array::get_middle() const noexcept { return util::floor2(coord[0] + coord[1]); }
 
-auto wire_array::begin() const noexcept -> warr_iterator {
-    return {track_id(tid.get_level(), tid.get_htr(), tid.get_ntr(), 1, 0), coord, tid.get_pitch(),
-            0};
-}
+void wire_array::set_track_id(std::shared_ptr<track_id> tid) noexcept { tid_ptr = std::move(tid); }
 
-auto wire_array::end() const noexcept -> warr_iterator {
-    return {track_id(tid.get_level(), tid.get_htr(), tid.get_ntr(), 1, 0), coord, tid.get_pitch(),
-            tid.get_num()};
-}
-
-wire_array &wire_array::transform(const transformation &xform, const routing_grid &grid) {
-    tid.transform(xform, grid);
-    auto &tinfo = grid.track_info_at(tid.get_level());
-    auto dir = tinfo.get_direction();
-    auto scale = axis_scale(xform)[to_int(dir)];
-    auto delta = cbag::get_coord(xform, dir);
-    auto tmp = coord[0];
-    if (scale != 1) {
-        coord[0] = -coord[1];
-        coord[1] = -tmp;
-    }
-    coord[0] += delta;
-    coord[1] += delta;
-    return *this;
-}
-
-wire_array wire_array::get_transform(const transformation &xform, const routing_grid &grid) const {
-    return wire_array(*this).transform(xform, grid);
-}
-
-wire_array::warr_iterator::warr_iterator() = default;
-
-wire_array::warr_iterator::warr_iterator(track_id &&tid, const std::array<offset_t, 2> &coord,
-                                         offset_t pitch, cnt_t idx)
-    : val{std::move(tid), coord[0], coord[1]}, pitch(pitch), idx(idx) {}
-
-bool wire_array::warr_iterator::operator==(const warr_iterator &rhs) const noexcept {
-    return val == rhs.val && pitch == rhs.pitch && idx == rhs.idx;
-}
-
-bool wire_array::warr_iterator::operator!=(const warr_iterator &rhs) const noexcept {
-    return !(*this == rhs);
-}
-
-const wire_array &wire_array::warr_iterator::operator*() const noexcept { return val; }
-
-auto wire_array::warr_iterator::operator++() noexcept -> warr_iterator & {
-    idx += 1;
-    val.tid.htr += pitch;
-    return *this;
+void wire_array::set_coord(offset_t lower, offset_t upper) noexcept {
+    coord[0] = lower;
+    coord[1] = upper;
 }
 
 } // namespace layout

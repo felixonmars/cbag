@@ -6,6 +6,8 @@
 namespace cbag {
 namespace layout {
 
+class wire_array;
+
 template <typename T> class cv_obj_ref;
 
 box_t get_bbox(const cellview &cv, const std::string &layer, const std::string &purpose);
@@ -13,8 +15,8 @@ box_t get_bbox(const cellview &cv, const std::string &layer, const std::string &
 void add_pin(cellview &cv, const std::string &layer, const std::string &net,
              const std::string &label, const box_t &bbox);
 
-void add_pin_arr(cellview &cv, const std::string &net, const std::string &label, level_t level,
-                 htr_t htr, offset_t lower, offset_t upper, cnt_t ntr, cnt_t n, offset_t htr_pitch);
+void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
+                 const wire_array &warr);
 
 cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string via_id,
                                 bool add_layers, bool bot_horiz, bool top_horiz, cnt_t vnx,

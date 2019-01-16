@@ -2,6 +2,7 @@
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview_util.h>
 #include <cbag/layout/cv_obj_ref.h>
+#include <cbag/layout/grid_object.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
 #include <cbag/layout/via_wrapper.h>
@@ -30,15 +31,22 @@ void add_pin(cellview &cv, const std::string &layer, const std::string &net,
     cv.add_pin(lay_id, std::string(net), std::string(label), box_t(bbox));
 }
 
-void add_pin_arr(cellview &cv, const std::string &net, const std::string &label, level_t level,
-                 htr_t htr, offset_t lower, offset_t upper, cnt_t ntr, cnt_t n,
-                 offset_t htr_pitch) {
-    auto cur_htr = htr;
+void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
+                 const wire_array &warr) {
+    auto &tid = warr.get_track_id_ref();
+    auto level = tid.get_level();
+    auto cur_htr = tid.get_htr();
+    auto ntr = tid.get_ntr();
+    auto num = tid.get_num();
+    auto pitch = tid.get_pitch();
+    auto [lower, upper] = warr.get_coord();
+
     auto &tinfo = cv.get_grid()->track_info_at(level);
     auto winfo = tinfo.get_wire_width(ntr);
     auto winfo_end = winfo.end();
     auto tr_dir = tinfo.get_direction();
-    for (decltype(n) idx = 0; idx < n; ++idx, htr += htr_pitch) {
+    auto htr_pitch = pitch * tinfo.get_pitch() / 2;
+    for (decltype(num) idx = 0; idx < num; ++idx, cur_htr += htr_pitch) {
         auto [lay, purp] = get_layer_t(*cv.get_grid(), level, cur_htr);
         for (auto witer = winfo.begin(); witer != winfo_end; ++witer) {
             auto &[rel_htr, wire_w] = *witer;
