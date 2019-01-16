@@ -1,7 +1,9 @@
 #include <cbag/common/box_t_util.h>
 #include <cbag/layout/cellview_poly.h>
+#include <cbag/layout/grid_object.h>
 #include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/tech_util.h>
+#include <cbag/layout/track_info.h>
 
 namespace cbag {
 namespace layout {
@@ -24,6 +26,16 @@ void add_rect_arr(cellview &cv, const std::string &layer, const std::string &pur
         for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
             geo.add_shape(get_move_by(box, dx, dy), marx, mary);
         }
+    }
+}
+
+void add_warr(cellview &cv, const wire_array &warr) {
+    auto grid = *cv.get_grid();
+    for (auto iter = warr.begin_rect(grid), stop = warr.end_rect(grid); iter != stop; ++iter) {
+        auto [key, box] = *iter;
+        auto &geo = cv.make_geometry(key);
+        auto [spx, spy] = get_margins(grid, key, box);
+        geo.add_shape(box, spx, spy);
     }
 }
 
