@@ -36,8 +36,8 @@ std::size_t track_id::get_hash() const noexcept {
 }
 
 std::string track_id::to_string() const noexcept {
-    return fmt::format("TrackID(layer={}, htr={}, wdth={}, num={}, pitch={})", level, htr, ntr, num,
-                       pitch);
+    return fmt::format("TrackID(layer={}, htr={}, wdth={}, num={}, htr_pitch={})", level, htr, ntr,
+                       num, pitch);
 }
 
 level_t track_id::get_level() const noexcept { return level; }
@@ -88,6 +88,16 @@ const track_id &wire_array::get_track_id() const noexcept { return tid; }
 
 offset_t wire_array::get_middle() const noexcept { return util::floor2(coord[0] + coord[1]); }
 
+auto wire_array::begin() const noexcept -> warr_iterator {
+    return {track_id(tid.get_level(), tid.get_htr(), tid.get_ntr(), 1, 0), coord, tid.get_pitch(),
+            0};
+}
+
+auto wire_array::end() const noexcept -> warr_iterator {
+    return {track_id(tid.get_level(), tid.get_htr(), tid.get_ntr(), 1, 0), coord, tid.get_pitch(),
+            tid.get_num()};
+}
+
 wire_array &wire_array::transform(const transformation &xform, const routing_grid &grid) {
     tid.transform(xform, grid);
     auto &tinfo = grid.track_info_at(tid.get_level());
@@ -106,6 +116,28 @@ wire_array &wire_array::transform(const transformation &xform, const routing_gri
 
 wire_array wire_array::get_transform(const transformation &xform, const routing_grid &grid) const {
     return wire_array(*this).transform(xform, grid);
+}
+
+wire_array::warr_iterator::warr_iterator() = default;
+
+wire_array::warr_iterator::warr_iterator(track_id &&tid, const std::array<offset_t, 2> &coord,
+                                         offset_t pitch, cnt_t idx)
+    : val{std::move(tid), coord[0], coord[1]}, pitch(pitch), idx(idx) {}
+
+bool wire_array::warr_iterator::operator==(const warr_iterator &rhs) const noexcept {
+    return val == rhs.val && pitch == rhs.pitch && idx == rhs.idx;
+}
+
+bool wire_array::warr_iterator::operator!=(const warr_iterator &rhs) const noexcept {
+    return !(*this == rhs);
+}
+
+const wire_array &wire_array::warr_iterator::operator*() const noexcept { return val; }
+
+auto wire_array::warr_iterator::operator++() noexcept -> warr_iterator & {
+    idx += 1;
+    val.tid.htr += pitch;
+    return *this;
 }
 
 } // namespace layout
