@@ -59,33 +59,18 @@ void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
 }
 
 cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string via_id,
-                                bool add_layers, bool bot_horiz, bool top_horiz, cnt_t vnx,
-                                cnt_t vny, offset_t w, offset_t h, offset_t vspx, offset_t vspy,
-                                offset_t enc1l, offset_t enc1r, offset_t enc1t, offset_t enc1b,
-                                offset_t enc2l, offset_t enc2r, offset_t enc2t, offset_t enc2b,
-                                bool commit) {
-    return {&cv,
-            via_wrapper(via(std::move(xform), std::move(via_id),
-                            via_param(vnx, vny, w, h, vspx, vspy, enc1l, enc1r, enc1t, enc1b, enc2l,
-                                      enc2r, enc2t, enc2b)),
-                        add_layers, bot_horiz, top_horiz),
-            commit};
+                                const via_param &params, bool add_layers, bool commit) {
+    return {&cv, via_wrapper(via(std::move(xform), std::move(via_id), params), add_layers), commit};
 }
 
 void add_via_arr(cellview &cv, const transformation &xform, const std::string &via_id,
-                 bool add_layers, bool bot_horiz, bool top_horiz, cnt_t vnx, cnt_t vny, offset_t w,
-                 offset_t h, offset_t vspx, offset_t vspy, offset_t enc1l, offset_t enc1r,
-                 offset_t enc1t, offset_t enc1b, offset_t enc2l, offset_t enc2r, offset_t enc2t,
-                 offset_t enc2b, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
-    via_param param{vnx,   vny,   w,     h,     vspx,  vspy,  enc1l,
-                    enc1r, enc1t, enc1b, enc2l, enc2r, enc2t, enc2b};
-
+                 const via_param &params, bool add_layers, cnt_t nx, cnt_t ny, offset_t spx,
+                 offset_t spy) {
     offset_t dx = 0;
     for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
         offset_t dy = 0;
         for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
-            cv.add_object(via_wrapper(via(get_move_by(xform, dx, dy), via_id, param), add_layers,
-                                      bot_horiz, top_horiz));
+            cv.add_object(via_wrapper(via(get_move_by(xform, dx, dy), via_id, params), add_layers));
         }
     }
 }
