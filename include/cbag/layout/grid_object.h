@@ -3,11 +3,14 @@
 
 #include <array>
 
+#include <cbag/common/transformation_fwd.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/direction.h>
 
 namespace cbag {
 namespace layout {
+
+class routing_grid;
 
 class track_id {
   private:
@@ -37,6 +40,10 @@ class track_id {
     cnt_t get_num() const noexcept;
 
     offset_t get_pitch() const noexcept;
+
+    track_id &transform(const transformation &xform, const routing_grid &grid);
+
+    track_id get_transform(const transformation &xform, const routing_grid &grid) const;
 };
 
 class wire_array {
@@ -60,6 +67,10 @@ class wire_array {
     const track_id &get_track_id() const noexcept;
 
     offset_t get_middle() const noexcept;
+
+    wire_array &transform(const transformation &xform, const routing_grid &grid);
+
+    wire_array get_transform(const transformation &xform, const routing_grid &grid) const;
 };
 
 } // namespace layout
