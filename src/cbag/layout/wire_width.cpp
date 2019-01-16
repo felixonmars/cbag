@@ -25,7 +25,15 @@ bool wire_width::width_iter::operator!=(const width_iter &rhs) const {
     return vec_iter != rhs.vec_iter;
 }
 
+wire_width::wire_width() = default;
+
 wire_width::wire_width(vec_type &&widths) : widths_(std::move(widths)) {}
+
+const std::tuple<htr_t, offset_t> &wire_width::operator[](std::size_t idx) const {
+    return widths_[idx];
+}
+
+std::size_t wire_width::size() const { return widths_.size(); }
 
 auto wire_width::begin() const -> vec_type::const_iterator { return widths_.begin(); }
 

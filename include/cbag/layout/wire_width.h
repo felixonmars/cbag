@@ -45,7 +45,13 @@ class wire_width {
         bool operator!=(const width_iter &rhs) const;
     };
 
+    wire_width();
+
     explicit wire_width(vec_type &&widths);
+
+    const std::tuple<htr_t, offset_t> &operator[](std::size_t idx) const;
+
+    std::size_t size() const;
 
     vec_type::const_iterator begin() const;
 

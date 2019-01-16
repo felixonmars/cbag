@@ -4,7 +4,7 @@
 
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/grid_object.h>
-#include <cbag/layout/routing_grid.h>
+#include <cbag/layout/routing_grid_util.h>
 #include <cbag/layout/track_info_util.h>
 #include <cbag/util/math.h>
 
@@ -20,6 +20,8 @@ bool track_id::operator==(const track_id &rhs) const noexcept {
     return level == rhs.level && htr == rhs.htr && ntr == rhs.ntr && num == rhs.num &&
            pitch == rhs.pitch;
 }
+
+htr_t track_id::operator[](std::size_t idx) const noexcept { return htr + idx * pitch; }
 
 std::size_t track_id::get_hash() const noexcept {
     auto seed = static_cast<std::size_t>(0);
@@ -90,6 +92,54 @@ void wire_array::set_coord(offset_t lower, offset_t upper) noexcept {
     coord[0] = lower;
     coord[1] = upper;
 }
+
+warr_rect_iterator wire_array::begin_rect(const routing_grid &grid) const {
+    return {grid, *this, true};
+}
+
+warr_rect_iterator wire_array::end_rect(const routing_grid &grid) const {
+    return {grid, *this, false};
+}
+
+warr_rect_iterator::warr_rect_iterator() = default;
+
+warr_rect_iterator::warr_rect_iterator(const routing_grid &grid, const wire_array &warr, bool begin)
+    : grid_ptr(&grid), warr_ptr(&warr), warr_idx(begin ? 0 : warr.get_track_id_ref().get_num()) {
+    auto &tinfo = grid.track_info_at(warr.get_track_id_ref().get_level());
+    wire_w = tinfo.get_wire_width(warr.get_track_id_ref().get_ntr());
+    ww_idx = begin ? 0 : wire_w.size();
+}
+
+bool warr_rect_iterator::operator==(const warr_rect_iterator &rhs) const {
+    return warr_idx == rhs.warr_idx && ww_idx == rhs.ww_idx;
+}
+
+bool warr_rect_iterator::operator!=(const warr_rect_iterator &rhs) const { return !(*this == rhs); }
+
+std::tuple<layer_t, box_t> warr_rect_iterator::operator*() const {
+    auto &tid = warr_ptr->get_track_id_ref();
+    auto level = tid.get_level();
+
+    auto &tinfo = (*grid_ptr)[level];
+    auto htr = tid[warr_idx];
+    auto &[rel_htr, w] = wire_w[ww_idx];
+    auto &[lower, upper] = warr_ptr->get_coord();
+    auto c = htr_to_coord(tinfo, rel_htr + htr);
+    auto half_w = w / 2;
+    return {get_layer_t(*grid_ptr, level, htr + rel_htr),
+            box_t(tinfo.get_direction(), lower, upper, c - half_w, c + half_w)};
+}
+
+warr_rect_iterator &warr_rect_iterator::operator++() {
+    ++ww_idx;
+    if (ww_idx == wire_w.size()) {
+        ww_idx = 0;
+        ++warr_idx;
+    }
+    return *this;
+}
+
+const routing_grid &warr_rect_iterator::get_grid() const { return *grid_ptr; }
 
 } // namespace layout
 } // namespace cbag
