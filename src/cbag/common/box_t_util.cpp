@@ -29,10 +29,11 @@ void set(box_t &box, coord_t xl, coord_t yl, coord_t xh, coord_t yh) {
     box.intvs[1][0] = yl;
     box.intvs[1][1] = yh;
 }
-void set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th) {
+box_t &set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th) {
     auto orient_code = to_int(orient);
     box.intvs[orient_code][0] = tl;
     box.intvs[orient_code][1] = th;
+    return box;
 }
 
 coord_t xl(const box_t &box) { return box.intvs[0][0]; }

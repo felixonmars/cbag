@@ -77,12 +77,11 @@ void add_via_arr(cellview &cv, const transformation &xform, const std::string &v
     }
 }
 
-std::array<offset_t, 2> connect_box_track(cellview &cv, direction vdir, layer_t key,
-                                          const box_t &box, std::array<cnt_t, 2> num,
-                                          std::array<offset_t, 2> sp, const track_id &tid,
-                                          const std::array<std::optional<offset_t>, 2> &box_ext,
-                                          const std::array<std::optional<offset_t>, 2> &tr_ext,
-                                          min_len_mode mode) {
+std::array<std::array<offset_t, 2>, 2>
+connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
+                  std::array<cnt_t, 2> num, std::array<offset_t, 2> sp, const track_id &tid,
+                  const std::array<std::optional<offset_t>, 2> &box_ext,
+                  const std::array<std::optional<offset_t>, 2> &tr_ext, min_len_mode mode) {
     std::array<std::array<offset_t, 2>, 2> ans;
 
     auto &grid = *cv.get_grid();
@@ -174,7 +173,7 @@ std::array<offset_t, 2> connect_box_track(cellview &cv, direction vdir, layer_t 
 
     // add track wires and return track coordinates
     add_warr(cv, tid, ans[tv_didx]);
-    return ans[tv_didx];
+    return ans;
 }
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,

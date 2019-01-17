@@ -14,7 +14,7 @@ offset_t get_dim(const box_t &box, orient_2d orient);
 coord_t get_center(const box_t &box, orient_2d orient);
 
 void set(box_t &box, coord_t xl, coord_t yl, coord_t xh, coord_t yh);
-void set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th);
+box_t &set_interval(box_t &box, orient_2d orient, coord_t tl, coord_t th);
 
 coord_t xl(const box_t &box);
 coord_t yl(const box_t &box);
