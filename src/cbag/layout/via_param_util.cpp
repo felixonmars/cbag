@@ -26,10 +26,11 @@ box_t get_box(const via_param &p, const transformation &xform, direction vdir) {
 std::array<offset_t, 2> get_via_extensions(const via_param &p, vector dim, direction vdir,
                                            orient_2d ex_dir, orient_2d adj_ex_dir) {
 
-    return std::array<offset_t, 2>{
-        get_metal_dim(p, ex_dir, vdir) - dim[to_int(ex_dir)],
-        get_metal_dim(p, adj_ex_dir, flip(vdir)) - dim[to_int(adj_ex_dir)],
-    };
+    std::array<offset_t, 2> ans;
+    auto didx = to_int(vdir);
+    ans[didx] = (get_metal_dim(p, ex_dir, vdir) - dim[to_int(ex_dir)]) / 2;
+    ans[1 - didx] = (get_metal_dim(p, adj_ex_dir, flip(vdir)) - dim[to_int(adj_ex_dir)]) / 2;
+    return ans;
 }
 
 } // namespace layout

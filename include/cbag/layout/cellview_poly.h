@@ -13,15 +13,18 @@
 namespace cbag {
 namespace layout {
 
+class track_id;
 class wire_array;
 
 shape_ref<box_t> add_rect(cellview &cv, const std::string &layer, const std::string &purpose,
                           box_t bbox, bool commit);
 
-void add_rect_arr(cellview &cv, const std::string &layer, const std::string &purpose,
-                  const box_t &box, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy);
+void add_rect_arr(cellview &cv, layer_t &key, const box_t &box, std::array<cnt_t, 2> num,
+                  std::array<offset_t, 2> sp);
 
 void add_warr(cellview &cv, const wire_array &warr);
+
+void add_warr(cellview &cv, const track_id &tid, std::array<offset_t, 2> coord);
 
 template <typename T>
 shape_ref<T> add_polygon(cellview &cv, const std::string &layer, const std::string &purpose,

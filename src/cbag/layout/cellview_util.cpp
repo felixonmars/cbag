@@ -1,10 +1,12 @@
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
+#include <cbag/layout/cellview_poly.h>
 #include <cbag/layout/cellview_util.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/grid_object.h>
 #include <cbag/layout/tech_util.h>
 #include <cbag/layout/track_info_util.h>
+#include <cbag/layout/via_param_util.h>
 #include <cbag/layout/via_wrapper.h>
 #include <cbag/layout/wire_width.h>
 
@@ -64,15 +66,115 @@ cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string 
 }
 
 void add_via_arr(cellview &cv, const transformation &xform, const std::string &via_id,
-                 const via_param &params, bool add_layers, cnt_t nx, cnt_t ny, offset_t spx,
-                 offset_t spy) {
+                 const via_param &params, bool add_layers, std::array<cnt_t, 2> num_arr,
+                 std::array<offset_t, 2> sp_arr) {
     offset_t dx = 0;
-    for (decltype(nx) xidx = 0; xidx < nx; ++xidx, dx += spx) {
+    for (cnt_t xidx = 0; xidx < num_arr[0]; ++xidx, dx += sp_arr[0]) {
         offset_t dy = 0;
-        for (decltype(ny) yidx = 0; yidx < ny; ++yidx, dy += spy) {
+        for (cnt_t yidx = 0; yidx < num_arr[1]; ++yidx, dy += sp_arr[1]) {
             cv.add_object(via_wrapper(via(get_move_by(xform, dx, dy), via_id, params), add_layers));
         }
     }
+}
+
+std::array<offset_t, 2> connect_box_track(cellview &cv, direction vdir, layer_t key,
+                                          const box_t &box, std::array<cnt_t, 2> num,
+                                          std::array<offset_t, 2> sp, const track_id &tid,
+                                          const std::array<std::optional<offset_t>, 2> &box_ext,
+                                          const std::array<std::optional<offset_t>, 2> &tr_ext,
+                                          min_len_mode mode) {
+    std::array<std::array<offset_t, 2>, 2> ans;
+
+    auto &grid = *cv.get_grid();
+    auto &tech = *grid.get_tech();
+    auto &tinfo = grid.track_info_at(tid.get_level());
+    auto tr_dir = tinfo.get_direction();
+    auto p_dir = perpendicular(tr_dir);
+    auto tr_didx = to_int(tr_dir);
+    auto p_didx = 1 - tr_didx;
+
+    auto v_didx = to_int(vdir);
+    auto tv_didx = 1 - v_didx;
+    auto num_box = num[tr_didx];
+    auto sp_box = sp[tr_didx];
+    decltype(sp_box) delta = sp_box * (num_box - 1);
+    decltype(sp_box) p_delta = sp[p_didx] * (num[p_didx] - 1);
+    ans[v_didx] = box.intvs[p_didx];
+    ans[v_didx][p_delta > 0] += p_delta;
+    ans[tv_didx] = box.intvs[tr_didx];
+    ans[tv_didx][delta > 0] += delta;
+
+    for (auto iter = begin_rect(grid, tid, ans[1]), stop = end_rect(grid, tid, ans[1]);
+         iter != stop; ++iter) {
+        // compute via
+        auto [tr_key, tr_box] = *iter;
+        auto &via_id = tech.get_via_id(vdir, key, tr_key);
+        auto via_box = box_t(tr_dir, box.intvs[tr_didx][0], box.intvs[tr_didx][1],
+                             tr_box.intvs[p_didx][0], tr_box.intvs[p_didx][1]);
+        auto via_dim = dim(via_box);
+        auto via_param = tech.get_via_param(via_dim, via_id, vdir, p_dir, tr_dir, true);
+
+        // add via
+        auto xform = make_xform(xm(via_box), ym(via_box));
+        auto via_num = std::array<cnt_t, 2>{1, 1};
+        auto via_sp = std::array<offset_t, 2>{0, 0};
+        via_num[tr_didx] = num_box;
+        via_sp[tr_didx] = sp_box;
+        add_via_arr(cv, xform, via_id, via_param, false, via_num, via_sp);
+
+        // get via coordinate boundaries
+        auto via_ext = get_via_extensions(via_param, via_dim, vdir, p_dir, tr_dir);
+        ans[v_didx][0] = std::min(ans[v_didx][0], via_box.intvs[p_didx][0] - via_ext[p_didx]);
+        ans[v_didx][1] = std::max(ans[v_didx][1], via_box.intvs[p_didx][1] + via_ext[p_didx]);
+        ans[tv_didx][0] = std::min(ans[tv_didx][0], via_box.intvs[tr_didx][0] - via_ext[tr_didx]);
+        ans[tv_didx][1] = std::max(ans[tv_didx][1], via_box.intvs[tr_didx][1] + via_ext[tr_didx]);
+    }
+
+    // perform optional extensions
+    if (box_ext[0])
+        ans[v_didx][0] = std::min(ans[v_didx][0], *box_ext[0]);
+    if (box_ext[1])
+        ans[v_didx][1] = std::max(ans[v_didx][1], *box_ext[1]);
+    if (tr_ext[0])
+        ans[tv_didx][0] = std::min(ans[tv_didx][0], *tr_ext[0]);
+    if (tr_ext[1])
+        ans[tv_didx][1] = std::max(ans[tv_didx][1], *tr_ext[1]);
+
+    // perform minimum length correction
+    auto tr_len = ans[tv_didx][1] - ans[tv_didx][0];
+    switch (mode) {
+    case min_len_mode::LOWER:
+        tr_len = std::max(tr_len, get_min_length(tech, tid.get_level(),
+                                                 tinfo.get_wire_width(tid.get_ntr()), false));
+        ans[tv_didx][0] = ans[tv_didx][1] - tr_len;
+        break;
+    case min_len_mode::UPPER:
+        tr_len = std::max(tr_len, get_min_length(tech, tid.get_level(),
+                                                 tinfo.get_wire_width(tid.get_ntr()), false));
+        ans[tv_didx][1] = ans[tv_didx][0] + tr_len;
+        break;
+    case min_len_mode::MIDDLE:
+        tr_len = std::max(tr_len, get_min_length(tech, tid.get_level(),
+                                                 tinfo.get_wire_width(tid.get_ntr()), true));
+        ans[tv_didx][0] = (ans[tv_didx][0] + ans[tv_didx][1] - tr_len) / 2;
+        ans[tv_didx][1] = ans[tv_didx][0] + tr_len;
+        break;
+    default:
+        break;
+    }
+
+    // add bbox wires
+    auto new_box =
+        box_t(tr_dir, box.intvs[tr_didx][0], box.intvs[tr_didx][1], ans[v_didx][0], ans[v_didx][1]);
+    auto new_num_box = std::array<cnt_t, 2>{1, 1};
+    auto new_sp_box = std::array<offset_t, 2>{0, 0};
+    new_num_box[tr_didx] = num_box;
+    new_sp_box[tr_didx] = sp_box;
+    add_rect_arr(cv, key, new_box, new_num_box, new_sp_box);
+
+    // add track wires and return track coordinates
+    add_warr(cv, tid, ans[tv_didx]);
+    return ans[tv_didx];
 }
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,

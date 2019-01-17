@@ -16,6 +16,7 @@ namespace cbag {
 namespace layout {
 
 class routing_grid;
+class warr_rect_iterator;
 
 class track_id : public std::enable_shared_from_this<track_id> {
   private:
@@ -48,12 +49,12 @@ class track_id : public std::enable_shared_from_this<track_id> {
 
     htr_t get_pitch() const noexcept;
 
+    std::array<offset_t, 2> get_bounds(const routing_grid &grid) const;
+
     void set_htr(htr_t val) noexcept;
 
     void set_pitch(htr_t val) noexcept;
 };
-
-class warr_rect_iterator;
 
 class wire_array {
   private:
@@ -86,21 +87,24 @@ class wire_array {
     void set_coord(offset_t lower, offset_t upper) noexcept;
 
     warr_rect_iterator begin_rect(const routing_grid &grid) const;
+
     warr_rect_iterator end_rect(const routing_grid &grid) const;
 };
 
 class warr_rect_iterator {
   private:
     const routing_grid *grid_ptr;
-    const wire_array *warr_ptr;
-    cnt_t warr_idx = 0;
+    const track_id *tr_ptr;
+    std::array<offset_t, 2> coord;
+    cnt_t tr_idx = 0;
     cnt_t ww_idx = 0;
     wire_width wire_w;
 
   public:
     warr_rect_iterator();
 
-    warr_rect_iterator(const routing_grid &grid, const wire_array &warr, bool begin);
+    warr_rect_iterator(const routing_grid &grid, const track_id &tid, std::array<offset_t, 2> coord,
+                       bool begin);
 
     bool operator==(const warr_rect_iterator &rhs) const;
     bool operator!=(const warr_rect_iterator &rhs) const;
@@ -110,6 +114,12 @@ class warr_rect_iterator {
 
     const routing_grid &get_grid() const;
 };
+
+warr_rect_iterator begin_rect(const routing_grid &grid, const track_id &tid,
+                              std::array<offset_t, 2> coord);
+
+warr_rect_iterator end_rect(const routing_grid &grid, const track_id &tid,
+                            std::array<offset_t, 2> coord);
 
 } // namespace layout
 } // namespace cbag

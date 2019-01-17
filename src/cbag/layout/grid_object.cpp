@@ -48,6 +48,13 @@ cnt_t track_id::get_num() const noexcept { return num; }
 
 htr_t track_id::get_pitch() const noexcept { return pitch; }
 
+std::array<offset_t, 2> track_id::get_bounds(const routing_grid &grid) const {
+    auto ans = get_wire_bounds(grid, level, htr, ntr);
+    auto delta = static_cast<offset_t>(get_num() - 1) * get_pitch() * grid[level].get_pitch() / 2;
+    ans[delta > 0] += delta;
+    return ans;
+}
+
 void track_id::set_htr(htr_t val) noexcept { htr = val; }
 
 void track_id::set_pitch(htr_t val) noexcept { pitch = (num == 1) ? 0 : val; }
@@ -94,52 +101,61 @@ void wire_array::set_coord(offset_t lower, offset_t upper) noexcept {
 }
 
 warr_rect_iterator wire_array::begin_rect(const routing_grid &grid) const {
-    return {grid, *this, true};
+    return cbag::layout::begin_rect(grid, *tid_ptr, coord);
 }
 
 warr_rect_iterator wire_array::end_rect(const routing_grid &grid) const {
-    return {grid, *this, false};
+    return cbag::layout::end_rect(grid, *tid_ptr, coord);
 }
 
 warr_rect_iterator::warr_rect_iterator() = default;
 
-warr_rect_iterator::warr_rect_iterator(const routing_grid &grid, const wire_array &warr, bool begin)
-    : grid_ptr(&grid), warr_ptr(&warr), warr_idx(begin ? 0 : warr.get_track_id_ref().get_num()) {
-    auto &tinfo = grid.track_info_at(warr.get_track_id_ref().get_level());
-    wire_w = tinfo.get_wire_width(warr.get_track_id_ref().get_ntr());
+warr_rect_iterator::warr_rect_iterator(const routing_grid &grid, const track_id &tid,
+                                       std::array<offset_t, 2> coord, bool begin)
+    : grid_ptr(&grid), tr_ptr(&tid), coord(coord), tr_idx(begin ? 0 : tid.get_num()) {
+    auto &tinfo = grid.track_info_at(tid.get_level());
+    wire_w = tinfo.get_wire_width(tid.get_ntr());
     ww_idx = begin ? 0 : wire_w.size();
 }
 
 bool warr_rect_iterator::operator==(const warr_rect_iterator &rhs) const {
-    return warr_idx == rhs.warr_idx && ww_idx == rhs.ww_idx;
+    return tr_idx == rhs.tr_idx && ww_idx == rhs.ww_idx;
 }
 
 bool warr_rect_iterator::operator!=(const warr_rect_iterator &rhs) const { return !(*this == rhs); }
 
 std::tuple<layer_t, box_t> warr_rect_iterator::operator*() const {
-    auto &tid = warr_ptr->get_track_id_ref();
-    auto level = tid.get_level();
+    auto level = tr_ptr->get_level();
 
     auto &tinfo = (*grid_ptr)[level];
-    auto htr = tid[warr_idx];
+    auto htr = (*tr_ptr)[tr_idx];
     auto &[rel_htr, w] = wire_w[ww_idx];
-    auto &[lower, upper] = warr_ptr->get_coord();
     auto c = htr_to_coord(tinfo, rel_htr + htr);
     auto half_w = w / 2;
     return {get_layer_t(*grid_ptr, level, htr + rel_htr),
-            box_t(tinfo.get_direction(), lower, upper, c - half_w, c + half_w)};
+            box_t(tinfo.get_direction(), coord[0], coord[1], c - half_w, c + half_w)};
 }
 
 warr_rect_iterator &warr_rect_iterator::operator++() {
     ++ww_idx;
     if (ww_idx == wire_w.size()) {
         ww_idx = 0;
-        ++warr_idx;
+        ++tr_idx;
     }
     return *this;
 }
 
 const routing_grid &warr_rect_iterator::get_grid() const { return *grid_ptr; }
+
+warr_rect_iterator begin_rect(const routing_grid &grid, const track_id &tid,
+                              std::array<offset_t, 2> coord) {
+    return {grid, tid, coord, true};
+}
+
+warr_rect_iterator end_rect(const routing_grid &grid, const track_id &tid,
+                            std::array<offset_t, 2> coord) {
+    return {grid, tid, coord, false};
+}
 
 } // namespace layout
 } // namespace cbag

@@ -6,6 +6,7 @@
 
 #include <cbag/common/box_t.h>
 #include <cbag/common/transformation_fwd.h>
+#include <cbag/common/vector.h>
 
 namespace cbag {
 
@@ -23,6 +24,7 @@ coord_t xm(const box_t &box);
 coord_t ym(const box_t &box);
 offset_t width(const box_t &box);
 offset_t height(const box_t &box);
+vector dim(const box_t &box);
 
 std::string to_string(const box_t &box);
 bool is_physical(const box_t &box);
