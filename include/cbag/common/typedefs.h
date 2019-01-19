@@ -21,6 +21,9 @@ using temp_t = int_fast32_t;
 using scnt_t = int_fast32_t;
 using em_specs_t = std::tuple<double, double, double>;
 
+constexpr auto COORD_MIN = std::numeric_limits<coord_t>::min();
+constexpr auto COORD_MAX = std::numeric_limits<coord_t>::max();
+
 } // namespace cbag
 
 #endif

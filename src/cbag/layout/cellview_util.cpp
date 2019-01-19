@@ -79,69 +79,90 @@ void add_via_arr(cellview &cv, const transformation &xform, const std::string &v
     }
 }
 
-void add_via_on_intersection(cellview &cv, const wire_array &warr1, const wire_array &warr2,
-                             bool extend, bool contain) {
-    auto lev1 = warr1.get_track_id_ref().get_level();
-    auto lev2 = warr2.get_track_id_ref().get_level();
+std::array<std::array<coord_t, 2>, 2> add_via_on_intersections(cellview &cv, const track_id &tid1,
+                                                               const track_id &tid2,
+                                                               std::array<coord_t, 2> coord1,
+                                                               std::array<coord_t, 2> coord2,
+                                                               bool extend, bool contain) {
+    std::array<std::array<coord_t, 2>, 2> ans = {std::array<coord_t, 2>{COORD_MAX, COORD_MIN},
+                                                 std::array<coord_t, 2>{COORD_MAX, COORD_MIN}};
+    auto lev1 = tid1.get_level();
+    auto lev2 = tid2.get_level();
     auto diff = lev1 - lev2;
     if (std::abs(diff) != 1)
         throw std::invalid_argument(
             fmt::format("Cannot create via between layers {} and {}", lev1, lev2));
 
-    std::array<const wire_array *, 2> warr_arr;
+    std::array<const track_id *, 2> tid_arr;
+    std::array<std::array<coord_t, 2>, 2> coord_arr;
     auto idx1 = static_cast<int>(diff > 0);
-    warr_arr[idx1] = &warr1;
-    warr_arr[1 - idx1] = &warr2;
+    tid_arr[idx1] = &tid1;
+    tid_arr[1 - idx1] = &tid2;
+    coord_arr[idx1] = coord1;
+    coord_arr[1 - idx1] = coord2;
     auto &grid = *cv.get_grid();
     auto &tech = *grid.get_tech();
-    auto &tid0 = warr_arr[0]->get_track_id_ref();
-    auto &tid1 = warr_arr[1]->get_track_id_ref();
-    auto &tinfo0 = grid.track_info_at(tid0.get_level());
-    auto &tinfo1 = grid.track_info_at(tid1.get_level());
+    auto &tinfo0 = grid.track_info_at(tid_arr[0]->get_level());
+    auto &tinfo1 = grid.track_info_at(tid_arr[1]->get_level());
     auto dir0 = tinfo0.get_direction();
     auto dir1 = tinfo1.get_direction();
     if (dir0 == dir1)
         throw std::invalid_argument("Cannot draw vias between layers with same direction.");
 
-    for (auto i0 = warr_arr[0]->begin_rect(grid), s0 = warr_arr[0]->end_rect(grid); i0 != s0;
-         ++i0) {
+    for (auto i0 = begin_rect(grid, *tid_arr[0], coord_arr[0]),
+              s0 = end_rect(grid, *tid_arr[0], coord_arr[0]);
+         i0 != s0; ++i0) {
         auto [lay0, box0] = *i0;
-        for (auto i1 = warr_arr[1]->begin_rect(grid), s1 = warr_arr[1]->end_rect(grid); i1 != s1;
-             ++i1) {
+        for (auto i1 = begin_rect(grid, *tid_arr[1], coord_arr[1]),
+                  s1 = end_rect(grid, *tid_arr[1], coord_arr[1]);
+             i1 != s1; ++i1) {
             auto [lay1, box1] = *i1;
             auto via_box = get_intersect(box0, box1);
-            if (is_physical(via_box)) {
-                auto box_dim = dim(via_box);
+            auto box_dim = dim(via_box);
+            if (box_dim[to_int(dir0)] == get_dim(box1, dir0) &&
+                box_dim[to_int(dir1)] == get_dim(box0, dir1)) {
                 auto &via_id = tech.get_via_id(direction::LOWER, lay0, lay1);
                 auto via_param =
                     tech.get_via_param(box_dim, via_id, direction::LOWER, dir0, dir1, extend);
                 if (!empty(via_param)) {
-                    if (contain) {
-                        auto via_ext =
-                            get_via_extensions(via_param, box_dim, direction::LOWER, dir0, dir1);
-                        // check that via extensions are contained inside the wire
-                        if (lower(box0, dir0) > (lower(via_box, dir0) - via_ext[0]) ||
-                            upper(box0, dir0) < (upper(via_box, dir0) + via_ext[0]) ||
-                            lower(box1, dir1) > (lower(via_box, dir1) - via_ext[1]) ||
-                            upper(box1, dir1) < (upper(via_box, dir1) + via_ext[1])) {
-                            continue;
-                        }
+                    auto via_ext =
+                        get_via_extensions(via_param, box_dim, direction::LOWER, dir0, dir1);
+                    auto l0 = lower(via_box, dir0) - via_ext[0];
+                    auto u0 = upper(via_box, dir0) + via_ext[0];
+                    auto l1 = lower(via_box, dir1) - via_ext[1];
+                    auto u1 = upper(via_box, dir1) + via_ext[1];
+                    if (!contain || (lower(box0, dir0) <= l0 && upper(box0, dir0) >= u0 &&
+                                     lower(box1, dir1) <= l1 && upper(box1, dir1) >= u1)) {
+                        // we can draw via safely
+                        cv.add_object(via_wrapper(
+                            via(make_xform(xm(via_box), ym(via_box)), via_id, via_param), false));
+                        // update bounds
+                        ans[0][0] = std::min(ans[0][0], l0);
+                        ans[0][1] = std::max(ans[0][1], u0);
+                        ans[1][0] = std::min(ans[1][0], l1);
+                        ans[1][1] = std::max(ans[1][1], u1);
                     }
-                    // we can draw via safely
-                    cv.add_object(via_wrapper(
-                        via(make_xform(xm(via_box), ym(via_box)), via_id, via_param), false));
                 }
             }
         }
     }
+    return ans;
 }
 
-std::array<std::array<offset_t, 2>, 2>
+std::array<std::array<coord_t, 2>, 2> add_via_on_intersections(cellview &cv,
+                                                               const wire_array &warr1,
+                                                               const wire_array &warr2, bool extend,
+                                                               bool contain) {
+    return add_via_on_intersections(cv, warr1.get_track_id_ref(), warr2.get_track_id_ref(),
+                                    warr1.get_coord(), warr2.get_coord(), extend, contain);
+}
+
+std::array<std::array<coord_t, 2>, 2>
 connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
                   std::array<cnt_t, 2> num, std::array<offset_t, 2> sp, const track_id &tid,
-                  const std::array<std::optional<offset_t>, 2> &box_ext,
-                  const std::array<std::optional<offset_t>, 2> &tr_ext, min_len_mode mode) {
-    std::array<std::array<offset_t, 2>, 2> ans;
+                  const std::array<std::optional<coord_t>, 2> &box_ext,
+                  const std::array<std::optional<coord_t>, 2> &tr_ext, min_len_mode mode) {
+    std::array<std::array<coord_t, 2>, 2> ans;
 
     auto &grid = *cv.get_grid();
     auto &tech = *grid.get_tech();
@@ -235,10 +256,48 @@ connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
     return ans;
 }
 
-std::array<std::array<offset_t, 2>, 2>
+std::array<std::array<coord_t, 2>, 2>
 connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
-                   const std::array<std::optional<offset_t>, 2> &box_ext,
-                   const std::array<std::optional<offset_t>, 2> &tr_ext) {}
+                   const std::array<std::optional<coord_t>, 2> &w_ext,
+                   const std::array<std::optional<coord_t>, 2> &tr_ext) {
+
+    // draw vias
+    auto &w_tid = warr.get_track_id_ref();
+    auto inf_bnds = std::array<coord_t, 2>{COORD_MIN, COORD_MAX};
+    auto ans = add_via_on_intersections(cv, w_tid, tid, inf_bnds, inf_bnds, true, false);
+
+    // determine wire_array and track_id layer indices
+    auto wlev = w_tid.get_level();
+    auto tlev = tid.get_level();
+    auto lev_diff = wlev - tlev;
+    auto w_vidx = static_cast<int>(lev_diff > 0);
+    auto t_vidx = 1 - w_vidx;
+
+    // extend wires and track indicates
+    auto &w_coords = warr.get_coord();
+    if (w_ext[0]) {
+        ans[w_vidx][0] = std::min({ans[w_vidx][0], w_coords[0], *w_ext[0]});
+    } else {
+        ans[w_vidx][0] = std::min(ans[w_vidx][0], w_coords[0]);
+    }
+    if (w_ext[1]) {
+        ans[w_vidx][1] = std::min({ans[w_vidx][1], w_coords[1], *w_ext[1]});
+    } else {
+        ans[w_vidx][1] = std::min(ans[w_vidx][1], w_coords[1]);
+    }
+    if (tr_ext[0]) {
+        ans[t_vidx][0] = std::min(ans[t_vidx][0], *tr_ext[0]);
+    }
+    if (tr_ext[1]) {
+        ans[t_vidx][1] = std::min(ans[t_vidx][1], *tr_ext[1]);
+    }
+
+    // draw wires
+    add_warr(cv, w_tid, ans[w_vidx]);
+    add_warr(cv, tid, ans[t_vidx]);
+
+    return ans;
+}
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
                transformation xform, std::string label) {
