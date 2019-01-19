@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
 #include <cbag/layout/cellview_poly.h>
@@ -73,6 +75,63 @@ void add_via_arr(cellview &cv, const transformation &xform, const std::string &v
         offset_t dy = 0;
         for (cnt_t yidx = 0; yidx < num_arr[1]; ++yidx, dy += sp_arr[1]) {
             cv.add_object(via_wrapper(via(get_move_by(xform, dx, dy), via_id, params), add_layers));
+        }
+    }
+}
+
+void add_via_on_intersection(cellview &cv, const wire_array &warr1, const wire_array &warr2,
+                             bool extend, bool contain) {
+    auto lev1 = warr1.get_track_id_ref().get_level();
+    auto lev2 = warr2.get_track_id_ref().get_level();
+    auto diff = lev1 - lev2;
+    if (std::abs(diff) != 1)
+        throw std::invalid_argument(
+            fmt::format("Cannot create via between layers {} and {}", lev1, lev2));
+
+    std::array<const wire_array *, 2> warr_arr;
+    auto idx1 = static_cast<int>(diff > 0);
+    warr_arr[idx1] = &warr1;
+    warr_arr[1 - idx1] = &warr2;
+    auto &grid = *cv.get_grid();
+    auto &tech = *grid.get_tech();
+    auto &tid0 = warr_arr[0]->get_track_id_ref();
+    auto &tid1 = warr_arr[1]->get_track_id_ref();
+    auto &tinfo0 = grid.track_info_at(tid0.get_level());
+    auto &tinfo1 = grid.track_info_at(tid1.get_level());
+    auto dir0 = tinfo0.get_direction();
+    auto dir1 = tinfo1.get_direction();
+    if (dir0 == dir1)
+        throw std::invalid_argument("Cannot draw vias between layers with same direction.");
+
+    for (auto i0 = warr_arr[0]->begin_rect(grid), s0 = warr_arr[0]->end_rect(grid); i0 != s0;
+         ++i0) {
+        auto [lay0, box0] = *i0;
+        for (auto i1 = warr_arr[1]->begin_rect(grid), s1 = warr_arr[1]->end_rect(grid); i1 != s1;
+             ++i1) {
+            auto [lay1, box1] = *i1;
+            auto via_box = get_intersect(box0, box1);
+            if (is_physical(via_box)) {
+                auto box_dim = dim(via_box);
+                auto &via_id = tech.get_via_id(direction::LOWER, lay0, lay1);
+                auto via_param =
+                    tech.get_via_param(box_dim, via_id, direction::LOWER, dir0, dir1, extend);
+                if (!empty(via_param)) {
+                    if (contain) {
+                        auto via_ext =
+                            get_via_extensions(via_param, box_dim, direction::LOWER, dir0, dir1);
+                        // check that via extensions are contained inside the wire
+                        if (lower(box0, dir0) > (lower(via_box, dir0) - via_ext[0]) ||
+                            upper(box0, dir0) < (upper(via_box, dir0) + via_ext[0]) ||
+                            lower(box1, dir1) > (lower(via_box, dir1) - via_ext[1]) ||
+                            upper(box1, dir1) < (upper(via_box, dir1) + via_ext[1])) {
+                            continue;
+                        }
+                    }
+                    // we can draw via safely
+                    cv.add_object(via_wrapper(
+                        via(make_xform(xm(via_box), ym(via_box)), via_id, via_param), false));
+                }
+            }
         }
     }
 }
@@ -175,6 +234,11 @@ connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
     add_warr(cv, tid, ans[tv_didx]);
     return ans;
 }
+
+std::array<std::array<offset_t, 2>, 2>
+connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
+                   const std::array<std::optional<offset_t>, 2> &box_ext,
+                   const std::array<std::optional<offset_t>, 2> &tr_ext) {}
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
                transformation xform, std::string label) {

@@ -45,6 +45,8 @@ coord_t ym(const box_t &box) { return get_center(box, orient_2d::VERTICAL); }
 coord_t width(const box_t &box) { return get_dim(box, orient_2d::HORIZONTAL); }
 coord_t height(const box_t &box) { return get_dim(box, orient_2d::VERTICAL); }
 vector dim(const box_t &box) { return {width(box), height(box)}; }
+coord_t lower(const box_t &box, orient_2d orient) { return box.intvs[to_int(orient)][0]; }
+coord_t upper(const box_t &box, orient_2d orient) { return box.intvs[to_int(orient)][1]; }
 
 std::string to_string(const box_t &box) {
     return fmt::format("BBox({}, {}, {}, {})", xl(box), yl(box), xh(box), yh(box));

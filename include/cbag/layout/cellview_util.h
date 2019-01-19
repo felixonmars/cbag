@@ -27,11 +27,19 @@ void add_via_arr(cellview &cv, const transformation &xform, const std::string &v
                  const via_param &params, bool add_layers, std::array<cnt_t, 2> num_arr,
                  std::array<offset_t, 2> sp_arr);
 
+void add_via_on_intersection(cellview &cv, const wire_array &warr1, const wire_array &warr2,
+                             bool extend, bool contain);
+
 std::array<std::array<offset_t, 2>, 2>
 connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
                   std::array<cnt_t, 2> num, std::array<offset_t, 2> sp, const track_id &tid,
-                  const std::array<std::optional<offset_t>, 2> &box_ext,
+                  const std::array<std::optional<offset_t>, 2> &w_ext,
                   const std::array<std::optional<offset_t>, 2> &tr_ext, min_len_mode mode);
+
+std::array<std::array<offset_t, 2>, 2>
+connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
+                   const std::array<std::optional<offset_t>, 2> &box_ext,
+                   const std::array<std::optional<offset_t>, 2> &tr_ext);
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
                transformation xform, std::string label);

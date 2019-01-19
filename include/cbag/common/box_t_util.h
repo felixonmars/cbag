@@ -25,6 +25,8 @@ coord_t ym(const box_t &box);
 offset_t width(const box_t &box);
 offset_t height(const box_t &box);
 vector dim(const box_t &box);
+coord_t lower(const box_t &box, orient_2d orient);
+coord_t upper(const box_t &box, orient_2d orient);
 
 std::string to_string(const box_t &box);
 bool is_physical(const box_t &box);
