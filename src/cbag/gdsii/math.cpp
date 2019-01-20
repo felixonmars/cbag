@@ -13,17 +13,23 @@ constexpr auto dbl_mantissa = 52;
 constexpr auto one_64b = static_cast<uint64_t>(1);
 constexpr auto msb_64b = one_64b << 63;
 
+union double_conv {
+    double d_val;
+    uint64_t i_val;
+};
+
 uint64_t double_to_gds(double val) {
     if (val == 0)
         return 0;
 
     int exp_dbl;
-    auto frac = std::frexp(val, &exp_dbl);
+    double_conv frac;
+    frac.d_val = std::frexp(val, &exp_dbl);
 
     // at this point, 0.5 <= |frac| < 1, |frac| * 2^(exp) = |val|
 
     // get sign bit
-    auto frac_bits = *reinterpret_cast<uint64_t *>(&frac);
+    auto frac_bits = frac.i_val;
     auto sgn = frac_bits & msb_64b;
 
     // get mantissa bits (adding implicit 1), and convert number of
