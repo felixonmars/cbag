@@ -115,7 +115,7 @@ warr_rect_iterator::warr_rect_iterator(const routing_grid &grid, const track_id 
     : grid_ptr(&grid), tr_ptr(&tid), coord(coord), tr_idx(begin ? 0 : tid.get_num()) {
     auto &tinfo = grid.track_info_at(tid.get_level());
     wire_w = tinfo.get_wire_width(tid.get_ntr());
-    ww_idx = begin ? 0 : wire_w.size();
+    ww_idx = 0;
 }
 
 bool warr_rect_iterator::operator==(const warr_rect_iterator &rhs) const {

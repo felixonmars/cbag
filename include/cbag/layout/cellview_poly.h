@@ -3,6 +3,7 @@
 
 #include <cbag/layout/blockage.h>
 #include <cbag/layout/boundary.h>
+#include <cbag/layout/cellview.h>
 #include <cbag/layout/cv_obj_ref.h>
 #include <cbag/layout/polygon45_fwd.h>
 #include <cbag/layout/polygon90_fwd.h>
