@@ -37,7 +37,7 @@ std::string write_cv(const cbag::sch::cellview &cv, const std::string &cell_name
     return out_fname;
 }
 
-SCENARIO("read/write OA data", "[cbagoa]") {
+SCENARIO("read/write OA data", "[oa]") {
     GIVEN("An OA library") {
         std::string lib_name = "test_netlist";
         std::string lib_file = "tests/data/cds.lib";
@@ -65,4 +65,9 @@ SCENARIO("read/write OA data", "[cbagoa]") {
             }
         }
     }
+}
+
+TEST_CASE("Reading cds.lib with non-existent libray", "[oa]") {
+    auto lib_file = "tests/data/cds_bad.lib";
+    REQUIRE_THROWS_AS(cbagoa::oa_database(lib_file), std::runtime_error);
 }

@@ -32,9 +32,14 @@ namespace cbagoa {
 using oa_lay_purp_t = std::pair<oa::oaLayerNum, oa::oaPurposeNum>;
 using oa_via_lay_purp_t = std::tuple<oa_lay_purp_t, oa_lay_purp_t, oa_lay_purp_t>;
 
+LibDefObserver::LibDefObserver(oa::oaUInt4 priority)
+    : oa::oaObserver<oa::oaLibDefList>(priority, true) {}
+
 oa::oaBoolean LibDefObserver::onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                              oa::oaLibDefListWarningTypeEnum type) {
-    throw std::runtime_error("OA Error: " + std::string(msg));
+
+    err_msg = "OA Error: " + std::string(msg);
+    return true;
 }
 
 oa_database::oa_database(std::string lib_def_fname)
@@ -44,6 +49,11 @@ oa_database::oa_database(std::string lib_def_fname)
 
         logger->info("Creating new oa_database with file: {}", lib_def_file);
         oa::oaLibDefList::openLibs(lib_def_file.c_str());
+
+        if (!lib_def_obs.err_msg.empty()) {
+            throw std::runtime_error(lib_def_obs.err_msg);
+        }
+
     } catch (...) {
         handle_oa_exceptions(*logger);
     }

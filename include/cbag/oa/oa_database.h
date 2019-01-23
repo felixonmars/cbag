@@ -38,8 +38,9 @@ class oa_writer;
 
 class LibDefObserver : public oa::oaObserver<oa::oaLibDefList> {
   public:
-    explicit LibDefObserver(oa::oaUInt4 priority)
-        : oa::oaObserver<oa::oaLibDefList>(priority, true){};
+    std::string err_msg;
+
+    explicit LibDefObserver(oa::oaUInt4 priority);
 
     oa::oaBoolean onLoadWarnings(oa::oaLibDefList *obj, const oa::oaString &msg,
                                  oa::oaLibDefListWarningTypeEnum type) override;
