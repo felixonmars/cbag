@@ -10,7 +10,7 @@
 #include <cbag/layout/polygon45_set_fwd.h>
 #include <cbag/layout/polygon90_fwd.h>
 #include <cbag/layout/polygon_fwd.h>
-#include <cbag/layout/routing_grid_fwd.h>
+#include <cbag/layout/routing_grid.h>
 
 namespace cbag {
 
