@@ -45,9 +45,9 @@ std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const
 level_t get_lower_orthogonal_level(const routing_grid &grid, level_t level) {
     auto top_dir = grid.track_info_at(level).get_direction();
     auto bot_lev = level - 1;
-    for (; bot_lev >= grid.get_bot_level(); --bot_lev) {
-        if (grid[bot_lev].get_direction() != top_dir)
-            return bot_lev;
+    auto min_lev = grid.get_bot_level();
+    while (bot_lev >= min_lev && grid[bot_lev].get_direction() == top_dir) {
+        --bot_lev;
     }
     return bot_lev;
 }
@@ -67,8 +67,8 @@ std::array<offset_t, 2> get_top_track_pitches(const routing_grid &grid, level_t 
 
     std::array<offset_t, 2> ans;
     auto tidx = to_int(tinfo.get_direction());
-    ans[tidx] = tinfo.get_pitch();
-    ans[1 - tidx] = binfo.get_pitch();
+    ans[1 - tidx] = tinfo.get_pitch();
+    ans[tidx] = binfo.get_pitch();
     return ans;
 }
 
