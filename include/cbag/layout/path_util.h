@@ -19,16 +19,12 @@ pt_vector path_to_poly45(coord_t x0, coord_t y0, coord_t x1, coord_t y1, offset_
                          end_style sty0, end_style sty1);
 
 template <typename T, typename = IsPtList<T>>
-polygon45_set make_path(const T &data, offset_t half_width, enum_t style0, enum_t style1,
-                        enum_t stylem) {
+polygon45_set make_path(const T &data, offset_t half_width, end_style s0, end_style s1,
+                        end_style sm) {
     auto n = traits::pt_list<T>::size(data);
     if (n < 2) {
         throw std::invalid_argument("Cannot draw path with less than 2 points.");
     }
-
-    auto s0 = static_cast<end_style>(style0);
-    auto s1 = static_cast<end_style>(style1);
-    auto sm = static_cast<end_style>(stylem);
 
     polygon45_set ans;
     polygon45 tmp;
@@ -48,8 +44,8 @@ polygon45_set make_path(const T &data, offset_t half_width, enum_t style0, enum_
 }
 
 template <typename T, typename L, typename = IsPtList<T>>
-polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, enum_t style0,
-                              enum_t style1, enum_t stylem) {
+polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, end_style style0,
+                              end_style style1, end_style stylem) {
     auto n_pts = traits::pt_list<T>::size(data);
     if (n_pts < 2) {
         throw std::invalid_argument("Cannot draw path with less than 2 points.");
@@ -100,9 +96,9 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     // add intermediate path segments
     polygon45_set ans;
     polygon45 tmp;
-    auto sty1 = static_cast<end_style>(stylem);
+    auto sty1 = stylem;
     for (decltype(n_pts) nidx = 2; nidx < n_pts; ++nidx) {
-        auto sty0 = static_cast<end_style>((nidx == 2) ? style0 : stylem);
+        auto sty0 = (nidx == 2) ? style0 : stylem;
 
         auto xc = traits::pt_list<T>::x(data, nidx);
         auto yc = traits::pt_list<T>::y(data, nidx);
@@ -152,8 +148,8 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
     }
 
     // add last path segment
-    auto sty0 = static_cast<end_style>((n_pts == 2) ? style0 : stylem);
-    sty1 = static_cast<end_style>(style1);
+    auto sty0 = (n_pts == 2) ? style0 : stylem;
+    sty1 = style1;
     x0 = traits::pt_list<T>::x(data, n_pts - 1);
     y0 = traits::pt_list<T>::y(data, n_pts - 1);
     s0.dx = x0 - traits::pt_list<T>::x(data, n_pts - 2);
@@ -185,9 +181,9 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
 }
 
 template <typename T, typename = IsPtList<T>>
-shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
-                                  const std::string &purpose, const T &data, offset_t half_width,
-                                  enum_t style0, enum_t style1, enum_t stylem, bool commit) {
+shape_ref<polygon45_set>
+add_path(cellview &cv, const std::string &layer, const std::string &purpose, const T &data,
+         offset_t half_width, end_style style0, end_style style1, end_style stylem, bool commit) {
     return add_polygon(cv, layer, purpose, make_path(data, half_width, style0, style1, stylem),
                        commit);
 }
@@ -195,8 +191,8 @@ shape_ref<polygon45_set> add_path(cellview &cv, const std::string &layer,
 template <typename T, typename L, typename = IsPtList<T>>
 shape_ref<polygon45_set> add_path45_bus(cellview &cv, const std::string &layer,
                                         const std::string &purpose, const T &data, const L &widths,
-                                        const L &spaces, enum_t style0, enum_t style1,
-                                        enum_t stylem, bool commit) {
+                                        const L &spaces, end_style style0, end_style style1,
+                                        end_style stylem, bool commit) {
     return add_polygon(cv, layer, purpose,
                        make_path45_bus(data, widths, spaces, style0, style1, stylem), commit);
 }
