@@ -17,6 +17,7 @@ class poly45_writer {
     const routing_grid &grid;
     layer_t key;
     value_type last;
+    bool has_value = false;
 
   public:
     poly45_writer(geo_index &index, const routing_grid &grid, layer_t key)
@@ -25,16 +26,20 @@ class poly45_writer {
     void push_back(value_type &&v) {
         record_last();
         last = std::move(v);
+        has_value = true;
     }
 
     void insert(value_type *ptr, const value_type &v) {
         record_last();
         last = v;
+        has_value = true;
     }
 
     void record_last() const {
-        auto [spx, spy] = get_margins(grid, key, last);
-        index.insert(last, spx, spy);
+        if (has_value) {
+            auto [spx, spy] = get_margins(grid, key, last);
+            index.insert(last, spx, spy);
+        }
     }
 
     value_type &back() { return last; }

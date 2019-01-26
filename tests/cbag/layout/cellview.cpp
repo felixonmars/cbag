@@ -13,6 +13,8 @@ using c_tid = cbag::layout::track_id;
 using c_warr = cbag::layout::wire_array;
 using c_offset_t = cbag::offset_t;
 
+using pt_type = std::array<cbag::coord_t, 2>;
+
 TEST_CASE("add wire array", "[layout::cellview]") {
     c_tech tech_info("tests/data/test_layout/tech_params.yaml");
     c_grid grid(&tech_info, "tests/data/test_layout/grid.yaml");
@@ -38,17 +40,37 @@ TEST_CASE("add path", "[layout::cellview]") {
     c_grid grid(&tech_info, "tests/data/test_layout/grid.yaml");
     c_cellview cv(&grid, "CBAG_TEST");
 
-    using data_type =
-        std::tuple<std::array<std::string, 2>, std::vector<std::array<cbag::coord_t, 2>>,
-                   cbag::offset_t, std::array<cbag::end_style, 3>>;
+    using data_type = std::tuple<std::array<std::string, 2>, std::vector<pt_type>, cbag::offset_t,
+                                 std::array<cbag::end_style, 3>, std::vector<pt_type>>;
 
-    auto [lay_purp, pt_list, half_w, styles] = GENERATE(values<data_type>({
+    auto [lay_purp, pt_list, half_w, styles, pt_expect] = GENERATE(values<data_type>({
         {{"M2", ""},
          {{0, 0}, {2000, 0}, {3000, 1000}, {3000, 3000}},
          10,
-         {cbag::end_style::truncate, cbag::end_style::round, cbag::end_style::round}},
+         {cbag::end_style::truncate, cbag::end_style::round, cbag::end_style::round},
+         {{3010, 3004},
+          {3004, 3010},
+          {2996, 3010},
+          {2990, 3004},
+          {2990, 1004},
+          {1996, 10},
+          {0, 10},
+          {0, -10},
+          {2004, -10},
+          {3010, 996},
+          {3010, 3004}}},
     }));
 
     cv.set_geometry_mode(cbag::geometry_mode::POLY45);
     add_path(cv, lay_purp[0], lay_purp[1], pt_list, half_w, styles[0], styles[1], styles[2], true);
+
+    // create expected geometry
+    auto key = cbag::layout::layer_t_at(*cv.get_tech(), lay_purp[0], lay_purp[1]);
+    cbag::layout::geometry expect(cbag::geometry_mode::POLY45);
+    auto poly_set = cbag::layout::make_path(pt_list, half_w, styles[0], styles[1], styles[2]);
+    expect.add_shape_set(*cv.get_grid(), key, poly_set);
+
+    auto geo_iter = cv.find_geometry(key);
+    REQUIRE(geo_iter != cv.end_geometry());
+    REQUIRE(geo_iter->second == expect);
 }
