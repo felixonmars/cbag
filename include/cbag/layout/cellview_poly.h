@@ -59,17 +59,19 @@ shape_ref<polygon> add_poly(cellview &cv, const std::string &layer, const std::s
 }
 
 template <typename T, typename = IsPtList<T>>
-cv_obj_ref<blockage> add_blockage(cellview &cv, const std::string &layer, enum_t blk_code,
+cv_obj_ref<blockage> add_blockage(cellview &cv, const std::string &layer, blockage_type blk_type,
                                   const T &data, bool commit) {
-    auto lay_id = layer_id_at(*cv.get_tech(), layer);
-    blockage obj(static_cast<blockage_type>(blk_code), lay_id);
+    auto lay_id_opt = cv.get_tech()->get_layer_id(layer);
+    auto lay_id = (lay_id_opt) ? *lay_id_opt : 0;
+    blockage obj(blk_type, lay_id);
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
     return {&cv, std::move(obj), commit};
 }
 
 template <typename T, typename = IsPtList<T>>
-cv_obj_ref<boundary> add_boundary(cellview &cv, enum_t bnd_code, const T &data, bool commit) {
-    boundary obj(static_cast<boundary_type>(bnd_code));
+cv_obj_ref<boundary> add_boundary(cellview &cv, boundary_type bnd_type, const T &data,
+                                  bool commit) {
+    boundary obj(bnd_type);
     obj.set(traits::pt_list<T>::begin(data), traits::pt_list<T>::end(data));
     return {&cv, std::move(obj), commit};
 }

@@ -15,11 +15,14 @@ using c_offset_t = cbag::offset_t;
 
 using pt_type = std::array<cbag::coord_t, 2>;
 
-TEST_CASE("add wire array", "[layout::cellview]") {
-    c_tech tech_info("tests/data/test_layout/tech_params.yaml");
-    c_grid grid(&tech_info, "tests/data/test_layout/grid.yaml");
-    c_cellview cv(&grid, "CBAG_TEST");
+c_tech make_tech_info() { return c_tech("tests/data/test_layout/tech_params.yaml"); }
+c_grid make_grid(const c_tech &tech) { return c_grid(&tech, "tests/data/test_layout/grid.yaml"); }
+c_cellview make_cv(const c_grid &grid) { return c_cellview(&grid, "CBAG_TEST"); }
 
+TEST_CASE("add wire array", "[layout::cellview]") {
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
     auto [tid, lower, upper] = GENERATE(values<std::tuple<c_tid, c_offset_t, c_offset_t>>({
         // one track
         {c_tid(4, 0, 1, 1, 0), 0, 100},
@@ -36,13 +39,12 @@ TEST_CASE("add wire array", "[layout::cellview]") {
 }
 
 TEST_CASE("add path", "[layout::cellview]") {
-    c_tech tech_info("tests/data/test_layout/tech_params.yaml");
-    c_grid grid(&tech_info, "tests/data/test_layout/grid.yaml");
-    c_cellview cv(&grid, "CBAG_TEST");
-
     using data_type = std::tuple<std::array<std::string, 2>, std::vector<pt_type>, cbag::offset_t,
                                  std::array<cbag::end_style, 3>, std::vector<pt_type>>;
 
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
     auto [lay_purp, pt_list, half_w, styles, pt_expect] = GENERATE(values<data_type>({
         {{"M2", ""},
          {{0, 0}, {2000, 0}, {3000, 1000}, {3000, 3000}},
@@ -73,4 +75,18 @@ TEST_CASE("add path", "[layout::cellview]") {
     auto geo_iter = cv.find_geometry(key);
     REQUIRE(geo_iter != cv.end_geometry());
     REQUIRE(geo_iter->second == expect);
+}
+
+TEST_CASE("add blockage", "[layout::cellview]") {
+    using data_type = std::tuple<std::string, cbag::blockage_type, std::vector<pt_type>>;
+
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
+    auto [layer, blk_type, pt_list] = GENERATE(values<data_type>({
+        {"", cbag::blockage_type::placement, {{0, 0}, {100, 0}, {0, 100}}},
+    }));
+
+    cv.set_geometry_mode(cbag::geometry_mode::POLY45);
+    cbag::layout::add_blockage(cv, layer, blk_type, pt_list, true);
 }
