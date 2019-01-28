@@ -95,6 +95,8 @@ level_t routing_grid::get_bot_level() const noexcept { return bot_level; }
 
 level_t routing_grid::get_top_level() const noexcept { return bot_level + info_list.size() - 1; }
 
+std::size_t routing_grid::get_num_levels() const noexcept { return info_list.size(); }
+
 level_t routing_grid::get_top_ignore_level() const noexcept { return top_ignore_level; }
 
 level_t routing_grid::get_top_private_level() const noexcept { return top_private_level; }
@@ -155,31 +157,22 @@ void routing_grid::set_top_ignore_level(level_t new_level) {
     top_ignore_level = new_level;
 }
 
-void routing_grid::add_new_level(level_t new_level, bool is_private, orient_2d dir, offset_t w,
-                                 offset_t sp) {
+void routing_grid::set_level(level_t level, bool is_private, orient_2d dir, offset_t w,
+                             offset_t sp) {
     auto top_level = get_top_level();
-    auto min_new = bot_level - 1;
-    auto max_new = top_level + 1;
-    if (new_level < min_new || new_level > max_new) {
-        throw std::invalid_argument(
-            fmt::format("Cannot add new level {}; valid new level range: [{}, {}]", new_level,
-                        min_new, max_new));
-    }
-    if (new_level == min_new) {
-        info_list.insert(info_list.begin(), track_info(dir, w, sp, {}));
-        bot_level = new_level;
-    } else if (new_level == max_new) {
-        info_list.emplace_back(dir, w, sp, std::vector<std::array<offset_t, 2>>{});
-    } else {
-        auto &info = info_list[new_level - bot_level];
-        info.dir = dir;
-        info.w = w;
-        info.sp = sp;
-        info.offset = (w + sp) / 2;
+    if (level < bot_level || level > top_level) {
+        throw std::invalid_argument(fmt::format(
+            "Cannot set level {}; valid new level range: [{}, {}]", level, bot_level, top_level));
     }
 
+    auto &info = info_list[level - bot_level];
+    info.dir = dir;
+    info.w = w;
+    info.sp = sp;
+    info.offset = (w + sp) / 2;
+
     if (is_private)
-        top_private_level = std::max(top_private_level, new_level);
+        top_private_level = std::max(top_private_level, level);
     helper::update_block_pitch(info_list, bot_level, top_private_level, top_ignore_level);
 }
 

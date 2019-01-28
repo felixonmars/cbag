@@ -28,6 +28,7 @@ class via_wrapper;
 class routing_grid;
 class tech;
 class label;
+class track_id;
 
 using geo_map_t = std::unordered_map<layer_t, geometry, boost::hash<layer_t>>;
 using block_map_t = std::unordered_map<lay_t, std::vector<blockage>>;
@@ -68,6 +69,7 @@ class cellview {
 
     bool empty() const noexcept;
 
+    const geo_index &get_geo_index(level_t lev) const;
     auto begin_inst() const -> decltype(inst_map.cbegin());
     auto end_inst() const -> decltype(inst_map.cend());
     auto begin_geometry() const -> decltype(geo_map.cbegin());
@@ -99,6 +101,7 @@ class cellview {
     void add_shape(layer_t key, const polygon45 &obj);
     void add_shape(layer_t key, const polygon &obj);
     void add_shape(layer_t key, const polygon45_set &obj);
+    void add_warr(const track_id &tid, std::array<offset_t, 2> coord);
 };
 
 } // namespace layout

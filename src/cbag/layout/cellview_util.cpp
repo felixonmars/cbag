@@ -252,7 +252,7 @@ connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
     add_rect_arr(cv, key, new_box, new_num_box, new_sp_box);
 
     // add track wires and return track coordinates
-    add_warr(cv, tid, ans[tv_didx]);
+    cv.add_warr(tid, ans[tv_didx]);
     return ans;
 }
 
@@ -293,8 +293,8 @@ connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
     }
 
     // draw wires
-    add_warr(cv, w_tid, ans[w_vidx]);
-    add_warr(cv, tid, ans[t_vidx]);
+    cv.add_warr(w_tid, ans[w_vidx]);
+    cv.add_warr(tid, ans[t_vidx]);
 
     return ans;
 }

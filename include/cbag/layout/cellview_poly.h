@@ -25,8 +25,6 @@ void add_rect_arr(cellview &cv, layer_t &key, const box_t &box, std::array<cnt_t
 
 void add_warr(cellview &cv, const wire_array &warr);
 
-void add_warr(cellview &cv, const track_id &tid, std::array<offset_t, 2> coord);
-
 template <typename T>
 shape_ref<T> add_polygon(cellview &cv, const std::string &layer, const std::string &purpose,
                          T &&poly, bool commit) {

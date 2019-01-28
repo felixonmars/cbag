@@ -16,7 +16,7 @@ shape_ref<box_t> add_rect(cellview &cv, const std::string &layer, const std::str
 
 void add_rect_arr(cellview &cv, layer_t &key, const box_t &box, std::array<cnt_t, 2> num,
                   std::array<offset_t, 2> sp) {
-    auto box_copy = box;
+    box_t box_copy(box);
     for (cnt_t xidx = 0; xidx < num[0]; ++xidx, move_by(box_copy, sp[0], 0)) {
         auto tot_dy = num[1] * sp[1];
         for (cnt_t yidx = 0; yidx < num[1]; ++yidx, move_by(box_copy, 0, sp[1])) {
@@ -33,16 +33,7 @@ void add_rect_arr(cellview &cv, const std::string &layer, const std::string &pur
 }
 
 void add_warr(cellview &cv, const wire_array &warr) {
-    add_warr(cv, warr.get_track_id_ref(), warr.get_coord());
-}
-
-void add_warr(cellview &cv, const track_id &tid, std::array<offset_t, 2> coord) {
-    auto grid = *cv.get_grid();
-    for (auto iter = begin_rect(grid, tid, coord), stop = end_rect(grid, tid, coord); iter != stop;
-         ++iter) {
-        auto [key, box] = *iter;
-        cv.add_shape(key, box);
-    }
+    cv.add_warr(warr.get_track_id_ref(), warr.get_coord());
 }
 
 } // namespace layout

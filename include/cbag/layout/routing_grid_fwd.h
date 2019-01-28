@@ -39,6 +39,8 @@ class routing_grid {
 
     level_t get_top_level() const noexcept;
 
+    std::size_t get_num_levels() const noexcept;
+
     level_t get_top_ignore_level() const noexcept;
 
     level_t get_top_private_level() const noexcept;
@@ -52,7 +54,7 @@ class routing_grid {
 
     void set_top_ignore_level(level_t new_level);
 
-    void add_new_level(level_t new_level, bool is_private, orient_2d dir, offset_t w, offset_t sp);
+    void set_level(level_t level, bool is_private, orient_2d dir, offset_t w, offset_t sp);
 
     void set_track_offset(level_t level, offset_t offset);
 };
