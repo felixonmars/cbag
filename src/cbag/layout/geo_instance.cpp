@@ -1,21 +1,21 @@
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/transformation_util.h>
+#include <cbag/layout/geo_index.h>
 #include <cbag/layout/geo_instance.h>
 #include <cbag/layout/geo_iterator.h>
-#include <cbag/layout/geometry.h>
 
 namespace cbag {
 namespace layout {
 
 geo_instance::geo_instance() = default;
 
-geo_instance::geo_instance(const geometry *master, cbag::transformation xform)
+geo_instance::geo_instance(const geo_index *master, cbag::transformation xform)
     : master(master), xform(std::move(xform)) {}
 
-bool geo_instance::empty() const { return master->index_empty(); }
+bool geo_instance::empty() const { return master->empty(); }
 
 box_t geo_instance::get_bbox() const {
-    box_t ans = master->get_index_bbox();
+    box_t ans = master->get_bbox();
     return transform(ans, xform);
 }
 

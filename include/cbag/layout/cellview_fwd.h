@@ -10,6 +10,7 @@
 #include <cbag/common/layer_t.h>
 #include <cbag/common/transformation_fwd.h>
 #include <cbag/enum/geometry_mode.h>
+#include <cbag/layout/geo_index.h>
 #include <cbag/layout/geometry.h>
 #include <cbag/layout/instance.h>
 
@@ -39,6 +40,7 @@ class cellview {
     geometry_mode geo_mode = geometry_mode::POLY90;
     const routing_grid *grid_ptr = nullptr;
     std::string cell_name;
+    std::vector<geo_index> index_list;
     geo_map_t geo_map;
     inst_map_t inst_map;
     pin_map_t pin_map;
@@ -59,7 +61,6 @@ class cellview {
     void set_geometry_mode(geometry_mode new_mode);
 
     auto find_geometry(layer_t key) const -> decltype(geo_map.find(key));
-    geometry &make_geometry(layer_t key);
 
     const std::string &get_name() const noexcept;
     const tech *get_tech() const noexcept;
@@ -93,6 +94,11 @@ class cellview {
     void add_object(boundary &&obj);
     void add_object(const via_wrapper &obj);
     void add_object(const instance &obj);
+    void add_shape(layer_t key, const box_t &obj);
+    void add_shape(layer_t key, const polygon90 &obj);
+    void add_shape(layer_t key, const polygon45 &obj);
+    void add_shape(layer_t key, const polygon &obj);
+    void add_shape(layer_t key, const polygon45_set &obj);
 };
 
 } // namespace layout

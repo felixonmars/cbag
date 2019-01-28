@@ -31,14 +31,7 @@ template <typename T> class shape_ref {
 
     void commit() {
         if (editable()) {
-            if constexpr (std::is_base_of_v<polygon45_set, std::decay_t<T>>) {
-                parent->make_geometry(key).add_shape_set(*(parent->get_grid()), key, obj);
-                parent = nullptr;
-            } else {
-                auto [spx, spy] = get_margins(*(parent->get_grid()), key, obj);
-                parent->make_geometry(key).add_shape(obj, spx, spy);
-                parent = nullptr;
-            }
+            parent->add_shape(key, obj);
         }
     }
 };

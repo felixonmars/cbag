@@ -36,7 +36,6 @@ class geometry {
 
     geometry_mode mode;
     geometry_data data;
-    geo_index index;
     struct helper;
 
   public:
@@ -44,23 +43,15 @@ class geometry {
 
     bool operator==(const geometry &rhs) const noexcept;
 
-    bool index_empty() const;
     box_t get_bbox() const;
-    box_t get_index_bbox() const;
-
-    geo_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
-                                 const transformation &xform = transformation()) const;
 
     void reset_to_mode(geometry_mode m);
 
-    void add_shape(const box_t &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon90 &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon45 &obj, offset_t spx, offset_t spy);
-    void add_shape(const polygon &obj, offset_t spx, offset_t spy);
-
-    void add_shape_set(const routing_grid &grid, layer_t key, const polygon45_set &obj);
-
-    void record_instance(const geometry *master, transformation xform);
+    void add_shape(const box_t &obj);
+    void add_shape(const polygon90 &obj);
+    void add_shape(const polygon45 &obj);
+    void add_shape(const polygon &obj);
+    void add_shape(const polygon45_set &obj);
 
     template <typename T> void write_geometry(T &output) const {
         std::visit(

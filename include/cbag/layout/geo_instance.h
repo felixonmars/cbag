@@ -10,17 +10,17 @@ class box_t;
 namespace layout {
 
 class geo_iterator;
-class geometry;
+class geo_index;
 
 class geo_instance {
   private:
-    const geometry *master = nullptr;
+    const geo_index *master = nullptr;
     transformation xform;
 
   public:
     geo_instance();
 
-    geo_instance(const geometry *master, transformation xform);
+    geo_instance(const geo_index *master, transformation xform);
 
     bool empty() const;
 

@@ -20,10 +20,14 @@ namespace layout {
 
 class wire_width;
 
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const box_t &obj);
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon90 &obj);
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon45 &obj);
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon &obj);
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const box_t &obj);
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon90 &obj);
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon45 &obj);
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon &obj);
 
 std::array<offset_t, 2> get_via_extensions(const routing_grid &grid, direction vdir, level_t level,
                                            cnt_t ntr, cnt_t adj_ntr);

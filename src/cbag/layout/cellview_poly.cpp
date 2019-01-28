@@ -16,15 +16,13 @@ shape_ref<box_t> add_rect(cellview &cv, const std::string &layer, const std::str
 
 void add_rect_arr(cellview &cv, layer_t &key, const box_t &box, std::array<cnt_t, 2> num,
                   std::array<offset_t, 2> sp) {
-    auto [marx, mary] = get_margins(*(cv.get_grid()), key, box);
-
-    auto &geo = cv.make_geometry(key);
-    offset_t dx = 0;
-    for (cnt_t xidx = 0; xidx < num[0]; ++xidx, dx += sp[0]) {
-        offset_t dy = 0;
-        for (cnt_t yidx = 0; yidx < num[1]; ++yidx, dy += sp[1]) {
-            geo.add_shape(get_move_by(box, dx, dy), marx, mary);
+    auto box_copy = box;
+    for (cnt_t xidx = 0; xidx < num[0]; ++xidx, move_by(box_copy, sp[0], 0)) {
+        auto tot_dy = num[1] * sp[1];
+        for (cnt_t yidx = 0; yidx < num[1]; ++yidx, move_by(box_copy, 0, sp[1])) {
+            cv.add_shape(key, box_copy);
         }
+        move_by(box_copy, 0, -tot_dy);
     }
 }
 
@@ -43,9 +41,7 @@ void add_warr(cellview &cv, const track_id &tid, std::array<offset_t, 2> coord) 
     for (auto iter = begin_rect(grid, tid, coord), stop = end_rect(grid, tid, coord); iter != stop;
          ++iter) {
         auto [key, box] = *iter;
-        auto &geo = cv.make_geometry(key);
-        auto [spx, spy] = get_margins(grid, key, box);
-        geo.add_shape(box, spx, spy);
+        cv.add_shape(key, box);
     }
 }
 

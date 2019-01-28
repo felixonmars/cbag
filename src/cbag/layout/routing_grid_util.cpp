@@ -13,31 +13,32 @@
 namespace cbag {
 namespace layout {
 
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const box_t &obj) {
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const box_t &obj) {
     auto tech_ptr = grid.get_tech();
-    auto level = tech_ptr->get_level(key);
     std::array<offset_t, 2> ans{0, 0};
-    if (level) {
-        auto dir = grid.track_info_at(*level).get_direction();
-        auto pdir = perpendicular(dir);
-        auto width = get_dim(obj, pdir);
-        ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END, false);
-        ans[to_int(pdir)] = tech_ptr->get_min_space(key, width, space_type::DIFF_COLOR, false);
-    }
+    auto dir = grid[lev].get_direction();
+    auto pdir = perpendicular(dir);
+    auto width = get_dim(obj, pdir);
+    ans[to_int(dir)] = tech_ptr->get_min_space(key, width, space_type::LINE_END, false);
+    ans[to_int(pdir)] = tech_ptr->get_min_space(key, width, space_type::DIFF_COLOR, false);
     return ans;
 }
 
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon90 &obj) {
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon90 &obj) {
     // TODO: add margins around polygon?
     return {0, 0};
 }
 
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon45 &obj) {
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon45 &obj) {
     // TODO: add margins around polygon?
     return {0, 0};
 }
 
-std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, const polygon &obj) {
+std::array<offset_t, 2> get_margins(const routing_grid &grid, layer_t key, level_t lev,
+                                    const polygon &obj) {
     // TODO: add margins around polygon?
     return {0, 0};
 }

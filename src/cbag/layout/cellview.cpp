@@ -12,6 +12,46 @@
 namespace cbag {
 namespace layout {
 
+class poly45_writer {
+  public:
+    using value_type = polygon45;
+
+  private:
+    geo_index &index;
+    const routing_grid &grid;
+    layer_t key;
+    level_t lev;
+    value_type last;
+    bool has_value = false;
+
+  public:
+    poly45_writer(geo_index &index, const routing_grid &grid, layer_t key, level_t lev)
+        : index(index), grid(grid), key(key), lev(lev) {}
+
+    void push_back(value_type &&v) {
+        record_last();
+        last = std::move(v);
+        has_value = true;
+    }
+
+    void insert(value_type *ptr, const value_type &v) {
+        record_last();
+        last = v;
+        has_value = true;
+    }
+
+    void record_last() const {
+        if (has_value) {
+            auto [spx, spy] = get_margins(grid, key, lev, last);
+            index.insert(last, spx, spy);
+        }
+    }
+
+    value_type &back() { return last; }
+
+    value_type *end() const { return nullptr; }
+};
+
 struct cellview::helper {
     static void add_inst(cellview &self, const instance &inst) {
         auto &inst_name = inst.get_inst_name();
@@ -34,6 +74,29 @@ struct cellview::helper {
         self.inst_name_cnt = *(iter.get_save());
         self.inst_map.emplace("X" + std::to_string(self.inst_name_cnt), inst);
     }
+
+    static geometry &make_geometry(cellview &self, layer_t key) {
+        auto iter = self.geo_map.find(key);
+        if (iter == self.geo_map.end()) {
+            iter = self.geo_map.emplace(std::move(key), geometry(self.geo_mode)).first;
+        }
+        return iter->second;
+    }
+
+    template <typename T> static void add_shape(cellview &self, layer_t key, const T &obj) {
+        auto &geo = make_geometry(self, key);
+        geo.add_shape(obj);
+
+        auto lev_opt = self.get_tech()->get_level(key);
+        if (lev_opt) {
+            if constexpr (std::is_base_of_v<polygon45_set, std::decay_t<T>>) {
+                // TODO: insert into index
+            } else {
+                auto [spx, spy] = get_margins(*(self.get_grid()), key, *lev_opt, obj);
+                // TODO: insert into index
+            }
+        }
+    }
 };
 
 cellview::cellview(const routing_grid *grid_ptr, std::string cell_name, geometry_mode geo_mode)
@@ -55,14 +118,6 @@ void cellview::set_geometry_mode(geometry_mode new_mode) {
 
 auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
     return geo_map.find(key);
-}
-
-geometry &cellview::make_geometry(layer_t key) {
-    auto iter = geo_map.find(key);
-    if (iter == geo_map.end()) {
-        iter = geo_map.emplace(std::move(key), geometry(geo_mode)).first;
-    }
-    return iter->second;
 }
 
 const std::string &cellview::get_name() const noexcept { return cell_name; }
@@ -140,10 +195,8 @@ void cellview::add_object(const via_wrapper &obj) {
         (void)unused;
         auto bot_box = get_bot_box(obj.v);
         auto top_box = get_top_box(obj.v);
-        auto [bspx, bspy] = get_margins(*get_grid(), bot_key, bot_box);
-        auto [tspx, tspy] = get_margins(*get_grid(), top_key, top_box);
-        make_geometry(bot_key).add_shape(bot_box, bspx, bspy);
-        make_geometry(top_key).add_shape(top_box, tspx, tspy);
+        add_shape(bot_key, bot_box);
+        add_shape(top_key, top_box);
     }
 }
 
@@ -152,16 +205,21 @@ void cellview::add_object(const instance &obj) {
     auto master = obj.get_cellview();
     if (master != nullptr) {
         for (const auto &[layer_key, inst_geo] : master->geo_map) {
-            auto &geo = make_geometry(layer_key);
             for (decltype(obj.nx) ix = 0; ix < obj.nx; ++ix) {
                 for (decltype(obj.ny) iy = 0; iy < obj.ny; ++iy) {
-                    // unordered map does not invalidate pointers to elements
-                    geo.record_instance(&inst_geo,
-                                        get_move_by(obj.xform, obj.spx * ix, obj.spy * iy));
+                    // TODO: insert every layer into index
                 }
             }
         }
     }
+}
+
+void cellview::add_shape(layer_t key, const box_t &obj) { helper::add_shape(*this, key, obj); }
+void cellview::add_shape(layer_t key, const polygon90 &obj) { helper::add_shape(*this, key, obj); }
+void cellview::add_shape(layer_t key, const polygon45 &obj) { helper::add_shape(*this, key, obj); }
+void cellview::add_shape(layer_t key, const polygon &obj) { helper::add_shape(*this, key, obj); }
+void cellview::add_shape(layer_t key, const polygon45_set &obj) {
+    helper::add_shape(*this, key, obj);
 }
 
 } // namespace layout
