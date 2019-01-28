@@ -2,6 +2,7 @@
 
 #include <cbag/enum/end_style.h>
 #include <cbag/layout/cellview_poly.h>
+#include <cbag/layout/cellview_util.h>
 #include <cbag/layout/grid_object.h>
 #include <cbag/layout/path_util.h>
 #include <cbag/layout/routing_grid.h>
@@ -14,6 +15,7 @@ using c_warr = cbag::layout::wire_array;
 using c_offset_t = cbag::offset_t;
 
 using pt_type = std::array<cbag::coord_t, 2>;
+using intv_type = std::array<cbag::coord_t, 2>;
 
 c_tech make_tech_info() { return c_tech("tests/data/test_layout/tech_params.yaml"); }
 c_grid make_grid(const c_tech &tech) { return c_grid(&tech, "tests/data/test_layout/grid.yaml"); }
@@ -80,4 +82,57 @@ TEST_CASE("add blockage", "[layout::cellview]") {
 
     cv.set_geometry_mode(cbag::geometry_mode::POLY45);
     cbag::layout::add_blockage(cv, layer, blk_type, pt_list, true);
+}
+
+TEST_CASE("add via on intersections", "[layout::cellview]") {
+    using data_type =
+        std::tuple<c_tid, c_tid, intv_type, intv_type, bool, bool, std::array<intv_type, 2>>;
+
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
+    auto [tid1, tid2, coord1, coord2, extend, contain, expect] = GENERATE(values<data_type>({
+        {c_tid(4, 0, 1, 1, 0),
+         c_tid(5, 4, 1, 1, 0),
+         {cbag::COORD_MIN, cbag::COORD_MAX},
+         {cbag::COORD_MIN, cbag::COORD_MAX},
+         true,
+         false,
+         {intv_type{410, 490}, intv_type{30, 90}}},
+    }));
+
+    auto ans =
+        cbag::layout::add_via_on_intersections(cv, tid1, tid2, coord1, coord2, extend, contain);
+
+    REQUIRE(ans == expect);
+}
+
+TEST_CASE("connect warr to track", "[layout::cellview]") {
+    using ext_type = std::optional<cbag::coord_t>;
+    using ext_arr_type = std::array<ext_type, 2>;
+    using data_type =
+        std::tuple<c_tid, c_tid, intv_type, ext_arr_type, ext_arr_type, std::array<intv_type, 2>>;
+
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
+    auto [tid1, tid2, coord1, w_ext, tr_ext, expect] = GENERATE(values<data_type>({
+        {c_tid(4, 0, 1, 1, 0),
+         c_tid(5, 4, 1, 1, 0),
+         {0, 400},
+         {ext_type{}, ext_type{}},
+         {ext_type{}, ext_type{}},
+         {intv_type{0, 490}, intv_type{30, 90}}},
+        {c_tid(4, 0, 1, 1, 0),
+         c_tid(5, 4, 1, 1, 0),
+         {0, 400},
+         {ext_type{}, ext_type{}},
+         {0, 400},
+         {intv_type{0, 490}, intv_type{0, 400}}},
+    }));
+
+    auto warr = c_warr(std::make_shared<c_tid>(tid1), coord1[0], coord1[1]);
+    auto ans = cbag::layout::connect_warr_track(cv, warr, tid2, w_ext, tr_ext);
+
+    REQUIRE(ans == expect);
 }

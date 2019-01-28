@@ -281,15 +281,15 @@ connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
         ans[w_vidx][0] = std::min(ans[w_vidx][0], w_coords[0]);
     }
     if (w_ext[1]) {
-        ans[w_vidx][1] = std::min({ans[w_vidx][1], w_coords[1], *w_ext[1]});
+        ans[w_vidx][1] = std::max({ans[w_vidx][1], w_coords[1], *w_ext[1]});
     } else {
-        ans[w_vidx][1] = std::min(ans[w_vidx][1], w_coords[1]);
+        ans[w_vidx][1] = std::max(ans[w_vidx][1], w_coords[1]);
     }
     if (tr_ext[0]) {
         ans[t_vidx][0] = std::min(ans[t_vidx][0], *tr_ext[0]);
     }
     if (tr_ext[1]) {
-        ans[t_vidx][1] = std::min(ans[t_vidx][1], *tr_ext[1]);
+        ans[t_vidx][1] = std::max(ans[t_vidx][1], *tr_ext[1]);
     }
 
     // draw wires
