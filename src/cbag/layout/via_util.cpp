@@ -14,8 +14,8 @@ box_t get_via_box(const transformation &xform, const via_param &params, const ve
 
     auto xl = static_cast<coord_t>(offset[0] - (via_w / 2) - enc[0]);
     auto yl = static_cast<coord_t>(offset[1] - (via_h / 2) - enc[1]);
-    auto xh = static_cast<coord_t>(xl + via_w + enc[0]);
-    auto yh = static_cast<coord_t>(yl + via_h + enc[1]);
+    auto xh = static_cast<coord_t>(xl + via_w + 2 * enc[0]);
+    auto yh = static_cast<coord_t>(yl + via_h + 2 * enc[1]);
 
     box_t r{xl, yl, xh, yh};
     transform(r, xform);

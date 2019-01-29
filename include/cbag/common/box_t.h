@@ -24,6 +24,8 @@ struct box_t {
     bool operator==(const box_t &rhs) const noexcept;
 };
 
+std::ostream &operator<<(std::ostream &os, const box_t &value);
+
 } // namespace cbag
 
 #endif

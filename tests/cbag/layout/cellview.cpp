@@ -1,18 +1,23 @@
 #include <catch2/catch.hpp>
 
+#include <cbag/common/transformation_util.h>
 #include <cbag/enum/end_style.h>
 #include <cbag/layout/cellview_poly.h>
 #include <cbag/layout/cellview_util.h>
 #include <cbag/layout/grid_object.h>
 #include <cbag/layout/path_util.h>
 #include <cbag/layout/routing_grid.h>
+#include <cbag/layout/via_wrapper.h>
 
 using c_tech = cbag::layout::tech;
 using c_grid = cbag::layout::routing_grid;
 using c_cellview = cbag::layout::cellview;
+using c_xform = cbag::transformation;
 using c_tid = cbag::layout::track_id;
 using c_warr = cbag::layout::wire_array;
 using c_offset_t = cbag::offset_t;
+using c_via_param = cbag::layout::via_param;
+using c_box = cbag::box_t;
 
 using pt_type = std::array<cbag::coord_t, 2>;
 using intv_type = std::array<cbag::coord_t, 2>;
@@ -82,6 +87,38 @@ TEST_CASE("add blockage", "[layout::cellview]") {
 
     cv.set_geometry_mode(cbag::geometry_mode::POLY45);
     cbag::layout::add_blockage(cv, layer, blk_type, pt_list, true);
+}
+
+TEST_CASE("add via", "[layout::cellview]") {
+    using data_type = std::tuple<c_xform, std::string, std::string, c_via_param, c_box, c_box>;
+
+    auto tech_info = make_tech_info();
+    auto grid = make_grid(tech_info);
+    auto cv = make_cv(grid);
+    auto [xform, lay1, lay2, via_param, box1, box2] = GENERATE(values<data_type>({
+        {cbag::make_xform(0, 0), "M1", "M2",
+         c_via_param(1, 1, 32, 32, 0, 0, 14, 14, 14, 14, 14, 14, 14, 14), c_box(-30, -30, 30, 30),
+         c_box(-30, -30, 30, 30)},
+    }));
+
+    auto l1 = cbag::layout::layer_t_at(tech_info, lay1, "");
+    auto l2 = cbag::layout::layer_t_at(tech_info, lay2, "");
+    auto via_id = tech_info.get_via_id(cbag::direction::LOWER, l1, l2);
+
+    cv.add_object(cbag::layout::via_wrapper(cbag::layout::via(xform, via_id, via_param), true));
+
+    cbag::layout::geometry expect1(cbag::geometry_mode::POLY90);
+    expect1.add_shape(box1);
+    cbag::layout::geometry expect2(cbag::geometry_mode::POLY90);
+    expect2.add_shape(box2);
+
+    auto iter_end = cv.end_geometry();
+    auto iter1 = cv.find_geometry(l1);
+    auto iter2 = cv.find_geometry(l2);
+    REQUIRE(iter1 != iter_end);
+    REQUIRE(iter2 != iter_end);
+    REQUIRE(iter1->second == expect1);
+    REQUIRE(iter2->second == expect2);
 }
 
 TEST_CASE("add via on intersections", "[layout::cellview]") {
