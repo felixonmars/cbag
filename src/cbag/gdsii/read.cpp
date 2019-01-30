@@ -118,12 +118,10 @@ read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::strin
         case record_type::SREF:
             logger.info("Reading layout instance.");
             cv_ptr->add_object(read_instance(logger, stream, inst_cnt, master_map));
-            ++inst_cnt;
             break;
         case record_type::AREF:
             logger.info("Reading layout array instance.");
             cv_ptr->add_object(read_arr_instance(logger, stream, inst_cnt, master_map));
-            ++inst_cnt;
             break;
         case record_type::BOX: {
             logger.info("Reading layout box.");

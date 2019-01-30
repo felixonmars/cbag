@@ -205,8 +205,33 @@ std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
     return {gds_layer_t{glay, gpurp}, std::move(poly)};
 }
 
+std::string read_inst_name(spdlog::logger &logger, std::istream &stream, std::size_t &cnt) {
+    auto [rtype, rsize] = read_record_header(stream);
+    std::string inst_name;
+    switch (rtype) {
+    case record_type::ENDEL:
+        inst_name = "X" + std::to_string(cnt);
+        ++cnt;
+        break;
+    case record_type::PROPATTR: {
+        auto prop_code = read_bytes<uint16_t>(stream);
+        if (prop_code != PROP_INST_NAME) {
+            throw std::runtime_error(
+                fmt::format("Unexpected gds property code {} for instance.", prop_code));
+        }
+        inst_name = read_name<record_type::PROPVALUE>(logger, stream);
+        read_ele_end(logger, stream);
+        break;
+    }
+    default:
+        throw std::runtime_error(fmt::format("Unexpected gds record type {} at end of instance.",
+                                             static_cast<int>(rtype)));
+    }
+    return inst_name;
+}
+
 layout::instance
-read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
+read_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
               const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_name<record_type::SNAME>(logger, stream);
 
@@ -218,14 +243,12 @@ read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
     }
     auto master = iter->second;
     auto xform = read_transform(logger, stream);
-
-    read_ele_end(logger, stream);
-
-    return {"X" + std::to_string(cnt), master, std::move(xform)};
+    auto inst_name = read_inst_name(logger, stream, cnt);
+    return {std::move(inst_name), master, std::move(xform)};
 }
 
 layout::instance
-read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
+read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
                   const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_name<record_type::SNAME>(logger, stream);
 
@@ -243,14 +266,15 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
     pt_vec[0] = read_point(stream);
     pt_vec[1] = read_point(stream);
     pt_vec[2] = read_point(stream);
-    read_ele_end(logger, stream);
+    auto inst_name = read_inst_name(logger, stream, cnt);
 
     move_by(xform, pt_vec[0][0], pt_vec[0][1]);
     auto gds_spx = pt_vec[1][0] / gds_nx;
     auto gds_spy = pt_vec[2][1] / gds_ny;
 
     auto [nx, ny, spx, spy] = cbag::convert_gds_array(xform, gds_nx, gds_ny, gds_spx, gds_spy);
-    return {"X" + std::to_string(cnt), master, std::move(xform), nx, ny, spx, spy};
+
+    return {std::move(inst_name), master, std::move(xform), nx, ny, spx, spy};
 }
 
 } // namespace gdsii

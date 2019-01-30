@@ -51,8 +51,8 @@ void write_box(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp
                const box_t &box);
 
 void write_instance(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
-                    const transformation &xform, cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0,
-                    offset_t spy = 0);
+                    const std::string &inst_name, const transformation &xform, cnt_t nx = 1,
+                    cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
 void write_text(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                 const std::string &text, const transformation &xform);

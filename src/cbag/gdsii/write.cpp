@@ -219,8 +219,8 @@ void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std:
     logger.info("Export layout instances.");
     for (auto iter = cv.begin_inst(); iter != cv.end_inst(); ++iter) {
         auto &[inst_name, inst] = *iter;
-        write_instance(logger, stream, inst.get_cell_name(&rename_map), inst.xform, inst.nx,
-                       inst.ny, inst.spx, inst.spy);
+        write_instance(logger, stream, inst.get_cell_name(&rename_map), inst_name, inst.xform,
+                       inst.nx, inst.ny, inst.spx, inst.spy);
     }
 
     logger.info("Export layout geometries.");

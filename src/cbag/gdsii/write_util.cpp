@@ -223,6 +223,11 @@ void write_element_end(spdlog::logger &logger, std::ostream &stream) {
     write_empty<record_type::ENDEL>(logger, stream);
 }
 
+void write_prop_inst_name(spdlog::logger &logger, std::ostream &stream, const std::string &name) {
+    write_int<record_type::PROPATTR>(logger, stream, PROP_INST_NAME);
+    write_name<record_type::PROPVALUE>(logger, stream, name);
+}
+
 void write_polygon(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                    const layout::polygon &poly) {
     write_empty<record_type::BOUNDARY>(logger, stream);
@@ -248,22 +253,25 @@ void write_box(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp
 }
 
 void write_arr_instance(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
-                        const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx,
-                        offset_t spy) {
+                        const std::string &inst_name, const transformation &xform, cnt_t nx,
+                        cnt_t ny, offset_t spx, offset_t spy) {
     write_empty<record_type::AREF>(logger, stream);
     write_name<record_type::SNAME>(logger, stream, cell_name);
     write_transform(logger, stream, xform, nx, ny, spx, spy);
+    write_prop_inst_name(logger, stream, inst_name);
     write_element_end(logger, stream);
 }
 
 void write_instance(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
-                    const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
+                    const std::string &inst_name, const transformation &xform, cnt_t nx, cnt_t ny,
+                    offset_t spx, offset_t spy) {
     if (nx > 1 || ny > 1) {
-        write_arr_instance(logger, stream, cell_name, xform, nx, ny, spx, spy);
+        write_arr_instance(logger, stream, cell_name, inst_name, xform, nx, ny, spx, spy);
     } else {
         write_empty<record_type::SREF>(logger, stream);
         write_name<record_type::SNAME>(logger, stream, cell_name);
         write_transform(logger, stream, xform);
+        write_prop_inst_name(logger, stream, inst_name);
         write_element_end(logger, stream);
     }
 }

@@ -59,11 +59,11 @@ std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
                                                        std::istream &stream);
 
 layout::instance
-read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
+read_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
               const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 layout::instance
-read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
+read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
                   const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 } // namespace gdsii

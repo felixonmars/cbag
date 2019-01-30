@@ -32,9 +32,13 @@ enum class record_type : uint16_t {
     STRING = 0x1906,
     STRANS = 0x1A01,
     ANGLE = 0x1C05,
+    PROPATTR = 0x2B02,
+    PROPVALUE = 0x2C06,
     BOX = 0x2D00,
     BOXTYPE = 0x2E02,
 };
+
+constexpr auto PROP_INST_NAME = 1;
 
 } // namespace gdsii
 } // namespace cbag
