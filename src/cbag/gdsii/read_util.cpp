@@ -11,20 +11,9 @@
 #include <cbag/layout/instance.h>
 #include <cbag/layout/label.h>
 #include <cbag/layout/pt_traits.h>
-#include <cbag/util/sfinae.h>
 
 namespace cbag {
 namespace gdsii {
-
-template <typename T, util::IsInt<T> = 0> T read_bytes(std::istream &stream) {
-    constexpr auto unit_size = sizeof(T);
-    auto ans = static_cast<T>(0);
-    for (std::size_t bidx = 0, shft = (unit_size - 1) * 8; bidx < unit_size; ++bidx, shft -= 8) {
-        unsigned char tmp = stream.get();
-        ans |= tmp << shft;
-    }
-    return ans;
-}
 
 std::tuple<record_type, std::size_t> read_record_header(std::istream &stream) {
     auto size = static_cast<std::size_t>(read_bytes<uint16_t>(stream)) - 4;
@@ -114,16 +103,14 @@ void read_ele_end(spdlog::logger &logger, std::istream &stream) {
     check_record_header<record_type::ENDEL, sizeof(uint16_t), 0>(stream);
 }
 
-transformation read_transform(spdlog::logger &logger, std::istream &stream) {
+transformation read_transform_angle(spdlog::logger &logger, std::istream &stream) {
     auto bit_flag = read_int<record_type::STRANS>(logger, stream);
-
-    logger.info("transformation bit flag: {:#x}", bit_flag);
 
     if ((bit_flag & (1 << 13)) != 0) {
         throw std::runtime_error("GDS Magnification in transform is not supported.");
     }
 
-    transformation ans;
+    auto ans = make_xform();
     if ((bit_flag & 1) != 0) {
         set_orient(ans, oMX);
     }
@@ -135,13 +122,13 @@ transformation read_transform(spdlog::logger &logger, std::istream &stream) {
         case 0:
             break;
         case 90:
-            ans += make_xform(0, 0, oR90);
+            transform_by(ans, make_xform(0, 0, oR90));
             break;
         case 180:
-            ans += make_xform(0, 0, oR180);
+            transform_by(ans, make_xform(0, 0, oR180));
             break;
         case 270:
-            ans += make_xform(0, 0, oR270);
+            transform_by(ans, make_xform(0, 0, oR270));
             break;
         default:
             throw std::runtime_error("GDS rotation angle not supported: " + std::to_string(angle));
@@ -157,16 +144,21 @@ point read_point(std::istream &stream) {
     return {x, y};
 }
 
+transformation read_transform(spdlog::logger &logger, std::istream &stream) {
+    auto ans = read_transform_angle(logger, stream);
+    check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
+    auto [x, y] = read_point(stream);
+    move_by(ans, x, y);
+
+    return ans;
+}
+
 std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
                                                                std::istream &stream) {
     auto glay = read_int<record_type::LAYER>(logger, stream);
     auto gpurp = read_int<record_type::TEXTTYPE>(logger, stream);
     read_skip<record_type::PRESENTATION, sizeof(uint16_t), 1>(stream);
     auto xform = read_transform(logger, stream);
-
-    check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
-    auto [x, y] = read_point(stream);
-    move_by(xform, x, y);
 
     auto text = read_name<record_type::STRING>(logger, stream);
     read_ele_end(logger, stream);
@@ -226,12 +218,7 @@ read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
         throw std::runtime_error(msg);
     }
     auto master = iter->second;
-
     auto xform = read_transform(logger, stream);
-
-    check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
-    auto [x, y] = read_point(stream);
-    move_by(xform, x, y);
 
     read_ele_end(logger, stream);
 
@@ -249,7 +236,7 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
             fmt::format("Cannot find layout cellview {} in GDS file.", cell_name));
     auto master = iter->second;
 
-    auto xform = read_transform(logger, stream);
+    auto xform = read_transform_angle(logger, stream);
 
     auto [gds_nx, gds_ny] = read_col_row(logger, stream);
     check_record_header<record_type::XY, sizeof(int32_t), 6>(stream);

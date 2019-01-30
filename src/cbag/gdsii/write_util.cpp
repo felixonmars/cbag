@@ -10,7 +10,6 @@
 #include <cbag/gdsii/write_util.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/util/io.h>
-#include <cbag/util/sfinae.h>
 
 namespace cbag {
 namespace gdsii {
@@ -71,14 +70,6 @@ template <typename iT> class point_xy_iter {
         return pt_iter != other.pt_iter || is_y != other.is_y;
     }
 };
-
-template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ostream &stream, T val) {
-    constexpr auto unit_size = sizeof(T);
-    for (std::size_t bidx = 0, shft = (unit_size - 1) * 8; bidx < unit_size; ++bidx, shft -= 8) {
-        auto tmp = static_cast<char>(val >> shft);
-        stream.put(tmp);
-    }
-}
 
 template <record_type R, typename iT>
 void write(std::ostream &stream, std::size_t num_data, iT start, iT stop) {
@@ -148,7 +139,7 @@ std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
     case oR270:
         return {270, 0x4000};
     case oMX:
-        return {0, 0x4001};
+        return {0, 0x0001};
     case oMXR90:
         return {90, 0x4001};
     case oMY:
@@ -156,7 +147,7 @@ std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
     case oMYR90:
         return {270, 0x4001};
     default:
-        return {0, 0x4000};
+        return {0, 0x0000};
     }
 }
 

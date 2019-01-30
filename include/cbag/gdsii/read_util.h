@@ -13,6 +13,7 @@
 #include <cbag/gdsii/typedefs.h>
 #include <cbag/layout/polygon.h>
 #include <cbag/logging/logging.h>
+#include <cbag/util/sfinae.h>
 
 namespace cbag {
 
@@ -24,6 +25,16 @@ class cellview;
 } // namespace layout
 
 namespace gdsii {
+
+template <typename T, util::IsInt<T> = 0> T read_bytes(std::istream &stream) {
+    constexpr auto unit_size = sizeof(T);
+    auto ans = static_cast<T>(0);
+    for (std::size_t bidx = 0, shft = (unit_size - 1) * 8; bidx < unit_size; ++bidx, shft -= 8) {
+        auto tmp = static_cast<T>(stream.get());
+        ans |= tmp << shft;
+    }
+    return ans;
+}
 
 std::tuple<record_type, std::size_t> read_record_header(std::istream &stream);
 

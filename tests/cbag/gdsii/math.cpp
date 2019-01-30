@@ -18,6 +18,9 @@ TEST_CASE("No precision lost in gds <-> double conversion", "[gds]") {
         -1.54e-5,
         -1e-6,
         -1e-9,
+        90.0,
+        180.0,
+        270.0,
     }));
 
     uint64_t val_bits = *reinterpret_cast<uint64_t *>(&value);

@@ -10,9 +10,18 @@
 #include <cbag/gdsii/typedefs.h>
 #include <cbag/layout/polygon_fwd.h>
 #include <cbag/logging/logging.h>
+#include <cbag/util/sfinae.h>
 
 namespace cbag {
 namespace gdsii {
+
+template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ostream &stream, T val) {
+    constexpr auto unit_size = sizeof(T);
+    for (std::size_t bidx = 0, shft = (unit_size - 1) * 8; bidx < unit_size; ++bidx, shft -= 8) {
+        auto tmp = static_cast<char>((val >> shft) & 0xff);
+        stream.put(tmp);
+    }
+}
 
 void write_header(spdlog::logger &logger, std::ostream &stream);
 

@@ -90,7 +90,13 @@ transformation &invert(transformation &xform) {
 transformation get_invert(transformation xform) { return invert(xform); }
 
 transformation &transform_by(transformation &xform, const transformation &rhs) {
-    xform += rhs;
+    // NOTE: operator += is broken
+    auto new_shift = location(xform);
+    rhs.transform(new_shift[0], new_shift[1]);
+    auto atr = xform.get_axis_transformation();
+    atr += rhs.get_axis_transformation();
+    xform.set_axis_transformation(atr);
+    set_location(xform, new_shift[0], new_shift[1]);
     return xform;
 }
 transformation get_transform_by(transformation xform, const transformation &rhs) {

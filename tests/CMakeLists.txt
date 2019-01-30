@@ -2,6 +2,7 @@ add_subdirectory(../Catch2 catch2)
 
 add_executable(test_main
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/cbag/common/transformation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/gdsii/gds_lookup.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/gdsii/io.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cbag/gdsii/math.cpp
