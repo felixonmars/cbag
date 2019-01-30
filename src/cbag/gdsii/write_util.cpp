@@ -139,13 +139,13 @@ std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
     case oR270:
         return {270, 0x4000};
     case oMX:
-        return {0, 0x0001};
+        return {0, 0x8000};
     case oMXR90:
-        return {90, 0x4001};
+        return {90, 0xc000};
     case oMY:
-        return {180, 0x4001};
+        return {180, 0xc000};
     case oMYR90:
-        return {270, 0x4001};
+        return {270, 0xc000};
     default:
         return {0, 0x0000};
     }

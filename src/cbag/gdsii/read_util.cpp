@@ -111,7 +111,7 @@ transformation read_transform_angle(spdlog::logger &logger, std::istream &stream
     }
 
     auto ans = make_xform();
-    if ((bit_flag & 1) != 0) {
+    if ((bit_flag & (1 << 15)) != 0) {
         set_orient(ans, oMX);
     }
 
@@ -210,7 +210,6 @@ read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
               const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_name<record_type::SNAME>(logger, stream);
 
-    logger.info("Finding layout instance with cell name: {}", cell_name);
     auto iter = master_map.find(cell_name);
     if (iter == master_map.end()) {
         auto msg = fmt::format("Cannot find layout cellview {} in GDS file.", cell_name);

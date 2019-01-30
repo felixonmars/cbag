@@ -29,9 +29,20 @@ instance::instance(std::string name, const cellview *master, cbag::transformatio
     : master(std::in_place_type_t<const cellview *>{}, master), name(std::move(name)),
       xform(std::move(xform)), nx(nx), ny(ny), spx(spx), spy(spy) {}
 
+bool master_equal(const std::variant<const cellview *, cellview_ref> &lhs,
+                  const std::variant<const cellview *, cellview_ref> &rhs) {
+    return std::visit(
+        overload{
+            [](const cellview *a, const cellview *b) { return *a == *b; },
+            [](const cellview_ref &a, const cellview_ref &b) { return a == b; },
+            [](auto, auto) { return false; },
+        },
+        lhs, rhs);
+}
+
 bool instance::operator==(const instance &rhs) const noexcept {
-    return master == rhs.master && name == rhs.name && xform == rhs.xform && nx == rhs.nx &&
-           ny == rhs.ny && spx == rhs.spx && spy == rhs.spy;
+    return master_equal(master, rhs.master) && name == rhs.name && xform == rhs.xform &&
+           nx == rhs.nx && ny == rhs.ny && spx == rhs.spx && spy == rhs.spy;
 }
 
 bool instance::is_reference() const { return std::holds_alternative<cellview_ref>(master); }
