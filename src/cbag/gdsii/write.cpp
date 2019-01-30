@@ -18,13 +18,13 @@ class polygon_writer {
 
   private:
     spdlog::logger &logger;
-    std::ofstream &stream;
+    std::ostream &stream;
     glay_t layer;
     gpurp_t purpose;
     value_type last;
 
   public:
-    polygon_writer(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose)
+    polygon_writer(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose)
         : logger(logger), stream(stream), layer(layer), purpose(purpose) {}
 
     void push_back(value_type &&v) {
@@ -51,12 +51,12 @@ class polygon_writer {
 class rect_writer {
   private:
     spdlog::logger &logger;
-    std::ofstream &stream;
+    std::ostream &stream;
     glay_t layer;
     gpurp_t purpose;
 
   public:
-    rect_writer(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose)
+    rect_writer(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose)
         : logger(logger), stream(stream), layer(layer), purpose(purpose) {}
 
     rect_writer &operator=(const box_t &box) {
@@ -133,7 +133,7 @@ std::vector<tval_t> get_gds_time() {
     };
 }
 
-void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::string &lib_name,
+void write_gds_start(spdlog::logger &logger, std::ostream &stream, const std::string &lib_name,
                      double resolution, double user_unit, const std::vector<tval_t> &time_vec) {
     write_header(logger, stream);
     write_lib_begin(logger, stream, time_vec);
@@ -141,19 +141,16 @@ void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::s
     write_units(logger, stream, resolution, user_unit);
 }
 
-void write_gds_stop(spdlog::logger &logger, std::ofstream &stream) {
-    write_lib_end(logger, stream);
-    stream.close();
-}
+void write_gds_stop(spdlog::logger &logger, std::ostream &stream) { write_lib_end(logger, stream); }
 
-void write_lay_geometry(spdlog::logger &logger, std::ofstream &stream, glay_t lay, gpurp_t purp,
+void write_lay_geometry(spdlog::logger &logger, std::ostream &stream, glay_t lay, gpurp_t purp,
                         const layout::geometry &geo) {
     polygon_writer w(logger, stream, lay, purp);
     geo.write_geometry(w);
     w.record_last();
 }
 
-void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::tech &tech,
+void write_lay_via(spdlog::logger &logger, std::ostream &stream, const layout::tech &tech,
                    const gds_lookup &lookup, const layout::via &v) {
     auto [lay1_key, cut_key, lay2_key] = tech.get_via_layer_purpose(v.get_via_id());
     auto gkey1 = lookup.get_gds_layer(lay1_key);
@@ -182,7 +179,7 @@ void write_lay_via(spdlog::logger &logger, std::ofstream &stream, const layout::
     get_via_cuts(v, rect_writer(logger, stream, gcl, gcp));
 }
 
-void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, glay_t lay, gpurp_t purp,
+void write_lay_pin(spdlog::logger &logger, std::ostream &stream, glay_t lay, gpurp_t purp,
                    const layout::pin &pin, bool make_pin_obj) {
     if (!is_physical(pin)) {
         logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin), lay,
@@ -207,12 +204,12 @@ void write_lay_pin(spdlog::logger &logger, std::ofstream &stream, glay_t lay, gp
     }
 }
 
-void write_lay_label(spdlog::logger &logger, std::ofstream &stream, const layout::label &lab) {
+void write_lay_label(spdlog::logger &logger, std::ostream &stream, const layout::label &lab) {
     auto [lay, purp] = lab.get_key();
     write_text(logger, stream, lay, purp, lab.get_text(), lab.get_xform());
 }
 
-void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
                         const cbag::layout::cellview &cv,
                         const std::unordered_map<std::string, std::string> &rename_map,
                         const std::vector<tval_t> &time_vec, const gds_lookup &lookup) {

@@ -12,6 +12,8 @@ namespace bp = boost::polygon;
 
 namespace cbag {
 
+std::ostream &operator<<(std::ostream &os, const box_t &value) { return os << to_string(value); }
+
 box_t invalid_box() noexcept { return {0, 0, -1, -1}; }
 
 offset_t get_dim(const box_t &box, orient_2d orient) {

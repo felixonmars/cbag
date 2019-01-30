@@ -72,7 +72,7 @@ template <typename iT> class point_xy_iter {
     }
 };
 
-template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ofstream &stream, T val) {
+template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ostream &stream, T val) {
     constexpr auto unit_size = sizeof(T);
     for (std::size_t bidx = 0, shft = (unit_size - 1) * 8; bidx < unit_size; ++bidx, shft -= 8) {
         auto tmp = static_cast<char>(val >> shft);
@@ -81,7 +81,7 @@ template <typename T, util::IsUInt<T> = 0> void write_bytes(std::ofstream &strea
 }
 
 template <record_type R, typename iT>
-void write(std::ofstream &stream, std::size_t num_data, iT start, iT stop) {
+void write(std::ostream &stream, std::size_t num_data, iT start, iT stop) {
     constexpr auto unit_size = sizeof(*start);
 
     auto size_test = unit_size * num_data + size_size + type_size;
@@ -104,31 +104,31 @@ void write(std::ofstream &stream, std::size_t num_data, iT start, iT stop) {
 }
 
 template <record_type R>
-void write_grp_begin(spdlog::logger &logger, std::ofstream &stream,
+void write_grp_begin(spdlog::logger &logger, std::ostream &stream,
                      const std::vector<tval_t> &time_vec) {
     std::vector<tval_t> data(time_vec.begin(), time_vec.end());
     data.insert(data.end(), time_vec.begin(), time_vec.end());
     write<R>(stream, data.size(), data.begin(), data.end());
 }
 
-template <record_type R> void write_empty(spdlog::logger &logger, std::ofstream &stream) {
+template <record_type R> void write_empty(spdlog::logger &logger, std::ostream &stream) {
     std::array<uint16_t, 0> tmp;
     write<R>(stream, tmp.size(), tmp.begin(), tmp.end());
 }
 
 template <record_type R>
-void write_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name) {
+void write_name(spdlog::logger &logger, std::ostream &stream, const std::string &name) {
     write<R>(stream, name.size(), uchar_iter(name.begin()), uchar_iter(name.end()));
 }
 
 template <record_type R>
-void write_int(spdlog::logger &logger, std::ofstream &stream, uint16_t val) {
+void write_int(spdlog::logger &logger, std::ostream &stream, uint16_t val) {
     std::array<uint16_t, 1> tmp{val};
     write<R>(stream, tmp.size(), tmp.begin(), tmp.end());
 }
 
 template <typename iT>
-void write_points(spdlog::logger &logger, std::ofstream &stream, std::size_t num_pts, iT begin,
+void write_points(spdlog::logger &logger, std::ostream &stream, std::size_t num_pts, iT begin,
                   iT end) {
     auto start_iter = point_xy_iter(begin);
     auto xval = start_iter.x();
@@ -160,8 +160,8 @@ std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
     }
 }
 
-void write_transform(spdlog::logger &logger, std::ofstream &stream, const transformation &xform,
-                     cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0) {
+void write_transform(spdlog::logger &logger, std::ostream &stream, const transformation &xform,
+                     cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
     auto [angle, bit_flag] = get_angle_flag(orient(xform));
 
     write_int<record_type::STRANS>(logger, stream, bit_flag);
@@ -192,47 +192,47 @@ void write_transform(spdlog::logger &logger, std::ofstream &stream, const transf
     }
 }
 
-void write_header(spdlog::logger &logger, std::ofstream &stream) {
+void write_header(spdlog::logger &logger, std::ostream &stream) {
     write_int<record_type::HEADER>(logger, stream, version);
 }
 
-void write_units(spdlog::logger &logger, std::ofstream &stream, double resolution,
+void write_units(spdlog::logger &logger, std::ostream &stream, double resolution,
                  double user_unit) {
     std::array<uint64_t, 2> data{double_to_gds(resolution), double_to_gds(resolution * user_unit)};
     write<record_type::UNITS>(stream, data.size(), data.begin(), data.end());
 }
 
-void write_lib_begin(spdlog::logger &logger, std::ofstream &stream,
+void write_lib_begin(spdlog::logger &logger, std::ostream &stream,
                      const std::vector<tval_t> &time_vec) {
     write_grp_begin<record_type::BGNLIB>(logger, stream, time_vec);
 }
 
-void write_lib_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name) {
+void write_lib_name(spdlog::logger &logger, std::ostream &stream, const std::string &name) {
     write_name<record_type::LIBNAME>(logger, stream, name);
 }
 
-void write_lib_end(spdlog::logger &logger, std::ofstream &stream) {
+void write_lib_end(spdlog::logger &logger, std::ostream &stream) {
     write_empty<record_type::ENDLIB>(logger, stream);
 }
 
-void write_struct_begin(spdlog::logger &logger, std::ofstream &stream,
+void write_struct_begin(spdlog::logger &logger, std::ostream &stream,
                         const std::vector<tval_t> &time_vec) {
     write_grp_begin<record_type::BGNSTR>(logger, stream, time_vec);
 }
 
-void write_struct_name(spdlog::logger &logger, std::ofstream &stream, const std::string &name) {
+void write_struct_name(spdlog::logger &logger, std::ostream &stream, const std::string &name) {
     write_name<record_type::STRNAME>(logger, stream, name);
 }
 
-void write_struct_end(spdlog::logger &logger, std::ofstream &stream) {
+void write_struct_end(spdlog::logger &logger, std::ostream &stream) {
     write_empty<record_type::ENDSTR>(logger, stream);
 }
 
-void write_element_end(spdlog::logger &logger, std::ofstream &stream) {
+void write_element_end(spdlog::logger &logger, std::ostream &stream) {
     write_empty<record_type::ENDEL>(logger, stream);
 }
 
-void write_polygon(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
+void write_polygon(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                    const layout::polygon &poly) {
     write_empty<record_type::BOUNDARY>(logger, stream);
     write_int<record_type::LAYER>(logger, stream, layer);
@@ -241,7 +241,7 @@ void write_polygon(spdlog::logger &logger, std::ofstream &stream, glay_t layer, 
     write_element_end(logger, stream);
 }
 
-void write_box(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
+void write_box(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                const box_t &b) {
     write_empty<record_type::BOX>(logger, stream);
     write_int<record_type::LAYER>(logger, stream, layer);
@@ -256,7 +256,7 @@ void write_box(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpur
     write_element_end(logger, stream);
 }
 
-void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+void write_arr_instance(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
                         const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx,
                         offset_t spy) {
     write_empty<record_type::AREF>(logger, stream);
@@ -265,7 +265,7 @@ void write_arr_instance(spdlog::logger &logger, std::ofstream &stream, const std
     write_element_end(logger, stream);
 }
 
-void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+void write_instance(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
                     const transformation &xform, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
     if (nx > 1 || ny > 1) {
         write_arr_instance(logger, stream, cell_name, xform, nx, ny, spx, spy);
@@ -277,7 +277,7 @@ void write_instance(spdlog::logger &logger, std::ofstream &stream, const std::st
     }
 }
 
-void write_text(spdlog::logger &logger, std::ofstream &stream, glay_t layer, gpurp_t purpose,
+void write_text(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                 const std::string &text, const transformation &xform) {
     write_empty<record_type::TEXT>(logger, stream);
     write_int<record_type::LAYER>(logger, stream, layer);

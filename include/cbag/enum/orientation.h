@@ -22,6 +22,30 @@ constexpr orientation oMXR90 = orientation::SWAP_XY;
 constexpr orientation oMY = orientation::FLIP_X;
 constexpr orientation oMYR90 = orientation::FLIP_SWAP_XY;
 
+inline std::string to_string(orientation orient) {
+    switch (orient) {
+    case oR0:
+        return "R0";
+    case oR90:
+        return "R90";
+    case oR180:
+        return "R180";
+    case oR270:
+        return "R270";
+    case oMX:
+        return "MX";
+    case oMXR90:
+        return "MXR90";
+    case oMY:
+        return "MY";
+    case oMYR90:
+        return "MYR90";
+    default:
+        throw std::runtime_error("Unknown orientation code: " +
+                                 std::to_string(static_cast<orient_t>(orient)));
+    }
+}
+
 } // namespace cbag
 
 #endif

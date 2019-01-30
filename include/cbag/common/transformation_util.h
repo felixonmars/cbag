@@ -10,9 +10,19 @@
 #include <cbag/enum/orient_2d.h>
 #include <cbag/enum/orientation.h>
 
+namespace boost {
+namespace polygon {
+
+std::ostream &operator<<(std::ostream &os, const cbag::transformation &value);
+
+} // namespace polygon
+} // namespace boost
+
 namespace bp = boost::polygon;
 
 namespace cbag {
+
+std::string to_string(const transformation &xform);
 
 transformation make_xform(coord_t dx = 0, coord_t dy = 0, orientation orient = oR0);
 

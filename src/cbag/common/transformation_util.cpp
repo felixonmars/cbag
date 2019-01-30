@@ -1,7 +1,25 @@
+#include <fmt/core.h>
+
 #include <cbag/common/transformation.h>
 #include <cbag/common/transformation_util.h>
 
+namespace boost {
+namespace polygon {
+
+std::ostream &operator<<(std::ostream &os, const cbag::transformation &value) {
+    return os << cbag::to_string(value);
+}
+
+} // namespace polygon
+} // namespace boost
+
 namespace cbag {
+
+std::string to_string(const transformation &xform) {
+    auto loc = location(xform);
+    auto ori = orient(xform);
+    return fmt::format("Transform({}, {}, {})", loc[0], loc[1], to_string(ori));
+}
 
 transformation make_xform(coord_t dx, coord_t dy, orientation orient) {
     transformation ans(orient);

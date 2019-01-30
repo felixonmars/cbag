@@ -10,6 +10,8 @@
 
 namespace cbag {
 
+std::ostream &operator<<(std::ostream &os, const box_t &value);
+
 offset_t get_dim(const box_t &box, orient_2d orient);
 coord_t get_center(const box_t &box, orient_2d orient);
 

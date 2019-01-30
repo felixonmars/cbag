@@ -22,6 +22,4 @@ bool box_t::operator==(const box_t &rhs) const noexcept {
     return intvs[0] == rhs.intvs[0] && intvs[1] == rhs.intvs[1];
 }
 
-std::ostream &operator<<(std::ostream &os, const box_t &value) { return os << to_string(value); }
-
 } // namespace cbag

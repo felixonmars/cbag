@@ -40,12 +40,12 @@ class gds_lookup {
 
 std::vector<tval_t> get_gds_time();
 
-void write_gds_start(spdlog::logger &logger, std::ofstream &stream, const std::string &lib_name,
+void write_gds_start(spdlog::logger &logger, std::ostream &stream, const std::string &lib_name,
                      double resolution, double user_unit, const std::vector<tval_t> &time_vec);
 
-void write_gds_stop(spdlog::logger &logger, std::ofstream &stream);
+void write_gds_stop(spdlog::logger &logger, std::ostream &stream);
 
-void write_lay_cellview(spdlog::logger &logger, std::ofstream &stream, const std::string &cell_name,
+void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
                         const cbag::layout::cellview &cv,
                         const std::unordered_map<std::string, std::string> &rename_map,
                         const std::vector<tval_t> &time_vec, const gds_lookup &lookup);
@@ -79,6 +79,7 @@ void implement_gds(const std::string &fname, const std::string &lib_name,
     }
 
     write_gds_stop(*logger, stream);
+    stream.close();
 }
 
 } // namespace gdsii

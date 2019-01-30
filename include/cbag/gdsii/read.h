@@ -43,12 +43,12 @@ class gds_rlookup {
     layer_t get_layer_t(gds_layer_t key) const;
 };
 
-std::tuple<record_type, std::size_t> read_record_header(std::ifstream &stream);
+std::tuple<record_type, std::size_t> read_record_header(std::istream &stream);
 
-std::string read_gds_start(spdlog::logger &logger, std::ifstream &stream);
+std::string read_gds_start(spdlog::logger &logger, std::istream &stream);
 
 std::tuple<std::string, std::unique_ptr<layout::cellview>>
-read_lay_cellview(spdlog::logger &logger, std::ifstream &stream, const std::string &lib_name,
+read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
                   const layout::routing_grid &g, const gds_rlookup &rmap,
                   const std::unordered_map<std::string, layout::cellview *> &master_map);
 

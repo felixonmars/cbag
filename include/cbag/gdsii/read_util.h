@@ -25,32 +25,34 @@ class cellview;
 
 namespace gdsii {
 
-std::tuple<record_type, std::size_t> read_record_header(std::ifstream &stream);
+std::tuple<record_type, std::size_t> read_record_header(std::istream &stream);
 
-void read_header(spdlog::logger &logger, std::ifstream &stream);
+void read_header(spdlog::logger &logger, std::istream &stream);
 
-void read_lib_begin(spdlog::logger &logger, std::ifstream &stream);
+void read_lib_begin(spdlog::logger &logger, std::istream &stream);
 
-std::string read_lib_name(spdlog::logger &logger, std::ifstream &stream);
+std::string read_lib_name(spdlog::logger &logger, std::istream &stream);
 
-void read_units(spdlog::logger &logger, std::ifstream &stream);
+void read_units(spdlog::logger &logger, std::istream &stream);
 
-std::string read_struct_name(spdlog::logger &logger, std::ifstream &stream);
+std::string read_struct_name(spdlog::logger &logger, std::istream &stream);
+
+transformation read_transform(spdlog::logger &logger, std::istream &stream);
 
 std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
-                                                               std::ifstream &stream);
+                                                               std::istream &stream);
 
-std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::ifstream &stream);
+std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::istream &stream);
 
 std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
-                                                       std::ifstream &stream);
+                                                       std::istream &stream);
 
 layout::instance
-read_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t cnt,
+read_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
               const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 layout::instance
-read_arr_instance(spdlog::logger &logger, std::ifstream &stream, std::size_t cnt,
+read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t cnt,
                   const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 } // namespace gdsii
