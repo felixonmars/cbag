@@ -66,6 +66,8 @@ layout::instance
 read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
                   const std::unordered_map<std::string, layout::cellview *> &master_map);
 
+bool print_record(std::istream &stream);
+
 } // namespace gdsii
 } // namespace cbag
 

@@ -20,6 +20,18 @@ target_link_libraries(write_cv_yaml
   fmt
   )
 
+add_executable(print_gds
+  ${CMAKE_CURRENT_SOURCE_DIR}/print_gds.cpp
+  )
+
+# shared library dependencies
+target_link_libraries(print_gds
+  PRIVATE
+  cbag
+  fmt
+  )
+
+
 install(TARGETS
   write_tech_info write_cv_yaml
   RUNTIME DESTINATION ${CBAG_BINARY_DIR}

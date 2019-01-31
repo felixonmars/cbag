@@ -22,6 +22,12 @@ std::tuple<record_type, std::size_t> read_record_header(std::istream &stream) {
     return {static_cast<record_type>(record_val), size};
 }
 
+std::tuple<record_type, std::size_t> print_record_header(std::istream &stream) {
+    auto ans = read_record_header(stream);
+    std::cout << to_string(std::get<0>(ans)) << std::endl;
+    return ans;
+}
+
 template <record_type R, std::size_t unit_size = 1, std::size_t num_data = 0>
 std::size_t check_record_header(std::istream &stream) {
     auto [actual, size] = read_record_header(stream);
@@ -275,6 +281,107 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt
     auto [nx, ny, spx, spy] = cbag::convert_gds_array(xform, gds_nx, gds_ny, gds_spx, gds_spy);
 
     return {std::move(inst_name), master, std::move(xform), nx, ny, spx, spy};
+}
+
+void print_time(std::istream &stream) {
+    struct tm val;
+    auto timeinfo = &val;
+    timeinfo->tm_year = read_bytes<uint16_t>(stream);
+    timeinfo->tm_mon = read_bytes<uint16_t>(stream) - 1;
+    timeinfo->tm_mday = read_bytes<uint16_t>(stream);
+    timeinfo->tm_hour = read_bytes<uint16_t>(stream);
+    timeinfo->tm_min = read_bytes<uint16_t>(stream);
+    timeinfo->tm_sec = read_bytes<uint16_t>(stream);
+
+    auto time_obj = std::mktime(timeinfo);
+    std::cout << std::asctime(std::localtime(&time_obj));
+}
+
+bool print_record(std::istream &stream) {
+    auto [record, size] = print_record_header(stream);
+    auto ans = false;
+    switch (record) {
+    // empty records
+    case record_type::ENDLIB:
+        ans = true;
+    case record_type::ENDSTR:
+    case record_type::BOUNDARY:
+    case record_type::SREF:
+    case record_type::AREF:
+    case record_type::TEXT:
+    case record_type::ENDEL:
+    case record_type::BOX:
+        break;
+    // bit flag records
+    case record_type::PRESENTATION:
+    case record_type::STRANS:
+        std::cout << fmt::format("bit flag: {:#06x}", read_bytes<uint16_t>(stream)) << std::endl;
+        break;
+    case record_type::HEADER:
+    case record_type::LAYER:
+    case record_type::DATATYPE:
+    case record_type::TEXTTYPE:
+    case record_type::PROPATTR:
+    case record_type::BOXTYPE:
+        std::cout << fmt::format("value: {}", read_bytes<uint16_t>(stream)) << std::endl;
+        break;
+    case record_type::BGNLIB:
+    case record_type::BGNSTR:
+        std::cout << "modification time: " << std::endl;
+        print_time(stream);
+        std::cout << "access time: " << std::endl;
+        print_time(stream);
+        break;
+    case record_type::COLROW: {
+        auto nx = read_bytes<uint16_t>(stream);
+        auto ny = read_bytes<uint16_t>(stream);
+        std::cout << fmt::format("nx: {}, ny: {}", nx, ny) << std::endl;
+        break;
+    }
+
+    case record_type::WIDTH:
+        std::cout << fmt::format("value: {}", read_bytes<int32_t>(stream)) << std::endl;
+        break;
+    case record_type::XY: {
+        auto num_pts = size / 4 / 2;
+        for (std::size_t idx = 0; idx < num_pts; ++idx) {
+            auto x = read_bytes<int32_t>(stream);
+            auto y = read_bytes<int32_t>(stream);
+            std::cout << fmt::format("xy: ({}, {})", x, y) << std::endl;
+        }
+        break;
+    }
+
+    case record_type::UNITS:
+        std::cout << fmt::format("resolution: {}", gds_to_double(read_bytes<uint64_t>(stream)))
+                  << std::endl;
+        std::cout << fmt::format("res unit: {}", gds_to_double(read_bytes<uint64_t>(stream)))
+                  << std::endl;
+        break;
+    case record_type::MAG:
+    case record_type::ANGLE:
+        std::cout << fmt::format("value: {}", gds_to_double(read_bytes<uint64_t>(stream)))
+                  << std::endl;
+        break;
+    case record_type::LIBNAME:
+    case record_type::STRNAME:
+    case record_type::SNAME:
+    case record_type::STRING:
+    case record_type::PROPVALUE: {
+        std::string ans;
+        ans.reserve(size);
+        for (std::size_t idx = 0; idx < size; ++idx) {
+            ans.push_back(read_bytes<char>(stream));
+        }
+        std::cout << "value: " << ans << std::endl;
+        break;
+    }
+    default:
+        throw std::invalid_argument(
+            fmt::format("Unknown record type: {:#06x}", static_cast<uint16_t>(record)));
+    }
+
+    return ans;
 }
 
 } // namespace gdsii
