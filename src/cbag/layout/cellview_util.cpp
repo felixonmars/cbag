@@ -300,8 +300,9 @@ connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
 }
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
-               transformation xform, std::string label) {
-    cv.add_label(layer_t_at(*cv.get_tech(), layer, purpose), std::move(xform), std::move(label));
+               transformation xform, std::string label, offset_t text_h) {
+    cv.add_label(layer_t_at(*cv.get_tech(), layer, purpose), std::move(xform), std::move(label),
+                 text_h);
 }
 
 cv_obj_ref<instance> add_prim_instance(cellview &cv, std::string lib, std::string cell,

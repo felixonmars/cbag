@@ -16,11 +16,11 @@ namespace gdsii {
 
 using size_type = uint16_t;
 
-constexpr auto max_size = UINT16_MAX;
-constexpr auto type_size = sizeof(record_type);
-constexpr auto size_size = sizeof(size_type);
-constexpr auto version = static_cast<uint16_t>(5);
-constexpr auto text_presentation = static_cast<uint16_t>(0xA000);
+constexpr auto MAX_SIZE = UINT16_MAX;
+constexpr auto TYPE_SIZE = sizeof(record_type);
+constexpr auto SIZE_SIZE = sizeof(size_type);
+constexpr auto VERSION = static_cast<uint16_t>(5);
+constexpr auto TEXT_PRESENTATION = static_cast<uint16_t>(0x0005);
 
 template <typename T, typename U> T interpret_as(U val) { return *reinterpret_cast<T *>(&val); }
 
@@ -75,8 +75,8 @@ template <record_type R, typename iT>
 void write(std::ostream &stream, std::size_t num_data, iT start, iT stop) {
     constexpr auto unit_size = sizeof(*start);
 
-    auto size_test = unit_size * num_data + size_size + type_size;
-    assert(size_test <= max_size);
+    auto size_test = unit_size * num_data + SIZE_SIZE + TYPE_SIZE;
+    assert(size_test <= MAX_SIZE);
 
     auto size = static_cast<size_type>(size_test);
     bool add_zero = false;
@@ -132,30 +132,37 @@ void write_points(spdlog::logger &logger, std::ostream &stream, std::size_t num_
 
 std::tuple<uint32_t, uint16_t> get_angle_flag(orientation orient) {
     switch (orient) {
+    case oR0:
+        return {0, 0x0000};
     case oR90:
-        return {90, 0x4000};
+        return {90, 0x0000};
     case oR180:
-        return {180, 0x4000};
+        return {180, 0x0000};
     case oR270:
-        return {270, 0x4000};
+        return {270, 0x0000};
     case oMX:
         return {0, 0x8000};
     case oMXR90:
-        return {90, 0xc000};
+        return {90, 0x8000};
     case oMY:
-        return {180, 0xc000};
+        return {180, 0x8000};
     case oMYR90:
-        return {270, 0xc000};
+        return {270, 0x8000};
     default:
-        return {0, 0x0000};
+        throw std::runtime_error("Unknown orientation: " +
+                                 std::to_string(static_cast<int>(orient)));
     }
 }
 
 void write_transform(spdlog::logger &logger, std::ostream &stream, const transformation &xform,
-                     cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
+                     double mag, cnt_t nx, cnt_t ny, offset_t spx, offset_t spy) {
     auto [angle, bit_flag] = get_angle_flag(orient(xform));
 
     write_int<record_type::STRANS>(logger, stream, bit_flag);
+    if (mag != 1.0) {
+        std::array<uint64_t, 1> data{double_to_gds(mag)};
+        write<record_type::MAG>(stream, data.size(), data.begin(), data.end());
+    }
     if (angle != 0) {
         std::array<uint64_t, 1> data{double_to_gds((double)angle)};
         write<record_type::ANGLE>(stream, data.size(), data.begin(), data.end());
@@ -184,7 +191,7 @@ void write_transform(spdlog::logger &logger, std::ostream &stream, const transfo
 }
 
 void write_header(spdlog::logger &logger, std::ostream &stream) {
-    write_int<record_type::HEADER>(logger, stream, version);
+    write_int<record_type::HEADER>(logger, stream, VERSION);
 }
 
 void write_units(spdlog::logger &logger, std::ostream &stream, double resolution,
@@ -257,7 +264,7 @@ void write_arr_instance(spdlog::logger &logger, std::ostream &stream, const std:
                         cnt_t ny, offset_t spx, offset_t spy) {
     write_empty<record_type::AREF>(logger, stream);
     write_name<record_type::SNAME>(logger, stream, cell_name);
-    write_transform(logger, stream, xform, nx, ny, spx, spy);
+    write_transform(logger, stream, xform, 1.0, nx, ny, spx, spy);
     write_prop_inst_name(logger, stream, inst_name);
     write_element_end(logger, stream);
 }
@@ -277,12 +284,13 @@ void write_instance(spdlog::logger &logger, std::ostream &stream, const std::str
 }
 
 void write_text(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
-                const std::string &text, const transformation &xform) {
+                const std::string &text, const transformation &xform, offset_t height,
+                double resolution) {
     write_empty<record_type::TEXT>(logger, stream);
     write_int<record_type::LAYER>(logger, stream, layer);
     write_int<record_type::TEXTTYPE>(logger, stream, purpose);
-    write_int<record_type::PRESENTATION>(logger, stream, text_presentation);
-    write_transform(logger, stream, xform);
+    write_int<record_type::PRESENTATION>(logger, stream, TEXT_PRESENTATION);
+    write_transform(logger, stream, xform, height * resolution);
     write_name<record_type::STRING>(logger, stream, text);
     write_element_end(logger, stream);
 }

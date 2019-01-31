@@ -89,7 +89,7 @@ class cellview {
 
     void add_pin(lay_t lay_id, std::string &&net, std::string &&label, box_t &&bbox);
 
-    void add_label(layer_t &&key, transformation &&xform, std::string &&label);
+    void add_label(layer_t &&key, transformation &&xform, std::string &&label, offset_t height);
 
     void add_object(const blockage &obj);
     void add_object(const boundary &obj);

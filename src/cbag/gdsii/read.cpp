@@ -104,15 +104,16 @@ read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::strin
     logger.info("GDS cellview name: " + cell_name);
 
     auto cv_ptr = std::make_unique<layout::cellview>(&g, cell_name, geometry_mode::POLY);
-
+    auto resolution = g.get_tech()->get_resolution();
     auto inst_cnt = static_cast<std::size_t>(0);
     while (true) {
         auto [rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::TEXT: {
             logger.info("Reading layout text.");
-            auto [gds_key, xform, text] = read_text(logger, stream);
-            cv_ptr->add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text));
+            auto [gds_key, xform, text, text_h_dbl] = read_text(logger, stream);
+            auto text_h = static_cast<offset_t>(text_h_dbl / resolution);
+            cv_ptr->add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text), text_h);
             break;
         }
         case record_type::SREF:

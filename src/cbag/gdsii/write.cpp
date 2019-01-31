@@ -180,7 +180,7 @@ void write_lay_via(spdlog::logger &logger, std::ostream &stream, const layout::t
 }
 
 void write_lay_pin(spdlog::logger &logger, std::ostream &stream, glay_t lay, gpurp_t purp,
-                   const layout::pin &pin, bool make_pin_obj) {
+                   const layout::pin &pin, bool make_pin_obj, double resolution) {
     if (!is_physical(pin)) {
         logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin), lay,
                     purp);
@@ -198,15 +198,17 @@ void write_lay_pin(spdlog::logger &logger, std::ostream &stream, glay_t lay, gpu
         xform = make_xform(xc, yc, oR0);
     }
 
-    write_text(logger, stream, lay, purp, pin.get_label(), xform);
+    write_text(logger, stream, lay, purp, pin.get_label(), xform, text_h, resolution);
     if (make_pin_obj) {
         write_box(logger, stream, lay, purp, pin);
     }
 }
 
-void write_lay_label(spdlog::logger &logger, std::ostream &stream, const layout::label &lab) {
+void write_lay_label(spdlog::logger &logger, std::ostream &stream, const layout::label &lab,
+                     double resolution) {
     auto [lay, purp] = lab.get_key();
-    write_text(logger, stream, lay, purp, lab.get_text(), lab.get_xform());
+    write_text(logger, stream, lay, purp, lab.get_text(), lab.get_xform(), lab.get_height(),
+               resolution);
 }
 
 void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std::string &cell_name,
@@ -238,6 +240,7 @@ void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std:
 
     logger.info("Export layout vias.");
     auto tech_ptr = cv.get_tech();
+    auto resolution = tech_ptr->get_resolution();
     for (auto iter = cv.begin_via(); iter != cv.end_via(); ++iter) {
         write_lay_via(logger, stream, *tech_ptr, lookup, *iter);
     }
@@ -254,14 +257,14 @@ void write_lay_cellview(spdlog::logger &logger, std::ostream &stream, const std:
         } else {
             auto [glay, gpurp] = *gkey;
             for (const auto &pin : pin_list) {
-                write_lay_pin(logger, stream, glay, gpurp, pin, make_pin_obj);
+                write_lay_pin(logger, stream, glay, gpurp, pin, make_pin_obj, resolution);
             }
         }
     }
 
     logger.info("Export layout labels.");
     for (auto iter = cv.begin_label(); iter != cv.end_label(); ++iter) {
-        write_lay_label(logger, stream, *iter);
+        write_lay_label(logger, stream, *iter, resolution);
     }
 
     logger.info("Export layout boundaries.");

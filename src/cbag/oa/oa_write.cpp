@@ -685,14 +685,14 @@ void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock 
 }
 
 void create_lay_label(oa::oaBlock *blk, cbag::lay_t lay, cbag::purp_t purp,
-                      cbag::transformation &&xform, const std::string &text) {
+                      cbag::transformation &&xform, const std::string &text,
+                      cbag::offset_t height) {
     auto [x, y] = cbag::location(xform);
     oa::oaPoint center(x, y);
-    constexpr auto text_h = 10;
     auto ori = get_orient(cbag::orient(xform));
 
     oa::oaText::create(blk, lay, purp, text.c_str(), center, oa::oacCenterCenterTextAlign, ori,
-                       oa::oacRomanFont, text_h);
+                       oa::oacRomanFont, height);
 }
 
 void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
@@ -768,7 +768,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     for (auto iter = cv.begin_label(); iter != cv.end_label(); ++iter) {
         auto lab = *iter;
         auto [lay, purp] = lab.get_key();
-        create_lay_label(blk, lay, purp, lab.get_xform(), lab.get_text());
+        create_lay_label(blk, lay, purp, lab.get_xform(), lab.get_text(), lab.get_height());
     }
 
     logger.info("Export layout done, saving and closing.");

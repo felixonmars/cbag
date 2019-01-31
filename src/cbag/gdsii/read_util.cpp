@@ -22,6 +22,12 @@ std::tuple<record_type, std::size_t> read_record_header(std::istream &stream) {
     return {static_cast<record_type>(record_val), size};
 }
 
+std::tuple<record_type, std::size_t> peek_record_header(std::istream &stream) {
+    auto ans = read_record_header(stream);
+    stream.seekg(-4, std::ios::cur);
+    return ans;
+}
+
 std::tuple<record_type, std::size_t> print_record_header(std::istream &stream) {
     auto ans = read_record_header(stream);
     std::cout << to_string(std::get<0>(ans)) << std::endl;
@@ -109,39 +115,50 @@ void read_ele_end(spdlog::logger &logger, std::istream &stream) {
     check_record_header<record_type::ENDEL, sizeof(uint16_t), 0>(stream);
 }
 
-transformation read_transform_angle(spdlog::logger &logger, std::istream &stream) {
+std::tuple<transformation, double> read_transform_info(spdlog::logger &logger,
+                                                       std::istream &stream) {
     auto bit_flag = read_int<record_type::STRANS>(logger, stream);
-
-    if ((bit_flag & (1 << 13)) != 0) {
-        throw std::runtime_error("GDS Magnification in transform is not supported.");
-    }
 
     auto ans = make_xform();
     if ((bit_flag & (1 << 15)) != 0) {
         set_orient(ans, oMX);
     }
 
-    if ((bit_flag & (1 << 14)) != 0) {
-        auto ang_dbl = read_double<record_type::ANGLE>(logger, stream);
-        auto angle = static_cast<int>(ang_dbl);
-        switch (angle) {
-        case 0:
-            break;
-        case 90:
-            transform_by(ans, make_xform(0, 0, oR90));
-            break;
-        case 180:
-            transform_by(ans, make_xform(0, 0, oR180));
-            break;
-        case 270:
-            transform_by(ans, make_xform(0, 0, oR270));
-            break;
-        default:
-            throw std::runtime_error("GDS rotation angle not supported: " + std::to_string(angle));
-        }
+    double mag = 1.0;
+    double ang_dbl = 0.0;
+    auto [rec, size] = peek_record_header(stream);
+    switch (rec) {
+    case record_type::MAG:
+        mag = read_double<record_type::MAG>(logger, stream);
+        rec = std::get<0>(peek_record_header(stream));
+        if (rec == record_type::ANGLE)
+            ang_dbl = read_double<record_type::ANGLE>(logger, stream);
+        break;
+    case record_type::ANGLE:
+        ang_dbl = read_double<record_type::ANGLE>(logger, stream);
+        break;
+    default:
+        break;
     }
 
-    return ans;
+    auto angle = static_cast<int>(ang_dbl);
+    switch (angle) {
+    case 0:
+        break;
+    case 90:
+        transform_by(ans, make_xform(0, 0, oR90));
+        break;
+    case 180:
+        transform_by(ans, make_xform(0, 0, oR180));
+        break;
+    case 270:
+        transform_by(ans, make_xform(0, 0, oR270));
+        break;
+    default:
+        throw std::runtime_error("GDS rotation angle not supported: " + std::to_string(angle));
+    }
+
+    return {ans, mag};
 }
 
 point read_point(std::istream &stream) {
@@ -150,26 +167,31 @@ point read_point(std::istream &stream) {
     return {x, y};
 }
 
-transformation read_transform(spdlog::logger &logger, std::istream &stream) {
-    auto ans = read_transform_angle(logger, stream);
+std::tuple<transformation, double> read_transform_mag(spdlog::logger &logger,
+                                                      std::istream &stream) {
+    auto ans = read_transform_info(logger, stream);
     check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
     auto [x, y] = read_point(stream);
-    move_by(ans, x, y);
+    move_by(std::get<0>(ans), x, y);
 
     return ans;
 }
 
-std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
-                                                               std::istream &stream) {
+transformation read_transform(spdlog::logger &logger, std::istream &stream) {
+    return std::get<0>(read_transform_mag(logger, stream));
+}
+
+std::tuple<gds_layer_t, transformation, std::string, double> read_text(spdlog::logger &logger,
+                                                                       std::istream &stream) {
     auto glay = read_int<record_type::LAYER>(logger, stream);
     auto gpurp = read_int<record_type::TEXTTYPE>(logger, stream);
     read_skip<record_type::PRESENTATION, sizeof(uint16_t), 1>(stream);
-    auto xform = read_transform(logger, stream);
+    auto [xform, mag] = read_transform_mag(logger, stream);
 
     auto text = read_name<record_type::STRING>(logger, stream);
     read_ele_end(logger, stream);
 
-    return {gds_layer_t{glay, gpurp}, std::move(xform), std::move(text)};
+    return {gds_layer_t{glay, gpurp}, std::move(xform), std::move(text), mag};
 }
 
 std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::istream &stream) {
@@ -264,7 +286,7 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt
             fmt::format("Cannot find layout cellview {} in GDS file.", cell_name));
     auto master = iter->second;
 
-    auto xform = read_transform_angle(logger, stream);
+    auto [xform, mag] = read_transform_info(logger, stream);
 
     auto [gds_nx, gds_ny] = read_col_row(logger, stream);
     check_record_header<record_type::XY, sizeof(int32_t), 6>(stream);

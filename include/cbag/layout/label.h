@@ -15,15 +15,17 @@ class label {
     layer_t lay_purp;
     transformation xform;
     std::string text;
+    offset_t height;
 
   public:
     label();
 
-    label(layer_t key, transformation xform, std::string text);
+    label(layer_t key, transformation xform, std::string text, offset_t height);
 
     layer_t get_key() const;
     transformation get_xform() const;
     const std::string &get_text() const;
+    offset_t get_height() const noexcept;
 
     bool operator==(const label &rhs) const noexcept;
 };

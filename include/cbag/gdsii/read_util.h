@@ -50,8 +50,8 @@ std::string read_struct_name(spdlog::logger &logger, std::istream &stream);
 
 transformation read_transform(spdlog::logger &logger, std::istream &stream);
 
-std::tuple<gds_layer_t, transformation, std::string> read_text(spdlog::logger &logger,
-                                                               std::istream &stream);
+std::tuple<gds_layer_t, transformation, std::string, double> read_text(spdlog::logger &logger,
+                                                                       std::istream &stream);
 
 std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::istream &stream);
 

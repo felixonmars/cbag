@@ -50,7 +50,7 @@ connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
                    const std::array<std::optional<coord_t>, 2> &tr_ext);
 
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
-               transformation xform, std::string label);
+               transformation xform, std::string label, offset_t text_h);
 
 cv_obj_ref<instance> add_prim_instance(cellview &cv, std::string lib, std::string cell,
                                        std::string view, std::string name, transformation xform,

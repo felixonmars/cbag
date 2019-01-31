@@ -42,7 +42,8 @@ void write_struct_name(spdlog::logger &logger, std::ostream &stream, const std::
 void write_struct_end(spdlog::logger &logger, std::ostream &stream);
 
 void write_transform(spdlog::logger &logger, std::ostream &stream, const transformation &xform,
-                     cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
+                     double mag = 1.0, cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0,
+                     offset_t spy = 0);
 
 void write_polygon(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
                    const layout::polygon &poly);
@@ -55,7 +56,8 @@ void write_instance(spdlog::logger &logger, std::ostream &stream, const std::str
                     cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
 void write_text(spdlog::logger &logger, std::ostream &stream, glay_t layer, gpurp_t purpose,
-                const std::string &text, const transformation &xform);
+                const std::string &text, const transformation &xform, offset_t height,
+                double resolution);
 
 } // namespace gdsii
 } // namespace cbag

@@ -180,8 +180,9 @@ void cellview::add_pin(lay_t lay_id, std::string &&net, std::string &&label, box
     iter->second.emplace_back(std::move(bbox), std::move(net), std::move(label));
 }
 
-void cellview::add_label(layer_t &&key, transformation &&xform, std::string &&label) {
-    label_list.emplace_back(std::move(key), std::move(xform), std::move(label));
+void cellview::add_label(layer_t &&key, transformation &&xform, std::string &&label,
+                         offset_t height) {
+    label_list.emplace_back(std::move(key), std::move(xform), std::move(label), height);
 }
 
 void cellview::add_object(const blockage &obj) {
