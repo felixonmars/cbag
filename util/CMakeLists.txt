@@ -4,9 +4,8 @@ add_executable(write_tech_info
 
 # shared library dependencies
 target_link_libraries(write_tech_info
-  PRIVATE
+  PUBLIC
   cbag
-  fmt
   )
 
 add_executable(write_cv_yaml
@@ -15,9 +14,8 @@ add_executable(write_cv_yaml
 
 # shared library dependencies
 target_link_libraries(write_cv_yaml
-  PRIVATE
+  PUBLIC
   cbag
-  fmt
   )
 
 add_executable(print_gds
@@ -26,9 +24,8 @@ add_executable(print_gds
 
 # shared library dependencies
 target_link_libraries(print_gds
-  PRIVATE
+  PUBLIC
   cbag
-  fmt
   )
 
 

@@ -26,9 +26,9 @@ add_executable(test_main
 target_include_directories(test_main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(test_main
-  PRIVATE
+  PUBLIC
   cbag
-  fmt
+  fmt::fmt
   yaml-cpp
   Catch2::Catch2
   spdlog

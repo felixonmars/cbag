@@ -50,11 +50,10 @@ message("Boost library directory: " ${Boost_LIBRARY_DIRS})
 message("Boost libraries: " ${Boost_LIBRARIES})
 
 # Include fmt library
-# use add_subdirectory, as they do not support find_package
-# set to build static library and enable fPIC
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+find_package(fmt REQUIRED CONFIG)
 
 # Include spdlog
+set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "Use external fmt library instead of bundled")
 add_subdirectory(spdlog EXCLUDE_FROM_ALL)
 
 # Include threads for spdlog
@@ -176,7 +175,7 @@ add_library(cbag ${SRC_FILES_LIB_CBAG} ${SRC_FILES_LIB_CBAG_OA})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  fmt
+  fmt::fmt
   spdlog
   oaBase
   oaCommon
@@ -205,7 +204,7 @@ add_library(cbag ${SRC_FILES_LIB_CBAG})
 # shared library dependencies
 target_link_libraries(cbag
   PUBLIC
-  fmt
+  fmt::fmt
   spdlog
   PRIVATE
   stdc++fs
