@@ -111,8 +111,12 @@ box_t &expand(box_t &box, coord_t dx, coord_t dy) {
 }
 box_t get_expand(box_t box, coord_t dx, coord_t dy) { return expand(box, dx, dy); }
 
-box_t &transform(box_t &box, const transformation &xform) { return bp::transform(box, xform); }
-box_t get_transform(box_t box, const transformation &xform) { return bp::transform(box, xform); }
+box_t &transform(box_t &box, const transformation &xform) {
+    if (!is_valid(box))
+        return box;
+    return bp::transform(box, xform);
+}
+box_t get_transform(box_t box, const transformation &xform) { return transform(box, xform); }
 
 box_t &move_by_orient(box_t &box, orient_2d orient, offset_t dt, offset_t dp) {
     auto orient_code = to_int(orient);
