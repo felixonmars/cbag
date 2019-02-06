@@ -14,6 +14,7 @@ enum class design_output : enum_t {
     CDL = 4,
     VERILOG = 5,
     SYSVERILOG = 6,
+    SPECTRE = 7,
 };
 
 } // namespace cbag
