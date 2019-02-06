@@ -1,3 +1,6 @@
+#include <cerrno>
+#include <cstring>
+
 #include <cbag/util/io.h>
 
 namespace cbag {
@@ -17,6 +20,8 @@ std::ofstream open_file_write(const std::string &fname, bool binary) {
     if (binary)
         mode |= std::ios_base::binary;
     std::ofstream ans{fname, mode};
+    if (ans.fail())
+        throw std::runtime_error("Error writing " + fname + ": " + std::strerror(errno));
     if (binary)
         ans.imbue(std::locale::classic());
     return ans;
@@ -25,10 +30,12 @@ std::ofstream open_file_write(const std::string &fname, bool binary) {
 std::ifstream open_file_read(const std::string &fname, bool binary) {
     if (!is_file(fname))
         throw std::invalid_argument(fname + " is not a file.");
-    auto mode = std::ios_base::out;
+    auto mode = std::ios_base::in;
     if (binary)
         mode |= std::ios_base::binary;
     std::ifstream ans{fname, mode};
+    if (ans.fail())
+        throw std::runtime_error("Error reading " + fname + ": " + std::strerror(errno));
     if (binary)
         ans.imbue(std::locale::classic());
     return ans;
