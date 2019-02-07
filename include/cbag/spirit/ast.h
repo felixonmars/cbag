@@ -9,6 +9,7 @@
 #ifndef CBAG_SPIRIT_AST_H
 #define CBAG_SPIRIT_AST_H
 
+#include <array>
 #include <cstdint>
 #include <iterator>
 #include <string>
@@ -69,9 +70,11 @@ struct range : x3::position_tagged {
 
     range(cnt_t start, cnt_t stop, cnt_t step);
 
-    bool empty() const;
+    bool empty() const noexcept;
 
-    cnt_t size() const;
+    cnt_t size() const noexcept;
+
+    std::array<cnt_t, 2> bounds() const noexcept;
 
     cnt_t get_stop_include() const;
 
@@ -113,6 +116,8 @@ struct name_unit : x3::position_tagged {
     std::string get_name_bit(cnt_t index, bool is_id, namespace_cdba) const;
     std::string get_name_bit(cnt_t index, bool is_id, namespace_verilog) const;
 };
+
+std::string to_string(const std::string &base, std::array<cnt_t, 2> bounds, namespace_cdba);
 
 struct name_rep;
 

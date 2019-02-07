@@ -8,6 +8,7 @@
 #ifndef CBAG_SCHEMATIC_CELLVIEW_INFO_H
 #define CBAG_SCHEMATIC_CELLVIEW_INFO_H
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,7 @@ struct cellview_info {
     std::vector<std::string> in_terms;
     std::vector<std::string> out_terms;
     std::vector<std::string> io_terms;
+    std::vector<std::string> nets;
     param_map props;
     bool is_prim = false;
 

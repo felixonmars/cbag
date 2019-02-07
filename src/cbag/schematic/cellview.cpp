@@ -1,20 +1,37 @@
 
 #include <fmt/core.h>
 
-#include <cbag/spirit/name.h>
-#include <cbag/spirit/name_rep.h>
-#include <cbag/spirit/parsers.h>
-
 #include <cbag/common/box_t_util.h>
 #include <cbag/common/param_map_util.h>
 #include <cbag/schematic/cellview.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
+#include <cbag/spirit/ast.h>
 #include <cbag/util/io.h>
+#include <cbag/util/name_convert.h>
+#include <cbag/util/overload.h>
 #include <cbag/yaml/cellviews.h>
 
 namespace cbag {
 namespace sch {
+
+using nu_range_map_t = cbag::util::sorted_map<std::string, std::array<cnt_t, 2>>;
+
+void validate_sch_cellview(const cellview &cv) {
+    // check terminals have legal type and name
+    for (auto const & [ term_name, term_fig ] : cv.terminals) {
+        if (term_fig.ttype != term_type::input && term_fig.ttype != term_type::output &&
+            term_fig.ttype != term_type::inout) {
+            throw std::runtime_error("Unsupported terminal type: " +
+                                     std::to_string(static_cast<enum_t>(term_fig.ttype)));
+        }
+        try {
+            auto ast = util::parse_cdba_name_unit(term_name);
+        } catch (const std::invalid_argument &) {
+            throw std::runtime_error("Unsupported schematic terminal name: " + term_name);
+        }
+    }
+}
 
 cellview::cellview() = default;
 
@@ -26,14 +43,14 @@ cellview::cellview(const std::string &yaml_fname, const std::string &sym_view) {
     auto n = YAML::LoadFile(yaml_fname);
 
     *this = n.as<cellview>();
+    validate_sch_cellview(*this);
 
     if (!sym_view.empty()) {
         // load symbol cellview
         auto yaml_path = cbag::util::get_canonical_path(yaml_fname);
         yaml_path.replace_extension(fmt::format(".{}{}", sym_view, yaml_path.extension().c_str()));
         if (cbag::util::is_file(yaml_path)) {
-            auto s = YAML::LoadFile(yaml_path.string());
-            sym_ptr = std::make_unique<cellview>(s.as<cellview>());
+            sym_ptr = std::make_unique<cellview>(yaml_path.string(), "");
         }
     }
 }
@@ -43,20 +60,94 @@ cellview::cellview(std::string lib_name, std::string cell_name, std::string view
     : lib_name(std::move(lib_name)), cell_name(std::move(cell_name)),
       view_name(std::move(view_name)), bbox(xl, yl, xh, yh) {}
 
+void register_unique_name_units(const spirit::ast::name_unit &ast, nu_range_map_t &net_range_map,
+                                const nu_range_map_t &term_range_map) {
+    auto net_bounds = ast.idx_range.bounds();
+    auto term_iter = term_range_map.find(ast.base);
+    if (term_iter != term_range_map.end()) {
+        // verify that net range does not go out of bounds of terminal range
+        auto & [ term_start, term_stop ] = term_iter->second;
+        auto term_scalar = (term_start == term_stop);
+        auto net_scalar = (net_bounds[0] == net_bounds[1]);
+        if ((term_scalar != net_scalar) ||
+            (!term_scalar && (net_bounds[0] < term_start || net_bounds[1] > term_stop))) {
+            throw std::runtime_error(
+                fmt::format("Schematic cannot contain net {} because a terminal with the same base "
+                            "name and difference bounds exist.",
+                            ast.to_string(spirit::namespace_cdba{})));
+        }
+    } else {
+        // register net
+        auto net_iter = net_range_map.find(ast.base);
+        if (net_iter == net_range_map.end()) {
+            net_range_map.emplace(ast.base, net_bounds);
+        } else {
+            auto &cur_bnds = net_iter->second;
+            cur_bnds[0] = std::min(cur_bnds[0], net_bounds[0]);
+            cur_bnds[1] = std::max(cur_bnds[1], net_bounds[1]);
+        }
+    }
+}
+
+void register_unique_name_units(const spirit::ast::name &ast, nu_range_map_t &net_range_map,
+                                const nu_range_map_t &term_range_map);
+
+void register_unique_name_units(const spirit::ast::name_rep &ast, nu_range_map_t &net_range_map,
+                                const nu_range_map_t &term_range_map) {
+    std::visit(
+        overload{
+            [&net_range_map, &term_range_map](const spirit::ast::name_unit &arg) {
+                register_unique_name_units(arg, net_range_map, term_range_map);
+            },
+            [&net_range_map, &term_range_map](const spirit::ast::name &arg) {
+                register_unique_name_units(arg, net_range_map, term_range_map);
+            },
+        },
+        ast.data);
+}
+
+void register_unique_name_units(const spirit::ast::name &ast, nu_range_map_t &net_range_map,
+                                const nu_range_map_t &term_range_map) {
+    for (const auto &nr : ast.rep_list) {
+        register_unique_name_units(nr, net_range_map, term_range_map);
+    }
+}
+
 cellview_info cellview::get_info(const std::string &name) const {
     cellview_info ans(name, false);
 
-    for (auto const &pair : terminals) {
-        switch (pair.second.ttype) {
+    nu_range_map_t term_range_map, net_range_map;
+
+    // process terminals
+    for (auto const & [ term_name, term_fig ] : terminals) {
+        switch (term_fig.ttype) {
         case term_type::input:
-            ans.in_terms.push_back(pair.first);
+            ans.in_terms.push_back(term_name);
             break;
         case term_type::output:
-            ans.out_terms.push_back(pair.first);
+            ans.out_terms.push_back(term_name);
             break;
         default:
-            ans.io_terms.push_back(pair.first);
+            // this cellview is validated, term_type guaranteed to be supported
+            ans.io_terms.push_back(term_name);
+            break;
         }
+
+        auto ast = util::parse_cdba_name_unit(term_name);
+        term_range_map.emplace(ast.base, ast.idx_range.bounds());
+    }
+
+    // get all the nets
+    for (auto const & [ inst_name, inst_ptr ] : instances) {
+        for (auto const & [ inst_term, net ] : inst_ptr->connections) {
+            auto ast = util::parse_cdba_name(net);
+            register_unique_name_units(ast, net_range_map, term_range_map);
+        }
+    }
+
+    // save all nets to netlist
+    for (auto const & [ net_name, net_bnds ] : net_range_map) {
+        ans.nets.push_back(spirit::ast::to_string(net_name, net_bnds, spirit::namespace_cdba{}));
     }
 
     return ans;
@@ -104,8 +195,7 @@ void cellview::rename_pin(const std::string &old_name, const std::string &new_na
         throw std::invalid_argument(fmt::format("Terminal {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name ast;
-    parse(new_name, spirit::name(), ast);
+    auto ast = util::parse_cdba_name_unit(new_name);
 
     if (terminals.replace_key(old_name, new_name) == terminals.end()) {
         throw std::invalid_argument("Cannot find terminal: " + old_name);
@@ -119,8 +209,7 @@ void cellview::rename_pin(const std::string &old_name, const std::string &new_na
 
 void cellview::add_pin(const std::string &new_name, enum_t term_type) {
     // check the pin name is legal.  Parse will throw exception if not passed
-    spirit::ast::name ast;
-    parse(new_name, spirit::name(), ast);
+    auto ast = util::parse_cdba_name_unit(new_name);
 
     // check the pin name does not exist already
     if (terminals.find(new_name) != terminals.end()) {
@@ -166,16 +255,14 @@ void cellview::rename_instance(const std::string &old_name, std::string new_name
         throw std::invalid_argument(fmt::format("instance {} already exists.", new_name));
     }
     // check the new name is legal.  Parse will throw exception if not passed
-    spirit::ast::name_rep new_ast;
-    parse(new_name, spirit::name_rep(), new_ast);
+    auto new_ast = util::parse_cdba_name_rep(new_name);
 
     auto iter = instances.replace_key(old_name, new_name);
     if (iter == instances.end())
         throw std::invalid_argument("Cannot find instance: " + old_name);
 
     // resize nets if necessary
-    spirit::ast::name_rep old_ast;
-    parse(old_name, spirit::name_rep(), old_ast);
+    auto old_ast = util::parse_cdba_name_rep(old_name);
     auto old_size = old_ast.size();
     auto new_size = new_ast.size();
     if (old_size != new_size) {
