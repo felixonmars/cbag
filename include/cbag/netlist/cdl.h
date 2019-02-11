@@ -30,7 +30,7 @@ template <> struct traits::nstream<cdl_stream> {
     static void write_end(type &stream);
 
     static void write_cv_header(type &stream, const std::string &name,
-                                const sch::cellview_info &info);
+                                const sch::cellview_info &info, bool shell);
 
     static void write_cv_end(type &stream, const std::string &name);
 

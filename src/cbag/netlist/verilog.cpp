@@ -42,14 +42,14 @@ void traits::nstream<verilog_stream>::write_end(type &stream) {}
 void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &terms,
                     bool &has_prev_term, const char *prefix) {
     for (const auto &term : terms) {
-        spirit::ast::name_unit ast = util::parse_cdba_name_unit(term);
+        auto ast = util::parse_cdba_name_unit(term);
 
         lstream b;
         b << prefix << "wire";
         if (ast.is_vector()) {
             if (ast.idx_range.step != 1) {
                 throw std::invalid_argument(
-                    "Verilog does not support port with non-unity step size: " + term);
+                    "Verilog does not support buses with non-unity step size: " + term);
             }
             b << fmt::format("[{}:{}]", ast.idx_range.start, ast.idx_range.get_stop_include());
         }
@@ -64,7 +64,7 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
 }
 
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
-                                                      const sch::cellview_info &info) {
+                                                      const sch::cellview_info &info, bool shell) {
     stream.out_file << std::endl << std::endl;
 
     // write module declaration
@@ -79,6 +79,21 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     if (has_prev_term)
         stream.out_file << std::endl;
     stream.out_file << ");" << std::endl;
+
+    if (!info.nets.empty() && !shell) {
+        // write intermediate nets
+        stream.out_file << std::endl;
+        for (const auto &net_name : info.nets) {
+            stream.out_file << "wire";
+
+            auto ast = util::parse_cdba_name_unit(net_name);
+            if (ast.is_vector()) {
+                stream.out_file << fmt::format(" [{}:{}]", ast.idx_range.start,
+                                               ast.idx_range.get_stop_include());
+            }
+            stream.out_file << ' ' << ast.base << ';' << std::endl;
+        }
+    }
 }
 
 void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name) {

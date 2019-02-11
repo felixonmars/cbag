@@ -35,7 +35,7 @@ template <typename T> struct nstream {
     static void write_end(type &stream) {}
 
     static void write_cv_header(type &stream, const std::string &name,
-                                const sch::cellview_info &info) {}
+                                const sch::cellview_info &info, bool shell) {}
 
     static void write_cv_end(type &stream, const std::string &name) {}
 
@@ -50,7 +50,7 @@ template <typename T> struct nstream {
 template <typename Stream, typename = typename traits::nstream<Stream>::type>
 void add_cellview(Stream &stream, const std::string &name, const sch::cellview &cv,
                   const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell) {
-    traits::nstream<Stream>::write_cv_header(stream, name, info);
+    traits::nstream<Stream>::write_cv_header(stream, name, info, shell);
     if (!shell) {
         for (auto const &p : cv.instances) {
             const sch::instance &inst = *(p.second);
