@@ -115,8 +115,8 @@ void write_netlist(const ContentList &name_cv_list, const std::string &fname, de
         break;
     case design_output::SPECTRE:
         logger->info("Writing Spectre netlist: {}", fname);
-        write_netlist_helper(name_cv_list, spectre_stream(fname, rmin), flat, shell, netlist_map,
-                             inc_list, append_file, *logger);
+        write_netlist_helper(name_cv_list, spectre_stream(fname, rmin), flat, shell, top_subckt,
+                             netlist_map, inc_list, append_file, *logger);
         break;
     default:
         throw std::invalid_argument(

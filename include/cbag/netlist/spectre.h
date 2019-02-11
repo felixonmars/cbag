@@ -30,9 +30,9 @@ template <> struct traits::nstream<spectre_stream> {
     static void write_end(type &stream);
 
     static void write_cv_header(type &stream, const std::string &name,
-                                const sch::cellview_info &info);
+                                const sch::cellview_info &info, bool shell, bool write_subckt);
 
-    static void write_cv_end(type &stream, const std::string &name);
+    static void write_cv_end(type &stream, const std::string &name, bool write_subckt);
 
     static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info);

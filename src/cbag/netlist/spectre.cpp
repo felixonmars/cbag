@@ -58,21 +58,29 @@ void get_cv_pins(lstream &b, const std::vector<std::string> &names) {
     }
 }
 void traits::nstream<spectre_stream>::write_cv_header(type &stream, const std::string &name,
-                                                  const sch::cellview_info &info) {
-    lstream b;
+                                                  const sch::cellview_info &info, bool shell,
+                                                  bool write_subckt) {
     stream.out_file << std::endl << std::endl;
-    b << "subckt";
-    b << name;
-    get_cv_pins(b, info.in_terms);
-    get_cv_pins(b, info.out_terms);
-    get_cv_pins(b, info.io_terms);
+    if (write_subckt) {
+        lstream b;
+        b << "subckt";
+        b << name;
+        get_cv_pins(b, info.in_terms);
+        get_cv_pins(b, info.out_terms);
+        get_cv_pins(b, info.io_terms);
 
-    // write definition line
-    b.to_file(stream.out_file, spirit::namespace_cdba{});
+        // write definition line
+        b.to_file(stream.out_file, spirit::namespace_cdba{});
+    }
 }
 
-void traits::nstream<spectre_stream>::write_cv_end(type &stream, const std::string &name) {
-    stream.out_file << "ends " << name << std::endl;
+void traits::nstream<spectre_stream>::write_cv_end(type &stream, const std::string &name,
+                                                   bool write_subckt) {
+    if (write_subckt) {
+        stream.out_file << "ends " << name << std::endl;
+    } else {
+        stream.out_file << std::endl;
+    }
 }
 
 void append_nets1(lstream &b, const std::string &inst_name, const sch::instance &inst,
