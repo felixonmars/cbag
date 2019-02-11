@@ -72,7 +72,7 @@ void traits::nstream<spectre_stream>::write_cv_header(type &stream, const std::s
 }
 
 void traits::nstream<spectre_stream>::write_cv_end(type &stream, const std::string &name) {
-    stream.out_file << "ends" << std::endl;
+    stream.out_file << "ends " << name << std::endl;
 }
 
 void append_nets1(lstream &b, const std::string &inst_name, const sch::instance &inst,
