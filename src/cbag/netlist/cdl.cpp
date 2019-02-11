@@ -78,7 +78,8 @@ void get_cv_term_bits(lstream &b, lstream &b2, const std::vector<std::string> &n
     }
 }
 void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::string &name,
-                                                  const sch::cellview_info &info, bool shell) {
+                                                  const sch::cellview_info &info, bool shell,
+                                                  bool write_subckt) {
     lstream b;
     stream.out_file << std::endl << std::endl;
     b << ".SUBCKT";
@@ -95,7 +96,8 @@ void traits::nstream<cdl_stream>::write_cv_header(type &stream, const std::strin
     b2.to_file(stream.out_file, spirit::namespace_cdl_cmd{});
 }
 
-void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &name) {
+void traits::nstream<cdl_stream>::write_cv_end(type &stream, const std::string &name,
+                                               bool write_subckt) {
     stream.out_file << ".ENDS" << std::endl;
 }
 

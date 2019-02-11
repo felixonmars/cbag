@@ -24,8 +24,9 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
 
 template <class ContentList, class N, typename = IsNetlister<N>>
 void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat, bool shell,
-                          netlist_map_t &netlist_map, const std::vector<std::string> &inc_list,
-                          const std::string &append_file, spdlog::logger &logger) {
+                          bool top_subckt, netlist_map_t &netlist_map,
+                          const std::vector<std::string> &inc_list, const std::string &append_file,
+                          spdlog::logger &logger) {
 
     traits::nstream<N>::write_header(stream, inc_list, shell);
 
@@ -45,7 +46,9 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
     auto stop = name_cv_list.end();
     decltype(name_cv_list.size()) idx = 0;
     for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
-        if (!shell || idx == last_idx) {
+        bool is_top = (idx == last_idx);
+        if (!shell || is_top) {
+            bool write_subckt = top_subckt || !is_top;
             auto &cur_pair = *iter;
             const auto &cv_ptr = cur_pair.second.first;
             if (cv_ptr) {
@@ -56,7 +59,8 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
                 if (cur_netlist.empty()) {
                     // add this cellview to netlist
-                    add_cellview(stream, cur_name, *cv_ptr, cv_info, netlist_map, shell);
+                    add_cellview(stream, cur_name, *cv_ptr, cv_info, netlist_map, shell,
+                                 write_subckt);
                 } else {
                     add_cellview(stream, cur_netlist);
                 }
@@ -83,7 +87,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
 template <class ContentList>
 void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
-                   bool flat = true, bool shell = false, cnt_t rmin = 2000,
+                   bool flat = true, bool shell = false, bool top_subckt = true, cnt_t rmin = 2000,
                    const std::string &prim_fname = "") {
     auto logger = cbag::get_cbag_logger();
 
@@ -95,18 +99,18 @@ void write_netlist(const ContentList &name_cv_list, const std::string &fname, de
     switch (format) {
     case design_output::CDL:
         logger->info("Writing CDL netlist: {}", fname);
-        write_netlist_helper(name_cv_list, cdl_stream(fname, rmin), flat, shell, netlist_map,
-                             inc_list, append_file, *logger);
+        write_netlist_helper(name_cv_list, cdl_stream(fname, rmin), flat, shell, top_subckt,
+                             netlist_map, inc_list, append_file, *logger);
         break;
     case design_output::VERILOG:
         logger->info("Writing Verilog netlist: {}", fname);
-        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, netlist_map,
-                             inc_list, append_file, *logger);
+        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, top_subckt,
+                             netlist_map, inc_list, append_file, *logger);
         break;
     case design_output::SYSVERILOG:
         logger->info("Writing System Verilog netlist: {}", fname);
-        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, netlist_map,
-                             inc_list, append_file, *logger);
+        write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, top_subckt,
+                             netlist_map, inc_list, append_file, *logger);
         break;
     default:
         throw std::invalid_argument(

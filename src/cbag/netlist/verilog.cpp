@@ -64,7 +64,8 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
 }
 
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
-                                                      const sch::cellview_info &info, bool shell) {
+                                                      const sch::cellview_info &info, bool shell,
+                                                      bool write_subckt) {
     stream.out_file << std::endl << std::endl;
 
     // write module declaration
@@ -96,7 +97,8 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     }
 }
 
-void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name) {
+void traits::nstream<verilog_stream>::write_cv_end(type &stream, const std::string &name,
+                                                   bool write_subckt) {
 
     stream.out_file << std::endl << "endmodule" << std::endl;
 }

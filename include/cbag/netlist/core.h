@@ -35,9 +35,9 @@ template <typename T> struct nstream {
     static void write_end(type &stream) {}
 
     static void write_cv_header(type &stream, const std::string &name,
-                                const sch::cellview_info &info, bool shell) {}
+                                const sch::cellview_info &info, bool shell, bool write_subckt) {}
 
-    static void write_cv_end(type &stream, const std::string &name) {}
+    static void write_cv_end(type &stream, const std::string &name, bool write_subckt) {}
 
     static void write_instance(type &stream, const std::string &name, const sch::instance &inst,
                                const sch::cellview_info &info) {}
@@ -49,8 +49,9 @@ template <typename T> struct nstream {
 
 template <typename Stream, typename = typename traits::nstream<Stream>::type>
 void add_cellview(Stream &stream, const std::string &name, const sch::cellview &cv,
-                  const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell) {
-    traits::nstream<Stream>::write_cv_header(stream, name, info, shell);
+                  const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell,
+                  bool write_subckt) {
+    traits::nstream<Stream>::write_cv_header(stream, name, info, shell, write_subckt);
     if (!shell) {
         for (auto const &p : cv.instances) {
             const sch::instance &inst = *(p.second);
@@ -76,7 +77,7 @@ void add_cellview(Stream &stream, const std::string &name, const sch::cellview &
             }
         }
     }
-    traits::nstream<Stream>::write_cv_end(stream, name);
+    traits::nstream<Stream>::write_cv_end(stream, name, write_subckt);
 }
 
 template <typename Stream, typename = typename traits::nstream<Stream>::type>
