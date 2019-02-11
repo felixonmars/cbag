@@ -16,6 +16,7 @@ namespace spirit {
 namespace ast {
 struct name_unit;
 struct name;
+struct name_rep;
 struct namespace_info;
 } // namespace ast
 } // namespace spirit
@@ -27,6 +28,8 @@ namespace util {
 spirit::ast::name_unit parse_cdba_name_unit(const std::string &source);
 
 spirit::ast::name parse_cdba_name(const std::string &source);
+
+spirit::ast::name_rep parse_cdba_name_rep(const std::string &source);
 
 } // namespace util
 } // namespace cbag

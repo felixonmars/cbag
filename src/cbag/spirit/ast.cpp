@@ -47,9 +47,9 @@ range::range() {}
 
 range::range(cnt_t start, cnt_t stop, cnt_t step) : start(start), stop(stop), step(step) {}
 
-bool range::empty() const { return step == 0; }
+bool range::empty() const noexcept { return step == 0; }
 
-cnt_t range::size() const {
+cnt_t range::size() const noexcept {
     if (step == 0) {
         return 0;
     } else if (stop >= start) {
@@ -57,6 +57,15 @@ cnt_t range::size() const {
     } else {
         return (start - stop + step) / step;
     }
+}
+
+std::array<cnt_t, 2> range::bounds() const noexcept {
+    if (step == 0)
+        return {0, 0};
+    else if (stop >= start)
+        return {start, get_stop_include() + 1};
+    else
+        return {get_stop_include(), start + 1};
 }
 
 cnt_t range::get_stop_include() const {
@@ -124,6 +133,14 @@ std::string name_unit::to_string(namespace_verilog) const {
     } else {
         return base;
     }
+}
+
+std::string to_string(const std::string &base, std::array<cnt_t, 2> bounds, namespace_cdba) {
+    if (base.empty() || bounds[0] == bounds[1])
+        return base;
+    if (bounds[1] - bounds[0] == 1)
+        return fmt::format("{}<{}>", base, bounds[0]);
+    return fmt::format("{}<{}:{}>", base, bounds[0], bounds[1]);
 }
 
 std::string get_name_bit_helper(const name_unit &nu, cnt_t index, bool is_id, const char *fmt_str) {
