@@ -137,6 +137,11 @@ std::pair<std::string, cbag::value_t> read_app_def(oa::oaDesign *dsn, oa::oaAppD
     }
 }
 
+bool save_app_def(const std::string &name) {
+    return name == "_dbLastSavedCounter" || name == "_dbvCvTimeStamp" || name == "cdbRevision" ||
+           name == "cdnSPDesignMajorVersion";
+}
+
 // Read methods for shapes
 
 cbag::sch::rectangle read_rect(oa::oaRect *p, std::string &&net) {
@@ -523,7 +528,11 @@ cbag::sch::cellview read_sch_cellview(const oa::oaNativeNS &ns_native, const oa:
     oa::oaIter<oa::oaAppDef> appdef_iter(p->getAppDefs());
     oa::oaAppDef *appdef_ptr;
     while ((appdef_ptr = appdef_iter.getNext()) != nullptr) {
-        ans.app_defs.insert(read_app_def(p, appdef_ptr));
+        auto cur_appdef = read_app_def(p, appdef_ptr);
+        // only read the following AppDefs
+        if (save_app_def(cur_appdef.first)) {
+            ans.app_defs.insert(std::move(cur_appdef));
+        }
     }
     logger.info("AppDefs end");
 
