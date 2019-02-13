@@ -21,6 +21,7 @@ namespace sch {
  */
 struct cellview_info {
   public:
+    std::string lib_name;
     std::string cell_name;
     std::vector<std::string> in_terms;
     std::vector<std::string> out_terms;

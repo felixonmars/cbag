@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <variant>
+#include <map>
 
 #include <fmt/core.h>
 
@@ -99,7 +100,20 @@ void append_nets1(lstream &b, const std::string &inst_name, const sch::instance 
 template <class OutIter>
 void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
                               const sch::cellview_info &info) {
-    *iter = inst.cell_name;
+    // map CDF cell names to Spectre cell names
+    std::map <std::string, std::string> cdf2spectre_names;
+    cdf2spectre_names["cap"] = "capacitor";
+    cdf2spectre_names["idc"] = "isource";
+    cdf2spectre_names["res"] = "resistor";
+    cdf2spectre_names["vdc"] = "vsource";
+
+    // change CDF names to Spectre names for analogLib cells
+    auto itr = cdf2spectre_names.find(inst.cell_name);
+    if (itr == cdf2spectre_names.end()) {
+        *iter = inst.cell_name;
+    } else {
+        *iter = itr->second;
+    }
 
     // get default parameter values
     param_map par_map(info.props);
@@ -107,9 +121,24 @@ void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
     for (auto const &pair : inst.params) {
         par_map.insert_or_assign(pair.first, pair.second);
     }
+
+    // map CDF properties to Spectre properties
+    std::map <std::string, std::string> cdf2spectre_props;
+    cdf2spectre_props["acm"] = "mag";
+    cdf2spectre_props["acp"] = "phase";
+    cdf2spectre_props["idc"] = "dc";
+    cdf2spectre_props["srcType"] = "type";
+    cdf2spectre_props["vdc"] = "dc";
+
     // write instance parameters
     for (auto const &pair : par_map) {
-        std::visit(write_param_visitor(iter, pair.first), pair.second);
+        // map CDF parameters to Spectre parameters
+        auto itr2 = cdf2spectre_props.find(pair.first);
+        if (itr2 == cdf2spectre_props.end()) {
+            std::visit(write_param_visitor(iter, pair.first), pair.second);
+        } else {
+            std::visit(write_param_visitor(iter, itr2->second), pair.second);
+        }
     }
 }
 

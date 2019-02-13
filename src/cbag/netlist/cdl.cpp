@@ -154,46 +154,48 @@ void get_term_net_pairs(term_net_vec_t &term_net_vec, const std::string &inst_na
 void traits::nstream<cdl_stream>::write_instance(type &stream, const std::string &name,
                                                  const sch::instance &inst,
                                                  const sch::cellview_info &info) {
-    spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
-    auto n = inst_ast.size();
+    if (inst.lib_name != "analogLib") {
+        spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
+        auto n = inst_ast.size();
 
-    if (n == 1) {
-        // normal instance, just write normally
-        lstream b;
-        b << name;
-        append_nets(b, name, inst, info.in_terms);
-        append_nets(b, name, inst, info.out_terms);
-        append_nets(b, name, inst, info.io_terms);
-        cbag::netlist::write_instance_cell_name(b.get_back_inserter(), inst, info);
-        b.to_file(stream.out_file, spirit::namespace_cdba{});
-    } else {
-        // arrayed instance, need to split up
-        // get name bits of terminals/nets
-        term_net_vec_t term_net_vec;
-        get_term_net_pairs(term_net_vec, name, inst, info.in_terms);
-        get_term_net_pairs(term_net_vec, name, inst, info.out_terms);
-        get_term_net_pairs(term_net_vec, name, inst, info.io_terms);
-        // get cell name tokens
-        std::vector<std::string> tokens;
-        tokens.reserve(2);
-        cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
-        // array instance
-        for (decltype(n) inst_idx = 0; inst_idx < n; ++inst_idx) {
+        if (n == 1) {
+            // normal instance, just write normally
             lstream b;
-            // write instance name
-            b << inst_ast.get_name_bit(inst_idx, true, spirit::namespace_cdba{});
-            // write instance nets
-            for (const auto &pair : term_net_vec) {
-                auto term_n = pair.first;
-                auto net_idx = inst_idx * term_n;
-                auto stop_idx = net_idx + term_n;
-                for (; net_idx < stop_idx; ++net_idx) {
-                    b << pair.second[net_idx];
-                }
-            }
-            // write instance cell name
-            b << tokens;
+            b << name;
+            append_nets(b, name, inst, info.in_terms);
+            append_nets(b, name, inst, info.out_terms);
+            append_nets(b, name, inst, info.io_terms);
+            cbag::netlist::write_instance_cell_name(b.get_back_inserter(), inst, info);
             b.to_file(stream.out_file, spirit::namespace_cdba{});
+        } else {
+            // arrayed instance, need to split up
+            // get name bits of terminals/nets
+            term_net_vec_t term_net_vec;
+            get_term_net_pairs(term_net_vec, name, inst, info.in_terms);
+            get_term_net_pairs(term_net_vec, name, inst, info.out_terms);
+            get_term_net_pairs(term_net_vec, name, inst, info.io_terms);
+            // get cell name tokens
+            std::vector<std::string> tokens;
+            tokens.reserve(2);
+            cbag::netlist::write_instance_cell_name(std::back_inserter(tokens), inst, info);
+            // array instance
+            for (decltype(n) inst_idx = 0; inst_idx < n; ++inst_idx) {
+                lstream b;
+                // write instance name
+                b << inst_ast.get_name_bit(inst_idx, true, spirit::namespace_cdba{});
+                // write instance nets
+                for (const auto &pair : term_net_vec) {
+                    auto term_n = pair.first;
+                    auto net_idx = inst_idx * term_n;
+                    auto stop_idx = net_idx + term_n;
+                    for (; net_idx < stop_idx; ++net_idx) {
+                        b << pair.second[net_idx];
+                    }
+                }
+                // write instance cell name
+                b << tokens;
+                b.to_file(stream.out_file, spirit::namespace_cdba{});
+            }
         }
     }
 }
