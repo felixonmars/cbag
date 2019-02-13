@@ -240,6 +240,14 @@ void cellview::add_pin(const std::string &new_name, enum_t term_type) {
     throw std::runtime_error("add_pin functionality not implemented yet.  See developer.");
 }
 
+void cellview::set_pin_attribute(const std::string &pin_name, const std::string &key,
+                                 const std::string &val) {
+    auto iter = terminals.find(pin_name);
+    if (iter == terminals.end())
+        throw std::invalid_argument(fmt::format("pin {} not found.", pin_name));
+    iter->second.attrs.emplace(key, val);
+}
+
 bool cellview::remove_pin(const std::string &name) {
     auto success = terminals.erase(name) > 0;
     // remove symbol pin

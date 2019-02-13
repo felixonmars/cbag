@@ -82,7 +82,11 @@ SCENARIO("netlist generation", "[cbag]") {
         CAPTURE(cell_name);
         CAPTURE(ext_str);
         THEN("writes netlist correctly") {
-            cbag::netlist::write_netlist(name_cv_list, fname, format, flat, shell, rmin);
+            std::vector<std::string> inc_list;
+            std::string append_file;
+            cbag::netlist::netlist_map_t netlist_map;
+            cbag::netlist::write_netlist(name_cv_list, fname, format, netlist_map, append_file,
+                                         inc_list, flat, shell, rmin);
             std::string output_str = read_file(fname);
             std::string expect_str = read_file(expect_fname);
             REQUIRE(output_str == expect_str);

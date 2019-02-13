@@ -64,6 +64,9 @@ struct cellview {
 
     void add_pin(const std::string &new_name, enum_t term_type);
 
+    void set_pin_attribute(const std::string &pin_name, const std::string &key,
+                           const std::string &val);
+
     bool remove_pin(const std::string &name);
 
     void rename_instance(const std::string &old_name, std::string new_name);
