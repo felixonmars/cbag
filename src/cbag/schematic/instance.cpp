@@ -72,13 +72,15 @@ void instance::update_connection(const std::string &inst_name, std::string term,
     update_connection(inst_name, nu.size(), std::move(term), std::move(net));
 }
 
-void instance::update_master(std::string lib, std::string cell, bool prim) {
+void instance::update_master(std::string lib, std::string cell, bool prim, bool keep_connections) {
     lib_name = std::move(lib);
     cell_name = std::move(cell);
     is_primitive = prim;
 
     clear_params();
-    connections.clear();
+
+    if (!keep_connections)
+        connections.clear();
 }
 
 void instance::resize_nets(cnt_t old_size, cnt_t new_size) {

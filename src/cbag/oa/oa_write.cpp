@@ -83,6 +83,12 @@ constexpr auto cell_data = "(promptWidth nil "
 
 constexpr oa::oaByte pin_dir = oacTop | oacBottom | oacLeft | oacRight;
 
+std::string to_string(const oa::oaScalarName &name) {
+    oa::oaString tmp;
+    name.get(tmp);
+    return std::string(tmp);
+}
+
 oa::oaBox get_box(const cbag::box_t &cbag_obj) {
     return {xl(cbag_obj), yl(cbag_obj), xh(cbag_obj), yh(cbag_obj)};
 }
@@ -500,18 +506,45 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
         } else {
             ptr = oa::oaScalarInst::create(block, lib, cell, view, name, inst_xform);
         }
-        for (auto const &term_net_pair : inst->connections) {
-            logger.info("Connecting inst {} terminal {} to {}", inst_name, term_net_pair.first,
-                        term_net_pair.second);
-            term_name.init(ns, term_net_pair.first.c_str());
-            net_name.init(ns, term_net_pair.second.c_str());
+
+        // check instance design master exists
+        auto inst_dsn_ptr = ptr->getMaster();
+        if (!inst_dsn_ptr) {
+            auto msg = fmt::format("Instance {} master {}__{}({}) not found", inst_name,
+                                   to_string(lib), to_string(cell), to_string(view));
+            logger.error(msg);
+            throw std::runtime_error(msg);
+        }
+        auto inst_dsn_blk_ptr = inst_dsn_ptr->getTopBlock();
+        oa::oaIter<oa::oaTerm> inst_dsn_term_iter(inst_dsn_blk_ptr->getTerms());
+        oa::oaTerm *inst_dsn_term_ptr;
+        while ((inst_dsn_term_ptr = inst_dsn_term_iter.getNext()) != nullptr) {
+            oa::oaString term_str_oa;
+            inst_dsn_term_ptr->getName(ns, term_str_oa);
+            auto term_str = std::string(term_str_oa);
+            // find net name corresponding to terminal
+            auto net_iter = inst->connections.find(term_str);
+            if (net_iter == inst->connections.end()) {
+                auto msg = fmt::format("Cannot find net connected to terminal {} of instance {}.  "
+                                       "The instance master is {}__{}({}).",
+                                       term_str, inst_name, to_string(lib), to_string(cell),
+                                       to_string(view));
+                logger.error(msg);
+                throw std::runtime_error(msg);
+            }
+
+            // create oaInstTerm object to establish net connection
+            auto net_str_oa = oa::oaString(net_iter->second.c_str());
+            term_name.init(ns, term_str_oa);
+            net_name.init(ns, net_str_oa);
             auto term_net = oa::oaNet::find(block, net_name);
             if (term_net == nullptr || term_net->isImplicit()) {
                 term_net = oa::oaNet::create(block, net_name);
             }
-            auto inst_term = oa::oaInstTerm::create(term_net, ptr, term_name);
-            auto term = inst_term->getTerm();
-            oa::oaIter<oa::oaPin> pin_iter(term->getPins());
+            oa::oaInstTerm::create(term_net, ptr, term_name);
+
+            // get coordinate of the terminal pin
+            oa::oaIter<oa::oaPin> pin_iter(inst_dsn_term_ptr->getPins());
             auto pin = pin_iter.getNext();
             oa::oaIter<oa::oaPinFig> pin_fig_iter(pin->getFigs());
             auto pin_fig = pin_fig_iter.getNext();
@@ -529,9 +562,9 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
             auto line = oa::oaLine::create(block, sch_conn_layer, sch_conn_purpose, pt_arr);
             line->addToNet(term_net);
             oa::oaPoint mid(x + sch_stub_len2, y + sch_stub_len2);
-            auto text = oa::oaText::create(block, sch_conn_layer, sch_net_purpose,
-                                           term_net_pair.second.c_str(), mid, sch_net_align,
-                                           sch_net_orient, sch_net_font, sch_net_height);
+            auto text =
+                oa::oaText::create(block, sch_conn_layer, sch_net_purpose, net_str_oa, mid,
+                                   sch_net_align, sch_net_orient, sch_net_font, sch_net_height);
             text->addToNet(term_net);
         }
 
@@ -602,7 +635,7 @@ void create_lay_inst(const oa::oaCdbaNS &ns, oa::oaBlock *blk, const std::string
     auto xform = get_xform(inst.xform);
     if (inst.nx > 1 || inst.ny > 1) {
         // convert BAG array parameters to OA array parameters
-        auto [oa_nx, oa_ny, oa_spx, oa_spy] =
+        auto[oa_nx, oa_ny, oa_spx, oa_spy] =
             cbag::convert_array(inst.xform, inst.nx, inst.ny, inst.spx, inst.spy);
         oa::oaArrayInst::create(blk, lib_oa, cell_oa, view_oa, inst_name, xform, oa_spx, oa_spy,
                                 oa_ny, oa_nx, params_ptr);
@@ -687,7 +720,7 @@ void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock 
 void create_lay_label(oa::oaBlock *blk, cbag::lay_t lay, cbag::purp_t purp,
                       cbag::transformation &&xform, const std::string &text,
                       cbag::offset_t height) {
-    auto [x, y] = cbag::location(xform);
+    auto[x, y] = cbag::location(xform);
     oa::oaPoint center(x, y);
     auto ori = get_orient(cbag::orient(xform));
 
@@ -710,13 +743,13 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 
     logger.info("Export layout instances.");
     for (auto iter = cv.begin_inst(); iter != cv.end_inst(); ++iter) {
-        auto &[inst_name, inst] = *iter;
+        auto & [ inst_name, inst ] = *iter;
         create_lay_inst(ns, blk, inst_name, inst, lib_name.c_str(), view_name.c_str(), rename_map);
     }
 
     logger.info("Export layout geometries.");
     for (auto iter = cv.begin_geometry(); iter != cv.end_geometry(); ++iter) {
-        auto &[layer_key, geo] = *iter;
+        auto & [ layer_key, geo ] = *iter;
         create_lay_geometry(logger, blk, layer_key.first, layer_key.second, geo);
     }
 
@@ -758,7 +791,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     auto purp = tech_ptr->get_pin_purpose();
     auto make_pin_obj = tech_ptr->get_make_pin();
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
-        auto &[lay, pin_list] = *iter;
+        auto & [ lay, pin_list ] = *iter;
         for (auto const &pin : pin_list) {
             create_lay_pin(logger, ns, blk, lay, purp, pin, make_pin_obj);
         }
@@ -767,7 +800,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     logger.info("Export layout labels.");
     for (auto iter = cv.begin_label(); iter != cv.end_label(); ++iter) {
         auto lab = *iter;
-        auto [lay, purp] = lab.get_key();
+        auto[lay, purp] = lab.get_key();
         create_lay_label(blk, lay, purp, lab.get_xform(), lab.get_text(), lab.get_height());
     }
 
