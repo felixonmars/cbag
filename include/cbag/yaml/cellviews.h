@@ -29,6 +29,7 @@
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview, lib_name, cell_name, view_name, bbox, terminals,
                           shapes, instances, props, app_defs)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview_info, cell_name, in_terms, out_terms, io_terms, props)
+BOOST_FUSION_ADAPT_STRUCT(cbag::sch::cellview_info, cell_name, in_terms, out_terms, io_terms, nets,
+                          props)
 
 #endif // CBAG_YAML_CELLVIEWS_H

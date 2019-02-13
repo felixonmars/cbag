@@ -87,14 +87,10 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
 template <class ContentList>
 void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
-                   bool flat = true, bool shell = false, bool top_subckt = true, cnt_t rmin = 2000,
-                   const std::string &prim_fname = "") {
+                   netlist_map_t &netlist_map, const std::string &append_file,
+                   const std::vector<std::string> &inc_list, bool flat = true, bool shell = false,
+                   bool top_subckt = true, cnt_t rmin = 2000) {
     auto logger = cbag::get_cbag_logger();
-
-    std::vector<std::string> inc_list;
-    std::string append_file;
-    netlist_map_t netlist_map;
-    read_prim_info(prim_fname, inc_list, netlist_map, append_file, format);
 
     switch (format) {
     case design_output::CDL:
