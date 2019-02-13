@@ -51,7 +51,7 @@ struct instance {
 
     void update_connection(const std::string &inst_name, std::string term, std::string net);
 
-    void update_master(std::string lib, std::string cell, bool prim = false);
+    void update_master(std::string lib, std::string cell, bool prim, bool keep_connections);
 
     void resize_nets(cnt_t old_size, cnt_t new_size);
 };
