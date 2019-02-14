@@ -114,7 +114,7 @@ void register_unique_name_units(const spirit::ast::name &ast, nu_range_map_t &ne
 }
 
 cellview_info cellview::get_info(const std::string &name) const {
-    cellview_info ans(name, false);
+    cellview_info ans(lib_name, name, false);
 
     nu_range_map_t term_range_map, net_range_map;
 

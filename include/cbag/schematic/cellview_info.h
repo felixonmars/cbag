@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cbag/common/param_map.h>
+#include <cbag/util/sorted_map.h>
 
 namespace cbag {
 namespace sch {
@@ -21,6 +22,7 @@ namespace sch {
  */
 struct cellview_info {
   public:
+    std::string lib_name;
     std::string cell_name;
     std::vector<std::string> in_terms;
     std::vector<std::string> out_terms;
@@ -28,10 +30,11 @@ struct cellview_info {
     std::vector<std::string> nets;
     param_map props;
     bool is_prim = false;
+    util::sorted_map<std::string, util::sorted_map<std::string, std::string>> term_attrs;
 
     cellview_info();
 
-    cellview_info(std::string name, bool is_prim);
+    cellview_info(std::string lib_name, std::string cell_name, bool is_prim);
 };
 
 } // namespace sch

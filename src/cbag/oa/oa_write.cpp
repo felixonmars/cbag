@@ -450,7 +450,7 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 
     // build term order
     std::stringstream term_order;
-    auto cv_info = cv.get_info(cv.cell_name);
+    auto cv_info = cv.get_info(cell_name);
     auto tmp1 = boost::range::join(cv_info.in_terms, cv_info.out_terms);
     auto tmp2 = boost::range::join(tmp1, cv_info.io_terms);
     auto cursor = tmp2.begin();
