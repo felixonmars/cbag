@@ -10,8 +10,6 @@
 #include <utility>
 #include <variant>
 
-#include <boost/range/join.hpp>
-
 #include <cbag/logging/spdlog.h>
 
 #include <cbag/util/sorted_map.h>
@@ -434,6 +432,49 @@ void write_sch_cell_data(const cbag::sch::cellview &cv, const oa::oaScalarName &
     cv_data->close();
 }
 
+std::string get_cv_term_order(const cbag::sch::cellview &cv) {
+    auto term_vec = std::vector<std::string>();
+    auto tmp1 = std::vector<std::string>();
+    auto tmp2 = std::vector<std::string>();
+
+    auto n = cv.terminals.size();
+    term_vec.reserve(n);
+    tmp1.reserve(n);
+    tmp2.reserve(n);
+
+    for (auto const & [ term_name, term_fig ] : cv.terminals) {
+        switch (term_fig.ttype) {
+        case cbag::term_type::input:
+            term_vec.push_back(term_name);
+            break;
+        case cbag::term_type::output:
+            tmp1.push_back(term_name);
+            break;
+        default:
+            // this cellview is validated, term_type guaranteed to be supported
+            tmp2.push_back(term_name);
+            break;
+        }
+    }
+    term_vec.insert(term_vec.end(), tmp1.begin(), tmp1.end());
+    term_vec.insert(term_vec.end(), tmp2.begin(), tmp2.end());
+
+    std::stringstream term_order;
+    auto cursor = term_vec.begin();
+    auto stop = term_vec.end();
+    term_order << '(';
+    if (cursor != stop) {
+        term_order << '"' << *cursor << '"';
+        ++cursor;
+    }
+    for (; cursor != stop; ++cursor) {
+        term_order << " \"" << *cursor << '"';
+    }
+    term_order << ')';
+
+    return term_order.str();
+}
+
 void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         spdlog::logger &logger, const std::string &lib_name,
                         const std::string &cell_name, const std::string &view_name, bool is_sch,
@@ -448,23 +489,8 @@ void write_sch_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
 
     oa::oaBlock *block = oa::oaBlock::create(dsn);
 
-    // build term order
-    std::stringstream term_order;
-    auto cv_info = cv.get_info(cell_name);
-    auto tmp1 = boost::range::join(cv_info.in_terms, cv_info.out_terms);
-    auto tmp2 = boost::range::join(tmp1, cv_info.io_terms);
-    auto cursor = tmp2.begin();
-    auto stop = tmp2.end();
-    term_order << '(';
-    if (cursor != stop) {
-        term_order << '"' << *cursor << '"';
-        ++cursor;
-    }
-    for (; cursor != stop; ++cursor) {
-        term_order << " \"" << *cursor << '"';
-    }
-    term_order << ')';
-    auto term_order_str = term_order.str();
+    // get term order
+    auto term_order_str = get_cv_term_order(cv);
 
     int pin_cnt = 0;
     logger.info("Writing terminals");

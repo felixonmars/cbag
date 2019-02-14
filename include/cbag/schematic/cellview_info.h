@@ -30,7 +30,7 @@ struct cellview_info {
     std::vector<std::string> nets;
     param_map props;
     bool is_prim = false;
-    util::sorted_map<std::string, util::sorted_map<std::string, std::string>> term_attrs;
+    util::sorted_map<std::string, util::sorted_map<std::string, std::string>> term_net_attrs;
 
     cellview_info();
 
