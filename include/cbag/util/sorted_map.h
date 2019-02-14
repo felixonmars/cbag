@@ -83,6 +83,9 @@ template <class Key, class T, class Compare = std::less<Key>> class sorted_map {
     friend bool operator==(const sorted_map &lhs, const sorted_map &rhs) {
         return lhs.data_ == rhs.data_;
     }
+    friend bool operator!=(const sorted_map &lhs, const sorted_map &rhs) {
+        return lhs.data_ != rhs.data_;
+    }
 
     template <class K> const_iterator find(const K &x) const { return data_.find(x); }
     template <class K> iterator find(const K &x) { return data_.find(x); }

@@ -51,14 +51,38 @@ void record_cv_info(netlist_map_t &info_map, const std::string &lib_name,
 
 using nu_range_map_t = cbag::util::sorted_map<std::string, std::array<cnt_t, 2>>;
 
-void register_unique_name_units(const spirit::ast::name_unit &ast, const attr_map_t *ptr,
+const attr_map_t *get_attrs(const util::sorted_map<std::string, attr_map_t> &table,
+                            const std::string &base_name) {
+    auto iter = table.find(base_name);
+    if (iter == table.end())
+        return nullptr;
+    return &iter->second;
+}
+
+void register_unique_name_units(const spirit::ast::name_unit &ast, const attr_map_t *attr_ptr,
                                 nu_range_map_t &net_range_map, const nu_range_map_t &term_range_map,
                                 util::sorted_map<std::string, attr_map_t> &attr_map) {
+    // check that we do not have a conflict in net attribute
+    if (attr_ptr) {
+        auto attr_ptr_ref = get_attrs(attr_map, ast.base);
+        if (attr_ptr_ref) {
+            if (*attr_ptr_ref != *attr_ptr) {
+                auto msg = fmt::format("Terminal/net {} has conflicting attribute.", ast.base);
+                auto logger = cbag::get_cbag_logger();
+                logger->error(msg);
+                throw std::runtime_error(msg);
+            }
+        } else {
+            // update attribute table
+            attr_map.emplace(ast.base, *attr_ptr);
+        }
+    }
+
     auto net_bounds = ast.idx_range.bounds();
     auto term_iter = term_range_map.find(ast.base);
     if (term_iter != term_range_map.end()) {
         // this net is connected to a terminal
-        // verify that net range does not go out of bounds of terminal range
+        // check that net range does not go out of bounds of terminal range
         auto & [ term_start, term_stop ] = term_iter->second;
         auto term_scalar = (term_start == term_stop);
         auto net_scalar = (net_bounds[0] == net_bounds[1]);
@@ -113,16 +137,8 @@ void register_unique_name_units(const spirit::ast::name &ast, const attr_map_t *
     }
 }
 
-const attr_map_t *get_attrs(const util::sorted_map<std::string, attr_map_t> &table,
-                            const std::string &base_name) {
-    auto iter = table.find(base_name);
-    if (iter == table.end())
-        return nullptr;
-    return &iter->second;
-}
-
 cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_name,
-                                  const netlist_map_t &info_map) {
+                                  const netlist_map_t &info_map, bool compute_net_attrs) {
     cellview_info ans(cv.lib_name, cell_name, false);
 
     nu_range_map_t term_range_map, net_range_map;
@@ -153,11 +169,15 @@ cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_na
 
     // get all the nets
     for (auto const & [ inst_name, inst_ptr ] : cv.instances) {
-        auto &inst_cv_info = get_cv_info(info_map, inst_ptr->lib_name, inst_ptr->cell_name);
+        auto inst_cv_info_ptr =
+            (compute_net_attrs) ? &get_cv_info(info_map, inst_ptr->lib_name, inst_ptr->cell_name)
+                                : nullptr;
         for (auto const & [ inst_term, net ] : inst_ptr->connections) {
             auto term_ast = util::parse_cdba_name_unit(inst_term);
             auto net_ast = util::parse_cdba_name(net);
-            auto attr_ptr = get_attrs(inst_cv_info.term_net_attrs, term_ast.base);
+            auto attr_ptr = (inst_cv_info_ptr)
+                                ? get_attrs(inst_cv_info_ptr->term_net_attrs, term_ast.base)
+                                : nullptr;
             register_unique_name_units(net_ast, attr_ptr, net_range_map, term_range_map,
                                        ans.term_net_attrs);
         }

@@ -51,7 +51,7 @@ void record_cv_info(netlist_map_t &info_map, const std::string &lib_name,
                     const std::string &cell_name, cellview_info &&info);
 
 cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_name,
-                                  const netlist_map_t &info_map);
+                                  const netlist_map_t &info_map, bool compute_net_attrs);
 
 } // namespace sch
 } // namespace cbag

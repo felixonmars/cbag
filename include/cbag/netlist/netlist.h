@@ -49,13 +49,13 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
     for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
         auto is_top = (idx == last_idx);
         auto write_subckt = top_subckt || !is_top;
-        auto &cur_pair = *iter;
-        const auto &cv_ptr = cur_pair.second.first;
+        auto & [ cur_name, cv_netlist_pair ] = *iter;
+        auto & [ cv_ptr, cur_netlist ] = cv_netlist_pair;
         if (cv_ptr) {
-            auto &cur_name = cur_pair.first;
-            auto &cur_netlist = cur_pair.second.second;
-            auto cv_info = sch::get_cv_netlist_info(*cv_ptr, cur_name, netlist_map);
             logger.info("Netlisting cellview: {}__{}", cv_ptr->lib_name, cur_name);
+            // NOTE: we don't have to compute net attributes if a custom netlist is given
+            auto cv_info =
+                sch::get_cv_netlist_info(*cv_ptr, cur_name, netlist_map, cur_netlist.empty());
 
             if (!shell || is_top) {
                 if (cur_netlist.empty()) {
