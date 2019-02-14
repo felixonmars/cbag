@@ -23,7 +23,6 @@ namespace cbag {
 namespace sch {
 
 struct instance;
-struct cellview_info;
 
 using inst_map_t = cbag::util::sorted_map<std::string, std::unique_ptr<instance>>;
 using conn_list_t = std::vector<std::pair<std::string, std::string>>;
@@ -49,8 +48,6 @@ struct cellview {
 
     cellview(std::string lib_name, std::string cell_name, std::string view_name, coord_t xl,
              coord_t yl, coord_t xh, coord_t yh);
-
-    cellview_info get_info(const std::string &name) const;
 
     void to_file(const std::string &fname) const;
 

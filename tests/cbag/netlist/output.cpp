@@ -84,7 +84,7 @@ SCENARIO("netlist generation", "[cbag]") {
         THEN("writes netlist correctly") {
             std::vector<std::string> inc_list;
             std::string append_file;
-            cbag::netlist::netlist_map_t netlist_map;
+            cbag::sch::netlist_map_t netlist_map;
             cbag::netlist::write_netlist(name_cv_list, fname, format, netlist_map, append_file,
                                          inc_list, flat, shell, rmin);
             std::string output_str = read_file(fname);

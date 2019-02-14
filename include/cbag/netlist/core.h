@@ -11,7 +11,8 @@
 
 #include <fmt/core.h>
 
-#include <cbag/netlist/netlist_map_t.h>
+#include <cbag/schematic/cellview.h>
+#include <cbag/schematic/cellview_info.h>
 
 namespace cbag {
 
@@ -49,31 +50,17 @@ template <typename T> struct nstream {
 
 template <typename Stream, typename = typename traits::nstream<Stream>::type>
 void add_cellview(Stream &stream, const std::string &name, const sch::cellview &cv,
-                  const sch::cellview_info &info, const netlist_map_t &cell_map, bool shell,
+                  const sch::cellview_info &info, const sch::netlist_map_t &cell_map, bool shell,
                   bool write_subckt) {
     traits::nstream<Stream>::write_cv_header(stream, name, info, shell, write_subckt);
     if (!shell) {
         for (auto const &p : cv.instances) {
             const sch::instance &inst = *(p.second);
 
-            // get instance master's information object
-            auto libmap_iter = cell_map.find(inst.lib_name);
-            if (libmap_iter == cell_map.end()) {
-                throw std::invalid_argument(
-                    fmt::format("Cannot find library {} in netlist map for cell {}.  "
-                                "Check your primitives definition file.",
-                                inst.lib_name, inst.cell_name));
-            }
-            auto cellmap_iter = libmap_iter->second.find(inst.cell_name);
-            if (cellmap_iter == libmap_iter->second.end()) {
-                throw std::invalid_argument(fmt::format("Cannot find cell {}__{} in netlist map.",
-                                                        inst.lib_name, inst.cell_name));
-            }
-
+            auto &cv_info = sch::get_cv_info(cell_map, inst.lib_name, inst.cell_name);
             // Only write instance if the name is not empty
-            if (!cellmap_iter->second.cell_name.empty()) {
-                traits::nstream<Stream>::write_instance(stream, p.first, inst,
-                                                        cellmap_iter->second);
+            if (!cv_info.cell_name.empty()) {
+                traits::nstream<Stream>::write_instance(stream, p.first, inst, cv_info);
             }
         }
     }

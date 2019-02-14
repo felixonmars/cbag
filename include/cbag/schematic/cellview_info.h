@@ -18,6 +18,10 @@
 namespace cbag {
 namespace sch {
 
+struct cellview;
+
+using attr_map_t = util::sorted_map<std::string, std::string>;
+
 /** A simple struct representing netlist information of a cellview.
  */
 struct cellview_info {
@@ -30,12 +34,24 @@ struct cellview_info {
     std::vector<std::string> nets;
     param_map props;
     bool is_prim = false;
-    util::sorted_map<std::string, util::sorted_map<std::string, std::string>> term_net_attrs;
+    util::sorted_map<std::string, attr_map_t> term_net_attrs;
 
     cellview_info();
 
     cellview_info(std::string lib_name, std::string cell_name, bool is_prim);
 };
+
+using lib_map_t = std::unordered_map<std::string, sch::cellview_info>;
+using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
+
+const cellview_info &get_cv_info(const netlist_map_t &info_map, const std::string &lib_name,
+                                 const std::string &cell_name);
+
+void record_cv_info(netlist_map_t &info_map, const std::string &lib_name,
+                    const std::string &cell_name, cellview_info &&info);
+
+cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_name,
+                                  const netlist_map_t &info_map);
 
 } // namespace sch
 } // namespace cbag
