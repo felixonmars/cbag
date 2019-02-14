@@ -37,15 +37,16 @@ const cellview_info &get_cv_info(const netlist_map_t &info_map, const std::strin
     return cellmap_iter->second;
 }
 
-void record_cv_info(netlist_map_t &info_map, const std::string &lib_name,
-                    const std::string &cell_name, cellview_info &&info) {
-    auto lib_map_iter = info_map.find(lib_name);
+void record_cv_info(netlist_map_t &info_map, cellview_info &&info) {
+    auto cell_name_copy = info.cell_name;
+    auto lib_map_iter = info_map.find(info.lib_name);
     if (lib_map_iter == info_map.end()) {
         sch::lib_map_t new_lib_map;
-        new_lib_map.emplace(cell_name, std::move(info));
-        info_map.emplace(lib_name, std::move(new_lib_map));
+        auto lib_name_copy = info.lib_name;
+        new_lib_map.emplace(std::move(cell_name_copy), std::move(info));
+        info_map.emplace(lib_name_copy, std::move(new_lib_map));
     } else {
-        lib_map_iter->second.emplace(cell_name, std::move(info));
+        lib_map_iter->second.emplace(std::move(cell_name_copy), std::move(info));
     }
 }
 
@@ -137,9 +138,9 @@ void register_unique_name_units(const spirit::ast::name &ast, const attr_map_t *
     }
 }
 
-cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_name,
-                                  const netlist_map_t &info_map, bool compute_net_attrs) {
-    cellview_info ans(cv.lib_name, cell_name, false);
+cellview_info get_cv_netlist_info(const cellview &cv, const netlist_map_t &info_map,
+                                  bool compute_net_attrs) {
+    cellview_info ans(cv.lib_name, cv.cell_name, false);
 
     nu_range_map_t term_range_map, net_range_map;
 

@@ -54,8 +54,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
         if (cv_ptr) {
             logger.info("Netlisting cellview: {}__{}", cv_ptr->lib_name, cur_name);
             // NOTE: we don't have to compute net attributes if a custom netlist is given
-            auto cv_info =
-                sch::get_cv_netlist_info(*cv_ptr, cur_name, netlist_map, cur_netlist.empty());
+            auto cv_info = sch::get_cv_netlist_info(*cv_ptr, netlist_map, cur_netlist.empty());
 
             if (!shell || is_top) {
                 if (cur_netlist.empty()) {
@@ -70,8 +69,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
             // add this cellview to netlist map
             logger.info("Adding cellview {}__{} to netlist cell map", cv_ptr->lib_name,
                         cv_ptr->cell_name);
-            sch::record_cv_info(netlist_map, cv_ptr->lib_name, cv_ptr->cell_name,
-                                std::move(cv_info));
+            sch::record_cv_info(netlist_map, std::move(cv_info));
         }
     }
 

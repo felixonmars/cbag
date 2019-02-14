@@ -47,11 +47,10 @@ using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 const cellview_info &get_cv_info(const netlist_map_t &info_map, const std::string &lib_name,
                                  const std::string &cell_name);
 
-void record_cv_info(netlist_map_t &info_map, const std::string &lib_name,
-                    const std::string &cell_name, cellview_info &&info);
+void record_cv_info(netlist_map_t &info_map, cellview_info &&info);
 
-cellview_info get_cv_netlist_info(const cellview &cv, const std::string &cell_name,
-                                  const netlist_map_t &info_map, bool compute_net_attrs);
+cellview_info get_cv_netlist_info(const cellview &cv, const netlist_map_t &info_map,
+                                  bool compute_net_attrs);
 
 } // namespace sch
 } // namespace cbag
