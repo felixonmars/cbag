@@ -16,6 +16,15 @@ cellview_info::cellview_info() = default;
 cellview_info::cellview_info(std::string lib_name, std::string cell_name, bool is_prim)
     : lib_name(std::move(lib_name)), cell_name(std::move(cell_name)), is_prim(is_prim) {}
 
+std::string get_net_type(const util::sorted_map<std::string, attr_map_t> &term_net_attrs,
+                         const std::string &base_name, const std::string &def_str) {
+    auto iter = term_net_attrs.find(base_name);
+    if (iter == term_net_attrs.end())
+        return def_str;
+    auto type_iter = iter->second.find("type");
+    return (type_iter == iter->second.end()) ? def_str : type_iter->second;
+}
+
 const cellview_info &get_cv_info(const netlist_map_t &info_map, const std::string &lib_name,
                                  const std::string &cell_name) {
     auto libmap_iter = info_map.find(lib_name);

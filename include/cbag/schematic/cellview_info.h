@@ -44,6 +44,9 @@ struct cellview_info {
 using lib_map_t = std::unordered_map<std::string, sch::cellview_info>;
 using netlist_map_t = std::unordered_map<std::string, lib_map_t>;
 
+std::string get_net_type(const util::sorted_map<std::string, attr_map_t> &term_net_attrs,
+                         const std::string &base_name, const std::string &def_str);
+
 const cellview_info &get_cv_info(const netlist_map_t &info_map, const std::string &lib_name,
                                  const std::string &cell_name);
 
