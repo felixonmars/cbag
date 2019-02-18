@@ -150,6 +150,10 @@ template <class T, class Compare = std::less<T>> class sorted_vector {
         return lhs.data_ == rhs.data_;
     }
 
+    friend bool operator!=(const sorted_vector &lhs, const sorted_vector &rhs) {
+        return lhs.data_ != rhs.data_;
+    }
+
     friend bool operator==(const sorted_vector &lhs, const std::vector<T> &rhs) {
         return lhs.data_ == rhs;
     }

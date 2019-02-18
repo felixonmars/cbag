@@ -13,6 +13,7 @@
 #include <cbag/enum/term_type.h>
 #include <cbag/schematic/pin_object.h>
 #include <cbag/schematic/rectangle.h>
+#include <cbag/util/sorted_map.h>
 
 namespace cbag {
 namespace sch {
@@ -24,6 +25,7 @@ struct pin_figure {
     pin_fig_t obj;
     sig_type stype = sig_type::signal;
     term_type ttype = term_type::inout;
+    util::sorted_map<std::string, std::string> attrs;
 
     pin_figure();
 

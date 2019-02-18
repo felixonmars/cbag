@@ -24,14 +24,19 @@ BOOST_FUSION_ADAPT_STRUCT(cbag::sch::instance, lib_name, cell_name, view_name, x
 
 BOOST_FUSION_ADAPT_STRUCT(cbag::sch::pin_object, inst, attr)
 
-BOOST_FUSION_ADAPT_STRUCT(cbag::sch::pin_figure, obj, stype, ttype)
-
 namespace YAML {
 template <> struct convert<cbag::sch::pin_fig_t> {
     static Node encode(const cbag::sch::pin_fig_t &rhs);
 
     static bool decode(const Node &node, cbag::sch::pin_fig_t &rhs);
 };
+
+template <> struct convert<cbag::sch::pin_figure> {
+    static Node encode(const cbag::sch::pin_figure &rhs);
+
+    static bool decode(const Node &node, cbag::sch::pin_figure &rhs);
+};
+
 } // namespace YAML
 
 #endif // CBAG_YAML_FIGURES_H

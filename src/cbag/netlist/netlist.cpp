@@ -14,7 +14,8 @@ namespace cbag {
 namespace netlist {
 
 void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc_list,
-                    netlist_map_t &netlist_map, std::string &append_file, design_output out_type) {
+                    sch::netlist_map_t &netlist_map, std::string &append_file,
+                    design_output out_type) {
     if (prim_fname.empty())
         return;
 
@@ -24,7 +25,7 @@ void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc
     }
 
     YAML::Node n = YAML::LoadFile(prim_fname);
-    netlist_map = n["netlist_map"].as<netlist_map_t>();
+    netlist_map = n["netlist_map"].as<sch::netlist_map_t>();
     auto inc_list_map =
         n["inc_list"].as<std::unordered_map<design_output, std::vector<std::string>>>();
     auto iter = inc_list_map.find(out_type);

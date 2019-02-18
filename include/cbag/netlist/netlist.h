@@ -11,8 +11,8 @@
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/spectre.h>
 #include <cbag/netlist/core.h>
-#include <cbag/netlist/netlist_map_t.h>
 #include <cbag/netlist/verilog.h>
+#include <cbag/schematic/cellview_info.h>
 #include <cbag/util/io.h>
 
 namespace cbag {
@@ -21,11 +21,12 @@ namespace netlist {
 template <class N> using IsNetlister = typename traits::nstream<N>::type;
 
 void read_prim_info(const std::string &prim_fname, std::vector<std::string> &inc_list,
-                    netlist_map_t &netlist_map, std::string &append_file, design_output out_type);
+                    sch::netlist_map_t &netlist_map, std::string &append_file,
+                    design_output out_type);
 
 template <class ContentList, class N, typename = IsNetlister<N>>
 void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat, bool shell,
-                          bool top_subckt, netlist_map_t &netlist_map,
+                          bool top_subckt, sch::netlist_map_t &netlist_map,
                           const std::vector<std::string> &inc_list, const std::string &append_file,
                           spdlog::logger &logger) {
 
@@ -47,17 +48,16 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
     auto stop = name_cv_list.end();
     decltype(name_cv_list.size()) idx = 0;
     for (auto iter = name_cv_list.begin(); iter != stop; ++iter, ++idx) {
-        bool is_top = (idx == last_idx);
-        if (!shell || is_top) {
-            bool write_subckt = top_subckt || !is_top;
-            auto &cur_pair = *iter;
-            const auto &cv_ptr = cur_pair.second.first;
-            if (cv_ptr) {
-                const std::string &cur_name = cur_pair.first;
-                const std::string &cur_netlist = cur_pair.second.second;
-                sch::cellview_info cv_info = cv_ptr->get_info(cur_name);
-                logger.info("Netlisting cellview: {}", cur_name);
+        auto is_top = (idx == last_idx);
+        auto write_subckt = top_subckt || !is_top;
+        auto & [ cur_name, cv_netlist_pair ] = *iter;
+        auto & [ cv_ptr, cur_netlist ] = cv_netlist_pair;
+        if (cv_ptr) {
+            logger.info("Netlisting cellview: {}__{}", cv_ptr->lib_name, cur_name);
+            // NOTE: we don't have to compute net attributes if a custom netlist is given
+            auto cv_info = sch::get_cv_netlist_info(*cv_ptr, netlist_map, cur_netlist.empty());
 
+            if (!shell || is_top) {
                 if (cur_netlist.empty()) {
                     // add this cellview to netlist
                     add_cellview(stream, cur_name, *cv_ptr, cv_info, netlist_map, shell,
@@ -65,19 +65,12 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
                 } else {
                     add_cellview(stream, cur_netlist);
                 }
-
-                // add this cellview to netlist map
-                logger.info("Adding cellview to netlist cell map");
-                auto lib_map_iter = netlist_map.find(cv_ptr->lib_name);
-                if (lib_map_iter == netlist_map.end()) {
-                    logger.info("Cannot find library {}, creating lib cell map", cv_ptr->lib_name);
-                    lib_map_t new_lib_map;
-                    new_lib_map.emplace(cv_ptr->cell_name, cv_info);
-                    netlist_map.emplace(cv_ptr->lib_name, std::move(new_lib_map));
-                } else {
-                    lib_map_iter->second.emplace(cv_ptr->cell_name, cv_info);
-                }
             }
+
+            // add this cellview to netlist map
+            logger.info("Adding cellview {}__{} to netlist cell map", cv_ptr->lib_name,
+                        cv_ptr->cell_name);
+            sch::record_cv_info(netlist_map, std::move(cv_info));
         }
     }
 
@@ -88,7 +81,7 @@ void write_netlist_helper(const ContentList &name_cv_list, N &&stream, bool flat
 
 template <class ContentList>
 void write_netlist(const ContentList &name_cv_list, const std::string &fname, design_output format,
-                   netlist_map_t &netlist_map, const std::string &append_file,
+                   sch::netlist_map_t &netlist_map, const std::string &append_file,
                    const std::vector<std::string> &inc_list, bool flat = true, bool shell = false,
                    bool top_subckt = true, cnt_t rmin = 2000) {
     auto logger = cbag::get_cbag_logger();

@@ -10,6 +10,7 @@
 #include <cbag/yaml/transformation.h>
 
 namespace YAML {
+
 Node convert<cbag::sch::pin_fig_t>::encode(const cbag::sch::pin_fig_t &rhs) {
     Node root;
     root.push_back(rhs.index());
@@ -40,6 +41,40 @@ bool convert<cbag::sch::pin_fig_t>::decode(const Node &node, cbag::sch::pin_fig_
         }
     } catch (...) {
         logger->warn("cbag::sch::pin_fig_t YAML decode exception.  Node:\n{}",
+                     cbagyaml::node_to_str(node));
+        return false;
+    }
+}
+
+Node convert<cbag::sch::pin_figure>::encode(const cbag::sch::pin_figure &rhs) {
+    Node root(NodeType::Map);
+    root.force_insert("obj", rhs.obj);
+    root.force_insert("stype", rhs.stype);
+    root.force_insert("ttype", rhs.ttype);
+    if (!rhs.attrs.empty())
+        root.force_insert("attrs", rhs.attrs);
+    return root;
+}
+
+bool convert<cbag::sch::pin_figure>::decode(const Node &node, cbag::sch::pin_figure &rhs) {
+    auto logger = cbag::get_cbag_logger();
+    if (!node.IsMap()) {
+        logger->warn("cbag::sch::pin_figure YAML decode: not a map.  Node:\n{}",
+                     cbagyaml::node_to_str(node));
+        return false;
+    }
+    try {
+        rhs.obj = node["obj"].as<cbag::sch::pin_fig_t>();
+        rhs.stype = node["stype"].as<cbag::sig_type>();
+        rhs.ttype = node["ttype"].as<cbag::term_type>();
+        if (node["attrs"])
+            rhs.attrs = node["attrs"].as<cbag::util::sorted_map<std::string, std::string>>();
+        else
+            rhs.attrs.clear();
+
+        return true;
+    } catch (...) {
+        logger->warn("cbag::sch::pin_figure YAML decode exception.  Node:\n{}",
                      cbagyaml::node_to_str(node));
         return false;
     }

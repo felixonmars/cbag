@@ -40,12 +40,16 @@ void traits::nstream<verilog_stream>::write_header(type &stream,
 void traits::nstream<verilog_stream>::write_end(type &stream) {}
 
 void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &terms,
-                    bool &has_prev_term, const char *prefix) {
+                    bool &has_prev_term, const char *prefix,
+                    const util::sorted_map<std::string, sch::attr_map_t> &term_net_attrs,
+                    const std::string &def_type) {
     for (const auto &term : terms) {
         auto ast = util::parse_cdba_name_unit(term);
 
+        auto type_str = sch::get_net_type(term_net_attrs, ast.base, def_type);
+
         lstream b;
-        b << prefix << "wire";
+        b << prefix << type_str;
         if (ast.is_vector()) {
             if (ast.idx_range.step != 1) {
                 throw std::invalid_argument(
@@ -66,6 +70,8 @@ void write_cv_ports(verilog_stream &stream, const std::vector<std::string> &term
 void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::string &name,
                                                       const sch::cellview_info &info, bool shell,
                                                       bool write_subckt) {
+    auto def_type = std::string("wire");
+
     stream.out_file << std::endl << std::endl;
 
     // write module declaration
@@ -74,9 +80,10 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
     b.to_file(stream.out_file, spirit::namespace_verilog{});
 
     bool has_prev_term = false;
-    write_cv_ports(stream, info.in_terms, has_prev_term, "    input ");
-    write_cv_ports(stream, info.out_terms, has_prev_term, "    output");
-    write_cv_ports(stream, info.io_terms, has_prev_term, "    inout ");
+    auto &term_net_attrs = info.term_net_attrs;
+    write_cv_ports(stream, info.in_terms, has_prev_term, "    input ", term_net_attrs, def_type);
+    write_cv_ports(stream, info.out_terms, has_prev_term, "    output", term_net_attrs, def_type);
+    write_cv_ports(stream, info.io_terms, has_prev_term, "    inout ", term_net_attrs, def_type);
     if (has_prev_term)
         stream.out_file << std::endl;
     stream.out_file << ");" << std::endl;
@@ -85,9 +92,11 @@ void traits::nstream<verilog_stream>::write_cv_header(type &stream, const std::s
         // write intermediate nets
         stream.out_file << std::endl;
         for (const auto &net_name : info.nets) {
-            stream.out_file << "wire";
-
             auto ast = util::parse_cdba_name_unit(net_name);
+
+            auto type_str = sch::get_net_type(term_net_attrs, ast.base, def_type);
+            stream.out_file << type_str;
+
             if (ast.is_vector()) {
                 stream.out_file << fmt::format(" [{}:{}]", ast.idx_range.start,
                                                ast.idx_range.get_stop_include());
