@@ -16,6 +16,8 @@ namespace netlist {
 class spectre_stream : public nstream_file {
   public:
     cnt_t rmin;
+    std::unordered_map <std::string, std::string> cdf2spectre_names;
+    std::unordered_map <std::string, std::string> cdf2spectre_props;
 
     spectre_stream(const std::string &fname, cnt_t rmin);
 };

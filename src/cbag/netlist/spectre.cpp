@@ -26,7 +26,33 @@
 namespace cbag {
 namespace netlist {
 
-spectre_stream::spectre_stream(const std::string &fname, cnt_t rmin) : nstream_file(fname), rmin(rmin) {}
+spectre_stream::spectre_stream(const std::string &fname, cnt_t rmin) : nstream_file(fname), rmin(rmin) {
+    // map CDF cell names to Spectre cell names
+    cdf2spectre_names["cap"] = "capacitor";
+    cdf2spectre_names["idc"] = "isource";
+    cdf2spectre_names["ipulse"] = "isource";
+    cdf2spectre_names["isin"] = "isource";
+    cdf2spectre_names["res"] = "resistor";
+    cdf2spectre_names["vdc"] = "vsource";
+    cdf2spectre_names["vpulse"] = "vsource";
+    cdf2spectre_names["vsin"] = "vsource";
+
+    // map CDF properties to Spectre properties
+    cdf2spectre_props["acm"] = "mag";
+    cdf2spectre_props["acp"] = "phase";
+    cdf2spectre_props["i1"] = "val0";
+    cdf2spectre_props["i2"] = "val1";
+    cdf2spectre_props["ia"] = "ampl";
+    cdf2spectre_props["idc"] = "dc";
+    cdf2spectre_props["per"] = "period";
+    cdf2spectre_props["pw"] = "width";
+    cdf2spectre_props["srcType"] = "type";
+    cdf2spectre_props["td"] = "delay";
+    cdf2spectre_props["v1"] = "val0";
+    cdf2spectre_props["v2"] = "val1";
+    cdf2spectre_props["va"] = "ampl";
+    cdf2spectre_props["vdc"] = "dc";
+}
 
 void traits::nstream<spectre_stream>::close(type &stream) { stream.close(); }
 
@@ -99,21 +125,19 @@ void append_nets1(lstream &b, const std::string &inst_name, const sch::instance 
 
 template <class OutIter>
 void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
-                              const sch::cellview_info &info) {
-    // map CDF cell names to Spectre cell names
-    std::map <std::string, std::string> cdf2spectre_names;
-    cdf2spectre_names["cap"] = "capacitor";
-    cdf2spectre_names["idc"] = "isource";
-    cdf2spectre_names["res"] = "resistor";
-    cdf2spectre_names["vdc"] = "vsource";
-
-    // change CDF names to Spectre names for analogLib cells
-    auto itr = cdf2spectre_names.find(inst.cell_name);
-    if (itr == cdf2spectre_names.end()) {
-        *iter = inst.cell_name;
+                              const sch::cellview_info &info, spectre_stream &stream) {
+    if (inst.lib_name == "analogLib") {
+        // change CDF names to Spectre names for analogLib cells
+        auto itr = stream.cdf2spectre_names.find(inst.cell_name);
+        if (itr == stream.cdf2spectre_names.end()) {
+            *iter = inst.cell_name;
+        } else {
+            *iter = itr->second;
+        }
     } else {
-        *iter = itr->second;
+        *iter = inst.cell_name;
     }
+
 
     // get default parameter values
     param_map par_map(info.props);
@@ -122,22 +146,20 @@ void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
         par_map.insert_or_assign(pair.first, pair.second);
     }
 
-    // map CDF properties to Spectre properties
-    std::map <std::string, std::string> cdf2spectre_props;
-    cdf2spectre_props["acm"] = "mag";
-    cdf2spectre_props["acp"] = "phase";
-    cdf2spectre_props["idc"] = "dc";
-    cdf2spectre_props["srcType"] = "type";
-    cdf2spectre_props["vdc"] = "dc";
-
     // write instance parameters
-    for (auto const &pair : par_map) {
-        // map CDF parameters to Spectre parameters
-        auto itr2 = cdf2spectre_props.find(pair.first);
-        if (itr2 == cdf2spectre_props.end()) {
+    if (inst.lib_name == "analogLib") {
+        for (auto const &pair : par_map) {
+            // map CDF parameters to Spectre parameters
+            auto itr2 = stream.cdf2spectre_props.find(pair.first);
+            if (itr2 == stream.cdf2spectre_props.end()) {
+                std::visit(write_param_visitor(iter, pair.first), pair.second);
+            } else {
+                std::visit(write_param_visitor(iter, itr2->second), pair.second);
+            }
+        }
+    } else {
+        for (auto const &pair : par_map) {
             std::visit(write_param_visitor(iter, pair.first), pair.second);
-        } else {
-            std::visit(write_param_visitor(iter, itr2->second), pair.second);
         }
     }
 }
@@ -174,7 +196,7 @@ void traits::nstream<spectre_stream>::write_instance(type &stream, const std::st
         append_nets1(b, name, inst, info.in_terms);
         append_nets1(b, name, inst, info.out_terms);
         append_nets1(b, name, inst, info.io_terms);
-        cbag::netlist::write_instance_cell_name1(b.get_back_inserter(), inst, info);
+        cbag::netlist::write_instance_cell_name1(b.get_back_inserter(), inst, info, stream);
         b.to_file(stream.out_file, spirit::namespace_cdba{});
     } else {
         // arrayed instance, need to split up
@@ -186,7 +208,7 @@ void traits::nstream<spectre_stream>::write_instance(type &stream, const std::st
         // get cell name tokens
         std::vector<std::string> tokens;
         tokens.reserve(2);
-        cbag::netlist::write_instance_cell_name1(std::back_inserter(tokens), inst, info);
+        cbag::netlist::write_instance_cell_name1(std::back_inserter(tokens), inst, info, stream);
         // array instance
         for (decltype(n) inst_idx = 0; inst_idx < n; ++inst_idx) {
             lstream b;
