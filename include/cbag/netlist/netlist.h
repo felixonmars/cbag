@@ -9,8 +9,8 @@
 #include <cbag/enum/design_output.h>
 #include <cbag/logging/logging.h>
 #include <cbag/netlist/cdl.h>
-#include <cbag/netlist/spectre.h>
 #include <cbag/netlist/core.h>
+#include <cbag/netlist/spectre.h>
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/util/io.h>

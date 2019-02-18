@@ -5,9 +5,9 @@
  *  \date   2019/02/04
  */
 
+#include <map>
 #include <utility>
 #include <variant>
-#include <map>
 
 #include <fmt/core.h>
 
@@ -17,8 +17,8 @@
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/schematic/instance.h>
 
-#include <cbag/netlist/spectre.h>
 #include <cbag/netlist/lstream.h>
+#include <cbag/netlist/spectre.h>
 #include <cbag/spirit/util.h>
 #include <cbag/util/io.h>
 #include <cbag/util/name_convert.h>
@@ -26,7 +26,8 @@
 namespace cbag {
 namespace netlist {
 
-spectre_stream::spectre_stream(const std::string &fname, cnt_t rmin) : nstream_file(fname), rmin(rmin) {
+spectre_stream::spectre_stream(const std::string &fname, cnt_t rmin)
+    : nstream_file(fname), rmin(rmin) {
     // map CDF cell names to Spectre cell names
     cdf2spectre_names["cap"] = "capacitor";
     cdf2spectre_names["idc"] = "isource";
@@ -57,8 +58,8 @@ spectre_stream::spectre_stream(const std::string &fname, cnt_t rmin) : nstream_f
 void traits::nstream<spectre_stream>::close(type &stream) { stream.close(); }
 
 void traits::nstream<spectre_stream>::write_header(type &stream,
-                                               const std::vector<std::string> &inc_list,
-                                               bool shell) {
+                                                   const std::vector<std::string> &inc_list,
+                                                   bool shell) {
     if (!shell) {
         if (!inc_list.empty()) {
             for (auto const &fname : inc_list) {
@@ -85,8 +86,8 @@ void get_cv_pins(lstream &b, const std::vector<std::string> &names) {
     }
 }
 void traits::nstream<spectre_stream>::write_cv_header(type &stream, const std::string &name,
-                                                  const sch::cellview_info &info, bool shell,
-                                                  bool write_subckt) {
+                                                      const sch::cellview_info &info, bool shell,
+                                                      bool write_subckt) {
     stream.out_file << std::endl << std::endl;
     if (write_subckt) {
         lstream b;
@@ -111,7 +112,7 @@ void traits::nstream<spectre_stream>::write_cv_end(type &stream, const std::stri
 }
 
 void append_nets1(lstream &b, const std::string &inst_name, const sch::instance &inst,
-                 const std::vector<std::string> &terms) {
+                  const std::vector<std::string> &terms) {
     for (auto const &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -125,7 +126,7 @@ void append_nets1(lstream &b, const std::string &inst_name, const sch::instance 
 
 template <class OutIter>
 void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
-                              const sch::cellview_info &info, spectre_stream &stream) {
+                               const sch::cellview_info &info, spectre_stream &stream) {
     if (inst.lib_name == "analogLib") {
         // change CDF names to Spectre names for analogLib cells
         auto itr = stream.cdf2spectre_names.find(inst.cell_name);
@@ -137,7 +138,6 @@ void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
     } else {
         *iter = inst.cell_name;
     }
-
 
     // get default parameter values
     param_map par_map(info.props);
@@ -167,7 +167,7 @@ void write_instance_cell_name1(OutIter &&iter, const sch::instance &inst,
 using term_net_vec_t = std::vector<std::pair<cnt_t, std::vector<std::string>>>;
 
 void get_term_net_pairs1(term_net_vec_t &term_net_vec, const std::string &inst_name,
-                        const sch::instance &inst, const std::vector<std::string> &terms) {
+                         const sch::instance &inst, const std::vector<std::string> &terms) {
     for (const auto &term : terms) {
         auto term_iter = inst.connections.find(term);
         if (term_iter == inst.connections.end()) {
@@ -184,8 +184,8 @@ void get_term_net_pairs1(term_net_vec_t &term_net_vec, const std::string &inst_n
 }
 
 void traits::nstream<spectre_stream>::write_instance(type &stream, const std::string &name,
-                                                 const sch::instance &inst,
-                                                 const sch::cellview_info &info) {
+                                                     const sch::instance &inst,
+                                                     const sch::cellview_info &info) {
     spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
     auto n = inst_ast.size();
 
