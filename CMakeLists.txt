@@ -116,6 +116,7 @@ set(SRC_FILES_LIB_CBAG
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/core.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/lstream.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/netlist.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/spectre.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/netlist/verilog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/arc.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cbag/schematic/cellview.cpp

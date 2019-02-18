@@ -10,6 +10,7 @@
 #include <cbag/logging/logging.h>
 #include <cbag/netlist/cdl.h>
 #include <cbag/netlist/core.h>
+#include <cbag/netlist/spectre.h>
 #include <cbag/netlist/verilog.h>
 #include <cbag/schematic/cellview_info.h>
 #include <cbag/util/io.h>
@@ -99,6 +100,11 @@ void write_netlist(const ContentList &name_cv_list, const std::string &fname, de
     case design_output::SYSVERILOG:
         logger->info("Writing System Verilog netlist: {}", fname);
         write_netlist_helper(name_cv_list, verilog_stream(fname), flat, shell, top_subckt,
+                             netlist_map, inc_list, append_file, *logger);
+        break;
+    case design_output::SPECTRE:
+        logger->info("Writing Spectre netlist: {}", fname);
+        write_netlist_helper(name_cv_list, spectre_stream(fname, rmin), flat, shell, top_subckt,
                              netlist_map, inc_list, append_file, *logger);
         break;
     default:
