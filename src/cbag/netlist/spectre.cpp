@@ -119,8 +119,13 @@ void append_nets1(lstream &b, const std::string &inst_name, const sch::instance 
             throw std::invalid_argument(fmt::format(
                 "Cannot find net connected to instance {} terminal {}", inst_name, term));
         }
-        spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
-        spirit::util::get_name_bits(ast, b.get_back_inserter(), spirit::namespace_cdba{});
+        if (term_iter->second == "gnd!") {
+            // replace gnd! by 0 in netlist
+            b << "0";
+        } else {
+            spirit::ast::name ast = cbag::util::parse_cdba_name(term_iter->second);
+            spirit::util::get_name_bits(ast, b.get_back_inserter(), spirit::namespace_cdba{});
+        }
     }
 }
 
@@ -186,6 +191,9 @@ void get_term_net_pairs1(term_net_vec_t &term_net_vec, const std::string &inst_n
 void traits::nstream<spectre_stream>::write_instance(type &stream, const std::string &name,
                                                      const sch::instance &inst,
                                                      const sch::cellview_info &info) {
+    if (inst.cell_name == "gnd") {
+        return;
+    }
     spirit::ast::name_unit inst_ast = cbag::util::parse_cdba_name_unit(name);
     auto n = inst_ast.size();
 
