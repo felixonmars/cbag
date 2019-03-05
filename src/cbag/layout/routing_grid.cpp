@@ -38,7 +38,7 @@ struct routing_grid::helper {
             info.blk_pitch[0] = info.get_pitch();
             info.blk_pitch[1] = info.blk_pitch[0] / 2;
             auto didx = static_cast<orient_2d_t>(info.dir);
-            for (const auto &[bp, bp2] : pitch_list[didx]) {
+            for (const auto & [ bp, bp2 ] : pitch_list[didx]) {
                 info.blk_pitch[0] = std::lcm(info.blk_pitch[0], bp);
                 info.blk_pitch[1] = std::lcm(info.blk_pitch[1], bp2);
             }
@@ -69,7 +69,8 @@ struct routing_grid::helper {
 
 routing_grid::routing_grid() = default;
 
-routing_grid::routing_grid(const tech *t, const std::string &fname) : tech_ptr(t) {
+routing_grid::routing_grid(std::shared_ptr<const tech> t, const std::string &fname)
+    : tech_ptr(std::move(t)) {
     auto node = YAML::LoadFile(fname);
 
     auto tmp = cbagyaml::int_map_to_vec<track_info>(node["routing_grid"]);
@@ -89,7 +90,7 @@ const track_info &routing_grid::operator[](level_t level) const {
     return info_list[static_cast<std::size_t>(level - bot_level)];
 }
 
-const tech *routing_grid::get_tech() const noexcept { return tech_ptr; }
+const tech *routing_grid::get_tech() const noexcept { return tech_ptr.get(); }
 
 level_t routing_grid::get_bot_level() const noexcept { return bot_level; }
 
@@ -142,7 +143,7 @@ cnt_t routing_grid::get_htr_parity(level_t level, htr_t htr) const {
 }
 
 void routing_grid::set_flip_parity(const flip_parity &fp) {
-    for (const auto &[level, scale, offset] : fp.data_) {
+    for (const auto & [ level, scale, offset ] : fp.data_) {
         auto idx = helper::get_index(*this, level);
         info_list[idx].par_scale = scale;
         info_list[idx].par_offset = offset;

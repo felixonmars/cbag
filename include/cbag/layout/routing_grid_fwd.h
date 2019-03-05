@@ -1,6 +1,8 @@
 #ifndef CBAG_LAYOUT_ROUTING_GRID_FWD_H
 #define CBAG_LAYOUT_ROUTING_GRID_FWD_H
 
+#include <memory>
+
 #include <cbag/common/transformation_fwd.h>
 #include <cbag/common/typedefs.h>
 #include <cbag/enum/orient_2d.h>
@@ -15,7 +17,7 @@ class flip_parity;
 
 class routing_grid {
   private:
-    const tech *tech_ptr = nullptr;
+    std::shared_ptr<const tech> tech_ptr = nullptr;
     level_t bot_level = 0;
     std::vector<track_info> info_list;
     level_t top_ignore_level = -1;
@@ -25,7 +27,7 @@ class routing_grid {
   public:
     routing_grid();
 
-    routing_grid(const tech *t, const std::string &fname);
+    routing_grid(std::shared_ptr<const tech> t, const std::string &fname);
 
     bool operator==(const routing_grid &rhs) const noexcept;
 

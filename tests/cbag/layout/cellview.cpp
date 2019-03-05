@@ -22,9 +22,11 @@ using c_box = cbag::box_t;
 using pt_type = std::array<cbag::coord_t, 2>;
 using intv_type = std::array<cbag::coord_t, 2>;
 
-c_tech make_tech_info() { return c_tech("tests/data/test_layout/tech_params.yaml"); }
-std::shared_ptr<const c_grid> make_grid(const c_tech &tech) {
-    return std::make_shared<const c_grid>(&tech, "tests/data/test_layout/grid.yaml");
+std::shared_ptr<const c_tech> make_tech_info() {
+    return std::make_shared<const c_tech>("tests/data/test_layout/tech_params.yaml");
+}
+std::shared_ptr<const c_grid> make_grid(const std::shared_ptr<const c_tech> &tech) {
+    return std::make_shared<const c_grid>(tech, "tests/data/test_layout/grid.yaml");
 }
 std::shared_ptr<c_cellview> make_cv(const std::shared_ptr<const c_grid> &grid) {
     return std::make_shared<c_cellview>(grid, "CBAG_TEST");
@@ -105,9 +107,9 @@ TEST_CASE("add via", "[layout::cellview]") {
          c_box(-30, -30, 30, 30)},
     }));
 
-    auto l1 = cbag::layout::layer_t_at(tech_info, lay1, "");
-    auto l2 = cbag::layout::layer_t_at(tech_info, lay2, "");
-    auto via_id = tech_info.get_via_id(cbag::direction::LOWER, l1, l2);
+    auto l1 = cbag::layout::layer_t_at(*tech_info, lay1, "");
+    auto l2 = cbag::layout::layer_t_at(*tech_info, lay2, "");
+    auto via_id = tech_info->get_via_id(cbag::direction::LOWER, l1, l2);
 
     cv->add_object(cbag::layout::via_wrapper(cbag::layout::via(xform, via_id, via_param), true));
 
