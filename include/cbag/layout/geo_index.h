@@ -32,7 +32,7 @@ class geo_index {
     const_iterator begin_intersect(const box_t &r, offset_t spx, offset_t spy,
                                    const cbag::transformation &xform) const;
 
-    void insert(const geo_index *master, const cbag::transformation &xform);
+    void insert(const std::shared_ptr<const geo_index> &master, const cbag::transformation &xform);
 
     template <typename T> void insert(T &&obj, offset_t spx, offset_t spy) {
         index.insert(geo_object(std::forward<T>(obj), spx, spy));

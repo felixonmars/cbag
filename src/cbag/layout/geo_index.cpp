@@ -31,7 +31,8 @@ geo_iterator geo_index::begin_intersect(const box_t &r, offset_t spx, offset_t s
             xform};
 }
 
-void geo_index::insert(const geo_index *master, const cbag::transformation &xform) {
+void geo_index::insert(const std::shared_ptr<const geo_index> &master,
+                       const cbag::transformation &xform) {
     if (!master->empty())
         index.insert(geo_object(geo_instance(master, xform), 0, 0));
 }

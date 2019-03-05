@@ -9,8 +9,8 @@ namespace layout {
 
 geo_instance::geo_instance() = default;
 
-geo_instance::geo_instance(const geo_index *master, cbag::transformation xform)
-    : master(master), xform(std::move(xform)) {}
+geo_instance::geo_instance(std::shared_ptr<const geo_index> master, cbag::transformation xform)
+    : master(std::move(master)), xform(std::move(xform)) {}
 
 bool geo_instance::empty() const { return master->empty(); }
 

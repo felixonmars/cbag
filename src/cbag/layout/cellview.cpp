@@ -84,7 +84,7 @@ struct cellview::helper {
         return iter->second;
     }
 
-    static geo_index &get_geo_index(cellview &self, level_t lev) {
+    static std::shared_ptr<geo_index> &get_geo_index(cellview &self, level_t lev) {
         return self.index_list[lev - self.get_grid()->get_bot_level()];
     }
 
@@ -97,12 +97,12 @@ struct cellview::helper {
             auto &grid = *self.get_grid();
             auto &index = get_geo_index(self, *lev_opt);
             if constexpr (std::is_base_of_v<polygon45_set, std::decay_t<T>>) {
-                poly45_writer writer(index, grid, key, *lev_opt);
+                poly45_writer writer(*index, grid, key, *lev_opt);
                 obj.get(writer);
                 writer.record_last();
             } else {
                 auto[spx, spy] = get_margins(grid, key, *lev_opt, obj);
-                index.insert(obj, spx, spy);
+                index->insert(obj, spx, spy);
             }
         }
     }
@@ -110,8 +110,13 @@ struct cellview::helper {
 
 cellview::cellview(std::shared_ptr<const routing_grid> grid, std::string cell_name,
                    geometry_mode geo_mode)
-    : geo_mode(geo_mode), grid_ptr(std::move(grid)), cell_name(std::move(cell_name)),
-      index_list(grid_ptr->get_num_levels()) {}
+    : geo_mode(geo_mode), grid_ptr(std::move(grid)), cell_name(std::move(cell_name)) {
+    auto num = grid_ptr->get_num_levels();
+    index_list.reserve(num);
+    for (decltype(num) idx = 0; idx < num; ++idx) {
+        index_list.emplace_back(std::make_shared<geo_index>());
+    }
+}
 
 bool cellview::operator==(const cellview &rhs) const noexcept {
     return geo_mode == rhs.geo_mode && *grid_ptr == *(rhs.grid_ptr) && cell_name == rhs.cell_name &&
@@ -140,7 +145,7 @@ bool cellview::empty() const noexcept {
            area_block_list.empty() && boundary_list.empty() && pin_map.empty();
 }
 
-const geo_index &cellview::get_geo_index(level_t lev) const {
+const std::shared_ptr<geo_index> &cellview::get_geo_index(level_t lev) const {
     return index_list[lev - get_grid()->get_bot_level()];
 }
 
@@ -230,7 +235,7 @@ void cellview::add_object(const instance &obj) {
             auto &inst_index = master->get_geo_index(cur_lev);
             for (decltype(obj.nx) ix = 0; ix < obj.nx; ++ix, move_by(xform_copy, obj.spx, 0)) {
                 for (decltype(obj.ny) iy = 0; iy < obj.ny; ++iy, move_by(xform_copy, 0, obj.spy)) {
-                    parent_index.insert(&inst_index, xform_copy);
+                    parent_index->insert(inst_index, xform_copy);
                 }
                 move_by(xform_copy, 0, -tot_dy);
             }
@@ -258,7 +263,7 @@ void cellview::add_warr(const track_id &tid, std::array<offset_t, 2> coord) {
         geo.add_shape(box);
 
         auto[spx, spy] = get_margins(grid, key, lev, box);
-        index.insert(box, spx, spy);
+        index->insert(box, spx, spy);
     }
 }
 

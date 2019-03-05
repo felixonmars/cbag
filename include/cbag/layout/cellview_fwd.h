@@ -42,7 +42,7 @@ class cellview {
     geometry_mode geo_mode = geometry_mode::POLY90;
     std::shared_ptr<const routing_grid> grid_ptr = nullptr;
     std::string cell_name;
-    std::vector<geo_index> index_list;
+    std::vector<std::shared_ptr<geo_index>> index_list;
     geo_map_t geo_map;
     inst_map_t inst_map;
     pin_map_t pin_map;
@@ -70,7 +70,7 @@ class cellview {
 
     bool empty() const noexcept;
 
-    const geo_index &get_geo_index(level_t lev) const;
+    const std::shared_ptr<geo_index> &get_geo_index(level_t lev) const;
     auto begin_inst() const -> decltype(inst_map.cbegin());
     auto end_inst() const -> decltype(inst_map.cend());
     auto begin_geometry() const -> decltype(geo_map.cbegin());

@@ -1,6 +1,8 @@
 #ifndef CBAG_LAYOUT_GEO_INSTANCE_H
 #define CBAG_LAYOUT_GEO_INSTANCE_H
 
+#include <memory>
+
 #include <cbag/common/transformation.h>
 
 namespace cbag {
@@ -14,13 +16,13 @@ class geo_index;
 
 class geo_instance {
   private:
-    const geo_index *master = nullptr;
+    std::shared_ptr<const geo_index> master = nullptr;
     transformation xform;
 
   public:
     geo_instance();
 
-    geo_instance(const geo_index *master, transformation xform);
+    geo_instance(std::shared_ptr<const geo_index> master, transformation xform);
 
     bool empty() const;
 
