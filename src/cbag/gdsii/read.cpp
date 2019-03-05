@@ -97,21 +97,21 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
 
 std::tuple<std::string, std::unique_ptr<layout::cellview>>
 read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
-                  const layout::routing_grid &g, const gds_rlookup &rmap,
+                  std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
                   const std::unordered_map<std::string, layout::cellview *> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
 
     logger.info("GDS cellview name: " + cell_name);
 
-    auto cv_ptr = std::make_unique<layout::cellview>(&g, cell_name, geometry_mode::POLY);
-    auto resolution = g.get_tech()->get_resolution();
+    auto cv_ptr = std::make_unique<layout::cellview>(g, cell_name, geometry_mode::POLY);
+    auto resolution = g->get_tech()->get_resolution();
     auto inst_cnt = static_cast<std::size_t>(0);
     while (true) {
-        auto [rtype, rsize] = read_record_header(stream);
+        auto[rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::TEXT: {
             logger.info("Reading layout text.");
-            auto [gds_key, xform, text, text_h_dbl] = read_text(logger, stream);
+            auto[gds_key, xform, text, text_h_dbl] = read_text(logger, stream);
             auto text_h = static_cast<offset_t>(text_h_dbl / resolution);
             cv_ptr->add_label(rmap.get_layer_t(gds_key), std::move(xform), std::move(text), text_h);
             break;
@@ -126,13 +126,13 @@ read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::strin
             break;
         case record_type::BOX: {
             logger.info("Reading layout box.");
-            auto [gds_key, poly] = read_box(logger, stream);
+            auto[gds_key, poly] = read_box(logger, stream);
             add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }
         case record_type::BOUNDARY: {
             logger.info("Reading layout boundary.");
-            auto [gds_key, poly] = read_boundary(logger, stream);
+            auto[gds_key, poly] = read_boundary(logger, stream);
             add_object(logger, *cv_ptr, std::move(gds_key), std::move(poly), rmap);
             break;
         }

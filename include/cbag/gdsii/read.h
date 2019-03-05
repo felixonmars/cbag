@@ -49,12 +49,12 @@ std::string read_gds_start(spdlog::logger &logger, std::istream &stream);
 
 std::tuple<std::string, std::unique_ptr<layout::cellview>>
 read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
-                  const layout::routing_grid &g, const gds_rlookup &rmap,
+                  std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
                   const std::unordered_map<std::string, layout::cellview *> &master_map);
 
 template <class OutIter>
 void read_gds(const std::string &fname, const std::string &layer_map, const std::string &obj_map,
-              const layout::routing_grid &g, OutIter &&out_iter) {
+              std::shared_ptr<const layout::routing_grid> &g, OutIter &&out_iter) {
     auto log_ptr = get_cbag_logger();
 
     // get gds file stream
@@ -64,15 +64,15 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
     log_ptr->info("GDS library: {}", lib_name);
 
     bool is_done = false;
-    gds_rlookup rmap(layer_map, obj_map, *(g.get_tech()));
+    gds_rlookup rmap(layer_map, obj_map, *(g->get_tech()));
     std::unordered_map<std::string, layout::cellview *> cv_map;
     while (!is_done) {
-        auto [rtype, rsize] = read_record_header(stream);
+        auto[rtype, rsize] = read_record_header(stream);
         switch (rtype) {
         case record_type::BGNSTR: {
             log_ptr->info("Reading GDS cellview");
             stream.ignore(rsize);
-            auto [cell_name, cv_ptr] =
+            auto[cell_name, cv_ptr] =
                 read_lay_cellview(*log_ptr, stream, lib_name, g, rmap, cv_map);
 
             cv_map.emplace(cell_name, cv_ptr.get());

@@ -23,14 +23,18 @@ using pt_type = std::array<cbag::coord_t, 2>;
 using intv_type = std::array<cbag::coord_t, 2>;
 
 c_tech make_tech_info() { return c_tech("tests/data/test_layout/tech_params.yaml"); }
-c_grid make_grid(const c_tech &tech) { return c_grid(&tech, "tests/data/test_layout/grid.yaml"); }
-c_cellview make_cv(const c_grid &grid) { return c_cellview(&grid, "CBAG_TEST"); }
+std::shared_ptr<const c_grid> make_grid(const c_tech &tech) {
+    return std::make_shared<const c_grid>(&tech, "tests/data/test_layout/grid.yaml");
+}
+c_cellview make_cv(const std::shared_ptr<const c_grid> &grid) {
+    return c_cellview(grid, "CBAG_TEST");
+}
 
 TEST_CASE("add wire array", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [tid, lower, upper] = GENERATE(values<std::tuple<c_tid, c_offset_t, c_offset_t>>({
+    auto[tid, lower, upper] = GENERATE(values<std::tuple<c_tid, c_offset_t, c_offset_t>>({
         // one track
         {c_tid(4, 0, 1, 1, 0), 0, 100},
         {c_tid(4, -2, 2, 1, 0), -200, 100},
@@ -52,7 +56,7 @@ TEST_CASE("add path", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [lay_purp, pt_list, half_w, styles] = GENERATE(values<data_type>({
+    auto[lay_purp, pt_list, half_w, styles] = GENERATE(values<data_type>({
         {
             {"M2", ""},
             {{0, 0}, {2000, 0}, {3000, 1000}, {3000, 3000}},
@@ -81,7 +85,7 @@ TEST_CASE("add blockage", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [layer, blk_type, pt_list] = GENERATE(values<data_type>({
+    auto[layer, blk_type, pt_list] = GENERATE(values<data_type>({
         {"", cbag::blockage_type::placement, {{0, 0}, {100, 0}, {0, 100}}},
     }));
 
@@ -95,7 +99,7 @@ TEST_CASE("add via", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [xform, lay1, lay2, via_param, box1, box2] = GENERATE(values<data_type>({
+    auto[xform, lay1, lay2, via_param, box1, box2] = GENERATE(values<data_type>({
         {cbag::make_xform(0, 0), "M1", "M2",
          c_via_param(1, 1, 32, 32, 0, 0, 14, 14, 14, 14, 14, 14, 14, 14), c_box(-30, -30, 30, 30),
          c_box(-30, -30, 30, 30)},
@@ -128,7 +132,7 @@ TEST_CASE("add via on intersections", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [tid1, tid2, coord1, coord2, extend, contain, expect] = GENERATE(values<data_type>({
+    auto[tid1, tid2, coord1, coord2, extend, contain, expect] = GENERATE(values<data_type>({
         {c_tid(4, 0, 1, 1, 0),
          c_tid(5, 4, 1, 1, 0),
          {cbag::COORD_MIN, cbag::COORD_MAX},
@@ -153,7 +157,7 @@ TEST_CASE("connect warr to track", "[layout::cellview]") {
     auto tech_info = make_tech_info();
     auto grid = make_grid(tech_info);
     auto cv = make_cv(grid);
-    auto [tid1, tid2, coord1, w_ext, tr_ext, expect] = GENERATE(values<data_type>({
+    auto[tid1, tid2, coord1, w_ext, tr_ext, expect] = GENERATE(values<data_type>({
         {c_tid(4, 0, 1, 1, 0),
          c_tid(5, 4, 1, 1, 0),
          {0, 400},

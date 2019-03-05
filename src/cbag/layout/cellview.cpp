@@ -43,7 +43,7 @@ class poly45_writer {
 
     void record_last() const {
         if (has_value) {
-            auto [spx, spy] = get_margins(grid, key, lev, last);
+            auto[spx, spy] = get_margins(grid, key, lev, last);
             index.insert(last, spx, spy);
         }
     }
@@ -101,15 +101,16 @@ struct cellview::helper {
                 obj.get(writer);
                 writer.record_last();
             } else {
-                auto [spx, spy] = get_margins(grid, key, *lev_opt, obj);
+                auto[spx, spy] = get_margins(grid, key, *lev_opt, obj);
                 index.insert(obj, spx, spy);
             }
         }
     }
 };
 
-cellview::cellview(const routing_grid *grid_ptr, std::string cell_name, geometry_mode geo_mode)
-    : geo_mode(geo_mode), grid_ptr(grid_ptr), cell_name(std::move(cell_name)),
+cellview::cellview(std::shared_ptr<const routing_grid> grid, std::string cell_name,
+                   geometry_mode geo_mode)
+    : geo_mode(geo_mode), grid_ptr(std::move(grid)), cell_name(std::move(cell_name)),
       index_list(grid_ptr->get_num_levels()) {}
 
 bool cellview::operator==(const cellview &rhs) const noexcept {
@@ -132,7 +133,7 @@ auto cellview::find_geometry(layer_t key) const -> decltype(geo_map.find(key)) {
 
 const std::string &cellview::get_name() const noexcept { return cell_name; }
 const tech *cellview::get_tech() const noexcept { return grid_ptr->get_tech(); }
-const routing_grid *cellview::get_grid() const noexcept { return grid_ptr; }
+const routing_grid *cellview::get_grid() const noexcept { return grid_ptr.get(); }
 
 bool cellview::empty() const noexcept {
     return geo_map.empty() && inst_map.empty() && via_list.empty() && lay_block_map.empty() &&
@@ -206,7 +207,7 @@ void cellview::add_object(boundary &&obj) { boundary_list.push_back(std::move(ob
 void cellview::add_object(const via_wrapper &obj) {
     via_list.push_back(obj.v);
     if (obj.add_layers) {
-        auto [bot_key, unused, top_key] = get_tech()->get_via_layer_purpose(obj.v.get_via_id());
+        auto[bot_key, unused, top_key] = get_tech()->get_via_layer_purpose(obj.v.get_via_id());
         (void)unused;
         auto bot_box = get_bot_box(obj.v);
         auto top_box = get_top_box(obj.v);
@@ -252,11 +253,11 @@ void cellview::add_warr(const track_id &tid, std::array<offset_t, 2> coord) {
     auto &index = helper::get_geo_index(*this, lev);
     for (auto iter = begin_rect(grid, tid, coord), stop = end_rect(grid, tid, coord); iter != stop;
          ++iter) {
-        auto [key, box] = *iter;
+        auto[key, box] = *iter;
         auto &geo = helper::make_geometry(*this, key);
         geo.add_shape(box);
 
-        auto [spx, spy] = get_margins(grid, key, lev, box);
+        auto[spx, spy] = get_margins(grid, key, lev, box);
         index.insert(box, spx, spy);
     }
 }

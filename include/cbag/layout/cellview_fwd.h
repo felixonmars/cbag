@@ -1,6 +1,7 @@
 #ifndef CBAG_LAYOUT_CELLVIEW_FWD_H
 #define CBAG_LAYOUT_CELLVIEW_FWD_H
 
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -39,7 +40,7 @@ class cellview {
   private:
     cnt_t inst_name_cnt = 0;
     geometry_mode geo_mode = geometry_mode::POLY90;
-    const routing_grid *grid_ptr = nullptr;
+    std::shared_ptr<const routing_grid> grid_ptr = nullptr;
     std::string cell_name;
     std::vector<geo_index> index_list;
     geo_map_t geo_map;
@@ -54,7 +55,7 @@ class cellview {
     struct helper;
 
   public:
-    cellview(const routing_grid *grid_ptr, std::string cell_name,
+    cellview(std::shared_ptr<const routing_grid> grid, std::string cell_name,
              geometry_mode geo_mode = geometry_mode::POLY90);
 
     bool operator==(const cellview &rhs) const noexcept;
