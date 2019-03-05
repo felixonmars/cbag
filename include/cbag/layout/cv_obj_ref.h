@@ -12,14 +12,14 @@ namespace layout {
 template <typename T> class shape_ref {
   private:
     layer_t key{0, 0};
-    cellview *parent = nullptr;
+    std::shared_ptr<cellview> parent = nullptr;
     T obj;
 
   public:
     shape_ref() = default;
 
-    shape_ref(cellview *parent, layer_t &&key, T &&obj, bool add)
-        : key(std::move(key)), parent(parent), obj(std::move(obj)) {
+    shape_ref(std::shared_ptr<cellview> parent, layer_t &&key, T &&obj, bool add)
+        : key(std::move(key)), parent(std::move(parent)), obj(std::move(obj)) {
         if (add)
             commit();
     }
@@ -38,13 +38,14 @@ template <typename T> class shape_ref {
 
 template <typename T> class cv_obj_ref {
   private:
-    cellview *parent = nullptr;
+    std::shared_ptr<cellview> parent = nullptr;
     T obj;
 
   public:
     cv_obj_ref() = default;
 
-    cv_obj_ref(cellview *parent, T &&obj, bool add) : parent(parent), obj(std::move(obj)) {
+    cv_obj_ref(std::shared_ptr<cellview> parent, T &&obj, bool add)
+        : parent(std::move(parent)), obj(std::move(obj)) {
         if (add)
             commit();
     }

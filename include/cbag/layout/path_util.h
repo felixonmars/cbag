@@ -181,19 +181,20 @@ polygon45_set make_path45_bus(const T &data, const L &widths, const L &spaces, e
 }
 
 template <typename T, typename = IsPtList<T>>
-shape_ref<polygon45_set>
-add_path(cellview &cv, const std::string &layer, const std::string &purpose, const T &data,
-         offset_t half_width, end_style style0, end_style style1, end_style stylem, bool commit) {
-    return add_polygon(cv, layer, purpose, make_path(data, half_width, style0, style1, stylem),
+shape_ref<polygon45_set> add_path(const std::shared_ptr<cellview> &cv_ptr, const std::string &layer,
+                                  const std::string &purpose, const T &data, offset_t half_width,
+                                  end_style style0, end_style style1, end_style stylem,
+                                  bool commit) {
+    return add_polygon(cv_ptr, layer, purpose, make_path(data, half_width, style0, style1, stylem),
                        commit);
 }
 
 template <typename T, typename L, typename = IsPtList<T>>
-shape_ref<polygon45_set> add_path45_bus(cellview &cv, const std::string &layer,
-                                        const std::string &purpose, const T &data, const L &widths,
-                                        const L &spaces, end_style style0, end_style style1,
-                                        end_style stylem, bool commit) {
-    return add_polygon(cv, layer, purpose,
+shape_ref<polygon45_set>
+add_path45_bus(const std::shared_ptr<cellview> &cv_ptr, const std::string &layer,
+               const std::string &purpose, const T &data, const L &widths, const L &spaces,
+               end_style style0, end_style style1, end_style stylem, bool commit) {
+    return add_polygon(cv_ptr, layer, purpose,
                        make_path45_bus(data, widths, spaces, style0, style1, stylem), commit);
 }
 

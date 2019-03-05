@@ -20,8 +20,9 @@ void add_pin(cellview &cv, const std::string &layer, const std::string &net,
 void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
                  const wire_array &warr);
 
-cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string via_id,
-                                const via_param &params, bool add_layers, bool commit);
+cv_obj_ref<via_wrapper> add_via(const std::shared_ptr<cellview> &cv_ptr, transformation xform,
+                                std::string via_id, const via_param &params, bool add_layers,
+                                bool commit);
 
 void add_via_arr(cellview &cv, const transformation &xform, const std::string &via_id,
                  const via_param &params, bool add_layers, std::array<cnt_t, 2> num_arr,
@@ -52,13 +53,14 @@ connect_warr_track(cellview &cv, const wire_array &warr, const track_id &tid,
 void add_label(cellview &cv, const std::string &layer, const std::string &purpose,
                transformation xform, std::string label, offset_t text_h);
 
-cv_obj_ref<instance> add_prim_instance(cellview &cv, std::string lib, std::string cell,
-                                       std::string view, std::string name, transformation xform,
-                                       cnt_t nx, cnt_t ny, offset_t spx, offset_t spy, bool commit);
+cv_obj_ref<instance> add_prim_instance(const std::shared_ptr<cellview> &cv_ptr, std::string lib,
+                                       std::string cell, std::string view, std::string name,
+                                       transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
+                                       offset_t spy, bool commit);
 
-cv_obj_ref<instance> add_instance(cellview &cv, const cellview *master, std::string name,
-                                  transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
-                                  offset_t spy, bool commit);
+cv_obj_ref<instance> add_instance(const std::shared_ptr<cellview> &cv_ptr, const cellview *master,
+                                  std::string name, transformation xform, cnt_t nx, cnt_t ny,
+                                  offset_t spx, offset_t spy, bool commit);
 
 } // namespace layout
 } // namespace cbag

@@ -8,10 +8,10 @@
 namespace cbag {
 namespace layout {
 
-shape_ref<box_t> add_rect(cellview &cv, const std::string &layer, const std::string &purpose,
-                          box_t bbox, bool commit) {
+shape_ref<box_t> add_rect(const std::shared_ptr<cellview> &cv_ptr, const std::string &layer,
+                          const std::string &purpose, box_t bbox, bool commit) {
 
-    return {&cv, layer_t_at(*(cv.get_tech()), layer, purpose), std::move(bbox), commit};
+    return {cv_ptr, layer_t_at(*(cv_ptr->get_tech()), layer, purpose), std::move(bbox), commit};
 }
 
 void add_rect_arr(cellview &cv, layer_t &key, const box_t &box, std::array<cnt_t, 2> num,

@@ -26,8 +26,8 @@ c_tech make_tech_info() { return c_tech("tests/data/test_layout/tech_params.yaml
 std::shared_ptr<const c_grid> make_grid(const c_tech &tech) {
     return std::make_shared<const c_grid>(&tech, "tests/data/test_layout/grid.yaml");
 }
-c_cellview make_cv(const std::shared_ptr<const c_grid> &grid) {
-    return c_cellview(grid, "CBAG_TEST");
+std::shared_ptr<c_cellview> make_cv(const std::shared_ptr<const c_grid> &grid) {
+    return std::make_shared<c_cellview>(grid, "CBAG_TEST");
 }
 
 TEST_CASE("add wire array", "[layout::cellview]") {
@@ -46,7 +46,7 @@ TEST_CASE("add wire array", "[layout::cellview]") {
 
     auto warr = c_warr(std::make_shared<c_tid>(tid), lower, upper);
 
-    cbag::layout::add_warr(cv, warr);
+    cbag::layout::add_warr(*cv, warr);
 }
 
 TEST_CASE("add path", "[layout::cellview]") {
@@ -65,17 +65,17 @@ TEST_CASE("add path", "[layout::cellview]") {
         },
     }));
 
-    cv.set_geometry_mode(cbag::geometry_mode::POLY45);
+    cv->set_geometry_mode(cbag::geometry_mode::POLY45);
     add_path(cv, lay_purp[0], lay_purp[1], pt_list, half_w, styles[0], styles[1], styles[2], true);
 
     // create expected geometry
-    auto key = cbag::layout::layer_t_at(*cv.get_tech(), lay_purp[0], lay_purp[1]);
+    auto key = cbag::layout::layer_t_at(*(cv->get_tech()), lay_purp[0], lay_purp[1]);
     cbag::layout::geometry expect(cbag::geometry_mode::POLY45);
     auto poly_set = cbag::layout::make_path(pt_list, half_w, styles[0], styles[1], styles[2]);
     expect.add_shape(poly_set);
 
-    auto geo_iter = cv.find_geometry(key);
-    REQUIRE(geo_iter != cv.end_geometry());
+    auto geo_iter = cv->find_geometry(key);
+    REQUIRE(geo_iter != cv->end_geometry());
     REQUIRE(geo_iter->second == expect);
 }
 
@@ -89,7 +89,7 @@ TEST_CASE("add blockage", "[layout::cellview]") {
         {"", cbag::blockage_type::placement, {{0, 0}, {100, 0}, {0, 100}}},
     }));
 
-    cv.set_geometry_mode(cbag::geometry_mode::POLY45);
+    cv->set_geometry_mode(cbag::geometry_mode::POLY45);
     cbag::layout::add_blockage(cv, layer, blk_type, pt_list, true);
 }
 
@@ -109,16 +109,16 @@ TEST_CASE("add via", "[layout::cellview]") {
     auto l2 = cbag::layout::layer_t_at(tech_info, lay2, "");
     auto via_id = tech_info.get_via_id(cbag::direction::LOWER, l1, l2);
 
-    cv.add_object(cbag::layout::via_wrapper(cbag::layout::via(xform, via_id, via_param), true));
+    cv->add_object(cbag::layout::via_wrapper(cbag::layout::via(xform, via_id, via_param), true));
 
     cbag::layout::geometry expect1(cbag::geometry_mode::POLY90);
     expect1.add_shape(box1);
     cbag::layout::geometry expect2(cbag::geometry_mode::POLY90);
     expect2.add_shape(box2);
 
-    auto iter_end = cv.end_geometry();
-    auto iter1 = cv.find_geometry(l1);
-    auto iter2 = cv.find_geometry(l2);
+    auto iter_end = cv->end_geometry();
+    auto iter1 = cv->find_geometry(l1);
+    auto iter2 = cv->find_geometry(l2);
     REQUIRE(iter1 != iter_end);
     REQUIRE(iter2 != iter_end);
     REQUIRE(iter1->second == expect1);
@@ -143,7 +143,7 @@ TEST_CASE("add via on intersections", "[layout::cellview]") {
     }));
 
     auto ans =
-        cbag::layout::add_via_on_intersections(cv, tid1, tid2, coord1, coord2, extend, contain);
+        cbag::layout::add_via_on_intersections(*cv, tid1, tid2, coord1, coord2, extend, contain);
 
     REQUIRE(ans == expect);
 }
@@ -173,7 +173,7 @@ TEST_CASE("connect warr to track", "[layout::cellview]") {
     }));
 
     auto warr = c_warr(std::make_shared<c_tid>(tid1), coord1[0], coord1[1]);
-    auto ans = cbag::layout::connect_warr_track(cv, warr, tid2, w_ext, tr_ext);
+    auto ans = cbag::layout::connect_warr_track(*cv, warr, tid2, w_ext, tr_ext);
 
     REQUIRE(ans == expect);
 }

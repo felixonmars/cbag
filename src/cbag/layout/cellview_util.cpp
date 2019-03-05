@@ -43,7 +43,7 @@ void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
     auto ntr = tid.get_ntr();
     auto num = tid.get_num();
     auto pitch = tid.get_pitch();
-    auto [lower, upper] = warr.get_coord();
+    auto[lower, upper] = warr.get_coord();
 
     auto &tinfo = cv.get_grid()->track_info_at(level);
     auto winfo = tinfo.get_wire_width(ntr);
@@ -51,9 +51,9 @@ void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
     auto tr_dir = tinfo.get_direction();
     auto htr_pitch = pitch * tinfo.get_pitch() / 2;
     for (decltype(num) idx = 0; idx < num; ++idx, cur_htr += htr_pitch) {
-        auto [lay, purp] = get_layer_t(*cv.get_grid(), level, cur_htr);
+        auto[lay, purp] = get_layer_t(*cv.get_grid(), level, cur_htr);
         for (auto witer = winfo.begin(); witer != winfo_end; ++witer) {
-            auto &[rel_htr, wire_w] = *witer;
+            auto & [ rel_htr, wire_w ] = *witer;
             auto half_w = wire_w / 2;
             auto center = htr_to_coord(tinfo, cur_htr + rel_htr);
             cv.add_pin(lay, std::string(net), std::string(label),
@@ -62,9 +62,11 @@ void add_pin_arr(cellview &cv, const std::string &net, const std::string &label,
     }
 }
 
-cv_obj_ref<via_wrapper> add_via(cellview &cv, transformation xform, std::string via_id,
-                                const via_param &params, bool add_layers, bool commit) {
-    return {&cv, via_wrapper(via(std::move(xform), std::move(via_id), params), add_layers), commit};
+cv_obj_ref<via_wrapper> add_via(const std::shared_ptr<cellview> &cv_ptr, transformation xform,
+                                std::string via_id, const via_param &params, bool add_layers,
+                                bool commit) {
+    return {cv_ptr, via_wrapper(via(std::move(xform), std::move(via_id), params), add_layers),
+            commit};
 }
 
 void add_via_arr(cellview &cv, const transformation &xform, const std::string &via_id,
@@ -112,11 +114,11 @@ std::array<std::array<coord_t, 2>, 2> add_via_on_intersections(cellview &cv, con
     for (auto i0 = begin_rect(grid, *tid_arr[0], coord_arr[0]),
               s0 = end_rect(grid, *tid_arr[0], coord_arr[0]);
          i0 != s0; ++i0) {
-        auto [lay0, box0] = *i0;
+        auto[lay0, box0] = *i0;
         for (auto i1 = begin_rect(grid, *tid_arr[1], coord_arr[1]),
                   s1 = end_rect(grid, *tid_arr[1], coord_arr[1]);
              i1 != s1; ++i1) {
-            auto [lay1, box1] = *i1;
+            auto[lay1, box1] = *i1;
             auto via_box = get_intersect(box0, box1);
             auto box_dim = dim(via_box);
             if (box_dim[to_int(dir0)] == get_dim(box1, dir0) &&
@@ -186,7 +188,7 @@ connect_box_track(cellview &cv, direction vdir, layer_t key, const box_t &box,
     for (auto iter = begin_rect(grid, tid, ans[1]), stop = end_rect(grid, tid, ans[1]);
          iter != stop; ++iter) {
         // compute via
-        auto [tr_key, tr_box] = *iter;
+        auto[tr_key, tr_box] = *iter;
         auto &via_id = tech.get_via_id(vdir, key, tr_key);
         auto via_box = box_t(tr_dir, box.intvs[tr_didx][0], box.intvs[tr_didx][1],
                              tr_box.intvs[p_didx][0], tr_box.intvs[p_didx][1]);
@@ -305,20 +307,20 @@ void add_label(cellview &cv, const std::string &layer, const std::string &purpos
                  text_h);
 }
 
-cv_obj_ref<instance> add_prim_instance(cellview &cv, std::string lib, std::string cell,
-                                       std::string view, std::string name,
+cv_obj_ref<instance> add_prim_instance(const std::shared_ptr<cellview> &cv_ptr, std::string lib,
+                                       std::string cell, std::string view, std::string name,
                                        cbag::transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
                                        offset_t spy, bool commit) {
-    return {&cv,
+    return {cv_ptr,
             instance(std::move(name), std::move(lib), std::move(cell), std::move(view),
                      std::move(xform), nx, ny, spx, spy),
             commit};
 }
 
-cv_obj_ref<instance> add_instance(cellview &cv, const cellview *master, std::string name,
-                                  cbag::transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
-                                  offset_t spy, bool commit) {
-    return {&cv, instance(std::move(name), master, std::move(xform), nx, ny, spx, spy), commit};
+cv_obj_ref<instance> add_instance(const std::shared_ptr<cellview> &cv_ptr, const cellview *master,
+                                  std::string name, cbag::transformation xform, cnt_t nx, cnt_t ny,
+                                  offset_t spx, offset_t spy, bool commit) {
+    return {cv_ptr, instance(std::move(name), master, std::move(xform), nx, ny, spx, spy), commit};
 }
 
 } // namespace layout
