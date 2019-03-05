@@ -49,12 +49,12 @@ std::string read_gds_start(spdlog::logger &logger, std::istream &stream);
 
 std::tuple<std::string, std::shared_ptr<layout::cellview>> read_lay_cellview(
     spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
-    std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
+    const std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
     const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map);
 
 template <class OutIter>
 void read_gds(const std::string &fname, const std::string &layer_map, const std::string &obj_map,
-              std::shared_ptr<const layout::routing_grid> &g, OutIter &&out_iter) {
+              const std::shared_ptr<const layout::routing_grid> &g, OutIter &&out_iter) {
     auto log_ptr = get_cbag_logger();
 
     // get gds file stream
@@ -75,7 +75,7 @@ void read_gds(const std::string &fname, const std::string &layer_map, const std:
             auto[cell_name, cv_ptr] =
                 read_lay_cellview(*log_ptr, stream, lib_name, g, rmap, cv_map);
 
-            cv_map.emplace(cell_name, cv_ptr.get());
+            cv_map.emplace(cell_name, cv_ptr);
             *out_iter = std::move(cv_ptr);
             ++out_iter;
             break;

@@ -97,7 +97,7 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
 
 std::tuple<std::string, std::shared_ptr<layout::cellview>> read_lay_cellview(
     spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
-    std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
+    const std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
     const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
 
