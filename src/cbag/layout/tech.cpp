@@ -25,7 +25,7 @@ std::vector<std::pair<offset_t, offset_t>> make_w_sp_vec(const YAML::Node &node)
 sp_map_t make_space_map(const YAML::Node &node, const lp_lookup &lp_map) {
     sp_map_t ans;
     for (const auto &pair : node) {
-        auto [lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
+        auto[lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
         ans.emplace(layer_t_at(lp_map, lay_name, purp_name), make_w_sp_vec(pair.second));
     }
     return ans;
@@ -34,13 +34,16 @@ sp_map_t make_space_map(const YAML::Node &node, const lp_lookup &lp_map) {
 len_map_t make_len_map(const YAML::Node &node, const lp_lookup &lp_map) {
     len_map_t ans;
     for (const auto &pair : node) {
-        auto [lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
+        auto[lay_name, purp_name] = pair.first.as<std::pair<std::string, std::string>>();
         ans.emplace(layer_t_at(lp_map, lay_name, purp_name), pair.second.as<len_info>());
     }
     return ans;
 }
 
 tech::tech(const std::string &tech_fname) {
+    if (tech_fname.empty())
+        return;
+
     auto node = YAML::LoadFile(tech_fname);
 
     tech_lib = node["tech_lib"].as<std::string>();
@@ -76,7 +79,7 @@ tech::tech(const std::string &tech_fname) {
     for (const auto &cur_lp_vec : std::get<1>(tmp)) {
         std::vector<layer_t> new_lp_vec;
         new_lp_vec.reserve(cur_lp_vec.size());
-        for (const auto &[lay_str, purp_str] : cur_lp_vec) {
+        for (const auto & [ lay_str, purp_str ] : cur_lp_vec) {
             auto lid = lp_map.get_layer_id(lay_str);
             if (!lid)
                 throw std::out_of_range("Cannot find layer ID for layer: " + lay_str);
@@ -158,7 +161,7 @@ offset_t tech::get_min_space(layer_t key, offset_t width, space_type sp_type, bo
 
     const auto &w_sp_list = vec_iter->second;
 
-    for (const auto &[w_spec, sp] : w_sp_list) {
+    for (const auto & [ w_spec, sp ] : w_sp_list) {
         if (width <= w_spec)
             return sp + (sp & static_cast<offset_t>(even));
     }
