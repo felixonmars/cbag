@@ -95,15 +95,15 @@ void add_object(spdlog::logger &logger, layout::cellview &ans, gds_layer_t &&gds
         map_val);
 }
 
-std::tuple<std::string, std::unique_ptr<layout::cellview>>
-read_lay_cellview(spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
-                  std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
-                  const std::unordered_map<std::string, layout::cellview *> &master_map) {
+std::tuple<std::string, std::shared_ptr<layout::cellview>> read_lay_cellview(
+    spdlog::logger &logger, std::istream &stream, const std::string &lib_name,
+    std::shared_ptr<const layout::routing_grid> &g, const gds_rlookup &rmap,
+    const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map) {
     auto cell_name = read_struct_name(logger, stream);
 
     logger.info("GDS cellview name: " + cell_name);
 
-    auto cv_ptr = std::make_unique<layout::cellview>(g, cell_name, geometry_mode::POLY);
+    auto cv_ptr = std::make_shared<layout::cellview>(g, cell_name, geometry_mode::POLY);
     auto resolution = g->get_tech()->get_resolution();
     auto inst_cnt = static_cast<std::size_t>(0);
     while (true) {

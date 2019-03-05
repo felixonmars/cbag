@@ -317,9 +317,10 @@ cv_obj_ref<instance> add_prim_instance(const std::shared_ptr<cellview> &cv_ptr, 
             commit};
 }
 
-cv_obj_ref<instance> add_instance(const std::shared_ptr<cellview> &cv_ptr, const cellview *master,
-                                  std::string name, cbag::transformation xform, cnt_t nx, cnt_t ny,
-                                  offset_t spx, offset_t spy, bool commit) {
+cv_obj_ref<instance> add_instance(const std::shared_ptr<cellview> &cv_ptr,
+                                  const std::shared_ptr<const cellview> &master, std::string name,
+                                  cbag::transformation xform, cnt_t nx, cnt_t ny, offset_t spx,
+                                  offset_t spy, bool commit) {
     return {cv_ptr, instance(std::move(name), master, std::move(xform), nx, ny, spx, spy), commit};
 }
 

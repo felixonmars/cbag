@@ -58,13 +58,13 @@ std::tuple<gds_layer_t, layout::polygon> read_box(spdlog::logger &logger, std::i
 std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
                                                        std::istream &stream);
 
-layout::instance
-read_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
-              const std::unordered_map<std::string, layout::cellview *> &master_map);
+layout::instance read_instance(
+    spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
+    const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map);
 
-layout::instance
-read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
-                  const std::unordered_map<std::string, layout::cellview *> &master_map);
+layout::instance read_arr_instance(
+    spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
+    const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map);
 
 bool print_record(std::istream &stream);
 

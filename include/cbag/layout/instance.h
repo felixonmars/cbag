@@ -1,6 +1,7 @@
 #ifndef CBAG_LAYOUT_INSTANCE_H
 #define CBAG_LAYOUT_INSTANCE_H
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -33,7 +34,7 @@ using str_map_t = std::unordered_map<std::string, std::string>;
 
 class instance {
   private:
-    std::variant<const cellview *, cellview_ref> master = nullptr;
+    std::variant<std::shared_ptr<const cellview>, cellview_ref> master = nullptr;
     std::string name;
 
   public:
@@ -49,8 +50,8 @@ class instance {
              cbag::transformation xform, cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0,
              offset_t spy = 0);
 
-    instance(std::string name, const cellview *master, cbag::transformation xform, cnt_t nx = 1,
-             cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
+    instance(std::string name, std::shared_ptr<const cellview> master, cbag::transformation xform,
+             cnt_t nx = 1, cnt_t ny = 1, offset_t spx = 0, offset_t spy = 0);
 
     bool operator==(const instance &rhs) const noexcept;
 
@@ -70,7 +71,7 @@ class instance {
 
     box_t get_bbox(const std::string &layer, const std::string &purpose) const;
 
-    void set_master(const cellview *new_master);
+    void set_master(const std::shared_ptr<const cellview> &new_master);
 
     void set_param(const std::string &name, const param_t &val);
 };

@@ -36,7 +36,7 @@ std::tuple<record_type, std::size_t> print_record_header(std::istream &stream) {
 
 template <record_type R, std::size_t unit_size = 1, std::size_t num_data = 0>
 std::size_t check_record_header(std::istream &stream) {
-    auto [actual, size] = read_record_header(stream);
+    auto[actual, size] = read_record_header(stream);
     if (actual != R)
         throw std::runtime_error(fmt::format("got gds record {:#x}, expected {:#x}",
                                              static_cast<int>(actual), static_cast<int>(R)));
@@ -126,7 +126,7 @@ std::tuple<transformation, double> read_transform_info(spdlog::logger &logger,
 
     double mag = 1.0;
     double ang_dbl = 0.0;
-    auto [rec, size] = peek_record_header(stream);
+    auto[rec, size] = peek_record_header(stream);
     switch (rec) {
     case record_type::MAG:
         mag = read_double<record_type::MAG>(logger, stream);
@@ -171,7 +171,7 @@ std::tuple<transformation, double> read_transform_mag(spdlog::logger &logger,
                                                       std::istream &stream) {
     auto ans = read_transform_info(logger, stream);
     check_record_header<record_type::XY, sizeof(int32_t), 2>(stream);
-    auto [x, y] = read_point(stream);
+    auto[x, y] = read_point(stream);
     move_by(std::get<0>(ans), x, y);
 
     return ans;
@@ -186,7 +186,7 @@ std::tuple<gds_layer_t, transformation, std::string, double> read_text(spdlog::l
     auto glay = read_int<record_type::LAYER>(logger, stream);
     auto gpurp = read_int<record_type::TEXTTYPE>(logger, stream);
     read_skip<record_type::PRESENTATION, sizeof(uint16_t), 1>(stream);
-    auto [xform, mag] = read_transform_mag(logger, stream);
+    auto[xform, mag] = read_transform_mag(logger, stream);
 
     auto text = read_name<record_type::STRING>(logger, stream);
     read_ele_end(logger, stream);
@@ -234,7 +234,7 @@ std::tuple<gds_layer_t, layout::polygon> read_boundary(spdlog::logger &logger,
 }
 
 std::string read_inst_name(spdlog::logger &logger, std::istream &stream, std::size_t &cnt) {
-    auto [rtype, rsize] = read_record_header(stream);
+    auto[rtype, rsize] = read_record_header(stream);
     std::string inst_name;
     switch (rtype) {
     case record_type::ENDEL:
@@ -258,9 +258,9 @@ std::string read_inst_name(spdlog::logger &logger, std::istream &stream, std::si
     return inst_name;
 }
 
-layout::instance
-read_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
-              const std::unordered_map<std::string, layout::cellview *> &master_map) {
+layout::instance read_instance(
+    spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
+    const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map) {
     auto cell_name = read_name<record_type::SNAME>(logger, stream);
 
     auto iter = master_map.find(cell_name);
@@ -275,9 +275,9 @@ read_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
     return {std::move(inst_name), master, std::move(xform)};
 }
 
-layout::instance
-read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
-                  const std::unordered_map<std::string, layout::cellview *> &master_map) {
+layout::instance read_arr_instance(
+    spdlog::logger &logger, std::istream &stream, std::size_t &cnt,
+    const std::unordered_map<std::string, std::shared_ptr<const layout::cellview>> &master_map) {
     auto cell_name = read_name<record_type::SNAME>(logger, stream);
 
     auto iter = master_map.find(cell_name);
@@ -286,9 +286,9 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt
             fmt::format("Cannot find layout cellview {} in GDS file.", cell_name));
     auto master = iter->second;
 
-    auto [xform, mag] = read_transform_info(logger, stream);
+    auto[xform, mag] = read_transform_info(logger, stream);
 
-    auto [gds_nx, gds_ny] = read_col_row(logger, stream);
+    auto[gds_nx, gds_ny] = read_col_row(logger, stream);
     check_record_header<record_type::XY, sizeof(int32_t), 6>(stream);
     std::array<point, 3> pt_vec;
     pt_vec[0] = read_point(stream);
@@ -300,7 +300,7 @@ read_arr_instance(spdlog::logger &logger, std::istream &stream, std::size_t &cnt
     auto gds_spx = pt_vec[1][0] / gds_nx;
     auto gds_spy = pt_vec[2][1] / gds_ny;
 
-    auto [nx, ny, spx, spy] = cbag::convert_gds_array(xform, gds_nx, gds_ny, gds_spx, gds_spy);
+    auto[nx, ny, spx, spy] = cbag::convert_gds_array(xform, gds_nx, gds_ny, gds_spx, gds_spy);
 
     return {std::move(inst_name), master, std::move(xform), nx, ny, spx, spy};
 }
@@ -320,7 +320,7 @@ void print_time(std::istream &stream) {
 }
 
 bool print_record(std::istream &stream) {
-    auto [record, size] = print_record_header(stream);
+    auto[record, size] = print_record_header(stream);
     auto ans = false;
     switch (record) {
     // empty records
