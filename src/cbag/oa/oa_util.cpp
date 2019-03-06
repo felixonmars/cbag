@@ -1,3 +1,4 @@
+#include <cxxabi.h>
 
 #include <cbag/logging/spdlog.h>
 
@@ -6,6 +7,11 @@
 #include <cbag/oa/oa_util.h>
 
 namespace cbagoa {
+
+const char *currentExceptionTypeName() {
+    int status;
+    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
+}
 
 oa::oaTech *read_tech(const oa::oaNativeNS &ns, const std::string &lib_name) {
     // open technology file
@@ -55,17 +61,14 @@ void handle_oa_exceptions(spdlog::logger &logger) {
     logger.error("throwing exception");
     try {
         throw;
-    } catch (oa::oaCompatibilityError &ex) {
-        std::string msg_std(ex.getMsg());
-        throw std::runtime_error("OA Compatibility Error: " + msg_std);
-    } catch (oa::oaDMError &ex) {
-        std::string msg_std(ex.getMsg());
-        throw std::runtime_error("OA DM Error: " + msg_std);
-    } catch (oa::oaError &ex) {
-        std::string msg_std(ex.getMsg());
-        throw std::runtime_error("OA Error: " + msg_std);
-    } catch (oa::oaDesignError &ex) {
-        throw std::runtime_error("OA Design Error: " + std::string(ex.getMsg()));
+    } catch (const oa::oaException &ex) {
+        auto msg = fmt::format("OA Exception ID: {}, Msg: {}", ex.getMsgId(), ex.getMsg());
+        logger.error(msg);
+        throw std::runtime_error(msg);
+    } catch (const oa::IException &ex) {
+        auto msg = fmt::format("OA IException ID: {}, Msg: {}", ex.getMsgId(), ex.getMsg());
+        logger.error(msg);
+        throw std::runtime_error(msg);
     }
 }
 
