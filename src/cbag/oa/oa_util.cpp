@@ -1,5 +1,3 @@
-#include <cxxabi.h>
-
 #include <cbag/logging/spdlog.h>
 
 #include <oa/oaDesignDB.h>
@@ -7,11 +5,6 @@
 #include <cbag/oa/oa_util.h>
 
 namespace cbagoa {
-
-const char *currentExceptionTypeName() {
-    int status;
-    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
-}
 
 oa::oaTech *read_tech(const oa::oaNativeNS &ns, const std::string &lib_name) {
     // open technology file
