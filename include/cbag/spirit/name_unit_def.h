@@ -33,7 +33,7 @@ auto const name_string = +(x3::ascii::print - x3::ascii::char_("()<>:*, "));
  *  foo
  *  foo<__range__>
  *
- *  the first charater of the base name must be an alphabet.
+ *  the first character of the base name must be an alphabet.
  */
 auto const name_unit_def = name_unit_type{} = name_string[check_str] >> -(range);
 
