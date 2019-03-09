@@ -687,8 +687,18 @@ void create_lay_polygon(oa::oaBlock *blk, cbag::lay_t layer, cbag::purp_t purpos
 }
 
 void create_lay_geometry(spdlog::logger &logger, oa::oaBlock *blk, cbag::lay_t layer,
-                         cbag::purp_t purpose, const cbag::layout::geometry &geo) {
-    polygon_writer w(blk, layer, purpose, logger);
+                         cbag::purp_t purpose, const cbag::layout::geometry &geo,
+                         const cbag::layout::color_map_t &color_map) {
+    auto iter = color_map.find(layer);
+    oa::ByteAppDef<oa::oaShape> *def_ptr = nullptr;
+    oa::oaByte color = 0;
+    if (iter != color_map.end()) {
+        layer = (iter->second).first;
+        color = (iter->second).second;
+        def_ptr = oa::ByteAppDef<oa::oaShape>::get("ShapeMPColor");
+    }
+
+    polygon_writer w(blk, layer, purpose, logger, def_ptr, color);
     geo.write_geometry(w);
     w.record_last();
 }
@@ -709,12 +719,22 @@ void create_lay_via(spdlog::logger &logger, oa::oaBlock *blk, oa::oaTech *tech,
 
 void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock *blk,
                     cbag::lay_t lay, cbag::purp_t purp, const cbag::layout::pin &pin,
-                    bool make_pin_obj) {
+                    bool make_pin_obj, const cbag::layout::color_map_t &color_map) {
     if (!is_physical(pin)) {
         logger.warn("non-physical bbox {} on pin layer ({}, {}), skipping.", to_string(pin), lay,
                     purp);
         return;
     }
+
+    auto iter = color_map.find(lay);
+    oa::ByteAppDef<oa::oaShape> *def_ptr = nullptr;
+    oa::oaByte color = 0;
+    if (iter != color_map.end()) {
+        lay = (iter->second).first;
+        color = (iter->second).second;
+        def_ptr = oa::ByteAppDef<oa::oaShape>::get("ShapeMPColor");
+    }
+
     oa::oaPoint center(xm(pin), ym(pin));
     auto w = width(pin);
     auto text_h = height(pin);
@@ -728,6 +748,8 @@ void create_lay_pin(spdlog::logger &logger, const oa::oaCdbaNS &ns, oa::oaBlock 
                        oa::oacCenterCenterTextAlign, orient, oa::oacRomanFont, text_h);
     if (make_pin_obj) {
         auto r = oa::oaRect::create(blk, lay, purp, oa::oaBox(xl(pin), yl(pin), xh(pin), yh(pin)));
+        if (def_ptr)
+            def_ptr->set(r, color);
 
         oa::oaName term_name(ns, pin.get_net().c_str());
         auto term = oa::oaTerm::find(blk, term_name);
@@ -760,6 +782,9 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
                         const cbag::layout::cellview &cv, oa::oaTech *tech,
                         const str_map_t *rename_map) {
 
+    auto cv_tech_ptr = cv.get_tech();
+    auto &color_map = cv_tech_ptr->get_color_map();
+
     auto dsn =
         open_design(ns_native, logger, lib_name, cell_name, view_name, 'w', oa::oacMaskLayout);
     logger.info("Writing cellview {}__{}({})", lib_name, cell_name, view_name);
@@ -776,7 +801,7 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     logger.info("Export layout geometries.");
     for (auto iter = cv.begin_geometry(); iter != cv.end_geometry(); ++iter) {
         auto & [ layer_key, geo ] = *iter;
-        create_lay_geometry(logger, blk, layer_key.first, layer_key.second, geo);
+        create_lay_geometry(logger, blk, layer_key.first, layer_key.second, geo, color_map);
     }
 
     logger.info("Export layout vias.");
@@ -813,13 +838,12 @@ void write_lay_cellview(const oa::oaNativeNS &ns_native, const oa::oaCdbaNS &ns,
     }
 
     logger.info("Export layout pins.");
-    auto tech_ptr = cv.get_tech();
-    auto purp = tech_ptr->get_pin_purpose();
-    auto make_pin_obj = tech_ptr->get_make_pin();
+    auto purp = cv_tech_ptr->get_pin_purpose();
+    auto make_pin_obj = cv_tech_ptr->get_make_pin();
     for (auto iter = cv.begin_pin(); iter != cv.end_pin(); ++iter) {
         auto & [ lay, pin_list ] = *iter;
         for (auto const &pin : pin_list) {
-            create_lay_pin(logger, ns, blk, lay, purp, pin, make_pin_obj);
+            create_lay_pin(logger, ns, blk, lay, purp, pin, make_pin_obj, color_map);
         }
     }
 

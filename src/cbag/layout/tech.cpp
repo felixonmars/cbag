@@ -100,6 +100,12 @@ tech::tech(const std::string &tech_fname) {
         }
         ++lay;
     }
+
+    // parse color map
+    auto color_map_node = node["colors"];
+    if (color_map_node) {
+        color_map = color_map_node.as<color_map_t>();
+    }
 }
 
 const std::string &tech::get_tech_lib() const { return tech_lib; }
@@ -115,6 +121,8 @@ purp_t tech::get_default_purpose() const { return lp_map.get_default_purpose(); 
 purp_t tech::get_pin_purpose() const { return lp_map.get_pin_purpose(); }
 
 bool tech::get_make_pin() const { return make_pin_obj; }
+
+const color_map_t &tech::get_color_map() const { return color_map; }
 
 const std::string &tech::get_layer_name(lay_t lay_id) const {
     return lp_map.get_layer_name(lay_id);

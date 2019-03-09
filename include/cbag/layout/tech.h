@@ -26,6 +26,7 @@ using sp_map_grp_t = std::unordered_map<space_type, sp_map_t>;
 using len_map_t = std::unordered_map<layer_t, len_info, boost::hash<layer_t>>;
 using lp_list_t = std::vector<std::vector<layer_t>>;
 using level_map_t = std::unordered_map<layer_t, level_t, boost::hash<layer_t>>;
+using color_map_t = std::unordered_map<lay_t, std::pair<lay_t, cnt_t>>;
 
 class tech {
   private:
@@ -42,6 +43,7 @@ class tech {
     level_t grid_bot_layer = 0;
     lp_list_t lp_list;
     level_map_t lev_map;
+    color_map_t color_map;
 
   public:
     tech(const std::string &tech_fname);
@@ -66,6 +68,8 @@ class tech {
     purp_t get_pin_purpose() const;
 
     bool get_make_pin() const;
+
+    const color_map_t &get_color_map() const;
 
     const std::string &get_layer_name(lay_t lay_id) const;
 

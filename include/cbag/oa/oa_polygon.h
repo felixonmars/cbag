@@ -11,6 +11,34 @@ namespace spdlog {
 class logger;
 }
 
+namespace OpenAccess_4 {
+template <class T> class ByteAppDef : public oaIntAppDef<T> {
+  public:
+    static ByteAppDef<T> *get(const oaString &name, oaByte defValue = 0, oaBoolean persist = true) {
+        return (ByteAppDef<T> *)oaIntAppDef<T>::get(name, defValue - 1, persist);
+    }
+
+    static ByteAppDef<T> *get(const oaString &name, const oaAppObjectDef *objDef,
+                              oaByte defValue = 0, oaBoolean persist = true) {
+        return (ByteAppDef<T> *)oaIntAppDef<T>::get(name, objDef, defValue - 1, persist);
+    }
+
+    static ByteAppDef<T> *find(const oaString &name) {
+        return (ByteAppDef<T> *)oaIntAppDef<T>::find(name);
+    }
+
+    static ByteAppDef<T> *find(const oaString &name, const oaAppObjectDef *objDef) {
+        return (ByteAppDef<T> *)oaIntAppDef<T>::find(name, objDef);
+    }
+
+    oaByte get(const T *object) { return oaIntAppDef<T>::get(object) + 1; }
+
+    void set(T *object, oaByte value) { oaIntAppDef<T>::set(object, (oaInt4)value - 1); }
+
+    oaByte getDefault() const { return (oaByte)oaIntAppDef<T>::getDefault() + 1; }
+};
+} // namespace OpenAccess_4
+
 namespace cbagoa {
 
 class oa_polygon {
@@ -32,12 +60,16 @@ class polygon_writer {
     oa::oaLayerNum layer;
     oa::oaPurposeNum purpose;
     spdlog::logger &logger;
+    oa::ByteAppDef<oa::oaShape> *color_def_ptr;
+    oa::oaByte color;
     value_type last;
 
   public:
     polygon_writer(oa::oaBlock *blk, oa::oaLayerNum lay, oa::oaPurposeNum purp,
-                   spdlog::logger &logger)
-        : block(blk), layer(lay), purpose(purp), logger(logger) {}
+                   spdlog::logger &logger, oa::ByteAppDef<oa::oaShape> *color_def_ptr,
+                   oa::oaByte color)
+        : block(blk), layer(lay), purpose(purp), logger(logger), color_def_ptr(color_def_ptr),
+          color(color) {}
 
     void push_back(value_type &&v) {
         record_last();
@@ -51,12 +83,16 @@ class polygon_writer {
 
     void record_last() const {
         if (last.pt_arr.getNumElements() > 0) {
+            oa::oaShape *ptr;
             if (last.pt_arr.isRectangle()) {
                 oa::oaBox box;
                 last.pt_arr.getBBox(box);
-                oa::oaRect::create(block, layer, purpose, box);
+                ptr = oa::oaRect::create(block, layer, purpose, box);
             } else {
-                oa::oaPolygon::create(block, layer, purpose, last.pt_arr);
+                ptr = oa::oaPolygon::create(block, layer, purpose, last.pt_arr);
+            }
+            if (color_def_ptr) {
+                color_def_ptr->set(ptr, color);
             }
         }
     }

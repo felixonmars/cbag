@@ -37,11 +37,10 @@ bool convert<cbag::sch::cellview_info>::decode(const Node &node, cbag::sch::cell
         rhs.nets = node["nets"].as<std::vector<std::string>>();
         rhs.props = node["props"].as<cbag::param_map>();
         rhs.is_prim = node["is_prim"].as<bool>();
-        if (node["term_net_attrs"])
-            rhs.term_net_attrs =
-                node["term_net_attrs"]
-                    .as<cbag::util::sorted_map<std::string,
-                                               cbag::util::sorted_map<std::string, std::string>>>();
+        auto term_net_node = node["term_net_attrs"];
+        if (term_net_node)
+            rhs.term_net_attrs = term_net_node.as<cbag::util::sorted_map<
+                std::string, cbag::util::sorted_map<std::string, std::string>>>();
         else
             rhs.term_net_attrs.clear();
 
